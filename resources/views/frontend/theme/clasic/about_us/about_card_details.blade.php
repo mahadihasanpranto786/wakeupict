@@ -1,148 +1,107 @@
 @extends('frontend.theme.clasic.frontend_layouts.master_layout')
 
 @section('maincontent')
-    <div class="row">
-        @push('css')
-            <link rel="stylesheet" href="{{ asset('about_us_details') }}/vendors/linericon/style.css">
-            <link rel="stylesheet" href="{{ asset('about_us_details') }}/css/style.css">
-            <link rel="stylesheet" href="{{ asset('about_us_details') }}/css/responsive.css">
-
-            <style>
-                .media-body {
-                    -webkit-box-flex: 1;
-                    -ms-flex: 1;
-                    margin-top: 21px;
-                    flex: 1;
-                }
-
-                .home_banner_area {
-                    background: rgb(240, 103, 37);
-                    background: linear-gradient(90deg, rgba(240, 103, 37, 0.6418942577030813) 0%, rgba(240, 103, 37, 1) 100%);
-                }
-
-                .tabs_inner .tab-content .tab-pane .list:before {
-                    content: "";
-                    height: 84%;
-                    width: 5px;
-                    background: rgba(0, 0, 0, 0.2);
-                    position: absolute;
-                    left: 46%;
-                    transform: translateX(-50%);
-                    top: 75px;
-                }
-                .key {
-                    display: flex;
-                    align-items: center;
-                    padding: 10px;
-                    margin: 5px;
-                    border-radius: 5px;
-                }
-
-                .key img {
-                    margin-right: 10px;
-                }
-            </style>
-        @endpush
-        <div class="col-12">
-            <!--================Home Banner Area =================-->
-            <section class="home_banner_area">
-                <div class="container box_1620">
-                    <div class="banner_inner d-flex align-items-center">
-                        <div class="banner_content">
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-lg-5">
-                                    <img width="100%" class="pr-3" src="{{ asset($about->image) }}" alt="">
-                                    <div class="my-4">
-                                        <h3>
-                                            <b>Love To Work With:</b>
-                                        </h3>
-
-                                        <ul class="list-unstyled d-flex flex-wrap">
-                                            @foreach ($about->assign_stacks as $stack)
-                                                <li class="key">
-                                                    <img width="40" src="{{ asset($stack->stack->logo) }}" alt="Laravel Logo">
-                                                    {{ $stack->stack->name}}
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-7">
-                                    <div class="personal_text">
-                                        <h3>{{ $about->name }}</h3>
-                                        <h4>{{ $about->designation }}</h4>
-                                        @php
-                                            if ($about->singleAboutDetail) {
-                                                $joining_date = $about->singleAboutDetail ? \Carbon\Carbon::parse($about->singleAboutDetail->joining_date)->format('F Y') : null;
-                                                $end_date = $about->singleAboutDetail ? \Carbon\Carbon::parse($about->singleAboutDetail->end_date)->format('F Y') : null;
-                                            }
-                                        @endphp
-
-                                        @if ($about->singleAboutDetail)
-                                            <ul class="list basic_info">
-                                                <li><i class="fa fa-calendar" style="font-size:24px"></i>
-                                                    {{ $about->singleAboutDetail->employee_type }} : {{ $joining_date }}
-                                                    -
-                                                    {{ $about->singleAboutDetail->currently_working_status == 1 ? 'Present' : $end_date }}
-                                                </li>
-                                                {{-- <li><a href="#"><i class="lnr lnr-envelope"></i> businessplan@donald</a>
-                                            </li> --}}
-                                            </ul>
-                                            <br>
-                                            <br>
-                                            <h4>Description: </h4>
-                                            <p>{!! $about->singleAboutDetail->description !!}</p>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!--================End Home Banner Area =================-->
-
-            <!--================My Tabs Area =================-->
-            @if (count($about->projects) > 0)
+<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-32 pb-24">
+    
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Member Profile Header Card -->
+        <div class="rounded-3xl bg-slate-900/80 border border-slate-800/90 p-8 sm:p-12 backdrop-blur-xl shadow-2xl mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-start">
                 
-            <section class="mytabs_area p_120">
-                <div class="container">
-                    <div class="tabs_inner">
-                        <h2 class="text-center text-dark">Projects</h2>
-
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active">
-                                <ul class="list">
-                                    @foreach ($about->projects as $project)
-                                        @php
-                                            $start_date = $project ? \Carbon\Carbon::parse($project->start_date)->format('M Y') : '';
-                                            $end_date = $project ? \Carbon\Carbon::parse($project->end_date)->format('M Y') : '';
-                                            $is_checked = $project->currently_working_status;
-                                        @endphp
-                                        <li>
-                                            <span></span>
-                                            <div class="media">
-                                                <div class="d-flex">
-                                                    <p>{{ $start_date }} to
-                                                        {{ $is_checked == 1 ? 'Present' : $end_date }}</p>
-                                                </div>
-                                                <div class="media-body">
-                                                    <h4>{{ $project->project_title }}</h4>
-                                                    <p>{{ $project->short_description }}</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-
-                        </div>
+                <!-- Left: Profile Photo & Tech Stacks (Cols 5) -->
+                <div class="md:col-span-5 flex flex-col">
+                    <div class="rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-800 shadow-xl mb-8 aspect-square">
+                        <img class="w-full h-full object-cover filter contrast-105" src="{{ asset($about->image) }}" alt="{{ $about->name }}">
                     </div>
+
+                    @if (!empty($about->assign_stacks) && count($about->assign_stacks) > 0)
+                        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+                            <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-4">
+                                Technology Stack & Specialization:
+                            </h4>
+                            <ul class="flex flex-wrap gap-2.5">
+                                @foreach ($about->assign_stacks as $stack)
+                                    <li class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-mono text-slate-200">
+                                        <img width="20" height="20" class="object-contain" src="{{ asset($stack->stack->logo) }}" alt="{{ $stack->stack->name }}">
+                                        <span>{{ $stack->stack->name }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
-            </section>
-            <!-- /.card -->
-            @endif
+
+                <!-- Right: Bio & Designation (Cols 7) -->
+                <div class="md:col-span-7 flex flex-col">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4 w-fit">
+                        <span>Verified Specialist</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-5xl font-extrabold text-white mb-2 leading-tight">
+                        {{ $about->name }}
+                    </h1>
+                    <p class="text-lg font-mono text-emerald-400 font-semibold mb-6">
+                        {{ $about->designation }}
+                    </p>
+
+                    @php
+                        if ($about->singleAboutDetail) {
+                            $joining_date = $about->singleAboutDetail ? \Carbon\Carbon::parse($about->singleAboutDetail->joining_date)->format('F Y') : null;
+                            $end_date = $about->singleAboutDetail ? \Carbon\Carbon::parse($about->singleAboutDetail->end_date)->format('F Y') : null;
+                        }
+                    @endphp
+
+                    @if ($about->singleAboutDetail)
+                        <div class="flex items-center gap-3 text-xs font-mono text-slate-400 mb-8 p-3 rounded-xl bg-slate-950/50 border border-slate-800 w-fit">
+                            <i class="fa fa-calendar text-emerald-400"></i>
+                            <span>{{ $about->singleAboutDetail->employee_type }} : {{ $joining_date }} - {{ $about->singleAboutDetail->currently_working_status == 1 ? 'Present' : $end_date }}</span>
+                        </div>
+
+                        <div class="border-t border-slate-800/80 pt-6">
+                            <h3 class="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold mb-3">Executive Summary</h3>
+                            <div class="text-slate-300 text-sm sm:text-base leading-relaxed space-y-4">
+                                {!! $about->singleAboutDetail->description !!}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
         </div>
-        <!-- /.col -->
+
+        <!-- Projects Timeline / Portfolio Section -->
+        @if (count($about->projects) > 0)
+            <div class="rounded-3xl bg-slate-900/60 border border-slate-800/80 p-8 sm:p-12 backdrop-blur-xl">
+                <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                    <i class="fa fa-code-fork text-emerald-400"></i>
+                    <span>Key Engineering Projects</span>
+                </h2>
+
+                <div class="space-y-6">
+                    @foreach ($about->projects as $project)
+                        @php
+                            $start_date = $project ? \Carbon\Carbon::parse($project->start_date)->format('M Y') : '';
+                            $end_date = $project ? \Carbon\Carbon::parse($project->end_date)->format('M Y') : '';
+                            $is_checked = $project->currently_working_status;
+                        @endphp
+                        <div class="p-6 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-emerald-500/30 transition-all">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                <h3 class="text-lg font-bold text-white">{{ $project->project_title }}</h3>
+                                <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20 w-fit">
+                                    {{ $start_date }} to {{ $is_checked == 1 ? 'Present' : $end_date }}
+                                </span>
+                            </div>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                {{ $project->short_description }}
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
     </div>
+
+</div>
 @endsection

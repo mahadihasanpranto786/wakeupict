@@ -1,0 +1,112 @@
+/* ==========================================================================
+   Connected Intelligence Canvas & SVG Animations
+   ========================================================================== */
+.canvas-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circuit-path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 2;
+    transition: stroke 0.4s ease;
+}
+
+.circuit-path.active {
+    stroke: var(--brand-primary);
+    stroke-dasharray: 10, 10;
+    animation: dash-flow 20s linear infinite;
+}
+
+@keyframes dash-flow {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+}
+
+.canvas-node {
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.canvas-node:hover, .canvas-node.active {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px var(--brand-primary));
+}
+
+.canvas-node-core {
+    animation: core-pulse 4s infinite alternate;
+}
+
+@keyframes core-pulse {
+    0% { filter: drop-shadow(0 0 10px rgba(191, 215, 50, 0.4)); }
+    100% { filter: drop-shadow(0 0 30px rgba(191, 215, 50, 0.8)); }
+}
+
+.micro-stats-ticker {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #A0AAB2;
+}
+
+.micro-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(191, 215, 50, 0.1);
+    border: 1px solid rgba(191, 215, 50, 0.3);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--brand-primary);
+    margin-bottom: 1.5rem;
+}
+
+.live-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: var(--brand-primary);
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 8px var(--brand-primary);
+    animation: blink 1.5s infinite alternate;
+}
+
+@keyframes blink {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+.hero-gradient-overlay {
+    background: radial-gradient(circle at 70% 50%, rgba(19,21,22,0.4) 0%, rgba(19,21,22,0.95) 100%), 
+                linear-gradient(to right, rgba(19,21,22,1) 0%, rgba(19,21,22,0.7) 40%, rgba(19,21,22,0.3) 100%);
+}

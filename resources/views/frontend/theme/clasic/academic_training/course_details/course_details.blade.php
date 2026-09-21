@@ -1,156 +1,218 @@
 @extends('frontend.theme.clasic.frontend_layouts.master_layout')
+
 @foreach ($page_content as $content)
     @include('frontend.theme.clasic.include.seo')
 @endforeach
 
 @section('maincontent')
+<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-28 pb-24">
 
-
-    <!--========================== Services Section ============================-->
-    <section class="pt-5 mt-5">
-        <div class="py-4 container">
-            <h1 class="mb-3 text-center">{{ $courses->course_title }}</h1>
-            <p class="text-muted">{!! $courses->long_description !!}</p>
-            <hr class="my-4">
+    <!-- Course Title & Overview Hero -->
+    <section class="relative py-12 border-b border-slate-800/80 bg-slate-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4">
+                <span>Course Blueprint</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+                {{ $courses->course_title }}
+            </h1>
+            <div class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-4xl">
+                {!! $courses->long_description !!}
+            </div>
         </div>
     </section>
 
-    <section class="course__details">
-        <div class="container">
-            <div class="course__details__need mb-5">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="mb-5">
-                            <h3 class="mb-3">আপনার জন্য কোর্সটি কেন গুরুত্বপূর্ণ ?</h3>
-                            <p class="text-muted">{!! $courses->importents !!}</p>
+    <!-- Main Course Grid: 8-Column Curriculum / 4-Column Sticky Enrollment Card -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                
+                <!-- Left 8 Columns: Deep Curriculum & Details -->
+                <div class="lg:col-span-8 space-y-12">
+                    
+                    <!-- Why this course is important -->
+                    <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <i class="fa fa-crosshairs text-base"></i>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-white">আপনার জন্য কোর্সটি কেন গুরুত্বপূর্ণ?</h3>
                         </div>
-                        <div class="mb-3">
-                            <h3>কোর্সের বিষয়বস্তু:</h3>
-                            <div id="accordion">
-                                @foreach ($Courseitem as $item)
-                                    @if ($item->course_order == 1)
-                                        <div class="card">
-                                            <div class="card-header" id="headingOne">
-                                                <h5 class="mb-0">
-                                                    <button class="btn btn-link" data-toggle="collapse"
-                                                        data-target="#collapseOne{{ $item->id }}" aria-expanded="true"
-                                                        aria-controls="collapseOne{{ $item->id }}">
-                                                        {{ $item->item_title }}
-                                                    </button>
-                                                </h5>
-                                            </div>
+                        <div class="text-slate-300 text-base leading-relaxed">
+                            {!! $courses->importents !!}
+                        </div>
+                    </div>
 
-                                            <div id="collapseOne{{ $item->id }}" class="collapse show"
-                                                aria-labelledby="headingOne" data-parent="#accordion">
-                                                <div class="card-body text-muted">
-                                                    {!! $item->description !!}
-                                                </div>
-                                            </div>
+                    <!-- Curriculum Accordion -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-white">কোর্সের বিষয়বস্তু ও কারিকুলাম</h3>
+                            <span class="text-xs font-mono text-emerald-400 uppercase tracking-wider">{{ count($Courseitem) }} Modules</span>
+                        </div>
+
+                        <div class="space-y-4" id="curriculum-accordion">
+                            @foreach ($Courseitem as $item)
+                                @php
+                                    $isFirst = ($item->course_order == 1);
+                                @endphp
+                                <div class="accordion-item rounded-2xl bg-slate-900/70 border border-slate-800/80 overflow-hidden transition-all duration-200">
+                                    <button type="button" class="accordion-toggle w-full flex items-center justify-between p-6 text-left hover:bg-slate-800/40 transition-colors focus:outline-none" onclick="toggleAccordion('item-{{ $item->id }}')">
+                                        <div class="flex items-center gap-4">
+                                            <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-mono text-emerald-400 font-semibold flex-shrink-0">
+                                                {{ sprintf('%02d', $loop->iteration) }}
+                                            </span>
+                                            <span class="text-base sm:text-lg font-semibold text-white">
+                                                {{ $item->item_title }}
+                                            </span>
                                         </div>
-                                    @else
-                                        <div class="card">
-                                            <div class="card-header" id="headingOne">
-                                                <h5 class="mb-0">
-                                                    <button class="btn btn-link" data-toggle="collapse"
-                                                        data-target="#collapseOne{{ $item->id }}" aria-expanded="true"
-                                                        aria-controls="collapseOne{{ $item->id }}">
+                                        <i class="fa fa-chevron-down text-xs text-slate-400 transition-transform duration-300 accordion-icon-item-{{ $item->id }} {{ $isFirst ? 'rotate-180' : '' }}"></i>
+                                    </button>
 
-                                                        {{ $item->item_title }}
+                                    <div id="content-item-{{ $item->id }}" class="{{ $isFirst ? 'block' : 'hidden' }} px-6 pb-6 pt-2 border-t border-slate-800/50 text-slate-300 text-sm leading-relaxed">
+                                        {!! $item->description !!}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
 
+                    <!-- Post-Course Career Potential & Impact -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+                            <h4 class="text-lg font-bold text-white mb-3 text-emerald-400">কোর্স শেষ করার পর সুযোগ</h4>
+                            <div class="text-slate-400 text-sm leading-relaxed">
+                                {!! $courses->future_of_this_course !!}
+                            </div>
+                        </div>
 
-                                                    </button>
-                                                </h5>
-                                            </div>
-
-                                            <div id="collapseOne{{ $item->id }}" class="collapse"
-                                                aria-labelledby="headingOne" data-parent="#accordion">
-                                                <div class="card-body text-muted">
-                                                    {!! $item->description !!}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
+                        <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+                            <h4 class="text-lg font-bold text-white mb-3 text-cyan-400">{{ $courses->course_title }} এর ভবিষ্যৎ</h4>
+                            <div class="text-slate-400 text-sm leading-relaxed">
+                                {!! $courses->possibilities_of_this_course !!}
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div>
-                            <img src="{{ URL::asset($courses->image) }}" style="height: 200px; width: 100%;"
-                                class="img-fluid" alt="">
+
+                </div>
+
+                <!-- Right 4 Columns: Sticky Enrollment Card -->
+                <div class="lg:col-span-4 sticky top-28">
+                    <div class="rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl p-6 sm:p-8 overflow-hidden">
+                        
+                        <!-- Course Image Preview -->
+                        <div class="relative w-full h-48 rounded-xl overflow-hidden mb-6 bg-slate-950">
+                            <img src="{{ URL::asset($courses->image) }}" class="w-full h-full object-cover" alt="{{ $courses->course_title }}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                            <div class="absolute bottom-3 left-3">
+                                <span class="px-2.5 py-1 rounded-md bg-emerald-500/90 text-slate-950 font-mono font-bold text-xs">
+                                    Admissions Open
+                                </span>
+                            </div>
                         </div>
-                        <ul class="list-group">
-                            <li class="list-group-item"><i class="fa fa-money text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp; কোর্স এর মূল্য: ৳ {{ $courses->price }}/-</li>
-                            <li class="list-group-item"><i class="fa fa-calendar text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp; কোর্স এর সময়কাল: {{ $courses->time_line }}</li>
+
+                        <!-- Price Highlight -->
+                        <div class="mb-6 pb-6 border-b border-slate-800">
+                            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block">কোর্স ফি (Tuition)</span>
+                            <div class="text-3xl font-extrabold font-mono text-white tracking-tight mt-1">
+                                ৳ {{ $courses->price }} <span class="text-sm font-normal text-emerald-400">BDT</span>
+                            </div>
+                        </div>
+
+                        <!-- Course Metadata List -->
+                        <ul class="space-y-4 text-sm mb-8">
+                            <li class="flex items-center justify-between text-slate-300">
+                                <span class="flex items-center gap-2 text-slate-400">
+                                    <i class="fa fa-calendar text-emerald-400"></i> সময়কাল:
+                                </span>
+                                <span class="font-semibold text-white font-mono">{{ $courses->time_line }}</span>
+                            </li>
+                            <li class="flex items-center justify-between text-slate-300">
+                                <span class="flex items-center gap-2 text-slate-400">
+                                    <i class="fa fa-users text-emerald-400"></i> ব্যাচ শিক্ষার্থী:
+                                </span>
+                                <span class="font-semibold text-white font-mono">{{ $courses->student_quantity }} জন</span>
+                            </li>
+
                             @php
                                 $sl = 1;
                             @endphp
                             @foreach ($course_members as $member)
-                                <li class="list-group-item"><i class="fa fa-user text-success" aria-hidden="true"></i>
-                                    &nbsp;&nbsp; কোর্সে এর প্রশিক্ষক: {{ $sl++ }}. <a href="">
-                                        {{ App\User::find($member->member_id)->name }}
-                                    </a></li>
+                                <li class="flex items-center justify-between text-slate-300">
+                                    <span class="flex items-center gap-2 text-slate-400">
+                                        <i class="fa fa-user-circle text-emerald-400"></i> প্রশিক্ষক:
+                                    </span>
+                                    <span class="font-semibold text-white">{{ App\User::find($member->member_id)->name }}</span>
+                                </li>
                             @endforeach
 
-                            <li class="list-group-item"><i class="fa fa-users text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp;&nbsp;&nbsp; প্রতি ব্যাচে শিক্ষার্থী সংখ্যা: {{ $courses->student_quantity }}
-                            </li>
-
-                            {{-- course fassility --}}
                             @foreach ($course_fassilities as $item)
-                                <li class="list-group-item"><i class="fa fa-question-circle text-success"
-                                        aria-hidden="true"></i>
-                                    &nbsp;&nbsp; {{ $item->title }}</li>
+                                <li class="flex items-center gap-2 text-slate-400 text-xs">
+                                    <i class="fa fa-check text-emerald-400"></i>
+                                    <span>{{ $item->title }}</span>
+                                </li>
                             @endforeach
                         </ul>
-                        <a href="{{ url('training/' . $courses->course_slug . '/student-registration') }}"><button
-                                type="button" class="btn btn-success d-block my-4 font-weight-bold"><i
-                                    class="fas fa-user-graduate"></i>
-                                Register For This Course</button></a>
-                    </div>
 
-                </div>
-            </div>
-            <div class="course__details__purpose">
-                <div class="row">
-                    <div class="mb-5 mx-2">
-                        <h3 class="mb-3">কোর্স শেষ করার পর আমি কী করতে পারব?</h3>
-                        <p class="text-muted">{!! $courses->future_of_this_course !!}</p>
+                        <!-- Direct Enrollment CTA Button -->
+                        <a href="{{ url('training/' . $courses->course_slug . '/student-registration') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                            <i class="fa fa-graduation-cap"></i>
+                            <span>Register For This Course</span>
+                        </a>
+
                     </div>
                 </div>
-                <div class="row">
-                    <div class="mx-2 mb-5">
-                        <h3 class="mb-3">{{ $courses->course_title }} এর ভবিষ্যৎ সম্ভাবনা</h3>
-                        <p class="text-muted">{!! $courses->possibilities_of_this_course !!}</p>
-                    </div>
-                </div>
+
             </div>
         </div>
+    </section>
 
-        <!-- ============= Other Courses ========== -->
-        <div class="course__details__other__courses">
-            <div class="container">
-                <h3 class="mb-4">Other courses available on Wake Up ICT:</h3>
-                <div class="owl-carousel owl-theme">
+    <!--========================== Related Courses Matrix ============================-->
+    @if (!empty($moreCourses))
+        <section class="py-16 border-t border-slate-800/80 bg-slate-900/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between mb-12">
+                    <div>
+                        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-2">Explore Next</div>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white">Other Courses at Wake Up ICT</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach ($moreCourses as $course)
-                        <a style="text-decoration: none; color:black"
-                            href="{{ url('training/' . $course->course_slug) }}">
-                            <div class="item">
-                                <div style="height: 600px;" class="card pb-5">
-                                    <img style="height: 300px;" src="{{ URL::asset($course->image) }}"
-                                        class="card-img-top" alt="...">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $course->course_title }}</h5>
-                                        <p class="card-text">{!! $course->short_description !!}</p>
-                                    </div>
+                        <a href="{{ url('training/' . $course->course_slug) }}" class="group block rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                            <div class="h-48 overflow-hidden bg-slate-950">
+                                <img src="{{ URL::asset($course->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $course->course_title }}">
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors mb-2">
+                                    {{ $course->course_title }}
+                                </h4>
+                                <div class="text-slate-400 text-xs line-clamp-2">
+                                    {!! strip_tags($course->short_description) !!}
                                 </div>
                             </div>
                         </a>
                     @endforeach
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
+
+</div>
+
+<script>
+    function toggleAccordion(id) {
+        const content = document.getElementById('content-' + id);
+        const icon = document.querySelector('.accordion-icon-' + id);
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            content.classList.add('block');
+            if (icon) icon.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            content.classList.remove('block');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+    }
+</script>
 @endsection
