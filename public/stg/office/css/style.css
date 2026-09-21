@@ -1,0 +1,65 @@
+ @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Rampart+One&display=swap');
+ body {
+     background-color: rgb(252, 252, 240);
+     font-family: 'Montserrat', sans-serif;
+ }
+ .jumbotron{
+    padding: 25px 0;
+ }
+ .header__style {
+     background-image: url(../images/offer-bg.png);
+     height: 150px;
+ }
+ 
+ .header__style a {
+     color: #ff8c00;
+     font-family: 'Rampart One', cursive;
+ }
+ /* =============>After click style*/
+ 
+ .fade-enter-active,
+ .fade-leave-active {
+     transition: opacity 2s;
+ }
+ 
+ .fade-enter,
+ .fade-leave-to
+ /* .fade-leave-active below version 2.1.8 */
+ 
+ {
+     opacity: 0;
+ }
+ /* ===============> Nav bar design  */
+ 
+ .login__menu {
+     background: linear-gradient(to left, #5151E5 0%, #72EDF2 83%);
+ }
+ 
+ .login__menu .nav-item a {
+     color: black;
+     font-family: 'Montserrat', sans-serif;
+     font-size: 13px;
+ }
+ 
+ .login__menu .nav-item a {
+     color: #fff;
+ }
+ 
+ .login__menu .nav-item a:hover {
+     border-bottom: 2px solid rgb(255, 255, 255);
+ }
+ /* =============================== */
+ /* ============> Footer */
+ 
+ .site__footer {
+     background: linear-gradient(to left, #72EDF2 0%, #5151E5 83%);
+     color: #fff;
+     padding: 30px 10px 10px 10px;
+     text-align: center;
+ }
+ 
+ .site__footer .site__credit p {
+     color: #fff;
+     font-size: 16px;
+ }

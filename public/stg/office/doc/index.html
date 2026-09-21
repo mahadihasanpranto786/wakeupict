@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="content" viewport="width=device-width, initial-scale=1.0" />
+    <title>Documentation For Attendance Management System</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,500;1,900&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,200&display=swap");
+      @media (prefers-reduced-motion: no-preference) {
+        * {
+          scroll-behavior: smooth;
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
+      }
+
+      body::-webkit-scrollbar {
+        width: 12px;
+        background-color: grey;
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: blue;
+        border-radius: 10px;
+      }
+
+      #main-doc {
+        background-color: rgb(238, 231, 231);
+      }
+
+      header img {
+        background-color: transparent;
+        width: 45px;
+        height: 60px;
+        margin: auto;
+      }
+
+      #navbar {
+        min-width: 250px;
+        width: 300px;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        align-items: center;
+        flex-direction: column;
+        border-right: 1px solid;
+        border-color: rgb(49, 48, 48);
+        background-color: rgb(153, 149, 149);
+      }
+
+      #navbar ul {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        list-style-type: none;
+      }
+
+      #navbar ul li {
+        font-family: "Roboto", sans-serif;
+        line-height: 2.8;
+        border-bottom: 1px solid rgb(99, 97, 97);
+        padding: 5px 35px;
+        width: 100%;
+        position: relative;
+        cursor: pointer;
+      }
+
+      #navbar ul li a {
+        color: rgb(255, 255, 255);
+      }
+
+      #navbar ul li:last-of-type {
+        border: none;
+        color: #fff;
+      }
+
+      #main-doc {
+        position: absolute;
+        margin-left: 18.7rem;
+        padding: 20px;
+      }
+
+      #navbar header {
+        font-family: "Roboto", sans-serif;
+        background: rgb(107, 99, 99);
+        color: black;
+        font-size: 25px;
+        font-weight: 600;
+        display: block;
+        text-align: center;
+        padding: 15px 20px;
+      }
+
+      #main-doc header {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.8em;
+        text-align: left;
+        padding: 10px;
+      }
+
+      #main-doc h3,
+      h4 {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 15px;
+      }
+
+      .main-section article {
+        margin: 15px;
+        line-height: 1.5;
+      }
+
+      .main-section article p a {
+        color: red;
+        font-family: "Tahoma", sans-serif;
+        font-weight: 500;
+      }
+
+      .main-section article p {
+        font-family: "Roboto", sans-serif;
+        font-weight: 300;
+        margin: 20px;
+      }
+
+      .main-section ul {
+        padding-left: 50px;
+        font-style: italic;
+      }
+
+      .main-section article caption {
+        font-family: "Roboto", sans-serif;
+      }
+
+      .main-section article table {
+        font-family: "Poppins", sans-serif;
+        font-style: italic;
+        background-color: rgb(216, 216, 216);
+        border: 1px solid black;
+      }
+
+      .main-section article table th {
+        border-bottom: 1px solid;
+        border-right: 1px solid;
+      }
+
+      #specificity-table {
+        width: 400px;
+      }
+
+      .main-section article table #title {
+        font-size: 15px;
+        font-family: "Roboto";
+        background-color: rgb(153, 149, 149);
+      }
+
+      code {
+        background-color: rgb(216, 216, 216);
+        padding: 5px;
+      }
+
+      #navbar ul li:hover {
+        background-color: #eee7e7;
+        color: black;
+        transition: all 600ms;
+        font-size: 17px;
+      }
+
+      header img:hover {
+        width: 50px;
+        height: 65px;
+        filter: drop-shadow(5px 5px 4px rgba(0, 0, 0, 0.5));
+      }
+
+      .hiden-menu {
+        background-color: rgb(35, 35, 202);
+        display: none;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        height: 6em;
+        text-align: center;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 100;
+        overflow-x: scroll;
+      }
+
+      .hiden-menu::-webkit-scrollbar {
+        width: 4px;
+        background-color: rgb(95, 95, 95);
+      }
+
+      .hiden-menu::-webkit-scrollbar-thumb {
+        background: blue;
+        border-radius: 8px;
+        border: 1px solid white;
+      }
+
+      .hiden-menu .nav-hiden {
+        list-style: none;
+        display: flex;
+      }
+
+      .hiden-menu li a {
+        font-family: "Roboto", sans-serif;
+        font-size: 1em;
+        padding: 2px 15px;
+        color: antiquewhite;
+        font-weight: bold;
+      }
+
+      .hiden-menu .logo-hiden {
+        min-width: 35px;
+        margin: 0.6em;
+      }
+
+      .hiden-menu li a:hover {
+        color: blue;
+        font-size: 1.1em;
+        background-color: rgb(157, 170, 196);
+        transition: all 900ms;
+        padding: 1.8em 1.5em;
+      }
+
+      .preview__image {
+        height: auto;
+        width: 100%;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      }
+      .preview__code {
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      }
+
+      @media (max-width: 840px) {
+        #navbar {
+          display: none;
+        }
+
+        #main-doc {
+          margin-left: 0;
+        }
+      }
+
+      @media (max-width: 839px) {
+        .hiden-menu {
+          display: flex;
+        }
+        #main-doc {
+          margin-top: 5em;
+        }
+      }
+
+      @media (max-width: 330px) {
+        #main-doc {
+          font-size: 0.8em;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hiden-menu">
+      <img
+        class="logo-hiden"
+        src="https://wakeupict.com/frontend/image/wakeupict-fabicon.png"
+        alt="css logotype"
+      />
+      <ul class="nav-hiden">
+        <a class="nav-link" href="#Introduction"><li>Introduction</li></a>
+        <a class="nav-link" href="#History"><li>History</li></a>
+      </ul>
+    </div>
+    <nav id="navbar">
+      <header>
+        <div id="logo">
+          <a href="https://wakeupict.com" target="_blank"
+            ><img
+              src="https://wakeupict.com/frontend/image/wakeupict-fabicon.png"
+              alt="css logotype"
+          /></a>
+        </div>
+        <h5 style="color: #fff">AMS - Documentation</h5>
+      </header>
+      <ul>
+        <a class="nav-link" href="#Introduction"><li>Introduction</li></a>
+        <a class="nav-link" href="#History"><li>History</li></a>
+        <a class="nav-link" href="#Installation"><li>Installation</li></a>
+        <a class="nav-link" href="#Users"><li>Users & Ability</li></a>
+        <a class="nav-link" href="#ManageStatus"><li>Manage Status</li></a>
+        <a class="nav-link" href="#ChangePassword"><li>Change Password</li></a>
+        <a class="nav-link" href="#ManageTime"><li>Manage Time</li></a>
+        <a class="nav-link" href="#AttendanceReport"
+          ><li>Attendance Report</li></a
+        >
+        <a class="nav-link" href="#CoffeeReport"><li>Coffee Report</li></a>
+        <a class="nav-link" href="#EmployeeManage"><li>Employee Manage</li></a>
+        <a class="nav-link" href="#Penalty"><li>Penalty</li></a>
+        <a class="nav-link" href="#Tester"><li>Tester</li></a>
+        <a class="nav-link" href="#ReleaseNotes"><li>Release notes</li></a>
+      </ul>
+    </nav>
+    <main id="main-doc">
+      <section class="main-section" id="Introduction">
+        <header>Introduction</header>
+        <article>
+          <p>
+            An attendance management system refers to an organization's approach
+            to tracking employee time and attendance information. An accurate
+            attendance and time tracking system helps you save time and effort
+            in calculating your employees' working hours.
+          </p>
+          <img class="preview__image" src="./01_preview.png" alt="" />
+
+          <p>
+            This system is developed to store information about the employees
+            work time and office time activity. So that, end of the month it
+            could be calculated that how much time a employee spend in the
+            office. The count for the cup of coffees are also included inside
+            it.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="History">
+        <header>History</header>
+        <article>
+          <p>
+            The system is developed back in September, 2021. Since then Wake UP
+            ICT is using the system to track there office employees work time.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="Installation">
+        <header>Installation</header>
+        <article>
+          <p>
+            Get the application with the database. Then follow the process to
+            install the system:
+          </p>
+          <ul>
+            <li>
+              Keep the files in the server. (Inside 'xampp/htdocs' if local)
+            </li>
+            <li>Upload the database in phpmyadmin</li>
+            <li>
+              Connect the database to the system by add the database name on
+              <strong>config.php</strong> &
+              <strong>functionConfig.php</strong> both config files as follows.
+            </li>
+            <code>
+              $servername = "localhost"; <br />
+              $username = "root"; <br />
+              $password = "";<br />
+              $dbname = "attendance_management_system";
+            </code>
+            <li>Check your server URL</li>
+          </ul>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="Users">
+        <header>Users & Ability</header>
+        <article>
+          <p>The system could be used by the following users:</p>
+          <ul class="mb-2">
+            <li>Employee</li>
+            <li>Admin</li>
+            <li>HR Manager</li>
+          </ul>
+          <div class="mb-3">
+            <p>
+              <strong>Employee:</strong> All Employees can Check In(Enter),
+              Check Out(leave) and manage there break status including with the
+              submission for coffee using the system. To insert the status
+              employee will have to type there login username as contact(or
+              other number) and password then select the desired status from the
+              option and click inter. Employees can change there password and
+              manager there office in and out time after logging in into the
+              panel. In order to login employee has to use the same process as
+              the manage status just have to select the option login.
+            </p>
+            <ul class="mb-2">
+              <li>Manage Status</li>
+              <li>Manage Office Time</li>
+              <li>Change Password</li>
+            </ul>
+          </div>
+          <div class="mb-3">
+            <p>
+              <strong>Admin:</strong> An admin is also an employee. So, he can
+              also do the same as an employee can do. Admin can see and manage
+              each employees attendance report and coffee report for each month.
+              He can also inactive and delete an employee from the employees
+              list.
+            </p>
+            <ul class="mb-2">
+              <li>Manage Status</li>
+              <li>Manage Office Time</li>
+              <li>Change Password</li>
+              <li>Attendance Report</li>
+              <li>Coffee Report</li>
+              <li>Employee Manage</li>
+            </ul>
+          </div>
+          <div class="mb-3">
+            <p>
+              <strong>HR Manager:</strong> An manager is also an employee. So,
+              he can also do the same as an employee can do & also the same as
+              an admin can. The plus is the HR manager can also mark employee
+              using a foul status if an employee do something against the rules.
+            </p>
+            <ul class="mb-2">
+              <li>Manage Status</li>
+              <li>Manage Office Time</li>
+              <li>Change Password</li>
+              <li>Attendance Report</li>
+              <li>Coffee Report</li>
+              <li>Employee Manage</li>
+              <li>Employee Penalty</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="ManageStatus">
+        <header>Manage Status</header>
+        <article>
+          <ul>
+            <li>
+              <strong>Enter:</strong> When an employee enter in the office.
+            </li>
+            <li>
+              <strong>Break Start:</strong> When an employee goes to break.
+            </li>
+            <li>
+              <strong>Break End:</strong> When an employee comes back from
+              break.
+            </li>
+            <li>
+              <strong>Leave:</strong> When an employee leave the work space.
+            </li>
+            <li>
+              <strong>Coffee:</strong> When an employee take a cup of coffee.
+            </li>
+            <li>
+              <strong>Login:</strong> When an employee want's To use other
+              features.
+            </li>
+          </ul>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="ChangePassword">
+        <header>Change Password</header>
+        <article>
+          <p>
+            In order to change password user must give the old password and then
+            give the new password. And the password and confirm new password
+            again to confirm and then submit to finally change the password.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="ManageTime">
+        <header>Manage Time</header>
+        <article>
+          <p>
+            Just simplify inserting the start and leave office time and save
+            will set the office enter and leave time for you.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="AttendanceReport">
+        <header>Attendance Report</header>
+        <article>
+          <p>
+            Select Employee name you want to view the attendance of including
+            with desired month and year. Report will be shown. From here that
+            employees enter time, break start & end time and leave time will be
+            found. The penalty list for that employee will also been shown on
+            attendance report page.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="CoffeeReport">
+        <header>Coffee Report</header>
+        <article>
+          <p>
+            Just by selecting the month and year, list every employees cups of
+            coffee will be shown.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="EmployeeManage">
+        <header>Employee Manage</header>
+        <article>
+          <p>
+            On this panel active employees can be inactive and inactive
+            employees can be activated. Also employees can be deleted using this
+            list.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="Penalty">
+        <header>Penalty</header>
+        <article>
+          <p>
+            If any employee break any rules then the HR manager will be able to
+            mark penalty to that employee. By selecting the employee a give a
+            reason why that employee is marked will do it. The maked information
+            will be seen in attendance report.
+          </p>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="Tester">
+        <header>Tester</header>
+        <article>
+          <ol style="list-style-type: square">
+            <li>Use of developer tools is not allowed.</li>
+            <li>Script checking is not allowed(Office Privacy).</li>
+          </ol>
+        </article>
+      </section>
+      <hr />
+      <section class="main-section" id="ReleaseNotes">
+        <header>Release Notes</header>
+        <article>The release notes for the system is given below:</article>
+      </section>
+    </main>
+  </body>
+  <footer></footer>
+</html>

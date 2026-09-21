@@ -1,0 +1,17 @@
+@section('title'){{ $content->title }}@endsection
+@section('description'){!! $content->description !!}@endsection
+@section('link_canonical'){{ $content->link_canonical }}@endsection
+@section('og_locale'){{ $content->link_canonical }}@endsection
+@section('og_type'){{ $content->og_type }}@endsection
+@section('og_url'){{ $content->og_url }}@endsection
+@section('og_site_name'){{ $content->og_site_name }}@endsection
+@section('article_publisher'){{ $content->article_publisher }}@endsection
+@section('article_modified_time'){{ $content->article_modified_time }}@endsection
+@section('image'){{ asset($content->image) }}@endsection
+@section('og_image_width'){{ $content->og_image_width }}@endsection
+@section('og_image_height'){{ $content->og_image_height }}@endsection
+@section('twitter_card'){{ $content->twitter_card }}@endsection
+@section('twitter_label1'){{ $content->twitter_label1 }}@endsection
+@section('twitter_data1'){{ $content->twitter_data1 }}@endsection
+@section('msvalidate'){{ $content->msvalidate }}@endsection
+@section('google_site_verification'){{ $content->google_site_verification }}@endsection

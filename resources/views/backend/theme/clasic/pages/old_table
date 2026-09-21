@@ -1,0 +1,101 @@
+
+    <table class="table">
+        <thead>
+            <tr class="bg-gray-700 dark:bg-dark-1 text-white">
+                {{-- <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">SL</th> --}}
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Image</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Page Name</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">title</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Article Publisher</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Article Modified Time</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Link Canonical</th>
+
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">MS Validate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+            $serial =1;
+            @endphp
+            @foreach ($single_content as $content)
+            <tr>
+                {{-- <td class="border-b">{{$serial++}}</td> --}}
+                <td class="border-b">{{$content->image}}</td>
+                <td class="border-b">{{$content->page_name}}</td>
+                <td class="border-b">{{$content->title}}</td>
+                <td class="border-b">{{$content->article_publisher}}</td>
+                <td class="border-b">{{$content->article_modified_time}}</td>
+                <td class="border-b">{{$content->link_canonical}}</td>
+
+                <td class="border-b">{{$content->msvalidate}}</td>
+                {{-- twitter --}}
+            </tr>
+            @endforeach
+
+
+        </tbody>
+    </table>
+</div>
+<div class="overflow-x-auto">
+    <table class="table">
+        <thead>
+            <tr class="bg-gray-700 dark:bg-dark-1 text-white">
+                {{-- <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">SL</th> --}}
+                {{-- og --}}
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG Side Name</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG Type</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG URL</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG Image Width</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG Image Height</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">OG Locale</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+            $serial =1;
+            @endphp
+            @foreach ($single_content as $content)
+            <tr>
+                {{-- <td class="border-b">{{$serial++}}</td> --}}
+                {{-- og --}}
+                <td class="border-b">{{$content->og_site_name}}</td>
+                <td class="border-b">{{$content->og_type}}</td>
+                <td class="border-b">{{$content->og_url}}</td>
+                <td class="border-b">{{$content->og_image_width}}</td>
+                <td class="border-b">{{$content->og_image_height}}</td>
+                <td class="border-b">{{$content->og_locale}}</td>
+            </tr>
+            @endforeach
+
+
+        </tbody>
+    </table>
+</div>
+<div class="overflow-x-auto">
+    <table class="table">
+        <thead>
+            <tr class="bg-gray-700 dark:bg-dark-1 text-white">
+                {{-- <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">SL</th> --}}
+
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Twitter Card</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Twitter Label 1</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Twitter Data 1</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Google Side Varification</th>
+                <th class="whitespace-nowrap  dark:border-dark-5  border-b-2">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+            $serial =1;
+            @endphp
+            @foreach ($single_content as $content)
+            <tr>
+                {{-- <td class="border-b">{{$serial++}}</td> --}}
+
+                {{-- twitter --}}
+                <td class="border-b">{{$content->twitter_card}}</td>
+                <td class="border-b">{{$content->twitter_label1}}</td>
+                <td class="border-b">{{$content->twitter_data1}}</td>
+                <td class="border-b">{{$content->google_site_verification}}</td>
+                <td class="border-b">{!!$content->description!!}</td>
+            </tr>

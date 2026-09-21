@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+
+Disallow: /wp-admin/
+
+Crawl-delay: 15
+Sitemap: https://wakeupict.com/sitemap.xml

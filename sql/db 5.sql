@@ -1,0 +1,223 @@
+-- phpMyAdmin SQL Dump
+-- version 5.1.0
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Aug 24, 2021 at 12:17 PM
+-- Server version: 10.4.18-MariaDB
+-- PHP Version: 7.4.16
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `wakeupict`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `courses`
+--
+
+CREATE TABLE `courses` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `course_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `short_description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `long_description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `importents` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `future_of_this_course` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `possibilities_of_this_course` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `time_line` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_quantity` int(11) NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `courses`
+--
+
+INSERT INTO `courses` (`id`, `course_title`, `price`, `short_description`, `long_description`, `importents`, `future_of_this_course`, `possibilities_of_this_course`, `time_line`, `student_quantity`, `image`, `status`, `created_at`, `updated_at`) VALUES
+(8, 'Microsoft Office', '12', '<p><span style=\"background-color:hsl(0,75%,60%);color:hsl(0,0%,100%);\">Short Description. Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short Description.&nbsp;Short</span></p>', '<p>long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;long description.&nbsp;</p>', '<p>somethings important. &nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants. somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;somethings importants.&nbsp;</p>', '<p><i><strong>future of this course . future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;future of this course .&nbsp;</strong></i></p>', '<p><span style=\"background-color:rgb(241,245,248);color:rgb(45,55,72);\">Possibilities Of This Course. Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;Possibilities Of This Course.&nbsp;</span></p>', '2 hours', 43, 'public/uploads/course/images/1708797801717407.jpg', 1, '2021-08-24 03:51:39', '2021-08-24 03:51:39'),
+(9, 'Laravel', '1223', '<p><span class=\"text-big\">short Description. short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short Description.&nbsp;short&nbsp;</span></p>', '<p>Long Description</p>', '<p>Importents</p>', '<p><span style=\"background-color:rgb(241,245,248);color:rgb(45,55,72);\">Future Of This Course</span></p>', '<p><span style=\"background-color:rgb(241,245,248);color:rgb(45,55,72);\">Possibilities Of This Course</span></p>', '2 hours', 12, 'public/uploads/course/images/1708801167702551.jpg', 1, '2021-08-24 03:50:14', '2021-08-24 03:50:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '2014_10_12_000000_create_users_table', 1),
+(2, '2014_10_12_100000_create_password_resets_table', 1),
+(5, '2021_08_15_052148_create_pages_table', 2),
+(6, '2021_08_19_135312_create_courses_table', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pages`
+--
+
+CREATE TABLE `pages` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `page_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `link_canonical` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_locale` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_site_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `msvalidate` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `article_publisher` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `article_modified_time` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_image_width` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `og_image_height` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twitter_card` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twitter_label1` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twitter_data1` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_site_verification` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `pages`
+--
+
+INSERT INTO `pages` (`id`, `page_name`, `title`, `link_canonical`, `og_locale`, `og_type`, `og_url`, `og_site_name`, `msvalidate`, `description`, `article_publisher`, `article_modified_time`, `image`, `og_image_width`, `og_image_height`, `twitter_card`, `twitter_label1`, `twitter_data1`, `google_site_verification`, `status`, `created_at`, `updated_at`) VALUES
+(2, 'About', 'About page', 'www.google.come', 'og locale about', 'og type about', 'og url about', 'og side name about', 'ms validate about', '<p>about description. about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;about description.&nbsp;</p>', 'article publisher about', '19 Aug, 2021', 'public/uploads/SEO/images/1708522539636513.png', '324', '3423', 'twitter card about', 'twitter label 1 about', 'twitter data 1 about', 'google side varification about', '1', '2021-08-19 05:54:25', '2021-08-19 05:54:25'),
+(3, 'Academic', 'Academic Trainings', NULL, NULL, NULL, NULL, NULL, NULL, '<p>academic trainings. academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;academic trainings.&nbsp;</p>', NULL, '19 Aug, 2021', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2021-08-19 07:14:55', '2021-08-19 07:14:55'),
+(4, 'Services', 'Services', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '19 Aug, 2021', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2021-08-19 07:15:50', '2021-08-19 07:15:50'),
+(11, 'Microsoft Office', 'Microsoft office 10', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '24 Aug, 2021', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2021-08-24 02:54:51', '2021-08-24 02:54:51'),
+(12, 'Laravel', 'Laravel ecommarce', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '24 Aug, 2021', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2021-08-24 02:54:11', '2021-08-24 02:54:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `type`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Admin', 'admin@admin.com', 'Admin', NULL, '$2y$10$3Y5vFhDrx9dcRI1F/ygjy.EjHQveVmFFaPqGxXPQ1vhS.cthgfj7C', NULL, '2021-08-12 09:00:04', '2021-08-12 09:00:04'),
+(2, 'moderator', 'moderator@moderator.com', 'moderator', NULL, '$2y$10$wH9zBNza9ARqQ1rDVRZ3xOwiqiot0nftqMnF3CFUQM7fGTLUWPBMm', NULL, '2021-08-18 09:22:34', '2021-08-18 09:22:34');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `courses`
+--
+ALTER TABLE `courses`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `pages`
+--
+ALTER TABLE `pages`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD KEY `password_resets_email_index` (`email`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_unique` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `courses`
+--
+ALTER TABLE `courses`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `pages`
+--
+ALTER TABLE `pages`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
