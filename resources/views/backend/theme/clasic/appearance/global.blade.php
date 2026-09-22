@@ -120,22 +120,61 @@
 
                         <hr class="border-secondary my-4">
 
-                        <h6 class="text-slate-300 font-weight-bold text-white mb-2" style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">
-                            <i class="fab fa-facebook-square mr-1 text-primary"></i> Facebook Graph API Integration
-                        </h6>
-                        <p class="text-muted small mb-3">Configure Facebook Page ID & Access Token to automatically populate the public Facebook Feed page.</p>
+                        <hr class="border-secondary my-4">
+
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-slate-300 font-weight-bold text-white mb-0" style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                <i class="fab fa-facebook-square mr-1 text-primary"></i> Facebook Graph API Integration (Permanent Connection)
+                            </h6>
+                            <span class="badge badge-success px-2 py-1" style="font-size: 10px; font-family: monospace;">Permanent Token Recommended</span>
+                        </div>
+                        
+                        <!-- Permanent Token Quick Guide -->
+                        <div class="p-3 mb-3 rounded" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 12px;">
+                            <div class="font-weight-bold text-success mb-1">
+                                <i class="fas fa-key mr-1"></i> How to get a Never-Expiring Permanent Token:
+                            </div>
+                            <ol class="mb-0 pl-3 text-slate-300" style="color: #cbd5e1; line-height: 1.6;">
+                                <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener" class="text-info font-weight-bold">Graph API Explorer <i class="fas fa-external-link-alt" style="font-size: 10px;"></i></a>.</li>
+                                <li>In the <strong>User or Page</strong> dropdown, choose your <strong>Page (Wake Up ICT)</strong> instead of "User Token".</li>
+                                <li>Check permissions: <code style="color: #6ee7b7; background: #064e3b; padding: 1px 4px; border-radius: 4px;">pages_show_list</code>, <code style="color: #6ee7b7; background: #064e3b; padding: 1px 4px; border-radius: 4px;">pages_read_engagement</code>, <code style="color: #6ee7b7; background: #064e3b; padding: 1px 4px; border-radius: 4px;">pages_read_user_content</code>.</li>
+                                <li>Click <strong>Generate Access Token</strong> and paste it below. <em>Page tokens never expire!</em></li>
+                            </ol>
+                        </div>
 
                         <div class="form-group mb-2">
-                            <label class="text-white font-weight-bold small mb-1">Facebook Page ID / Username</label>
-                            <input type="text" name="facebook_page_id" class="form-control form-control-sm" value="{{ app_setting('facebook_page_id', 'wakeupict') }}" placeholder="e.g. wakeupict or 100084321..." style="background: #0f172a; border-color: #334155; color: #fff;">
+                            <label class="text-white font-weight-bold small mb-1">Facebook Page ID / Numeric ID</label>
+                            <input type="text" name="facebook_page_id" class="form-control form-control-sm" value="{{ app_setting('facebook_page_id', '854068321357052') }}" placeholder="e.g. 854068321357052 or wakeupict" style="background: #0f172a; border-color: #334155; color: #fff;">
                         </div>
+
                         <div class="form-group mb-2">
-                            <label class="text-white font-weight-bold small mb-1">Facebook Page Access Token</label>
-                            <input type="password" name="facebook_access_token" class="form-control form-control-sm" value="{{ app_setting('facebook_access_token') }}" placeholder="EAAG... (Page Access Token)" style="background: #0f172a; border-color: #334155; color: #fff;">
+                            <label class="text-white font-weight-bold small mb-1">Facebook Page Access Token (Never-Expiring)</label>
+                            <input type="password" name="facebook_access_token" class="form-control form-control-sm" value="{{ app_setting('facebook_access_token') }}" placeholder="EAA... (Permanent Page Access Token)" style="background: #0f172a; border-color: #334155; color: #fff;">
+                            <small class="text-muted">A valid Page Token remains connected permanently until manually revoked or deleted.</small>
                         </div>
-                        <div class="form-group mb-0">
+
+                        <div class="form-group mb-3">
                             <label class="text-white font-weight-bold small mb-1">Display Name</label>
                             <input type="text" name="facebook_page_name" class="form-control form-control-sm" value="{{ app_setting('facebook_page_name', 'Wake Up ICT Official') }}" style="background: #0f172a; border-color: #334155; color: #fff;">
+                        </div>
+
+                        <!-- Optional Auto-Exchange Credentials -->
+                        <div class="card p-3 mb-2" style="background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(100, 116, 139, 0.4); border-radius: 8px;">
+                            <div class="font-weight-bold text-white small mb-2 d-flex align-items-center justify-content-between">
+                                <span><i class="fas fa-magic mr-1 text-warning"></i> Optional: Auto-Exchange Token with App Credentials</span>
+                                <span class="badge badge-secondary" style="font-size: 10px;">Optional</span>
+                            </div>
+                            <p class="text-muted mb-2" style="font-size: 11px;">If you have a Facebook App ID & App Secret, the system will automatically exchange any short-lived token into a permanent Never-Expiring token on save.</p>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="text-muted small mb-1">Facebook App ID</label>
+                                    <input type="text" name="facebook_app_id" class="form-control form-control-sm" value="{{ app_setting('facebook_app_id') }}" placeholder="e.g. 10483920..." style="background: #0f172a; border-color: #334155; color: #fff;">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="text-muted small mb-1">Facebook App Secret</label>
+                                    <input type="password" name="facebook_app_secret" class="form-control form-control-sm" value="{{ app_setting('facebook_app_secret') }}" placeholder="App Secret key" style="background: #0f172a; border-color: #334155; color: #fff;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

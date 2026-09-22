@@ -49,8 +49,17 @@
 
         @if(isset($apiError) && !empty($apiError))
             @auth
-                <div class="mb-8 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
-                    <i class="fa fa-exclamation-triangle mr-1.5"></i> Admin Notice (Facebook API): {{ $apiError }}
+                <div class="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-start sm:items-center gap-3">
+                        <i class="fa fa-exclamation-triangle text-amber-400 text-base flex-shrink-0 mt-0.5 sm:mt-0"></i>
+                        <div class="text-xs font-mono text-amber-200">
+                            <strong>{{ App::getLocale() == 'bn' ? 'অ্যাডমিন নোটিশ (ফেসবুক সেশন মেয়াদোত্তীর্ণ):' : 'Admin Notice (Session Expired):' }}</strong>
+                            <span>{{ App::getLocale() == 'bn' ? 'ব্রাউজার টোকেনগুলোর মেয়াদ ১-২ ঘণ্টার মধ্যে শেষ হয়ে যায়। দীর্ঘস্থায়ী সংযোগের জন্য পার্মানেন্ট (Never-Expiring) পেজ টোকেন যুক্ত করুন।' : 'Temporary user tokens expire within 1-2 hours. To keep your website connected permanently, use a Never-Expiring Page Access Token.' }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('appearance.global') }}" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-mono font-bold text-xs whitespace-nowrap transition-colors flex-shrink-0">
+                        {{ App::getLocale() == 'bn' ? 'টোকেন আপডেট করুন →' : 'Update Token →' }}
+                    </a>
                 </div>
             @endauth
         @endif

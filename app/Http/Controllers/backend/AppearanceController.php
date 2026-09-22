@@ -94,6 +94,22 @@ class AppearanceController extends Controller
     {
         $fields = $request->except(['_token', 'logo', 'favicon']);
 
+        // Auto-exchange short-lived token to Never-Expiring Page Token if App ID & Secret are provided
+        $exchangeMessage = '';
+        if (!empty($request->facebook_app_id) && !empty($request->facebook_app_secret) && !empty($request->facebook_access_token)) {
+            $exchanged = $this->exchangeForPermanentPageToken(
+                $request->facebook_app_id,
+                $request->facebook_app_secret,
+                $request->facebook_access_token,
+                $request->facebook_page_id ?: '854068321357052'
+            );
+
+            if ($exchanged['success']) {
+                $fields['facebook_access_token'] = $exchanged['token'];
+                $exchangeMessage = ' ' . $exchanged['message'];
+            }
+        }
+
         foreach ($fields as $key => $values) {
             if (is_array($values)) {
                 $en = isset($values['en']) ? $values['en'] : null;
@@ -106,7 +122,70 @@ class AppearanceController extends Controller
 
         Cache::forget('appearance_settings_all');
 
-        return redirect()->back()->with('success', 'Global branding and contact information updated successfully.');
+        return redirect()->back()->with('success', 'Global branding and contact information updated successfully.' . $exchangeMessage);
+    }
+
+    /**
+     * Exchange short-lived token for a never-expiring Page Access Token.
+     */
+    private function exchangeForPermanentPageToken($appId, $appSecret, $token, $pageId)
+    {
+        try {
+            // Step 1: Exchange for long-lived user access token (valid 60 days)
+            $step1Url = "https://graph.facebook.com/v19.0/oauth/access_token?" . http_build_query([
+                'grant_type' => 'fb_exchange_token',
+                'client_id' => trim($appId),
+                'client_secret' => trim($appSecret),
+                'fb_exchange_token' => trim($token),
+            ]);
+
+            $ch = curl_init($step1Url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 12,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $res1 = curl_exec($ch);
+            curl_close($ch);
+
+            $data1 = json_decode($res1, true);
+            if (empty($data1['access_token'])) {
+                $errMsg = $data1['error']['message'] ?? 'Unable to exchange token with Meta.';
+                return ['success' => false, 'message' => 'Token exchange note: ' . $errMsg];
+            }
+
+            $longLivedUserToken = $data1['access_token'];
+
+            // Step 2: Query Graph API for the Page Access Token using the long-lived token
+            // A Page Access Token derived from a long-lived user token NEVER EXPIRES.
+            $step2Url = "https://graph.facebook.com/v19.0/{$pageId}?fields=access_token&access_token={$longLivedUserToken}";
+
+            $ch2 = curl_init($step2Url);
+            curl_setopt_array($ch2, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 12,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $res2 = curl_exec($ch2);
+            curl_close($ch2);
+
+            $data2 = json_decode($res2, true);
+            if (!empty($data2['access_token'])) {
+                return [
+                    'success' => true,
+                    'token' => $data2['access_token'],
+                    'message' => 'Successfully converted to a Permanent (Never-Expiring) Page Access Token!'
+                ];
+            }
+
+            return [
+                'success' => true,
+                'token' => $longLivedUserToken,
+                'message' => 'Converted to a Long-Lived Token (valid 60 days).'
+            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Exchange error: ' . $e->getMessage()];
+        }
     }
 
     /**
