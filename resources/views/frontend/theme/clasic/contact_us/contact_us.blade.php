@@ -10,13 +10,13 @@
     <!-- Header Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center sm:text-left">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4">
-            <span>Direct Inquiries</span>
+            <span>{{ __('frontend.contact.direct_badge') }}</span>
         </div>
         <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-            Let's Engineer the Future Together.
+            {{ __('frontend.contact.headline') }}
         </h1>
         <p class="text-slate-400 text-base sm:text-lg max-w-2xl">
-            Whether you need enterprise engineering consultation, custom technology tracks, or institutional partnerships, our team is standing by.
+            {{ __('frontend.contact.subheadline') }}
         </p>
     </div>
 
@@ -28,7 +28,7 @@
             <div class="lg:col-span-5 space-y-8">
                 
                 <div class="p-8 rounded-2xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl shadow-2xl">
-                    <h3 class="text-xl font-bold text-white mb-6">Contact Coordinates</h3>
+                    <h3 class="text-xl font-bold text-white mb-6">{{ __('frontend.contact.coordinates') }}</h3>
                     
                     <div class="space-y-6">
                         <!-- Location -->
@@ -37,9 +37,9 @@
                                 <i class="fa fa-map-marker"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-semibold text-white">Innovation Headquarters</h4>
+                                <h4 class="text-sm font-semibold text-white">{{ __('frontend.contact.hq_title') }}</h4>
                                 <p class="text-slate-400 text-sm mt-1 leading-relaxed">
-                                    Nannu Tower, 2nd Floor, Panna Chatter, Rajbari, Bangladesh
+                                    {{ app_setting('contact_address', __('frontend.contact.hq_address')) }}
                                 </p>
                             </div>
                         </div>
@@ -50,9 +50,9 @@
                                 <i class="fa fa-envelope"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-semibold text-white">Electronic Inquiries</h4>
-                                <a href="mailto:info@wakeupict.com" class="text-slate-400 hover:text-emerald-400 text-sm mt-1 inline-block transition-colors">
-                                    info@wakeupict.com
+                                <h4 class="text-sm font-semibold text-white">{{ __('frontend.contact.email_title') }}</h4>
+                                <a href="mailto:{{ app_setting('contact_email', 'info@wakeupict.com') }}" class="text-slate-400 hover:text-emerald-400 text-sm mt-1 inline-block transition-colors">
+                                    {{ app_setting('contact_email', 'info@wakeupict.com') }}
                                 </a>
                             </div>
                         </div>
@@ -63,9 +63,9 @@
                                 <i class="fa fa-phone"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-semibold text-white">Direct Line</h4>
-                                <a href="tel:+8801791612121" class="text-slate-400 hover:text-emerald-400 text-sm mt-1 inline-block transition-colors font-mono">
-                                    +88 01791612121
+                                <h4 class="text-sm font-semibold text-white">{{ __('frontend.contact.phone_title') }}</h4>
+                                <a href="tel:{{ app_setting('contact_phone', '+8801791612121') }}" class="text-slate-400 hover:text-emerald-400 text-sm mt-1 inline-block transition-colors font-mono">
+                                    {{ app_setting('contact_phone', '+88 01791612121') }}
                                 </a>
                             </div>
                         </div>
@@ -74,16 +74,16 @@
                     <!-- Operational Hours -->
                     <div class="mt-8 pt-8 border-t border-slate-800/80">
                         <div class="flex items-center justify-between text-xs font-mono text-slate-400">
-                            <span>Operating Hours:</span>
-                            <span class="text-emerald-400">Sat – Thu, 9:00 AM – 8:00 PM</span>
+                            <span>{{ __('frontend.contact.hours_label') }}</span>
+                            <span class="text-emerald-400">{{ __('frontend.contact.hours_value') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live Campus Notice -->
                 <div class="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 text-slate-300 text-sm leading-relaxed">
-                    <span class="font-semibold text-emerald-400 font-mono text-xs uppercase block mb-1">Campus Tours & Orientation</span>
-                    Walk-in visits are welcome during operational hours for students, parents, and corporate teams looking to inspect our labs.
+                    <span class="font-semibold text-emerald-400 font-mono text-xs uppercase block mb-1">{{ __('frontend.contact.campus_tour_title') }}</span>
+                    {{ __('frontend.contact.campus_tour_desc') }}
                 </div>
 
             </div>
@@ -91,8 +91,8 @@
             <!-- Right 7 Columns: High-Tech Glassmorphic Input Form -->
             <div class="lg:col-span-7">
                 <div class="p-8 sm:p-10 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-2xl">
-                    <h2 class="text-2xl font-bold text-white mb-2">Send an Official Inquiry</h2>
-                    <p class="text-slate-400 text-sm mb-8">All fields marked with an asterisk (*) are required.</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">{{ __('frontend.contact.form_title') }}</h2>
+                    <p class="text-slate-400 text-sm mb-8">{{ __('frontend.contact.form_subtitle') }}</p>
 
                     <form method="POST" action="{{ route('contact-us-user') }}" enctype="multipart/form-data" class="space-y-6 contactForm">
                         @csrf
@@ -100,9 +100,9 @@
                         <!-- Name Input -->
                         <div>
                             <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 font-medium mb-2">
-                                Full Name *
+                                {{ __('frontend.contact.name_label') }}
                             </label>
-                            <input type="text" name="name" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm transition-all" placeholder="Jane Doe" data-validation="required" value="{{ old('name') }}" />
+                            <input type="text" name="name" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm transition-all" placeholder="{{ __('frontend.contact.name_placeholder') }}" data-validation="required" value="{{ old('name') }}" />
                             @error('name')
                                 <span class="text-rose-400 text-xs mt-1 block font-mono">{{ $message }}</span>
                             @enderror
@@ -112,9 +112,9 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 font-medium mb-2">
-                                    Phone Number *
+                                    {{ __('frontend.contact.phone_label') }}
                                 </label>
-                                <input type="text" name="phone" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm font-mono transition-all" placeholder="+88 01XXXXXXXXX" data-validation="required" value="{{ old('phone') }}" />
+                                <input type="text" name="phone" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm font-mono transition-all" placeholder="{{ __('frontend.contact.phone_placeholder') }}" data-validation="required" value="{{ old('phone') }}" />
                                 @error('phone')
                                     <span class="text-rose-400 text-xs mt-1 block font-mono">{{ $message }}</span>
                                 @enderror
@@ -122,9 +122,9 @@
 
                             <div>
                                 <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 font-medium mb-2">
-                                    Email Address *
+                                    {{ __('frontend.contact.email_label') }}
                                 </label>
-                                <input type="email" name="email" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm transition-all" placeholder="jane@enterprise.com" data-validation="required" value="{{ old('email') }}" />
+                                <input type="email" name="email" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm transition-all" placeholder="{{ __('frontend.contact.email_placeholder') }}" data-validation="required" value="{{ old('email') }}" />
                                 @error('email')
                                     <span class="text-rose-400 text-xs mt-1 block font-mono">{{ $message }}</span>
                                 @enderror
@@ -135,11 +135,11 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 font-medium">
-                                    Message Details *
+                                    {{ __('frontend.contact.message_label') }}
                                 </label>
-                                <span id="charNum" class="text-[11px] font-mono text-slate-400">200 characters remaining</span>
+                                <span id="charNum" class="text-[11px] font-mono text-slate-400">200 {{ __('frontend.contact.chars_remaining') }}</span>
                             </div>
-                            <textarea name="message" rows="4" onkeyup="countChars(this);" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm leading-relaxed transition-all resize-none" placeholder="Provide context regarding your requirements, batch sizes, or consulting needs..." data-validation="required">{{ old('message') }}</textarea>
+                            <textarea name="message" rows="4" onkeyup="countChars(this);" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-500 text-sm leading-relaxed transition-all resize-none" placeholder="{{ __('frontend.contact.message_placeholder') }}" data-validation="required">{{ old('message') }}</textarea>
                             @error('message')
                                 <span class="text-rose-400 text-xs mt-1 block font-mono">{{ $message }}</span>
                             @enderror
@@ -148,7 +148,7 @@
                         <!-- File Upload (Optional) -->
                         <div>
                             <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 font-medium mb-2">
-                                Attach Document / Brief (Optional)
+                                {{ __('frontend.contact.file_label') }}
                             </label>
                             <div class="relative flex items-center">
                                 <input type="file" id="my-file" name="image" onchange="preview()" class="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-mono file:font-semibold file:bg-slate-800 file:text-emerald-400 hover:file:bg-slate-700 file:cursor-pointer cursor-pointer bg-slate-950/80 rounded-xl border border-slate-700/80" />
@@ -164,7 +164,7 @@
                         <!-- Submit Button -->
                         <div class="pt-4">
                             <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1 active:translate-y-0">
-                                <span>Transmit Inquiry</span>
+                                <span>{{ __('frontend.contact.submit_btn') }}</span>
                                 <i class="fa fa-paper-plane text-xs"></i>
                             </button>
                         </div>

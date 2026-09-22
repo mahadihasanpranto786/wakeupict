@@ -18,8 +18,11 @@ class LanguageController extends Controller
     {
         if (in_array($locale, ['en', 'bn'])) {
             Session::put('locale', $locale);
+            Session::put('manual_locale', true);
             App::setLocale($locale);
-            return redirect()->back()->withCookie(cookie()->forever('locale', $locale));
+            return redirect()->back()
+                ->withCookie(cookie()->forever('locale', $locale))
+                ->withCookie(cookie()->forever('manual_locale', '1'));
         }
 
         return redirect()->back();

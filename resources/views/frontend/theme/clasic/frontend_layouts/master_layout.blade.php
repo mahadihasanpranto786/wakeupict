@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 @php
-    $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'dark';
+    $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'light';
 @endphp
 <html lang="{{ App::getLocale() }}" class="{{ $initialTheme }} scroll-smooth">
 
@@ -9,16 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <!-- Immediate Theme Application (Zero FOUT) -->
+    <!-- Immediate Theme Application (Zero FOUT, Default Light Mode) -->
     <script>
         (function() {
             var savedTheme = localStorage.getItem('theme_mode') || '{{ $initialTheme }}';
-            if (savedTheme === 'light') {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.classList.add('light');
-            } else {
+            if (savedTheme === 'dark') {
                 document.documentElement.classList.remove('light');
                 document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
             }
         })();
     </script>

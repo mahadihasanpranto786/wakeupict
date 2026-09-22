@@ -19,7 +19,7 @@
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-6 backdrop-blur-md">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Our DNA & Purpose</span>
+                    <span>{{ __('frontend.about.dna_badge') }}</span>
                 </div>
                 
                 <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
@@ -43,7 +43,7 @@
                     <div class="lg:col-span-6 border-l-2 border-emerald-500/40 pl-8 relative">
                         <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-950 border-2 border-emerald-400"></div>
                         
-                        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">Our Genesis</div>
+                        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">{{ __('frontend.about.genesis_badge') }}</div>
                         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight mb-6">
                             {{ $history->title }}
                         </h2>
@@ -71,12 +71,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="text-center max-w-3xl mx-auto mb-20">
-                <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">Intellectual Capital</div>
+                <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">{{ __('frontend.about.intellectual_capital') }}</div>
                 <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4">
-                    Wake Up ICT Leadership & Team
+                    {{ __('frontend.about.leadership_title') }}
                 </h2>
                 <p class="text-slate-400 text-base leading-relaxed">
-                    A multidisciplinary collective of architects, technologists, and educators pioneering digital engineering standards.
+                    {{ __('frontend.about.leadership_sub') }}
                 </p>
             </div>
 
@@ -110,8 +110,8 @@
             @if (!empty($interns) && count($interns) > 0)
                 <div class="pt-12 border-t border-slate-800/80 mb-24">
                     <div class="text-center mb-12">
-                        <h3 class="text-2xl font-bold text-white mb-2">Our Engineering Interns</h3>
-                        <p class="text-xs font-mono uppercase tracking-wider text-cyan-400">Rising Tech Talent</p>
+                        <h3 class="text-2xl font-bold text-white mb-2">{{ __('frontend.about.interns_title') }}</h3>
+                        <p class="text-xs font-mono uppercase tracking-wider text-cyan-400">{{ __('frontend.about.interns_badge') }}</p>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                         @foreach ($interns as $index => $intern)
@@ -131,8 +131,8 @@
             @if (!empty($oldEmployees) && count($oldEmployees) > 0)
                 <div class="pt-12 border-t border-slate-800/80">
                     <div class="text-center mb-12">
-                        <h3 class="text-2xl font-bold text-white mb-2">Alumni & Former Colleagues</h3>
-                        <p class="text-xs font-mono uppercase tracking-wider text-slate-400">Part of Our Legacy</p>
+                        <h3 class="text-2xl font-bold text-white mb-2">{{ __('frontend.about.alumni_title') }}</h3>
+                        <p class="text-xs font-mono uppercase tracking-wider text-slate-400">{{ __('frontend.about.alumni_badge') }}</p>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                         @foreach ($oldEmployees as $index => $about)
@@ -155,13 +155,13 @@
     <section class="py-20 relative border-t border-slate-800/80 bg-gradient-to-b from-slate-950 to-slate-900">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             <h2 class="text-3xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
-                Are you Dedicated, Hardworking, and Fun? Join Us!
+                {{ __('frontend.about.cta_title') }}
             </h2>
             <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-8">
-                Wake Up ICT Academy is an accomplished training and service providing company delivering high-velocity, innovative solutions.
+                {{ __('frontend.about.cta_sub') }}
             </p>
             <a href="{{ route('contact-us-page') }}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
-                <span>Get In Touch With Leadership</span>
+                <span>{{ __('frontend.about.cta_button') }}</span>
                 <i class="fa fa-arrow-right text-xs"></i>
             </a>
         </div>

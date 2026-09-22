@@ -19,7 +19,7 @@
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono tracking-wider uppercase mb-6 backdrop-blur-md">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                    <span>Capabilities & Engineering</span>
+                    <span>{{ __('frontend.services.capabilities_badge') }}</span>
                 </div>
                 
                 <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
@@ -36,7 +36,7 @@
         @if (!empty($banner->body_title))
             <section class="py-16 sm:py-20 relative border-b border-slate-800/80 bg-slate-900/30">
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-                    <div class="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold mb-3">Enterprise Methodology</div>
+                    <div class="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold mb-3">{{ __('frontend.services.methodology_badge') }}</div>
                     <h2 class="text-2xl sm:text-4xl font-bold text-white mb-6">
                         {{ $banner->body_title }}
                     </h2>
@@ -57,33 +57,33 @@
                 <div class="lg:col-span-4 lg:sticky lg:top-32">
                     <div class="p-8 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl shadow-2xl">
                         <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">
-                            Full-Stack Delivery
+                            {{ __('frontend.services.full_stack_badge') }}
                         </div>
                         <h3 class="text-2xl sm:text-4xl font-bold text-white mb-6 leading-tight">
-                            Digital Engineering & Solutions
+                            {{ __('frontend.services.solutions_title') }}
                         </h3>
                         <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
-                            Explore our battle-tested enterprise tracks designed to accelerate technological capabilities, modernize systems, and scale business operations seamlessly.
+                            {{ __('frontend.services.solutions_sub') }}
                         </p>
 
                         <!-- Methodology Step Indicators -->
                         <div class="space-y-4 mb-8 pt-6 border-t border-slate-800/80 font-mono text-xs text-slate-300">
                             <div class="flex items-center gap-3">
                                 <span class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold">1</span>
-                                <span>Discover & Architect</span>
+                                <span>{{ __('frontend.services.step_1') }}</span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="w-6 h-6 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-bold">2</span>
-                                <span>High-Velocity Development</span>
+                                <span>{{ __('frontend.services.step_2') }}</span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="w-6 h-6 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold">3</span>
-                                <span>Continuous Scale & Security</span>
+                                <span>{{ __('frontend.services.step_3') }}</span>
                             </div>
                         </div>
 
                         <a href="{{ route('contact-us-page') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
-                            <span>Partner With Us</span>
+                            <span>{{ __('frontend.services.partner_btn') }}</span>
                             <i class="fa fa-arrow-right text-xs"></i>
                         </a>
                     </div>
@@ -117,7 +117,7 @@
 
                                 <div class="relative z-10 pt-6 border-t border-slate-800/80">
                                     <a href="{{ route('contact-us-page') }}" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold group-hover:translate-x-1 transition-transform">
-                                        <span>Consult With Expert</span>
+                                        <span>{{ __('frontend.services.consult_btn') }}</span>
                                         <i class="fa fa-arrow-right text-[10px]"></i>
                                     </a>
                                 </div>

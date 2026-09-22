@@ -14,7 +14,7 @@
     <!--========================== Services Section ============================-->
     <section class="pt-5 mt-5">
         <div class="py-4 container">
-            <h2 class="text-center">Student Registration Form</h2>
+            <h2 class="text-center">{{ __('frontend.student.reg_title') }}</h2>
         </div>
     </section>
 
@@ -31,11 +31,11 @@
                                     <input type="hidden" name="course_id" value="{{ $course->id }}">
                                     <input type="hidden" name="course_fee" value="{{ $course->price }}">
                                     <div class="form-row">
-                                        <label for="student_name" class="field_color">Student Name</label>
+                                        <label for="student_name" class="field_color">{{ __('frontend.student.name') }}</label>
                                         <div class="value">
                                             <div class="input-group">
                                                 <input id="student_name" data-validation='required' class="input--style-5"
-                                                    type="text" name="student_name" placeholder="Enter Student Name">
+                                                    type="text" name="student_name" placeholder="{{ __('frontend.student.name_placeholder') }}">
                                                 @error('student_name')
                                                     <span class="text-danger font-weight-bold">{{ $message }}</span>
                                                 @enderror
@@ -43,12 +43,12 @@
                                         </div>
                                     </div>
                                     <div class="form-row m-b-55 p-0">
-                                        <div class="field_color">Gender</div>
+                                        <div class="field_color">{{ __('frontend.student.gender') }}</div>
                                         <div class="value">
                                             <div class="row row-space">
                                                 <div class="col-6">
                                                     <div class="input-group-desc">
-                                                        <label class="radio-container m-r-55">Male
+                                                        <label class="radio-container m-r-55">{{ __('frontend.student.male') }}
                                                             <input type="radio" name='gander' checked="checked"
                                                                 value="male">
                                                             <span class="checkmark"></span>
@@ -61,7 +61,7 @@
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="input-group-desc">
-                                                        <label class="radio-container">Female
+                                                        <label class="radio-container">{{ __('frontend.student.female') }}
                                                             <input type="radio" name='gander' value="female">
                                                             <span class="checkmark"></span>
                                                             @error('female')
@@ -76,11 +76,11 @@
                                     </div>
 
                                     <div class="form-row">
-                                        <label for="fathers_name" class="field_color">Father's Name</label>
+                                        <label for="fathers_name" class="field_color">{{ __('frontend.student.father_name') }}</label>
                                         <div class="value">
                                             <div class="input-group">
                                                 <input id="fathers_name" data-validation='required' class="input--style-5"
-                                                    type="text" name="fathers_name" placeholder="Enter Father's Name">
+                                                    type="text" name="fathers_name" placeholder="{{ __('frontend.student.father_placeholder') }}">
                                                 @error('fathers_name')
                                                     <span class="text-danger font-weight-bold">{{ $message }}</span>
                                                 @enderror
@@ -88,11 +88,11 @@
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <label for="mothers_name" class="field_color">Mother's Name</label>
+                                        <label for="mothers_name" class="field_color">{{ __('frontend.student.mother_name') }}</label>
                                         <div class="value">
                                             <div class="input-group">
                                                 <input class="input--style-5" data-validation='required' type="text"
-                                                    name="mothers_name" placeholder="Enter Mother's Name">
+                                                    name="mothers_name" placeholder="{{ __('frontend.student.mother_placeholder') }}">
                                                 @error('mothers_name')
                                                     <span class="text-danger font-weight-bold">{{ $message }}</span>
                                                 @enderror
@@ -100,13 +100,13 @@
                                         </div>
                                     </div>
                                     <div class="border rounded  p-3">
-                                        <h4 class="field_color">Personal Information:</h4>
+                                        <h4 class="field_color">{{ __('frontend.student.personal_info') }}</h4>
                                         <div class="form-row m-b-55">
                                             <div class="row row-space">
                                                 <div class="col-md-6 col-sm-12">
-                                                    <label for="nationality" class="field_color">Nationality</label>
+                                                    <label for="nationality" class="field_color">{{ __('frontend.student.nationality') }}</label>
                                                     <input class="input--style-5" data-validation='required' type="text"
-                                                        id="nationality" name="nationality" placeholder="Enter Nationality">
+                                                        id="nationality" name="nationality" placeholder="{{ __('frontend.student.nationality_placeholder') }}">
                                                     @error('nationality')
                                                         <span class="text-danger font-weight-bold">{{ $message }}</span>
                                                     @enderror
@@ -114,11 +114,10 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="national_id_no" class="field_color">National Id
-                                                            No</label>
+                                                        <label for="national_id_no" class="field_color">{{ __('frontend.student.nid') }}</label>
                                                         <input class="input--style-5" data-validation='required'
                                                             type="number" id="national_id_no" name="national_id_no"
-                                                            placeholder="Enter National Id No">
+                                                            placeholder="{{ __('frontend.student.nid_placeholder') }}">
                                                         @error('national_id_no')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -128,12 +127,11 @@
                                                 </div>
                                                 <div class="col-md-12 col-sm-12">
                                                     <div class="form-group green-border-focus">
-                                                        <label for="present_address" class="field_color">Present
-                                                            Address</label>
+                                                        <label for="present_address" class="field_color">{{ __('frontend.student.present_address') }}</label>
                                                         <textarea class="form-control input--style-5"
                                                             data-validation='required' id="present_address"
                                                             name="present_address" rows="3"
-                                                            placeholder="Enter Present Address"></textarea>
+                                                            placeholder="{{ __('frontend.student.present_placeholder') }}"></textarea>
                                                         @error('present_address')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -142,12 +140,11 @@
                                                 </div>
                                                 <div class="col-md-12 col-sm-12">
                                                     <div class="form-group green-border-focus">
-                                                        <label for="permanent_address" class="field_color">Permanent
-                                                            Address</label>
+                                                        <label for="permanent_address" class="field_color">{{ __('frontend.student.permanent_address') }}</label>
                                                         <textarea class="form-control input--style-5"
                                                             data-validation='required' id="permanent_address"
                                                             name="permanent_address" rows="3"
-                                                            placeholder="Enter Permanent Address"></textarea>
+                                                            placeholder="{{ __('frontend.student.permanent_placeholder') }}"></textarea>
                                                         @error('permanent_address')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -156,11 +153,10 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="personal_call_no" class="field_color">Personal Call
-                                                            No</label>
+                                                        <label for="personal_call_no" class="field_color">{{ __('frontend.student.mobile') }}</label>
                                                         <input class="input--style-5" data-validation='required' type="text"
                                                             id="personal_call_no" name="personal_call_no"
-                                                            placeholder="Enter Personal Call No">
+                                                            placeholder="{{ __('frontend.student.mobile_placeholder') }}">
                                                         @error('personal_call_no')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -170,9 +166,9 @@
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
                                                         <label for="email" data-validation='required'
-                                                            class="field_color">Email</label>
+                                                            class="field_color">{{ __('frontend.student.email') }}</label>
                                                         <input class="input--style-5" type="email" id="email" name="email"
-                                                            placeholder="Enter Email Address">
+                                                            placeholder="{{ __('frontend.student.email_placeholder') }}">
                                                         @error('email')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -181,9 +177,9 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="religion" class="field_color">Religion</label>
+                                                        <label for="religion" class="field_color">{{ __('frontend.student.religion') }}</label>
                                                         <input class="input--style-5" data-validation='required' type="text"
-                                                            id="religion" name="religion" placeholder="Enter Religion">
+                                                            id="religion" name="religion" placeholder="{{ __('frontend.student.religion_placeholder') }}">
                                                         @error('religion')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -192,10 +188,10 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="occupation" class="field_color">Occupation</label>
+                                                        <label for="occupation" class="field_color">{{ __('frontend.student.occupation') }}</label>
                                                         <input class="input--style-5" data-validation='required' type="text"
                                                             id="occupation" name="occupation"
-                                                            placeholder="Enter Occupation">
+                                                            placeholder="{{ __('frontend.student.occupation_placeholder') }}">
                                                         @error('occupation')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -204,7 +200,7 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="age" class="field_color">Date Of Birth</label>
+                                                        <label for="age" class="field_color">{{ __('frontend.student.dob') }}</label>
                                                         <input id="age" class="input--style-5" data-validation='required'
                                                             type="text" name="age" placeholder="Year-Month-Day">
                                                         @error('age')
@@ -219,10 +215,10 @@
 
                                     <div class="border rounded p-3 mt-1">
                                         <div class="form-row">
-                                            <div class="field_color">Educational Qualification</div>
+                                            <div class="field_color">{{ __('frontend.student.education') }}</div>
                                             <select data-validation='required' name="educational_qualification"
                                                 class="custom-select custom-select-lg mb-3 input--style-5">
-                                                <option disabled="disabled" selected="selected">Choose option
+                                                <option disabled="disabled" selected="selected">{{ __('frontend.student.choose_option') }}
                                                 </option>
                                                 <option value="Masters">Masters</option>
                                                 <option value="Honers">Honers</option>
@@ -238,10 +234,10 @@
                                             <div class="row row-space">
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="result" class="field_color">Result</label>
+                                                        <label for="result" class="field_color">{{ __('frontend.student.result') }}</label>
                                                         <input class="input--style-5" data-validation='required'
                                                             type="text" id="result" name="result"
-                                                            value="{{ old('result') }}" placeholder="Enter Result">
+                                                            value="{{ old('result') }}" placeholder="{{ __('frontend.student.result_placeholder') }}">
                                                         @error('result')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -250,11 +246,10 @@
                                                 </div>
                                                 <div class="col-md-6 col-sm-12">
                                                     <div class="input-group-desc">
-                                                        <label for="passing_year" class="field_color">Passing
-                                                            Year</label>
+                                                        <label for="passing_year" class="field_color">{{ __('frontend.student.passing_year') }}</label>
                                                         <input class="input--style-5" data-validation='required'
                                                             type="text" id="passing_year" name="passing_year"
-                                                            placeholder="Enter Passing Year">
+                                                            placeholder="{{ __('frontend.student.passing_year_placeholder') }}">
                                                         @error('passing_year')
                                                             <span
                                                                 class="text-danger font-weight-bold">{{ $message }}</span>
@@ -268,7 +263,7 @@
                                     </div>
 
                                     <div>
-                                        <button class="btn_s btn--radius-2_s btn--green" type="submit">Register</button>
+                                        <button class="btn_s btn--radius-2_s btn--green" type="submit">{{ __('frontend.student.submit_btn') }}</button>
                                     </div>
                                 </form>
                             </div>
@@ -282,24 +277,24 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <i class="fas fa-graduation-cap text-success"></i>
-                                &nbsp;&nbsp; কোর্স এর নাম: <strong>{{ $course->course_title }}</strong>
+                                &nbsp;&nbsp; {{ __('frontend.student.course_name_label') }} <strong>{{ $course->course_title }}</strong>
                             </li>
                             <li class="list-group-item"><i class="fa fa-money text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp; কোর্স এর মূল্য: ৳ {{ $course->price }}/-</li>
+                                &nbsp;&nbsp; {{ __('frontend.student.course_fee_label') }} ৳ {{ $course->price }}/-</li>
                             <li class="list-group-item"><i class="fa fa-calendar text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp; কোর্স এর সময়কাল: {{ $course->time_line }}</li>
+                                &nbsp;&nbsp; {{ __('frontend.student.course_duration_label') }} {{ $course->time_line }}</li>
                             @php
                                 $sl = 1;
                             @endphp
                             @foreach ($course_members as $member)
                                 <li class="list-group-item"><i class="fa fa-user text-success" aria-hidden="true"></i>
-                                    &nbsp;&nbsp; কোর্সে এর প্রশিক্ষক: {{ $sl++ }}. <a href="">
+                                    &nbsp;&nbsp; {{ __('frontend.student.instructor_label') }} {{ $sl++ }}. <a href="">
                                         {{ App\User::find($member->member_id)->name }}
                                     </a></li>
                             @endforeach
 
                             <li class="list-group-item"><i class="fa fa-users text-success" aria-hidden="true"></i>
-                                &nbsp;&nbsp;&nbsp;&nbsp; প্রতি ব্যাচে শিক্ষার্থী সংখ্যা: {{ $course->student_quantity }}
+                                &nbsp;&nbsp;&nbsp;&nbsp; {{ __('frontend.student.batch_capacity_label') }} {{ $course->student_quantity }}
                             </li>
 
                             {{-- course fassility --}}

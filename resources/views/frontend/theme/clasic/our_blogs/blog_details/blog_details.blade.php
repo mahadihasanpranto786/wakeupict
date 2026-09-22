@@ -10,7 +10,7 @@
     <!-- Article Header -->
     <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-6">
-            <span>Engineering Insights</span>
+            <span>{{ __('frontend.blog.article_badge') }}</span>
         </div>
         
         <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-6 leading-tight">
@@ -164,7 +164,7 @@
 
         <!-- Social Share Bar -->
         <div class="pt-8 mt-12 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
-            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Share this publication</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">{{ __('frontend.blog.share_title') }}</span>
             <div class="flex items-center gap-3">
                 <a href="https://www.facebook.com/wakeupict" target="_blank" class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-2">
                     <i class="fa fa-facebook text-blue-400"></i> Facebook
@@ -183,7 +183,7 @@
     <!-- More Blogs Section -->
     @if (!empty($MoreBlog))
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 pt-16 border-t border-slate-800/80">
-            <h3 class="text-2xl font-bold text-white mb-8">Related Publications</h3>
+            <h3 class="text-2xl font-bold text-white mb-8">{{ __('frontend.blog.related_publications') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach ($MoreBlog as $blog)
                     <a href="{{ url('our-blogs/' . $blog->slug_title) }}" class="group block rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 overflow-hidden transition-all duration-300 hover:-translate-y-1">

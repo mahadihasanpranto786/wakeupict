@@ -11,7 +11,7 @@
     <section class="relative py-12 border-b border-slate-800/80 bg-slate-900/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4">
-                <span>Course Blueprint</span>
+                <span>{{ __('frontend.academic.course_blueprint') }}</span>
             </div>
             <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-6 leading-tight">
                 {{ $courses->course_title }}
@@ -36,7 +36,7 @@
                             <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                                 <i class="fa fa-crosshairs text-base"></i>
                             </div>
-                            <h3 class="text-xl sm:text-2xl font-bold text-white">আপনার জন্য কোর্সটি কেন গুরুত্বপূর্ণ?</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold text-white">{{ __('frontend.academic.why_important') }}</h3>
                         </div>
                         <div class="text-slate-300 text-base leading-relaxed">
                             {!! $courses->importents !!}
@@ -46,8 +46,8 @@
                     <!-- Curriculum Accordion -->
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-2xl font-bold text-white">কোর্সের বিষয়বস্তু ও কারিকুলাম</h3>
-                            <span class="text-xs font-mono text-emerald-400 uppercase tracking-wider">{{ count($Courseitem) }} Modules</span>
+                            <h3 class="text-2xl font-bold text-white">{{ __('frontend.academic.curriculum_title') }}</h3>
+                            <span class="text-xs font-mono text-emerald-400 uppercase tracking-wider">{{ count($Courseitem) }} {{ __('frontend.academic.modules') }}</span>
                         </div>
 
                         <div class="space-y-4" id="curriculum-accordion">
@@ -79,14 +79,14 @@
                     <!-- Post-Course Career Potential & Impact -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
-                            <h4 class="text-lg font-bold text-white mb-3 text-emerald-400">কোর্স শেষ করার পর সুযোগ</h4>
+                            <h4 class="text-lg font-bold text-white mb-3 text-emerald-400">{{ __('frontend.academic.career_scope') }}</h4>
                             <div class="text-slate-400 text-sm leading-relaxed">
                                 {!! $courses->future_of_this_course !!}
                             </div>
                         </div>
 
                         <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
-                            <h4 class="text-lg font-bold text-white mb-3 text-cyan-400">{{ $courses->course_title }} এর ভবিষ্যৎ</h4>
+                            <h4 class="text-lg font-bold text-white mb-3 text-cyan-400">{{ $courses->course_title }} {{ __('frontend.academic.future_scope') }}</h4>
                             <div class="text-slate-400 text-sm leading-relaxed">
                                 {!! $courses->possibilities_of_this_course !!}
                             </div>
@@ -105,14 +105,14 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                             <div class="absolute bottom-3 left-3">
                                 <span class="px-2.5 py-1 rounded-md bg-emerald-500/90 text-slate-950 font-mono font-bold text-xs">
-                                    Admissions Open
+                                    {{ __('frontend.academic.admissions_open') }}
                                 </span>
                             </div>
                         </div>
 
                         <!-- Price Highlight -->
                         <div class="mb-6 pb-6 border-b border-slate-800">
-                            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block">কোর্স ফি (Tuition)</span>
+                            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 block">{{ __('frontend.academic.tuition_fee') }}</span>
                             <div class="text-3xl font-extrabold font-mono text-white tracking-tight mt-1">
                                 ৳ {{ $courses->price }} <span class="text-sm font-normal text-emerald-400">BDT</span>
                             </div>
@@ -122,15 +122,15 @@
                         <ul class="space-y-4 text-sm mb-8">
                             <li class="flex items-center justify-between text-slate-300">
                                 <span class="flex items-center gap-2 text-slate-400">
-                                    <i class="fa fa-calendar text-emerald-400"></i> সময়কাল:
+                                    <i class="fa fa-calendar text-emerald-400"></i> {{ __('frontend.academic.duration') }}:
                                 </span>
                                 <span class="font-semibold text-white font-mono">{{ $courses->time_line }}</span>
                             </li>
                             <li class="flex items-center justify-between text-slate-300">
                                 <span class="flex items-center gap-2 text-slate-400">
-                                    <i class="fa fa-users text-emerald-400"></i> ব্যাচ শিক্ষার্থী:
+                                    <i class="fa fa-users text-emerald-400"></i> {{ __('frontend.academic.students_per_batch') }}:
                                 </span>
-                                <span class="font-semibold text-white font-mono">{{ $courses->student_quantity }} জন</span>
+                                <span class="font-semibold text-white font-mono">{{ $courses->student_quantity }} {{ __('frontend.academic.persons') }}</span>
                             </li>
 
                             @php
@@ -139,7 +139,7 @@
                             @foreach ($course_members as $member)
                                 <li class="flex items-center justify-between text-slate-300">
                                     <span class="flex items-center gap-2 text-slate-400">
-                                        <i class="fa fa-user-circle text-emerald-400"></i> প্রশিক্ষক:
+                                        <i class="fa fa-user-circle text-emerald-400"></i> {{ __('frontend.academic.instructors') }}:
                                     </span>
                                     <span class="font-semibold text-white">{{ App\User::find($member->member_id)->name }}</span>
                                 </li>
@@ -156,7 +156,7 @@
                         <!-- Direct Enrollment CTA Button -->
                         <a href="{{ url('training/' . $courses->course_slug . '/student-registration') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
                             <i class="fa fa-graduation-cap"></i>
-                            <span>Register For This Course</span>
+                            <span>{{ __('frontend.academic.register_btn') }}</span>
                         </a>
 
                     </div>
@@ -172,8 +172,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between mb-12">
                     <div>
-                        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-2">Explore Next</div>
-                        <h3 class="text-2xl sm:text-3xl font-bold text-white">Other Courses at Wake Up ICT</h3>
+                        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-2">{{ __('frontend.academic.explore_next') }}</div>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white">{{ __('frontend.academic.other_courses') }}</h3>
                     </div>
                 </div>
 

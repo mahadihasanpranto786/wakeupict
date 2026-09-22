@@ -10,13 +10,13 @@
     <!-- Header Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4">
-            <span>Knowledge & Perspectives</span>
+            <span>{{ __('frontend.blog.badge') }}</span>
         </div>
         <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-            Latest News & Insights
+            {{ __('frontend.blog.title') }}
         </h1>
         <p class="text-slate-400 text-base sm:text-lg max-w-2xl">
-            Thought leadership, technology trends, and updates from the Wake Up ICT engineering and academic ecosystem.
+            {{ __('frontend.blog.sub') }}
         </p>
     </div>
 
@@ -37,7 +37,7 @@
                                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
                                         <div class="absolute top-4 left-4">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-mono font-bold tracking-wider uppercase">
-                                                Featured Insight
+                                                {{ __('frontend.blog.featured_insight') }}
                                             </span>
                                         </div>
                                     </div>
@@ -54,7 +54,7 @@
                                             {!! Str::limit(strip_tags($blog->short_description), 160) !!}
                                         </div>
                                         <div class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold group-hover:translate-x-1 transition-transform">
-                                            <span>Read Full Story</span>
+                                            <span>{{ __('frontend.blog.read_full_story') }}</span>
                                             <i class="fa fa-arrow-right text-[10px]"></i>
                                         </div>
                                     </div>
@@ -78,7 +78,7 @@
                                             {!! Str::limit(strip_tags($blog->short_description), 80) !!}
                                         </div>
                                         <div class="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold mt-auto">
-                                            <span>Read</span>
+                                            <span>{{ __('frontend.blog.read') }}</span>
                                             <i class="fa fa-arrow-right text-[9px]"></i>
                                         </div>
                                     </div>

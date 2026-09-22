@@ -18,7 +18,7 @@
                     @if (!empty($about->assign_stacks) && count($about->assign_stacks) > 0)
                         <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80">
                             <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-4">
-                                Technology Stack & Specialization:
+                                {{ __('frontend.about.tech_stacks') }}
                             </h4>
                             <ul class="flex flex-wrap gap-2.5">
                                 @foreach ($about->assign_stacks as $stack)
@@ -35,7 +35,7 @@
                 <!-- Right: Bio & Designation (Cols 7) -->
                 <div class="md:col-span-7 flex flex-col">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4 w-fit">
-                        <span>Verified Specialist</span>
+                        <span>{{ __('frontend.about.verified_specialist') }}</span>
                     </div>
 
                     <h1 class="text-3xl sm:text-5xl font-extrabold text-white mb-2 leading-tight">
@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="border-t border-slate-800/80 pt-6">
-                            <h3 class="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold mb-3">Executive Summary</h3>
+                            <h3 class="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold mb-3">{{ __('frontend.about.executive_summary') }}</h3>
                             <div class="text-slate-300 text-sm sm:text-base leading-relaxed space-y-4">
                                 {!! $about->singleAboutDetail->description !!}
                             </div>
@@ -75,7 +75,7 @@
             <div class="rounded-3xl bg-slate-900/60 border border-slate-800/80 p-8 sm:p-12 backdrop-blur-xl">
                 <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                     <i class="fa fa-code-fork text-emerald-400"></i>
-                    <span>Key Engineering Projects</span>
+                    <span>{{ __('frontend.about.key_projects') }}</span>
                 </h2>
 
                 <div class="space-y-6">

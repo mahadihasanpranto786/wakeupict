@@ -22,11 +22,7 @@ class HomeController extends Controller
 {
     function index()
     {
-        if(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $UserIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $UserIP = $_SERVER['REMOTE_ADDR'];
-        }
+        $UserIP = request()->ip() ?? ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
 
         date_default_timezone_set("Asia/Dhaka");
         $timeDate= date("Y-m-d h:i:sa");

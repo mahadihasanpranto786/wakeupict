@@ -4,7 +4,7 @@
     <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
         <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
             <i class="fa fa-folder-open-o"></i>
-            <span>Categories</span>
+            <span>{{ __('frontend.blog.categories') }}</span>
         </h4>
         <ul class="space-y-3">
             @foreach ($blogCategory as $category)
@@ -30,7 +30,7 @@
     <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
         <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
             <i class="fa fa-clock-o"></i>
-            <span>Recent Posts</span>
+            <span>{{ __('frontend.blog.recent_posts') }}</span>
         </h4>
         <ul class="space-y-4">
             @foreach ($resentBlogs as $blog)
@@ -52,7 +52,7 @@
     <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
         <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
             <i class="fa fa-archive"></i>
-            <span>Archives</span>
+            <span>{{ __('frontend.blog.archives') }}</span>
         </h4>
         <ul class="space-y-3">
             <li>

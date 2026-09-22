@@ -171,8 +171,8 @@
                         <i class="fa fa-users text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Elite Engineering Core</h4>
-                        <p class="text-xs text-slate-400 mt-1">Handcrafted talent pipeline</p>
+                        <h4 class="text-sm font-semibold text-white">{{ __('frontend.home.core_1_title') }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">{{ __('frontend.home.core_1_sub') }}</p>
                     </div>
                 </div>
 
@@ -181,8 +181,8 @@
                         <i class="fa fa-shield text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Enterprise Scalability</h4>
-                        <p class="text-xs text-slate-400 mt-1">Zero-downtime architecture</p>
+                        <h4 class="text-sm font-semibold text-white">{{ __('frontend.home.core_2_title') }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">{{ __('frontend.home.core_2_sub') }}</p>
                     </div>
                 </div>
 
@@ -191,8 +191,8 @@
                         <i class="fa fa-trophy text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Award-Winning Quality</h4>
-                        <p class="text-xs text-slate-400 mt-1">National recognition in ICT</p>
+                        <h4 class="text-sm font-semibold text-white">{{ __('frontend.home.core_3_title') }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">{{ __('frontend.home.core_3_sub') }}</p>
                     </div>
                 </div>
             </div>
@@ -208,7 +208,7 @@
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div>
                         <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">
-                            {{ app_setting('portfolio_header_badge', 'Featured Deployments') }}
+                            {{ app_setting('portfolio_header_badge', __('frontend.home.featured_deployments')) }}
                         </div>
                         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
                             {{ app_setting('portfolio_header_title', $nationalWorkHeader->title ?? 'National Digital Engineering') }}
@@ -239,7 +239,7 @@
                                     <div class="absolute top-4 left-4">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 border border-slate-700 text-xs font-mono text-brand-primary">
                                             <i class="{{ $project->logo }} text-xs"></i>
-                                            <span>Case Study</span>
+                                            <span>{{ __('frontend.home.case_study') }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -253,7 +253,7 @@
                                         {!! Str::limit(strip_tags($project->description), $isFeatured ? 140 : 90) !!}
                                     </div>
                                     <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-brand-primary font-semibold group-hover:translate-x-1 transition-transform">
-                                        <span>Examine Architecture</span>
+                                        <span>{{ __('frontend.home.examine_architecture') }}</span>
                                         <i class="fa fa-arrow-right text-[10px]"></i>
                                     </div>
                                 </div>
@@ -274,13 +274,13 @@
                 
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div>
-                        <div class="text-xs font-mono uppercase tracking-widest text-brand-cyan font-semibold mb-3">Cross-Border Impact</div>
+                        <div class="text-xs font-mono uppercase tracking-widest text-brand-cyan font-semibold mb-3">{{ __('frontend.home.cross_border') }}</div>
                         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-                            {{ $internationalProjectHeader->title ?? 'Global Engineering Footprint' }}
+                            {{ $internationalProjectHeader->title ?? __('frontend.home.international_title') }}
                         </h2>
                     </div>
                     <div class="max-w-md text-slate-400 text-sm leading-relaxed">
-                        {!! $internationalProjectHeader->description ?? 'Collaborating with overseas partners on enterprise-grade software delivery.' !!}
+                        {!! $internationalProjectHeader->description ?? __('frontend.home.international_sub') !!}
                     </div>
                 </div>
 
@@ -298,9 +298,9 @@
                                 
                                 <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
                                     <div>
-                                        <span class="text-xs font-mono uppercase tracking-widest text-brand-cyan block mb-1">International Project</span>
+                                        <span class="text-xs font-mono uppercase tracking-widest text-brand-cyan block mb-1">{{ __('frontend.home.international_badge') }}</span>
                                         <h4 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
-                                            View Enterprise Solution
+                                            {{ __('frontend.home.view_enterprise_solution') }}
                                         </h4>
                                     </div>
                                     <div class="w-10 h-10 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-brand-cyan group-hover:bg-brand-cyan group-hover:text-slate-950 transition-all duration-300">
@@ -322,12 +322,12 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="text-center max-w-3xl mx-auto mb-16">
-                    <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">Regional Footprint</div>
+                    <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">{{ __('frontend.home.regional_footprint') }}</div>
                     <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4">
-                        {{ $localProjectHeader->title ?? 'Local Innovation Initiatives' }}
+                        {{ $localProjectHeader->title ?? __('frontend.home.local_innovation') }}
                     </h2>
                     <div class="text-slate-400 text-sm">
-                        {!! $localProjectHeader->description ?? 'Empowering our regional technology ecosystem through continuous high-grade implementations.' !!}
+                        {!! $localProjectHeader->description ?? __('frontend.home.local_sub') !!}
                     </div>
                 </div>
 
@@ -356,13 +356,13 @@
                 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
                     <div class="lg:col-span-6">
-                        <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">Active R&D Pipelines</div>
+                        <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">{{ __('frontend.home.active_rd') }}</div>
                         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-                            {{ $developmentProjectHeader->title ?? 'Ongoing Innovations' }}
+                            {{ $developmentProjectHeader->title ?? __('frontend.home.ongoing_innovations') }}
                         </h2>
                     </div>
                     <div class="lg:col-span-6 text-slate-400 text-base leading-relaxed">
-                        {!! $developmentProjectHeader->description ?? 'Explore what our advanced engineering cohorts and lab teams are currently deploying.' !!}
+                        {!! $developmentProjectHeader->description ?? __('frontend.home.ongoing_sub') !!}
                     </div>
                 </div>
 
@@ -388,7 +388,7 @@
                                         {!! Str::limit(strip_tags($project->description), 100) !!}
                                     </p>
                                     <a href="{{ !empty($blog_slug) ? url('our-blogs/' . $blog_slug) : '#' }}" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-brand-primary font-semibold group-hover:translate-x-1 transition-transform">
-                                        <span>Learn More</span>
+                                        <span>{{ __('frontend.home.learn_more') }}</span>
                                         <i class="fa fa-arrow-right text-[10px]"></i>
                                     </a>
                                 </div>
@@ -406,7 +406,7 @@
         <div class="absolute inset-0 bg-gradient-to-r from-brand-primary/10 via-transparent to-brand-cyan/10 pointer-events-none"></div>
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <span class="inline-block px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/30 text-brand-primary font-mono text-xs uppercase tracking-widest mb-4">
-                Enterprise Partnerships
+                {{ __('frontend.home.enterprise_partnerships') }}
             </span>
             <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-6">
                 {{ app_setting('cta_banner_title', __('frontend.sections.cta_title')) }}

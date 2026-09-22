@@ -122,23 +122,23 @@
                 <ul class="space-y-3 text-sm text-slate-400">
                     <li class="flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                        <span>Enterprise Software Architecture</span>
+                        <span>{{ __('frontend.footer.track_1') }}</span>
                     </li>
                     <li class="flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                        <span>Full-Stack Cloud & DevOps</span>
+                        <span>{{ __('frontend.footer.track_2') }}</span>
                     </li>
                     <li class="flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                        <span>Data Intelligence & Machine Learning</span>
+                        <span>{{ __('frontend.footer.track_3') }}</span>
                     </li>
                     <li class="flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                        <span>Cybersecurity Operations</span>
+                        <span>{{ __('frontend.footer.track_4') }}</span>
                     </li>
                     <li class="flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                        <span>Modern UI/UX Product Design</span>
+                        <span>{{ __('frontend.footer.track_5') }}</span>
                     </li>
                 </ul>
             </div>
@@ -151,7 +151,7 @@
                 <div class="space-y-4 text-sm text-slate-400">
                     <div class="flex items-start gap-3">
                         <i class="fa fa-map-marker text-brand-primary mt-1"></i>
-                        <span>{{ app_setting('contact_address', 'Nannu Tower, 2nd Floor, Panna Chatter, Rajbari, Bangladesh') }}</span>
+                        <span>{{ app_setting('contact_address', App::getLocale() == 'bn' ? 'নান্নু টাওয়ার (৩য় তলা), পান্না চত্বর, রাজবাড়ী, বাংলাদেশ' : 'Nannu Tower, 2nd Floor, Panna Chatter, Rajbari, Bangladesh') }}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fa fa-envelope text-brand-primary"></i>
@@ -177,9 +177,9 @@
             @endphp
             <p>{{ app_setting('footer_copyright', "© {$currentYear} Wake Up ICT. " . __('frontend.footer.rights')) }}</p>
             <div class="flex items-center gap-6">
-                <span>Enterprise Technology & Consulting</span>
+                <span>{{ __('frontend.footer.sub_footer_1') }}</span>
                 <span class="w-1 h-1 rounded-full bg-slate-700"></span>
-                <span>2026 Modern Architecture</span>
+                <span>{{ __('frontend.footer.sub_footer_2') }}</span>
             </div>
         </div>
     </div>

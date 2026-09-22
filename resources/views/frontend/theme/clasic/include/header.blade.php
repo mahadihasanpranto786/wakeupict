@@ -45,9 +45,9 @@
             <div class="hidden lg:flex items-center gap-2.5">
                 <!-- Global Theme Switcher Dropdown Button -->
                 <div class="relative">
-                    <button type="button" id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-mono text-slate-300 hover:text-white transition-colors focus:outline-none" title="Switch Theme (Dark / Light / Dynamic)">
+                    <button type="button" id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-mono text-slate-300 hover:text-white transition-colors focus:outline-none" title="Switch Theme (Light / Dark / Dynamic)">
                         <span id="theme-icon-dark" class="hidden items-center gap-1.5"><i class="fa fa-moon-o text-brand-primary"></i> Dark</span>
-                        <span id="theme-icon-light" class="hidden items-center gap-1.5"><i class="fa fa-sun-o text-amber-400"></i> Light</span>
+                        <span id="theme-icon-light" class="flex items-center gap-1.5"><i class="fa fa-sun-o text-amber-400"></i> Light</span>
                         <span id="theme-icon-custom" class="hidden items-center gap-1.5"><i class="fa fa-magic text-brand-cyan"></i> Dynamic</span>
                         <i class="fa fa-angle-down text-[10px] text-slate-500 ml-0.5"></i>
                     </button>
@@ -202,14 +202,14 @@
     }
 
     function cycleThemeMobile() {
-        var cur = localStorage.getItem('theme_mode') || 'dark';
-        if (cur === 'dark') setAppTheme('light');
-        else if (cur === 'light') setAppTheme('custom');
-        else setAppTheme('dark');
+        var cur = localStorage.getItem('theme_mode') || 'light';
+        if (cur === 'light') setAppTheme('dark');
+        else if (cur === 'dark') setAppTheme('custom');
+        else setAppTheme('light');
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        var curTheme = localStorage.getItem('theme_mode') || 'dark';
+        var curTheme = localStorage.getItem('theme_mode') || 'light';
         updateThemeUI(curTheme);
 
         var toggleBtn = document.getElementById('theme-toggle-btn');

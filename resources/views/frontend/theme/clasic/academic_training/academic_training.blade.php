@@ -21,7 +21,7 @@
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-6 backdrop-blur-md">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Industry-Grade Curriculum</span>
+                    <span>{{ __('frontend.academic.curriculum_badge') }}</span>
                 </div>
                 
                 <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
@@ -38,7 +38,7 @@
         @if (!empty($banner->body_title))
             <section class="py-16 sm:py-20 relative border-b border-slate-800/80 bg-slate-900/30">
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-                    <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">Our Pedagogical Framework</div>
+                    <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-3">{{ __('frontend.academic.pedagogy_badge') }}</div>
                     <h2 class="text-2xl sm:text-4xl font-bold text-white mb-6">
                         {{ $banner->body_title }}
                     </h2>
@@ -57,16 +57,16 @@
             <!-- Dynamic Filter Pills -->
             <div class="flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-6 mb-12 sm:mb-16 scrollbar-none">
                 <button type="button" class="course-filter-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase bg-emerald-500 text-slate-950 font-semibold transition-all">
-                    All Tracks
+                    {{ __('frontend.academic.filter_all') }}
                 </button>
                 <button type="button" class="course-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-all">
-                    Engineering
+                    {{ __('frontend.academic.filter_engineering') }}
                 </button>
                 <button type="button" class="course-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-all">
-                    Cloud & Cyber
+                    {{ __('frontend.academic.filter_cloud') }}
                 </button>
                 <button type="button" class="course-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-all">
-                    Product & UI
+                    {{ __('frontend.academic.filter_product') }}
                 </button>
             </div>
 
@@ -89,7 +89,7 @@
                                 
                                 <div class="absolute top-4 left-4">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 border border-emerald-500/30 text-xs font-mono text-emerald-400">
-                                        <span>Track {{ sprintf('%02d', $index + 1) }}</span>
+                                        <span>{{ __('frontend.academic.track') }} {{ sprintf('%02d', $index + 1) }}</span>
                                     </span>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                             <!-- Course Details Body -->
                             <div class="p-6 sm:p-8 flex flex-col flex-grow">
                                 <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-2">
-                                    Academic Training
+                                    {{ __('frontend.academic.academic_training') }}
                                 </div>
 
                                 <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">
@@ -111,14 +111,14 @@
                                 <!-- Card Footer: Fee & Action -->
                                 <div class="pt-6 border-t border-slate-800/80 flex items-center justify-between mt-auto">
                                     <div>
-                                        <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 block">Tuition Fee</span>
+                                        <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 block">{{ __('frontend.academic.tuition_fee') }}</span>
                                         <div class="text-lg sm:text-xl font-bold font-mono text-white tracking-tight">
                                             {{ $content->price }} <span class="text-xs font-normal text-emerald-400">BDT</span>
                                         </div>
                                     </div>
 
                                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold tracking-wider uppercase bg-slate-800/80 group-hover:bg-emerald-500 text-slate-200 group-hover:text-slate-950 border border-slate-700/80 group-hover:border-emerald-500 transition-all duration-300">
-                                        <span>View Syllabus</span>
+                                        <span>{{ __('frontend.academic.view_syllabus') }}</span>
                                         <i class="fa fa-arrow-right text-[10px]"></i>
                                     </div>
                                 </div>
