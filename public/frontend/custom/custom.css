@@ -43,3 +43,12 @@
     font-style: normal;
     font-weight: normal;
   }
+
+/* Bangla Global Font Definition */
+html[lang="bn"],
+html[lang="bn"] body,
+[lang="bn"],
+.font-bangla,
+.bangla-text {
+    font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
+}

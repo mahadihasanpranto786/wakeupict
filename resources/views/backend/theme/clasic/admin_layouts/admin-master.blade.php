@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ App::getLocale() }}">
 
 <head>
     <meta charset="utf-8">
@@ -25,10 +25,10 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Enterprise Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+    <!-- Enterprise Fonts: Plus Jakarta Sans, Inter, JetBrains Mono, Noto Sans Bengali, Source Sans Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- AdminLTE Core (kept intact for JS layout engine) -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -67,6 +67,19 @@
         .main-header, nav.main-header {
             background-color: rgba(4,10,21,0.97) !important;
             background: rgba(4,10,21,0.97) !important;
+        }
+
+        /* Bangla Global Font Styles */
+        html[lang="bn"],
+        html[lang="bn"] body,
+        html[lang="bn"] .wrapper,
+        html[lang="bn"] .content-wrapper,
+        html[lang="bn"] .main-header,
+        html[lang="bn"] .main-sidebar,
+        [lang="bn"],
+        .font-bangla,
+        .bangla-text {
+            font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
         }
     </style>
 

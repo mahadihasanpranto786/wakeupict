@@ -110,3 +110,14 @@
     background: radial-gradient(circle at 70% 50%, rgba(19,21,22,0.4) 0%, rgba(19,21,22,0.95) 100%), 
                 linear-gradient(to right, rgba(19,21,22,1) 0%, rgba(19,21,22,0.7) 40%, rgba(19,21,22,0.3) 100%);
 }
+
+/* Light Mode Overrides */
+html.light .circuit-path {
+    stroke: rgba(0, 0, 0, 0.12);
+}
+html.light .micro-stats-ticker {
+    border-top-color: #e2e8f0;
+}
+html.light .stat-label {
+    color: #64748b;
+}

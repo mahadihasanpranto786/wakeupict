@@ -46,13 +46,24 @@
     <link rel="stylesheet" href="{{ asset('public/admin/plugins/daterangepicker/daterangepicker.css') }}">
     <!-- summernote -->
     <link rel="stylesheet" href="{{ asset('public/admin/plugins/summernote/summernote-bs4.css') }}">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Google Fonts: Source Sans Pro, Noto Sans Bengali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
     {{-- tostr notification --}}
     <link rel="stylesheet" href="{{ URL::asset('admin/css/toastr/toastr.min.css') }}">
     <!-- custom css -->
     <link rel="stylesheet" href="{{ asset('public/admin/dist/css/style.css') }}">
 
+    <style>
+        html[lang="bn"],
+        html[lang="bn"] body,
+        [lang="bn"],
+        .font-bangla,
+        .bangla-text {
+            font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
+        }
+    </style>
 </head>
 
 <body class="hold-transition login-page">

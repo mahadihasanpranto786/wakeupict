@@ -138,5 +138,22 @@
         border-color: #10b981;
         color: #10b981;
     }
+
+    /* Light Mode Pagination */
+    html.light .dark-pagination .page-item .page-link {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+    }
+    html.light .dark-pagination .page-item.active .page-link {
+        background-color: #10b981;
+        color: #ffffff;
+        border-color: #10b981;
+    }
+    html.light .dark-pagination .page-item .page-link:hover {
+        border-color: #10b981;
+        color: #10b981;
+        background-color: #f8fafc;
+    }
 </style>
 @endsection

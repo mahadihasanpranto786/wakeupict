@@ -23,10 +23,10 @@
         })();
     </script>
 
-    <!-- Fonts: Plus Jakarta Sans, Inter, JetBrains Mono, Hind Siliguri -->
+    <!-- Fonts: Plus Jakarta Sans, Inter, JetBrains Mono, Noto Sans Bengali, Source Sans Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- Dynamic Theme Palette CSS Variables -->
     <style>
@@ -41,8 +41,17 @@
         body {
             background-color: #030712;
             color: #f1f5f9;
-            font-family: {{ App::getLocale() == 'bn' ? "'Hind Siliguri', 'Plus Jakarta Sans', sans-serif" : "'Plus Jakarta Sans', 'Inter', sans-serif" }};
+            font-family: {{ App::getLocale() == 'bn' ? '"Noto Sans Bengali", "Source Sans Pro", sans-serif' : "'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Source Sans Pro', sans-serif" }};
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Bangla Global Font Styles */
+        html[lang="bn"],
+        html[lang="bn"] body,
+        [lang="bn"],
+        .font-bangla,
+        .bangla-text {
+            font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
         }
 
         /* Utility Theme Classes */
@@ -62,59 +71,296 @@
             background-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.12);
         }
 
-        /* Light Mode Enterprise Overrides */
+        /* =========================================================
+           ENTERPRISE LIGHT MODE SYSTEM (Universal for All Pages)
+           ========================================================= */
+        html.light,
         html.light body {
             background-color: #f8fafc !important;
             color: #0f172a !important;
         }
+
+        /* Base Page Backgrounds & Wrappers */
         html.light .bg-slate-950,
-        html.light .bg-slate-900 {
+        html.light div.bg-slate-950,
+        html.light section.bg-slate-950,
+        html.light main.bg-slate-950,
+        html.light [class*="min-h-screen"].bg-slate-950 {
+            background-color: #f8fafc !important;
+        }
+
+        /* Subtle Section Strips & Dividers */
+        html.light section.bg-slate-900\/20,
+        html.light section.bg-slate-900\/30,
+        html.light section.bg-slate-900\/40,
+        html.light section[class*="bg-slate-900/"] {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Cards, Panels, Articles, Sidebar Widgets & Dropdowns */
+        html.light a[class*="bg-slate-900"],
+        html.light div[class*="bg-slate-900"],
+        html.light article[class*="bg-slate-900"],
+        html.light [class*="rounded-2xl"][class*="bg-slate-900"],
+        html.light [class*="rounded-xl"][class*="bg-slate-900"],
+        html.light [class*="bg-slate-900/"],
+        html.light .bg-slate-900,
+        html.light [class*="bg-brand-surface"],
+        html.light [class*="bg-brand-card"],
+        html.light [class*="bg-brand-dark"] {
             background-color: #ffffff !important;
-        }
-        html.light .bg-slate-900\/60,
-        html.light .bg-slate-900\/80,
-        html.light .bg-slate-900\/40,
-        html.light .bg-slate-900\/30,
-        html.light .bg-slate-900\/20,
-        html.light .bg-slate-950\/80,
-        html.light .bg-slate-950\/90,
-        html.light .bg-slate-950\/75 {
-            background-color: rgba(255, 255, 255, 0.94) !important;
-        }
-        html.light .border-slate-800,
-        html.light .border-slate-700,
-        html.light .border-slate-800\/80,
-        html.light .border-slate-800\/90,
-        html.light .border-slate-800\/60 {
             border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
         }
-        html.light .text-white {
-            color: #0f172a !important;
+
+        /* Card Hover Effects */
+        html.light a[class*="bg-slate-900"]:hover,
+        html.light div[class*="hover:-translate-y-1"]:hover {
+            border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5) !important;
+            box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05) !important;
         }
-        html.light .text-slate-300 {
+
+        /* Media / Image Container Placeholders */
+        html.light .overflow-hidden.bg-slate-950,
+        html.light [class*="overflow-hidden"][class*="bg-slate-950"] {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Soft Gradient Overlays on Images */
+        html.light .from-slate-950 {
+            --tw-gradient-from: transparent !important;
+        }
+        html.light .via-slate-950\/30,
+        html.light .via-slate-950\/20,
+        html.light .via-slate-950\/40 {
+            --tw-gradient-stops: transparent, transparent !important;
+        }
+        html.light .from-slate-950\/90,
+        html.light .from-slate-950\/80,
+        html.light .from-slate-950\/60 {
+            --tw-gradient-from: rgba(15, 23, 42, 0.45) !important;
+        }
+
+        /* Secondary Badges, Chips, Track Pills & Counts */
+        html.light [class*="bg-slate-800"],
+        html.light .bg-slate-800,
+        html.light [class*="bg-slate-850"],
+        html.light [class*="bg-slate-950/80"],
+        html.light [class*="bg-slate-950/90"] {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
             color: #334155 !important;
         }
-        html.light .text-slate-400 {
+
+        /* Interactive Hover on Secondary Elements */
+        html.light [class*="hover:bg-slate-800"]:hover,
+        html.light [class*="hover:bg-slate-900"]:hover {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Universal Borders */
+        html.light [class*="border-slate-800"],
+        html.light [class*="border-slate-700"],
+        html.light [class*="border-slate-900"],
+        html.light [class*="border-brand-border"],
+        html.light .border-slate-800,
+        html.light .border-slate-700 {
+            border-color: #e2e8f0 !important;
+        }
+        html.light [class*="hover:border-slate-700"]:hover,
+        html.light [class*="hover:border-slate-800"]:hover {
+            border-color: #cbd5e1 !important;
+        }
+
+        /* Typography: Headings & Strong Elements */
+        html.light h1,
+        html.light h2,
+        html.light h3,
+        html.light h4,
+        html.light h5,
+        html.light h6,
+        html.light .text-white,
+        html.light [class*="text-white"],
+        html.light .text-slate-100,
+        html.light [class*="text-slate-100"] {
+            color: #0f172a !important;
+        }
+
+        /* Typography: High-Readability Body & Descriptions */
+        html.light .text-slate-200,
+        html.light [class*="text-slate-200"] {
+            color: #1e293b !important;
+        }
+        html.light .text-slate-300,
+        html.light [class*="text-slate-300"] {
+            color: #334155 !important;
+        }
+
+        /* Typography: Metadata, Captions, Timestamps */
+        html.light .text-slate-400,
+        html.light [class*="text-slate-400"],
+        html.light .text-slate-500,
+        html.light [class*="text-slate-500"] {
             color: #64748b !important;
         }
-        html.light .text-slate-500 {
+
+        /* Accent & Emerald text: Adjusted for White Card Contrast */
+        html.light .text-emerald-400,
+        html.light [class*="text-emerald-400"],
+        html.light .text-brand-accent,
+        html.light [class*="text-brand-accent"] {
+            color: #059669 !important;
+        }
+        html.light .text-cyan-400,
+        html.light [class*="text-cyan-400"] {
+            color: #0891b2 !important;
+        }
+        html.light .text-blue-400,
+        html.light [class*="text-blue-400"] {
+            color: #2563eb !important;
+        }
+
+        /* Hover Text Transitions */
+        html.light [class*="group"]:hover [class*="group-hover:text-emerald-400"],
+        html.light [class*="group"]:hover [class*="group-hover:text-brand-primary"],
+        html.light [class*="hover:text-emerald-400"]:hover,
+        html.light [class*="hover:text-brand-primary"]:hover {
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light [class*="hover:text-white"]:hover,
+        html.light [class*="group"]:hover [class*="group-hover:text-white"] {
+            color: #0f172a !important;
+        }
+
+        /* Form Inputs & Textarea */
+        html.light input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
+        html.light textarea,
+        html.light select,
+        html.light .input--style-5 {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light input::placeholder,
+        html.light textarea::placeholder {
             color: #94a3b8 !important;
         }
-        html.light .bg-grid-mesh {
-            background-image: 
-                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+        html.light input:focus,
+        html.light textarea:focus {
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 0 0 2px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
         }
+
+        /* Header Navigation & Dropdowns */
+        html.light #main-header .rounded-2xl {
+            background-color: rgba(255, 255, 255, 0.94) !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06) !important;
+        }
+        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]) {
+            color: #475569 !important;
+        }
+        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):hover {
+            color: var(--brand-primary, #10b981) !important;
+            background-color: #f1f5f9 !important;
+        }
+        html.light #main-header a[class*="text-brand-primary"] {
+            color: var(--brand-primary, #10b981) !important;
+            background-color: #f1f5f9 !important;
+        }
+        html.light #theme-toggle-btn {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        html.light #theme-dropdown {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12) !important;
+        }
+        html.light #theme-dropdown button {
+            color: #334155 !important;
+        }
+        html.light #theme-dropdown button:hover {
+            background-color: #f1f5f9 !important;
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light #mobile-menu {
+            background-color: rgba(255, 255, 255, 0.98) !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15) !important;
+        }
+        html.light #mobile-menu .mobile-nav-link {
+            color: #1e293b !important;
+        }
+        html.light #mobile-menu .mobile-nav-link:hover {
+            background-color: #f1f5f9 !important;
+            color: var(--brand-primary, #10b981) !important;
+        }
+
+        /* Footer */
+        html.light footer.bg-slate-950,
+        html.light footer {
+            background-color: #ffffff !important;
+            border-top: 1px solid #e2e8f0 !important;
+        }
+        html.light footer .border-b,
+        html.light footer .border-t {
+            border-color: #e2e8f0 !important;
+        }
+        html.light footer a:not([class*="bg-brand-primary"]) {
+            color: #64748b !important;
+        }
+        html.light footer a:not([class*="bg-brand-primary"]):hover {
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light footer [class*="bg-slate-900"] {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        html.light footer [class*="bg-slate-900"]:hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-primary, #10b981) !important;
+        }
+
+        /* Pagination Controls */
+        html.light .dark-pagination .page-item .page-link,
+        html.light .pagination .page-link {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        html.light .dark-pagination .page-item.active .page-link,
+        html.light .pagination .page-item.active .page-link {
+            background-color: var(--brand-primary, #10b981) !important;
+            color: #030712 !important;
+            border-color: var(--brand-primary, #10b981) !important;
+            font-weight: bold;
+        }
+        html.light .dark-pagination .page-item .page-link:hover,
+        html.light .pagination .page-item .page-link:hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-primary, #10b981) !important;
+            background-color: #f8fafc !important;
+        }
+
+        /* Preloader */
         html.light #app-preloader {
             background-color: #ffffff !important;
         }
         html.light #app-preloader .preloader-text {
             color: #0f172a !important;
         }
-        html.light #main-header .rounded-2xl {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.07) !important;
+
+        /* Ambient Mesh Backgrounds in Light Mode */
+        html.light .bg-grid-mesh {
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+        }
+        html.light .hero-mesh-glow {
+            background: radial-gradient(circle at 50% 20%, rgba(var(--brand-primary-rgb, 16, 185, 129), 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, transparent 70%) !important;
         }
 
         /* Custom scrollbar */
@@ -179,8 +425,9 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        sans: {!! App::getLocale() == 'bn' ? '[\'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' : '[\'"Plus Jakarta Sans"\', \'Inter\', \'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' !!},
+                        display: {!! App::getLocale() == 'bn' ? '[\'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' : '[\'"Plus Jakarta Sans"\', \'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' !!},
+                        bangla: ['"Noto Sans Bengali"', '"Source Sans Pro"', 'sans-serif'],
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {

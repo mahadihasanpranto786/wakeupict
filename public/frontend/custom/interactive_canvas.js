@@ -9,10 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     nodes.forEach(node => {
         node.addEventListener('mouseenter', () => {
             const targetId = node.getAttribute('data-target');
+            const isLight = document.documentElement.classList.contains('light');
             
             // Dim all paths
             paths.forEach(p => {
-                p.style.stroke = 'rgba(255, 255, 255, 0.05)';
+                p.style.stroke = isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)';
                 p.classList.remove('active');
             });
 
@@ -24,9 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         node.addEventListener('mouseleave', () => {
+            const isLight = document.documentElement.classList.contains('light');
             // Reset all paths
             paths.forEach(p => {
-                p.style.stroke = 'rgba(255, 255, 255, 0.15)';
+                p.style.stroke = isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.15)';
                 p.classList.remove('active');
             });
         });

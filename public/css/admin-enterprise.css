@@ -7,7 +7,7 @@
    AdminLTE visual rule while keeping the JS layout engine intact.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap');
 
 /* =============================================
    ROOT TOKENS
@@ -34,13 +34,27 @@
   --adm-text-muted:  #64748b;
   --adm-text-dim:    #94a3b8;
 
-  --adm-font:        'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --adm-font:        'Inter', 'Plus Jakarta Sans', "Noto Sans Bengali", "Source Sans Pro", system-ui, sans-serif;
+  --adm-font-bn:     "Noto Sans Bengali", "Source Sans Pro", sans-serif;
   --adm-mono:        'JetBrains Mono', monospace;
 
   --adm-radius:      10px;
   --adm-sidebar-w:   260px;
   --adm-topbar-h:    56px;
   --adm-transition:  all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Bangla Global Font Override */
+html[lang="bn"],
+html[lang="bn"] body,
+html[lang="bn"] .wrapper,
+html[lang="bn"] .content-wrapper,
+html[lang="bn"] .main-header,
+html[lang="bn"] .main-sidebar,
+[lang="bn"],
+.font-bangla,
+.bangla-text {
+  font-family: var(--adm-font-bn) !important;
 }
 
 /* =============================================
