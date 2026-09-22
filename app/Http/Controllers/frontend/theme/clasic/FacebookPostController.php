@@ -25,37 +25,29 @@ class FacebookPostController extends Controller
         if ($isConfigured) {
             $cacheKey = 'facebook_page_posts_' . md5($pageId . $accessToken);
 
-            $cachedResult = Cache::remember($cacheKey, 1800, function () use ($pageId, $accessToken) {
-                try {
-                    $fields = 'id,message,created_time,full_picture,permalink_url,shares,reactions.summary(total_count),comments.summary(total_count)';
-                    $url = "https://graph.facebook.com/v19.0/{$pageId}/posts?fields={$fields}&limit=12&access_token={$accessToken}";
+            $cachedPosts = Cache::get($cacheKey);
 
-                    $ctx = stream_context_create([
-                        'http' => [
-                            'timeout' => 4,
-                            'ignore_errors' => true,
-                        ],
-                    ]);
-
-                    $res = @file_get_contents($url, false, $ctx);
-                    if ($res) {
-                        $json = json_decode($res, true);
-                        if (isset($json['data'])) {
-                            return ['success' => true, 'data' => $json['data']];
-                        } elseif (isset($json['error'])) {
-                            return ['success' => false, 'error' => $json['error']['message']];
-                        }
-                    }
-                } catch (\Exception $e) {
-                    return ['success' => false, 'error' => $e->getMessage()];
-                }
-                return ['success' => false, 'error' => 'Unable to connect to Facebook Graph API.'];
-            });
-
-            if ($cachedResult && $cachedResult['success']) {
-                $posts = $cachedResult['data'];
+            if ($cachedPosts !== null && is_array($cachedPosts) && !empty($cachedPosts)) {
+                $posts = $cachedPosts;
             } else {
-                $apiError = $cachedResult['error'] ?? 'Facebook Graph API configuration issue.';
+                $fields = 'id,message,created_time,full_picture,permalink_url,shares,reactions.summary(total_count),comments.summary(total_count)';
+                $url = "https://graph.facebook.com/v19.0/{$pageId}/posts?fields={$fields}&limit=12&access_token={$accessToken}";
+
+                $fetchResult = $this->fetchGraphApi($url);
+
+                if ($fetchResult['success']) {
+                    $json = json_decode($fetchResult['body'], true);
+                    if (isset($json['data'])) {
+                        $posts = $json['data'];
+                        Cache::put($cacheKey, $posts, 1800); // Cache successful posts for 30 minutes
+                    } elseif (isset($json['error'])) {
+                        $apiError = $json['error']['message'] ?? 'Unknown Facebook Graph API error.';
+                    } else {
+                        $apiError = 'Invalid response format from Facebook Graph API.';
+                    }
+                } else {
+                    $apiError = $fetchResult['error'];
+                }
             }
         }
 
@@ -111,4 +103,52 @@ class FacebookPostController extends Controller
             ],
         ];
     }
+
+    /**
+     * Fetch data from Facebook Graph API using cURL with fallback.
+     */
+    private function fetchGraphApi($url)
+    {
+        if (function_exists('curl_init')) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'WakeUpICT-App/1.0');
+
+            $res = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($res !== false) {
+                return ['success' => true, 'body' => $res, 'code' => $httpCode];
+            }
+
+            return ['success' => false, 'error' => 'cURL connection error: ' . ($curlError ?: 'Unknown error')];
+        }
+
+        // Fallback to file_get_contents if curl is unavailable
+        $ctx = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'ignore_errors' => true,
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
+
+        $res = @file_get_contents($url, false, $ctx);
+        if ($res !== false) {
+            return ['success' => true, 'body' => $res];
+        }
+
+        return ['success' => false, 'error' => 'Unable to connect to Facebook Graph API (allow_url_fopen or network restricted).'];
+    }
 }
+
