@@ -107,35 +107,48 @@
             <div class="card-body p-4">
                 <div class="row">
                     <!-- Metric 1 -->
-                    <div class="col-md-3 mb-3">
-                        <label class="text-white font-weight-bold mb-1">Stat 1 Value</label>
-                        <input type="text" name="stat1_value" class="form-control" value="{{ app_setting('stat1_value', '15,000+') }}" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat1_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat1_label', 'Trained Professionals', 'en') }}" placeholder="EN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat1_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat1_label', 'প্রশিক্ষণপ্রাপ্ত প্রফেশনাল', 'bn') }}" placeholder="BN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
+                    <div class="col-md-4 mb-3">
+                        <label class="text-white font-weight-bold mb-1">Stat 1 (Value & Labels)</label>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">EN Val</span></div>
+                            <input type="text" name="stat1_value[en]" class="form-control" value="{{ app_setting('stat1_value', '15,000+', 'en') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. 15,000+">
+                        </div>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">BN Val</span></div>
+                            <input type="text" name="stat1_value[bn]" class="form-control" value="{{ app_setting('stat1_value', '১৫,০০০+', 'bn') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. ১৫,০০০+">
+                        </div>
+                        <input type="text" name="stat1_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat1_label', 'Trained Professionals', 'en') }}" placeholder="EN Label: Trained Professionals" style="background: #0f172a; border-color: #334155; color: #fff;">
+                        <input type="text" name="stat1_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat1_label', 'প্রশিক্ষণপ্রাপ্ত প্রফেশনাল', 'bn') }}" placeholder="BN Label: প্রশিক্ষণপ্রাপ্ত প্রফেশনাল" style="background: #0f172a; border-color: #334155; color: #fff;">
                     </div>
 
                     <!-- Metric 2 -->
-                    <div class="col-md-3 mb-3">
-                        <label class="text-white font-weight-bold mb-1">Stat 2 Value</label>
-                        <input type="text" name="stat2_value" class="form-control" value="{{ app_setting('stat2_value', '250+') }}" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat2_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat2_label', 'Enterprise Deployments', 'en') }}" placeholder="EN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat2_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat2_label', 'সফল প্রজেক্ট ডেলিভারি', 'bn') }}" placeholder="BN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
+                    <div class="col-md-4 mb-3">
+                        <label class="text-white font-weight-bold mb-1">Stat 2 (Value & Labels)</label>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">EN Val</span></div>
+                            <input type="text" name="stat2_value[en]" class="form-control" value="{{ app_setting('stat2_value', '250+', 'en') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. 250+">
+                        </div>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">BN Val</span></div>
+                            <input type="text" name="stat2_value[bn]" class="form-control" value="{{ app_setting('stat2_value', '২৫০+', 'bn') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. ২৫০+">
+                        </div>
+                        <input type="text" name="stat2_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat2_label', 'Enterprise Deployments', 'en') }}" placeholder="EN Label: Enterprise Deployments" style="background: #0f172a; border-color: #334155; color: #fff;">
+                        <input type="text" name="stat2_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat2_label', 'সফল প্রজেক্ট ডেলিভারি', 'bn') }}" placeholder="BN Label: সফল প্রজেক্ট ডেলিভারি" style="background: #0f172a; border-color: #334155; color: #fff;">
                     </div>
 
                     <!-- Metric 3 -->
-                    <div class="col-md-3 mb-3">
-                        <label class="text-white font-weight-bold mb-1">Stat 3 Value</label>
-                        <input type="text" name="stat3_value" class="form-control" value="{{ app_setting('stat3_value', '98.5%') }}" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat3_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat3_label', 'Client Satisfaction', 'en') }}" placeholder="EN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat3_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat3_label', 'ক্লায়েন্ট সন্তুষ্টির হার', 'bn') }}" placeholder="BN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
-                    </div>
-
-                    <!-- Metric 4 -->
-                    <div class="col-md-3 mb-3">
-                        <label class="text-white font-weight-bold mb-1">Stat 4 Value</label>
-                        <input type="text" name="stat4_value" class="form-control" value="{{ app_setting('stat4_value', '50+') }}" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat4_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat4_label', 'Senior Tech Mentors', 'en') }}" placeholder="EN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
-                        <input type="text" name="stat4_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat4_label', 'অভিজ্ঞ টেক মেন্টর', 'bn') }}" placeholder="BN Label" style="background: #0f172a; border-color: #334155; color: #fff;">
+                    <div class="col-md-4 mb-3">
+                        <label class="text-white font-weight-bold mb-1">Stat 3 (Value & Labels)</label>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">EN Val</span></div>
+                            <input type="text" name="stat3_value[en]" class="form-control" value="{{ app_setting('stat3_value', '98.5%', 'en') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. 98.5%">
+                        </div>
+                        <div class="input-group mb-1">
+                            <div class="input-group-prepend"><span class="input-group-text text-muted" style="background:#1e293b; border-color:#334155; font-size:11px;">BN Val</span></div>
+                            <input type="text" name="stat3_value[bn]" class="form-control" value="{{ app_setting('stat3_value', '৯৮.৫%', 'bn') }}" style="background: #0f172a; border-color: #334155; color: #fff;" placeholder="e.g. ৯৮.৫%">
+                        </div>
+                        <input type="text" name="stat3_label[en]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat3_label', 'Client Satisfaction', 'en') }}" placeholder="EN Label: Client Satisfaction" style="background: #0f172a; border-color: #334155; color: #fff;">
+                        <input type="text" name="stat3_label[bn]" class="form-control form-control-sm mt-1" value="{{ app_setting('stat3_label', 'ক্লায়েন্ট সন্তুষ্টির হার', 'bn') }}" placeholder="BN Label: ক্লায়েন্ট সন্তুষ্টির হার" style="background: #0f172a; border-color: #334155; color: #fff;">
                     </div>
                 </div>
             </div>

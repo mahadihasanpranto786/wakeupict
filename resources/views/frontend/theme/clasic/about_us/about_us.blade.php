@@ -82,8 +82,8 @@
 
             <!-- Leadership / Chairman Card -->
             @if (!empty($chairmanSir->image))
-                <div class="max-w-md mx-auto mb-20">
-                    <div class="rounded-2xl bg-slate-900/80 border border-slate-800/90 p-8 text-center backdrop-blur-xl shadow-2xl hover:border-emerald-500/40 transition-all duration-300 group">
+                <div class="max-w-md mx-auto mb-20 reveal-on-scroll">
+                    <div class="card-interactive-glow rounded-2xl bg-slate-900/80 border border-slate-800/90 p-8 text-center backdrop-blur-xl shadow-2xl hover:border-emerald-500/40 transition-all duration-300 group">
                         <div class="relative w-36 h-36 mx-auto mb-6 rounded-full overflow-hidden border-4 border-slate-800 group-hover:border-emerald-500 transition-colors">
                             <img src="{{ URL::asset($chairmanSir->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $chairmanSir->image_alt }}">
                         </div>
@@ -96,7 +96,7 @@
             <!-- Core Team Grid (Grayscale to Color Cards) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
                 @foreach ($abouts as $index => $about)
-                    <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="group block rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 p-6 text-center backdrop-blur-md transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
+                    <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="group block rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 p-6 text-center backdrop-blur-md transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1 card-interactive-glow reveal-on-scroll stagger-{{ ($index % 4) + 1 }}">
                         <div class="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-2 border-slate-800 group-hover:border-emerald-400 transition-colors">
                             <img src="{{ URL::asset($about->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $about->image_alt }}">
                         </div>

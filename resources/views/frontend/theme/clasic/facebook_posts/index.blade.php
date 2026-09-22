@@ -73,7 +73,7 @@
                     $permalink = $post['permalink_url'] ?? 'https://facebook.com/' . $pageId;
                 @endphp
 
-                <article class="group flex flex-col h-full rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-brand-primary/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
+                <article class="card-interactive-glow reveal-on-scroll stagger-{{ ($loop->iteration % 3) + 1 }} group flex flex-col h-full rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-brand-primary/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
                     
                     <!-- Card Top Header -->
                     <div class="p-5 pb-3 flex items-center justify-between border-b border-slate-800/50">

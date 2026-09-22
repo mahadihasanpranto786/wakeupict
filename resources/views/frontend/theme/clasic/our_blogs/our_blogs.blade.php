@@ -30,13 +30,13 @@
                     @foreach ($blogs as $index => $blog)
                         @if ($index % 4 == 0)
                             <!-- 1: Featured Hero Post (Spans 3 Columns) -->
-                            <div class="col-span-1 md:col-span-3 group">
-                                <a href="{{ url('our-blogs/' . $blog->slug_title) }}" class="flex flex-col rounded-2xl bg-slate-900/70 border border-slate-800/80 hover:border-emerald-500/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
+                            <div class="col-span-1 md:col-span-3 group reveal-on-scroll">
+                                <a href="{{ url('our-blogs/' . $blog->slug_title) }}" class="card-interactive-glow flex flex-col rounded-2xl bg-slate-900/70 border border-slate-800/80 hover:border-emerald-500/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
                                     <div class="relative w-full h-72 sm:h-96 overflow-hidden bg-slate-950">
                                         <img src="{{ URL::asset($blog->blog_image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-95 group-hover:brightness-100" alt="{{ $blog->image_alt }}">
                                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
                                         <div class="absolute top-4 left-4">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-mono font-bold tracking-wider uppercase">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-mono font-bold tracking-wider uppercase animate-badge-float">
                                                 {{ __('frontend.blog.featured_insight') }}
                                             </span>
                                         </div>
@@ -62,8 +62,8 @@
                             </div>
                         @else
                             <!-- +3: Subsequent Editorial Cards (Spans 1 Column each) -->
-                            <div class="col-span-1 group">
-                                <a href="{{ url('our-blogs/' . $blog->slug_title) }}" class="flex flex-col h-full rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-emerald-500/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
+                            <div class="col-span-1 group reveal-on-scroll stagger-{{ ($index % 3) + 1 }}">
+                                <a href="{{ url('our-blogs/' . $blog->slug_title) }}" class="card-interactive-glow flex flex-col h-full rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-emerald-500/40 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1">
                                     <div class="relative w-full h-44 overflow-hidden bg-slate-950">
                                         <img src="{{ URL::asset($blog->blog_image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $blog->image_alt }}">
                                     </div>

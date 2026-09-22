@@ -29,8 +29,8 @@
                 <!-- Left: Headline & Editorial Value Proposition (Cols 7) -->
                 <div class="lg:col-span-7 flex flex-col justify-center text-left reveal-on-scroll">
                     
-                    <!-- Live Status Badge -->
-                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-brand-primary/30 text-brand-primary text-xs font-mono tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-sm">
+                    <!-- Live Status Badge with Floating Wave -->
+                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-brand-primary/30 text-brand-primary text-xs font-mono tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-sm animate-badge-float">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
@@ -38,9 +38,9 @@
                         <span>{{ app_setting('hero_badge', __('frontend.hero.badge')) }}</span>
                     </div>
 
-                    <!-- Kinetic Display Headline -->
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12] mb-6">
-                        {{ app_setting('hero_title', __('frontend.hero.title')) }}
+                    <!-- Kinetic Display Headline with Animated Gradient Shimmer -->
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.14] mb-6">
+                        <span class="text-gradient-animated">{{ app_setting('hero_title', __('frontend.hero.title')) }}</span>
                     </h1>
 
                     <!-- Editorial Manifesto / Subtitle -->
@@ -48,9 +48,9 @@
                         {{ app_setting('hero_subtitle', __('frontend.hero.subtitle')) }}
                     </p>
 
-                    <!-- High-Impact Dual CTAs -->
+                    <!-- High-Impact Dual CTAs with Shimmer Effect -->
                     <div class="flex flex-wrap items-center gap-4 mb-12">
-                        <a href="{{ route('academic-training') }}" class="inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                        <a href="{{ route('academic-training') }}" class="btn-shimmer inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
                             <span>{{ app_setting('hero_btn1_text', __('frontend.hero.explore_courses')) }}</span>
                             <i class="fa fa-arrow-right text-xs"></i>
                         </a>
@@ -61,10 +61,31 @@
                     </div>
 
                     <!-- Micro-Stats Ticker with Kinetic Number Animation -->
+                    @php
+                        $bnToEnMap = ['০'=>'0','১'=>'1','২'=>'2','৩'=>'3','৪'=>'4','৫'=>'5','৬'=>'6','৭'=>'7','৮'=>'8','৯'=>'9'];
+
+                        $stat1Raw = app_setting('stat1_value', (App::getLocale() == 'bn' ? '১৫,০০০+' : '15,000+'));
+                        $stat1Norm = strtr($stat1Raw, $bnToEnMap);
+                        preg_match('/([\d,.]+)/', $stat1Norm, $m1);
+                        $stat1Num = isset($m1[1]) ? str_replace(',', '', $m1[1]) : '15000';
+                        $stat1Suf = (strpos($stat1Raw, '+') !== false ? '+' : (strpos($stat1Raw, '%') !== false ? '%' : ''));
+
+                        $stat2Raw = app_setting('stat2_value', (App::getLocale() == 'bn' ? '২৫০+' : '250+'));
+                        $stat2Norm = strtr($stat2Raw, $bnToEnMap);
+                        preg_match('/([\d,.]+)/', $stat2Norm, $m2);
+                        $stat2Num = isset($m2[1]) ? str_replace(',', '', $m2[1]) : '250';
+                        $stat2Suf = (strpos($stat2Raw, '+') !== false ? '+' : (strpos($stat2Raw, '%') !== false ? '%' : ''));
+
+                        $stat3Raw = app_setting('stat3_value', (App::getLocale() == 'bn' ? '৯৮.৫%' : '98.5%'));
+                        $stat3Norm = strtr($stat3Raw, $bnToEnMap);
+                        preg_match('/([\d,.]+)/', $stat3Norm, $m3);
+                        $stat3Num = isset($m3[1]) ? str_replace(',', '', $m3[1]) : '98.5';
+                        $stat3Suf = (strpos($stat3Raw, '%') !== false ? '%' : (strpos($stat3Raw, '+') !== false ? '+' : ''));
+                    @endphp
                     <div class="grid grid-cols-3 gap-4 pt-8 border-t border-slate-800/80 max-w-lg">
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                                <span data-counter-target="15000" data-counter-suffix="+">{{ app_setting('stat1_value', '15,000+') }}</span>
+                                <span data-counter-target="{{ $stat1Num }}" data-counter-suffix="{{ $stat1Suf }}">{{ $stat1Raw }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat1_label', __('frontend.hero.stats_students')) }}
@@ -72,7 +93,7 @@
                         </div>
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                                <span data-counter-target="250" data-counter-suffix="+">{{ app_setting('stat2_value', '250+') }}</span>
+                                <span data-counter-target="{{ $stat2Num }}" data-counter-suffix="{{ $stat2Suf }}">{{ $stat2Raw }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat2_label', __('frontend.hero.stats_projects')) }}
@@ -80,7 +101,7 @@
                         </div>
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-brand-primary tracking-tight">
-                                <span data-counter-target="98.5" data-counter-suffix="%">{{ app_setting('stat3_value', '98.5%') }}</span>
+                                <span data-counter-target="{{ $stat3Num }}" data-counter-suffix="{{ $stat3Suf }}">{{ $stat3Raw }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat3_label', __('frontend.hero.stats_satisfaction')) }}
@@ -90,12 +111,12 @@
 
                 </div>
 
-                <!-- Right: Auto-Sliding Hero Showcase (Cols 5) -->
+                <!-- Right: Auto-Sliding Hero Showcase (Cols 5) with 3D Tilt Interaction -->
                 <div class="lg:col-span-5 flex flex-col items-center justify-center">
                     
                     @if(isset($homeSliders) && count($homeSliders) > 0)
-                        <!-- Multi-Image Carousel Container -->
-                        <div id="hero-slider-carousel" class="relative w-full aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden border border-slate-800/90 shadow-2xl bg-slate-900 group">
+                        <!-- Multi-Image Carousel Container with Tilt Effect -->
+                        <div id="hero-slider-carousel" class="tilt-on-hover relative w-full aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden border border-slate-800/90 shadow-2xl bg-slate-900 group">
                             
                             <!-- Slides -->
                             @foreach($homeSliders as $idx => $slide)
@@ -162,8 +183,8 @@
                         <i class="fa fa-rocket text-lg"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Full-Throttle Innovation</h4>
-                        <p class="text-xs text-slate-400 mt-1">High-impact agile methodology</p>
+                        <h4 class="text-sm font-semibold text-white">{{ __('frontend.home.core_0_title') }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">{{ __('frontend.home.core_0_sub') }}</p>
                     </div>
                 </div>
 

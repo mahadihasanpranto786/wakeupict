@@ -28,6 +28,8 @@ return [
         'stats_mentors' => 'Senior Tech Mentors',
     ],
     'home' => [
+        'core_0_title' => 'Full-Throttle Innovation',
+        'core_0_sub' => 'High-impact agile methodology',
         'core_1_title' => 'Elite Engineering Core',
         'core_1_sub' => 'Handcrafted talent pipeline',
         'core_2_title' => 'Enterprise Scalability',

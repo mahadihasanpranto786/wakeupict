@@ -82,7 +82,7 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('contact-us-page') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                        <a href="{{ route('contact-us-page') }}" class="btn-shimmer flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
                             <span>{{ __('frontend.services.partner_btn') }}</span>
                             <i class="fa fa-arrow-right text-xs"></i>
                         </a>
@@ -93,7 +93,7 @@
                 <div class="lg:col-span-8">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         @foreach ($services as $index => $service)
-                            <div class="group relative rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 p-8 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1 flex flex-col justify-between {{ $index % 2 != 0 ? 'md:translate-y-8' : '' }}">
+                            <div class="group relative rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 p-8 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-card-dark card-interactive-glow reveal-on-scroll stagger-{{ ($index % 2) + 1 }} flex flex-col justify-between {{ $index % 2 != 0 ? 'md:translate-y-8' : '' }}">
                                 
                                 <!-- Decorative Faint Background Icon -->
                                 <div class="absolute -right-6 -bottom-6 text-8xl text-slate-800/30 pointer-events-none transition-transform duration-500 group-hover:scale-110">

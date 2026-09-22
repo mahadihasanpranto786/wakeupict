@@ -81,22 +81,95 @@
         .bangla-text {
             font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
         }
+
+        /* Animated Logo Preloader in Admin Panel */
+        #preloader {
+            transition: opacity 0.5s ease-out, visibility 0.5s ease;
+        }
+        html.light #preloader {
+            background-color: #f8fafc !important;
+        }
+        html.light #preloader .adm-logo-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.1) !important;
+        }
+        html.light #preloader .adm-preloader-text {
+            color: #0f172a !important;
+        }
+        html.light #preloader .adm-bar-bg {
+            background-color: #e2e8f0 !important;
+        }
+
+        @keyframes adm-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes adm-pulse {
+            0%, 100% { transform: scale(0.95); opacity: 0.15; }
+            50% { transform: scale(1.15); opacity: 0.35; }
+        }
+        @keyframes adm-logo-bounce {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+                filter: drop-shadow(0 0 8px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5));
+            }
+            50% {
+                transform: scale(1.08) translateY(-3px);
+                filter: drop-shadow(0 0 16px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.8));
+            }
+        }
+        .adm-logo-animated {
+            animation: adm-logo-bounce 2.2s ease-in-out infinite;
+        }
+        @keyframes adm-bar-sweep {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+        }
+        .adm-bar-indeterminate {
+            animation: adm-bar-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
     </style>
 
     @stack('css')
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed" style="background-color:#030712;color:#e2e8f0;">
-    <!-- Dynamic Theme Preloader -->
-    <div id="preloader" style="position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #030712; transition: opacity 0.4s ease-out;">
-        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; margin-bottom: 16px;">
-            <div style="position: absolute; inset: 0; border-radius: 50%; animation: adm-pulse 1.8s infinite; background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%); opacity: 0.25;"></div>
-            <div id="loader" style="width: 52px; height: 52px; border: 3px solid rgba(255,255,255,0.08); border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-accent, #34d399); border-radius: 50%; animation: adm-spin 0.8s linear infinite;"></div>
-            <div style="position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--brand-primary, #10b981); box-shadow: 0 0 10px var(--brand-primary, #10b981);"></div>
+    <!-- Dynamic Theme Preloader with Animated Logo -->
+    <div id="preloader" style="position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #030712; transition: opacity 0.5s ease-out;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; margin-bottom: 20px;">
+            <!-- Ambient Radial Pulse -->
+            <div style="position: absolute; inset: 0; border-radius: 50%; animation: adm-pulse 2s infinite; background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%); opacity: 0.22;"></div>
+            
+            <!-- Outer Spinning Gradient Track -->
+            <div style="position: absolute; width: 104px; height: 104px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-cyan, #22d3ee); animation: adm-spin 1.2s linear infinite;"></div>
+            
+            <!-- Secondary Counter Ring -->
+            <div style="position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.15); border-top-color: var(--brand-accent, #34d399); border-left-color: var(--brand-indigo, #6366f1); animation: adm-spin 3s linear infinite reverse;"></div>
+
+            <!-- Central Glass Orb with Logo -->
+            <div class="adm-logo-card" style="position: relative; z-index: 10; width: 68px; height: 68px; border-radius: 18px; background-color: rgba(11, 19, 41, 0.92); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(var(--brand-primary-rgb, 16, 185, 129), 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+                <img src="{{ asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT Logo" class="adm-logo-animated" style="width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 2;">
+            </div>
+
+            <!-- Orbiting Satellite Dot -->
+            <div style="position: absolute; width: 120px; height: 120px; animation: adm-spin 2.5s linear infinite; pointer-events: none;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--brand-primary, #10b981); box-shadow: 0 0 10px var(--brand-primary, #10b981);"></div>
+            </div>
         </div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--brand-primary, #10b981); display: inline-block;"></span>
-            <span class="adm-preloader-text" style="color: #f1f5f9; font-weight: 700;">WAKE UP ICT ADMIN</span>
+
+        <!-- Typography & Progress Track -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--brand-primary, #10b981); display: inline-block;"></span>
+                <span class="adm-preloader-text" style="color: #f1f5f9; font-weight: 700;">WAKE UP ICT ADMIN</span>
+            </div>
+            <!-- Progress Track -->
+            <div class="adm-bar-bg" style="width: 140px; height: 3px; border-radius: 9999px; background-color: rgba(255,255,255,0.08); overflow: hidden; position: relative;">
+                <div class="adm-bar-indeterminate" style="width: 50%; height: 100%; border-radius: 9999px; background: linear-gradient(90deg, var(--brand-primary, #10b981), var(--brand-cyan, #22d3ee));"></div>
+            </div>
         </div>
     </div>
     <div class="wrapper">

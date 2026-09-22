@@ -500,6 +500,84 @@
             color: #ffffff !important;
             border-color: var(--brand-primary, #10b981) !important;
         }
+
+        /* 5. Button Shimmer Light-Sweep Animation */
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 80%;
+            height: 200%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.35),
+                transparent
+            );
+            transform: rotate(25deg);
+            animation: btn-shine-sweep 4.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes btn-shine-sweep {
+            0%, 65% {
+                left: -150%;
+            }
+            100% {
+                left: 200%;
+            }
+        }
+
+        /* 6. Kinetic Gradient Wave for Headlines */
+        .text-gradient-animated {
+            background: linear-gradient(135deg, #ffffff 0%, var(--brand-primary, #10b981) 40%, var(--brand-cyan, #22d3ee) 75%, #ffffff 100%);
+            background-size: 250% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-gradient-shift 8s ease infinite;
+        }
+        @keyframes text-gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        html.light .text-gradient-animated {
+            background: linear-gradient(135deg, #0f172a 0%, var(--brand-primary, #10b981) 45%, #0284c7 80%, #0f172a 100%);
+            background-size: 250% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-gradient-shift 8s ease infinite;
+        }
+
+        /* 7. Card Ambient Glow & Micro-Lift */
+        .card-interactive-glow {
+            position: relative;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-interactive-glow:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 35px -5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.25) !important;
+        }
+        html.light .card-interactive-glow:hover {
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 0 30px -5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+        }
+
+        /* 8. Floating Badges */
+        @keyframes badge-float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+        .animate-badge-float {
+            animation: badge-float 3.5s ease-in-out infinite;
+        }
     </style>
 
     <!-- Tailwind CSS (v3 with Forms, Typography, Aspect-Ratio plugins) -->
@@ -783,6 +861,28 @@
                 window.requestAnimationFrame(step);
             }
             window.animateCounter = animateCounter;
+
+            // 5. Tactile 3D Tilt Interaction on Media & Key Cards
+            document.addEventListener('DOMContentLoaded', function() {
+                var tiltCards = document.querySelectorAll('.tilt-on-hover');
+                tiltCards.forEach(function(card) {
+                    card.style.transition = 'transform 0.15s ease-out';
+                    card.style.transformStyle = 'preserve-3d';
+                    card.addEventListener('mousemove', function(e) {
+                        var rect = card.getBoundingClientRect();
+                        var x = e.clientX - rect.left;
+                        var y = e.clientY - rect.top;
+                        var centerX = rect.width / 2;
+                        var centerY = rect.height / 2;
+                        var rotateX = ((y - centerY) / centerY) * -6;
+                        var rotateY = ((x - centerX) / centerX) * 6;
+                        card.style.transform = 'perspective(1000px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-4px)';
+                    });
+                    card.addEventListener('mouseleave', function() {
+                        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+                    });
+                });
+            });
         })();
     </script>
 
