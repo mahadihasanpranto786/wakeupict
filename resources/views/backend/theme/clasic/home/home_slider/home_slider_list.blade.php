@@ -56,7 +56,7 @@
                                         <tr>
                                             <td> {{ $serial++ }}</td>
                                             <td>
-                                                <img width="100px" src="{{ URL::asset($slider->slider_image) }}"
+                                                <img width="100px" style="border-radius: 6px; object-fit: cover; max-height: 60px;" src="{{ safe_asset($slider->slider_image) }}"
                                                     alt="slider image">
                                             </td>
                                             <td>{{ $slider->slider_alt }}

@@ -5,6 +5,25 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web'])->group(function () {
     //**************************************** BACKEND ROUTES*************************************************** */
     Auth::routes();
+
+    // Global Language Switcher
+    Route::get('/language/{locale}', 'LanguageController@switchLanguage')->name('language.switch');
+
+    // Appearance / CMS Routes
+    Route::group(['prefix' => 'admin/appearance'], function () {
+        Route::get('/theme', 'backend\AppearanceController@theme')->name('appearance.theme');
+        Route::post('/theme/update', 'backend\AppearanceController@updateTheme')->name('appearance.theme.update');
+        Route::get('/global', 'backend\AppearanceController@globalSettings')->name('appearance.global');
+        Route::post('/global/update', 'backend\AppearanceController@updateGlobal')->name('appearance.global.update');
+        Route::get('/home', 'backend\AppearanceController@home')->name('appearance.home');
+        Route::post('/home/update', 'backend\AppearanceController@updateHome')->name('appearance.home.update');
+        Route::get('/sections', 'backend\AppearanceController@sections')->name('appearance.sections');
+        Route::post('/sections/update', 'backend\AppearanceController@updateSections')->name('appearance.sections.update');
+    });
+
+    // Facebook Graph API Posts Feed
+    Route::get('/facebook-posts', 'frontend\theme\clasic\FacebookPostController@index')->name('facebook-posts');
+
     // ================================== talent hunt route start ======================================//
 
     Route::get('/talent-page-list', 'backend\theme\clasic\TalentHuntController@index')->name('talent-page-list');
