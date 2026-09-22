@@ -395,6 +395,111 @@
         .hero-mesh-glow {
             background: radial-gradient(circle at 50% 20%, rgba(var(--brand-primary-rgb, 16, 185, 129), 0.12) 0%, rgba(6, 182, 212, 0.06) 40%, transparent 70%);
         }
+
+        /* =========================================================
+           ADVANCED FRONTEND ANIMATION SYSTEM
+           ========================================================= */
+        /* 1. Animated Preloader Styles */
+        #app-preloader {
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s ease;
+        }
+        html.light #app-preloader {
+            background-color: #f8fafc !important;
+        }
+        html.light #app-preloader .preloader-icon-wrapper {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1) !important;
+        }
+        html.light #app-preloader .preloader-text {
+            color: #0f172a !important;
+        }
+        html.light #app-preloader .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light #app-preloader .preloader-bar-bg {
+            background-color: #e2e8f0 !important;
+        }
+
+        @keyframes preloader-icon-float {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+                filter: drop-shadow(0 0 10px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5));
+            }
+            50% {
+                transform: scale(1.08) translateY(-4px);
+                filter: drop-shadow(0 0 18px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.8));
+            }
+        }
+        .preloader-icon-animated {
+            animation: preloader-icon-float 2.2s ease-in-out infinite;
+        }
+
+        @keyframes preloader-bar-slide {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+        }
+        .preloader-bar-indeterminate {
+            animation: preloader-bar-slide 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* 2. Scroll-Driven Reveal Animations */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-on-scroll.is-revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.94);
+            transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-scale.is-revealed {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .stagger-1 { transition-delay: 0.08s; }
+        .stagger-2 { transition-delay: 0.16s; }
+        .stagger-3 { transition-delay: 0.24s; }
+        .stagger-4 { transition-delay: 0.32s; }
+
+        /* 3. Floating Ambient Mesh Blobs */
+        @keyframes float-ambient {
+            0%, 100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+                transform: translate(30px, -25px) scale(1.08);
+            }
+            66% {
+                transform: translate(-25px, 20px) scale(0.96);
+            }
+        }
+        .animate-ambient-float {
+            animation: float-ambient 14s ease-in-out infinite alternate;
+        }
+        .animate-ambient-float-reverse {
+            animation: float-ambient 18s ease-in-out infinite alternate-reverse;
+        }
+
+        /* 4. Light Mode Scroll-to-Top Button */
+        html.light #scroll-to-top {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
+        }
+        html.light #scroll-to-top:hover {
+            background-color: var(--brand-primary, #10b981) !important;
+            color: #ffffff !important;
+            border-color: var(--brand-primary, #10b981) !important;
+        }
     </style>
 
     <!-- Tailwind CSS (v3 with Forms, Typography, Aspect-Ratio plugins) -->
@@ -454,8 +559,11 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/jpg" href="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" />
+    <!-- Favicon & Touch Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" />
+    <link rel="apple-touch-icon" href="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}">
 
     <!-- Toastr Notifications & Datepicker -->
     <link rel="stylesheet" href="{{ safe_asset('admin/css/toastr/toastr.min.css') }}">
@@ -490,21 +598,43 @@
 
 <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-brand-primary selection:text-slate-950 min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- Modern Dynamic Theme Preloader -->
-    <div id="app-preloader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center transition-all duration-500 ease-out bg-slate-950">
-        <div class="relative flex items-center justify-center w-24 h-24 mb-4">
-            <!-- Ambient Radial Pulse -->
-            <div class="absolute inset-0 rounded-full animate-ping opacity-20" style="background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%);"></div>
-            <!-- Primary Spinning Ring -->
-            <div class="w-16 h-16 rounded-full border-2 border-slate-800 border-t-transparent animate-spin" style="border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-accent, #34d399); animation-duration: 0.8s;"></div>
-            <!-- Secondary Counter Ring -->
-            <div class="absolute w-10 h-10 rounded-full border-2 border-slate-800 border-b-transparent animate-[spin_1.2s_linear_infinite_reverse]" style="border-bottom-color: var(--brand-cyan, #22d3ee);"></div>
-            <!-- Center Core Glow -->
-            <div class="absolute w-3.5 h-3.5 rounded-full animate-pulse" style="background: var(--brand-primary, #10b981); box-shadow: 0 0 14px var(--brand-primary, #10b981);"></div>
+    <!-- Modern Dynamic Theme Preloader with Animated Wake Up ICT Favicon -->
+    <div id="app-preloader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center transition-all duration-700 ease-out bg-slate-950">
+        <div class="relative flex items-center justify-center w-32 h-32 mb-6">
+            
+            <!-- Ambient Pulsing Glow Aura -->
+            <div class="absolute inset-0 rounded-full animate-ping opacity-20" style="background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%); animation-duration: 2.2s;"></div>
+            
+            <!-- Outer Spinning Gradient Track -->
+            <div class="absolute w-28 h-28 rounded-full border-2 border-transparent animate-spin" style="border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-cyan, #22d3ee); animation-duration: 1.4s;"></div>
+            
+            <!-- Middle Counter-Rotating Dashed Tech Ring -->
+            <div class="absolute w-32 h-32 rounded-full border border-dashed border-slate-700/60 animate-[spin_3.5s_linear_infinite_reverse]" style="border-top-color: var(--brand-accent, #34d399); border-left-color: var(--brand-indigo, #6366f1);"></div>
+
+            <!-- Central Glass Orb Enclosing the Animated Wake Up Favicon -->
+            <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl flex items-center justify-center p-3 shadow-2xl overflow-hidden preloader-icon-wrapper">
+                <!-- Inner ambient glow -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-brand-primary/25 via-transparent to-brand-cyan/20 pointer-events-none"></div>
+                <!-- The Animated Wake Up Favicon -->
+                <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT Icon" class="w-full h-full object-contain relative z-10 preloader-icon-animated">
+            </div>
+
+            <!-- Orbiting Satellite Dot -->
+            <div class="absolute w-32 h-32 animate-spin pointer-events-none" style="animation-duration: 2.8s;">
+                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--brand-primary, #10b981); box-shadow: 0 0 12px var(--brand-primary, #10b981);"></div>
+            </div>
         </div>
-        <div class="flex items-center gap-2 font-mono text-xs tracking-widest uppercase font-semibold text-slate-400">
-            <span class="w-2 h-2 rounded-full animate-pulse" style="background: var(--brand-primary, #10b981);"></span>
-            <span class="preloader-text text-white tracking-widest font-bold">WAKE UP ICT</span>
+
+        <!-- Typography & Sleek Loading Progress Indicator -->
+        <div class="flex flex-col items-center gap-3">
+            <div class="flex items-center gap-2 font-mono text-xs tracking-widest uppercase font-semibold text-slate-400">
+                <span class="w-2 h-2 rounded-full animate-pulse" style="background: var(--brand-primary, #10b981);"></span>
+                <span class="preloader-text text-white tracking-[0.22em] font-bold text-sm">WAKE UP ICT</span>
+            </div>
+            <!-- Progress Track with Sliding Highlight -->
+            <div class="w-40 h-1 rounded-full bg-slate-800/90 overflow-hidden relative preloader-bar-bg">
+                <div class="preloader-bar-indeterminate h-full w-1/2 rounded-full" style="background: linear-gradient(90deg, var(--brand-primary, #10b981), var(--brand-cyan, #22d3ee));"></div>
+            </div>
         </div>
     </div>
 
@@ -519,24 +649,140 @@
     <!-- Footer -->
     @include('frontend.theme.clasic.include.footer')
 
-    <!-- Preloader Fade-out Script -->
+    <!-- Circular Scroll-to-Top Button with Real-time Progress Ring -->
+    <button id="scroll-to-top" type="button" class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-2xl bg-slate-900/90 text-slate-300 hover:text-slate-950 border border-slate-700/80 shadow-2xl backdrop-blur-xl flex items-center justify-center transition-all duration-300 opacity-0 translate-y-6 pointer-events-none hover:shadow-glow-emerald hover:-translate-y-1 focus:outline-none group" aria-label="Scroll to top">
+        <!-- SVG Circular Progress Indicator -->
+        <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="20" class="stroke-slate-800/80 text-transparent" stroke-width="2.5" fill="none"></circle>
+            <circle id="scroll-progress-indicator" cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="text-brand-primary group-hover:text-slate-950 transition-all duration-150"></circle>
+        </svg>
+        <i class="fa fa-arrow-up text-sm transition-transform duration-300 group-hover:-translate-y-0.5"></i>
+    </button>
+
+    <!-- Preloader & Frontend Animation Controller Script -->
     <script>
         (function() {
+            // 1. Smooth Preloader Dismissal
             function removePreloader() {
                 var p = document.getElementById('app-preloader');
                 if (p && !p.classList.contains('preloader-done')) {
                     p.classList.add('preloader-done');
                     p.style.opacity = '0';
                     p.style.pointerEvents = 'none';
-                    setTimeout(function() { if (p && p.parentNode) p.parentNode.removeChild(p); }, 500);
+                    setTimeout(function() { 
+                        if (p && p.parentNode) p.parentNode.removeChild(p); 
+                    }, 700);
                 }
             }
+
             if (document.readyState === 'complete') {
                 removePreloader();
             } else {
                 window.addEventListener('load', removePreloader);
-                setTimeout(removePreloader, 1500); // 1.5s max fallback
+                setTimeout(removePreloader, 1500); // 1.5s max graceful fallback
             }
+
+            // 2. Scroll Progress Ring & Back-to-Top Button
+            window.addEventListener('scroll', function() {
+                var topBtn = document.getElementById('scroll-to-top');
+                var progressCircle = document.getElementById('scroll-progress-indicator');
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                
+                if (topBtn) {
+                    if (scrollTop > 280) {
+                        topBtn.classList.remove('opacity-0', 'translate-y-6', 'pointer-events-none');
+                        topBtn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                    } else {
+                        topBtn.classList.add('opacity-0', 'translate-y-6', 'pointer-events-none');
+                        topBtn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                    }
+                }
+
+                if (progressCircle && docHeight > 0) {
+                    var scrollPercent = Math.min(Math.max(scrollTop / docHeight, 0), 1);
+                    var circumference = 2 * Math.PI * 20; // 125.66
+                    var offset = circumference - (scrollPercent * circumference);
+                    progressCircle.style.strokeDashoffset = offset;
+                }
+            }, { passive: true });
+
+            var scrollBtn = document.getElementById('scroll-to-top');
+            if (scrollBtn) {
+                scrollBtn.addEventListener('click', function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            // 3. Scroll-Driven Reveal Observer
+            document.addEventListener('DOMContentLoaded', function() {
+                var revealElements = document.querySelectorAll('.reveal-on-scroll, .reveal-scale');
+                
+                if ('IntersectionObserver' in window && revealElements.length > 0) {
+                    var revealObserver = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('is-revealed');
+                                
+                                // Trigger animated counters inside this element if present
+                                var counters = entry.target.querySelectorAll('[data-counter-target]');
+                                counters.forEach(function(counter) {
+                                    if (!counter.dataset.counterDone) {
+                                        counter.dataset.counterDone = "true";
+                                        animateCounter(counter);
+                                    }
+                                });
+
+                                revealObserver.unobserve(entry.target);
+                            }
+                        });
+                    }, {
+                        threshold: 0.1,
+                        rootMargin: '0px 0px -40px 0px'
+                    });
+
+                    revealElements.forEach(function(el) {
+                        revealObserver.observe(el);
+                    });
+                } else {
+                    revealElements.forEach(function(el) {
+                        el.classList.add('is-revealed');
+                    });
+                }
+            });
+
+            // 4. Smooth Kinetic Metric Number Ticker
+            function animateCounter(el) {
+                var targetStr = el.dataset.counterTarget;
+                var suffix = el.dataset.counterSuffix || '';
+                var prefix = el.dataset.counterPrefix || '';
+                var targetNum = parseFloat(targetStr.replace(/,/g, ''));
+                var isDecimal = targetStr.indexOf('.') !== -1;
+                var duration = 1800;
+                var start = 0;
+                var startTime = null;
+
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    var progress = Math.min((timestamp - startTime) / duration, 1);
+                    var easeOut = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+                    var current = start + (targetNum - start) * easeOut;
+                    
+                    if (isDecimal) {
+                        el.textContent = prefix + current.toFixed(1) + suffix;
+                    } else {
+                        el.textContent = prefix + Math.floor(current).toLocaleString() + suffix;
+                    }
+
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        el.textContent = prefix + targetStr + suffix;
+                    }
+                }
+                window.requestAnimationFrame(step);
+            }
+            window.animateCounter = animateCounter;
         })();
     </script>
 

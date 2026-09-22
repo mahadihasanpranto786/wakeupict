@@ -10,8 +10,9 @@
     <!--========================== Globant-Inspired Auto-Sliding Hero ============================-->
     <section class="relative min-h-[92vh] flex items-center justify-center pt-28 pb-16 lg:py-0 overflow-hidden bg-grid-mesh">
         
-        <!-- Ambient Glowing Core -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[900px] h-[500px] bg-gradient-to-tr from-brand-primary/15 via-brand-cyan/10 to-brand-indigo/10 blur-[140px] pointer-events-none rounded-full"></div>
+        <!-- Ambient Glowing Core with Slow Floating Movement -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[900px] h-[500px] bg-gradient-to-tr from-brand-primary/15 via-brand-cyan/10 to-brand-indigo/10 blur-[140px] pointer-events-none rounded-full animate-ambient-float"></div>
+        <div class="absolute bottom-10 right-10 w-[350px] h-[350px] bg-brand-cyan/10 blur-[120px] pointer-events-none rounded-full animate-ambient-float-reverse"></div>
         
         <!-- Ambient Background Texture from Active Slide -->
         <div class="absolute inset-0 z-0 opacity-10 mix-blend-luminosity overflow-hidden pointer-events-none">
@@ -26,7 +27,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center min-h-[80vh]">
                 
                 <!-- Left: Headline & Editorial Value Proposition (Cols 7) -->
-                <div class="lg:col-span-7 flex flex-col justify-center text-left">
+                <div class="lg:col-span-7 flex flex-col justify-center text-left reveal-on-scroll">
                     
                     <!-- Live Status Badge -->
                     <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-brand-primary/30 text-brand-primary text-xs font-mono tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-sm">
@@ -59,11 +60,11 @@
                         </a>
                     </div>
 
-                    <!-- Micro-Stats Ticker -->
+                    <!-- Micro-Stats Ticker with Kinetic Number Animation -->
                     <div class="grid grid-cols-3 gap-4 pt-8 border-t border-slate-800/80 max-w-lg">
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                                {{ app_setting('stat1_value', '15,000+') }}
+                                <span data-counter-target="15000" data-counter-suffix="+">{{ app_setting('stat1_value', '15,000+') }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat1_label', __('frontend.hero.stats_students')) }}
@@ -71,7 +72,7 @@
                         </div>
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">
-                                {{ app_setting('stat2_value', '250+') }}
+                                <span data-counter-target="250" data-counter-suffix="+">{{ app_setting('stat2_value', '250+') }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat2_label', __('frontend.hero.stats_projects')) }}
@@ -79,7 +80,7 @@
                         </div>
                         <div>
                             <div class="text-2xl sm:text-3xl font-bold font-mono text-brand-primary tracking-tight">
-                                {{ app_setting('stat3_value', '98.5%') }}
+                                <span data-counter-target="98.5" data-counter-suffix="%">{{ app_setting('stat3_value', '98.5%') }}</span>
                             </div>
                             <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-1">
                                 {{ app_setting('stat3_label', __('frontend.hero.stats_satisfaction')) }}
@@ -202,7 +203,7 @@
     <!--========================== National Work (Dynamic Case Studies) ============================-->
     @if (!empty($nationalWork) && count($nationalWork) > 0)
         <section id="national-work" class="py-24 sm:py-32 relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
                 
                 <!-- Section Header -->
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -319,7 +320,7 @@
     <!--========================== Local Projects / Ecosystem ============================-->
     @if (!empty($localProjects) && count($localProjects) > 0)
         <section class="py-20 relative border-t border-slate-800/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
                 
                 <div class="text-center max-w-3xl mx-auto mb-16">
                     <div class="text-xs font-mono uppercase tracking-widest text-brand-primary font-semibold mb-3">{{ __('frontend.home.regional_footprint') }}</div>
@@ -352,7 +353,7 @@
     <!--========================== Ongoing Development (R&D Pipeline) ============================-->
     @if (!empty($projects) && count($projects) > 0)
         <section class="py-24 sm:py-32 relative border-t border-slate-800/80 bg-slate-900/20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
                 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
                     <div class="lg:col-span-6">
@@ -404,7 +405,7 @@
     <!--========================== Bottom Enterprise CTA Banner ============================-->
     <section class="py-20 relative border-t border-slate-800/80 overflow-hidden" style="background: linear-gradient(180deg, rgba(3, 7, 18, 0.6) 0%, rgba(11, 19, 41, 0.95) 100%);">
         <div class="absolute inset-0 bg-gradient-to-r from-brand-primary/10 via-transparent to-brand-cyan/10 pointer-events-none"></div>
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 reveal-on-scroll">
             <span class="inline-block px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/30 text-brand-primary font-mono text-xs uppercase tracking-widest mb-4">
                 {{ __('frontend.home.enterprise_partnerships') }}
             </span>
