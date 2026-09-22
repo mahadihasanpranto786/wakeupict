@@ -133,37 +133,3 @@ if (!function_exists('uploadPleaseWithSize')) {
         
     }
 }
-
-if (!function_exists('app_setting')) {
-    /**
-     * Retrieve an appearance setting with automatic locale fallback.
-     */
-    function app_setting($key, $default = null, $locale = null)
-    {
-        try {
-            return \App\model\AppearanceSetting::getVal($key, $default, $locale);
-        } catch (\Exception $e) {
-            return $default;
-        }
-    }
-}
-
-if (!function_exists('safe_asset')) {
-    /**
-     * Generate an asset URL while safely stripping any redundant 'public/' prefix.
-     */
-    function safe_asset($path)
-    {
-        if (empty($path)) {
-            return '';
-        }
-        if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
-            return $path;
-        }
-        $clean = ltrim($path, '/');
-        if (strpos($clean, 'public/') === 0) {
-            $clean = substr($clean, 7);
-        }
-        return asset($clean);
-    }
-}

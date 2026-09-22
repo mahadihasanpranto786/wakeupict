@@ -43,7 +43,7 @@
                             <input type="hidden" name="old_img" value="{{ $homeSilder->slider_image }}">
                             <p id="para">Old Image</p>
                             <img width="250px" id="old_img" style=" border: 2px solid gray; padding: 20px;"
-                                class="old_img" src="{{ safe_asset($homeSilder->slider_image) }}" alt="old image">
+                                class="old_img" src="{{ asset($homeSilder->slider_image) }}" alt="old image">
 
                             <span>
                                 <img src="" id="reviewImg">

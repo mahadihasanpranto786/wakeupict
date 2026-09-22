@@ -344,7 +344,7 @@
                             </p>
                         </a>
                         @if ($Invest == 3)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item  @yield('Invest')">
                                     <a href="#" class="nav-link  @yield('index_investor_active')">
                                         <i class="fas fa-hand-holding-usd nav-icon"></i>
@@ -352,7 +352,7 @@
                                         <i class="right fas fa-angle-left"></i>
                                     </a>
                                     @if ($Investor == 4)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('index_investor') }}"
                                                     class="nav-link @yield('index_investor')">
@@ -363,7 +363,7 @@
                                         </ul>
                                     @endif
                                     @if ($Investor_Type == 5)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('index_investor_type') }}"
                                                     class="nav-link @yield('index_investor_type')">
@@ -374,7 +374,7 @@
                                         </ul>
                                     @endif
                                     @if ($Investment == 6)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('investment_list') }}"
                                                     class="nav-link @yield('investment_list')">
@@ -390,7 +390,7 @@
 
                         {{-- asset start --}}
                         @if ($Assets == 7)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item  @yield('asset')">
                                     <a href="#" class="nav-link  @yield('index_asset')">
                                         <i class="fas fa-donate nav-icon"></i>
@@ -398,7 +398,7 @@
                                         <i class="right fas fa-angle-left"></i>
                                     </a>
                                     @if ($Asset_Type == 8)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('asset_type') }}"
                                                     class="nav-link @yield('asset_type')">
@@ -410,7 +410,7 @@
                                     @endif
                                     @if ($Add_Asset == 9)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add_asset') }}"
                                                         class="nav-link @yield('add_asset')">
@@ -422,7 +422,7 @@
                                         @endif
                                     @endif
                                     @if ($Assets_List == 10)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('assets_list') }}"
                                                     class="nav-link @yield('assets_list')">
@@ -441,7 +441,7 @@
                         {{-- asset end --}}
                         {{-- loan start --}}
                         @if ($Loan == 11)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item  @yield('loan')">
                                     <a href="#" class="nav-link  @yield('loan_active')">
                                         <i class="fas fa-landmark nav-icon"></i>
@@ -451,7 +451,7 @@
 
                                     @if ($Add_Loan == 12)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add_loan') }}"
                                                         class="nav-link @yield('add_loan')">
@@ -463,7 +463,7 @@
                                         @endif
                                     @endif
                                     @if ($Loans_List == 13)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('loans-list') }}"
                                                     class="nav-link @yield('loans-list')">
@@ -479,7 +479,7 @@
                         @endif
                         {{-- loan end --}}
                         @if ($Accounts_Categories == 14)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('accounts-category') }}"
                                         class="nav-link @yield('account_active')">
@@ -492,7 +492,7 @@
 
                         @if ($Payroll == 15)
                             {{-- ****************************************** payroll start ************************************************ --}}
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item has-treeview @yield('payroll_active')">
                                     <a href="#" class="nav-link  @yield('menu_active_payroll')">
                                         <i class="nav-icon fas fa-credit-card"></i>
@@ -503,7 +503,7 @@
                                     </a>
 
                                     @if ($Employee_Salaries == 16)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                             <li class="nav-item">
                                                 <a href="{{ route('employee_salaries') }}"
                                                     class="nav-link @yield('employee_salaries')">
@@ -514,7 +514,7 @@
                                         </ul>
                                     @endif
                                     @if ($Payrolls_List == 17)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                             <li class="nav-item">
                                                 <a href="{{ route('payroll-list') }}"
                                                     class="nav-link @yield('payroll_list_active')">
@@ -526,7 +526,7 @@
                                     @endif
                                     @if ($Add_Payroll == 18)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add-payroll') }}"
                                                         class="nav-link @yield('add_payroll_active')">
@@ -543,7 +543,7 @@
                         @endif
                         @if ($Expense == 19)
                             {{-- expense start --}}
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item  @yield('expense')">
                                     <a href="#" class="nav-link  @yield('expense_active')">
                                         <i class="fas fa-money-bill-alt nav-icon"></i>
@@ -551,7 +551,7 @@
                                         <i class="right fas fa-angle-left"></i>
                                     </a>
                                     @if ($Expenses_List == 20)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('expenses-list') }}"
                                                     class="nav-link @yield('expense_list')">
@@ -563,7 +563,7 @@
                                     @endif
                                     @if ($Add_Expense == 21)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add-expense') }}"
                                                         class="nav-link @yield('add_expense_active')">
@@ -575,7 +575,7 @@
                                         @endif
                                     @endif
                                     @if ($Multiple_Expenses_List == 22)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('multiple-expense-list') }}"
                                                     class="nav-link @yield('multiple_expense_active')">
@@ -587,7 +587,7 @@
                                     @endif
                                     @if ($Add_Multiple_Expense == 23)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add-multiple-expense') }}"
                                                         class="nav-link @yield('add_multiple_expense_active')">
@@ -607,7 +607,7 @@
                         @if ($Income == 24)
                             {{-- income start --}}
 
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item  @yield('income')">
                                     <a href="#" class="nav-link  @yield('income_menu')">
                                         <i class="fas fa-hands nav-icon"></i>
@@ -616,7 +616,7 @@
                                     </a>
 
                                     @if ($Incomes_List == 25)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('income-list') }}"
                                                     class="nav-link @yield('income_active')">
@@ -628,7 +628,7 @@
                                     @endif
                                     @if ($Add_Income == 26)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('add-income') }}"
                                                         class="nav-link @yield('add_income_active')">
@@ -647,7 +647,7 @@
                         @endif
 
                         @if ($Monthly_Sheet == 27)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('monthly-sheet') }}"
                                         class="nav-link @yield('monthly_sheet_active')">
@@ -659,7 +659,7 @@
                         @endif
                         @if ($current_month_summary == 72)
                             {{-- montly summary start --}}
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('monthly_summary') }}"
                                         class="nav-link @yield('monthly_summary')">
@@ -671,7 +671,7 @@
                             {{-- montly summary end --}}
                         @endif
                         @if ($Cash_In_Hand == 28)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('cash_in_hand') }}" class="nav-link @yield('cash_in_hand')">
                                         <i class="fas fa-hryvnia nav-icon"></i>
@@ -693,7 +693,7 @@
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
-                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                        <ul class="nav nav-treeview ml-1" style="background-color: #032e22;">
                             {{-- ****************************************** fontawesome start ************************************************ --}}
                             @if ($Font_awesome == 30)
                                 <li class="nav-item has-treeview">
@@ -719,7 +719,7 @@
                                         </p>
                                     </a>
                                     @if ($Sliders_List == 32)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('home-slider-list') }}"
                                                     class="nav-link @yield('home_list')">
@@ -730,7 +730,7 @@
                                         </ul>
                                     @endif
                                     @if ($Development_Project_List == 33)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('development-project-list') }}"
                                                     class="nav-link @yield('project_active')">
@@ -741,7 +741,7 @@
                                         </ul>
                                     @endif
                                     @if ($International_Work == 34)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('international-work') }}"
                                                     class="nav-link @yield('international_active')">
@@ -752,7 +752,7 @@
                                         </ul>
                                     @endif
                                     @if ($Local_Projects == 35)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('local-project') }}"
                                                     class="nav-link @yield('local_active')">
@@ -763,7 +763,7 @@
                                         </ul>
                                     @endif
                                     @if ($Footer == 36)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('footer') }}"
                                                     class="nav-link @yield('footer_active')">
@@ -789,7 +789,7 @@
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
-                                    {{-- <ul class="nav nav-treeview" style="background-color: transparent;">
+                                    {{-- <ul class="nav nav-treeview" style="background-color: #032e22;">
                                     <li class="nav-item">
                                         <a href="{{ route('about-create') }}" class="nav-link @yield('about_create_active')">
                                             <i class="fas fa-plus-circle nav-icon"></i>
@@ -799,7 +799,7 @@
                                 </ul> --}}
 
                                     @if ($About_Page_Banner == 38)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('about_banner') }}"
                                                     class="nav-link @yield('about_banner')">
@@ -810,7 +810,7 @@
                                         </ul>
                                     @endif
                                     @if ($About_Page_History == 39)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('about_history') }}"
                                                     class="nav-link @yield('about_history')">
@@ -821,7 +821,7 @@
                                         </ul>
                                     @endif
                                     @if ($About_Hr_Cards == 40)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('who-we-are-list') }}"
                                                     class="nav-link @yield('about_list_active')">
@@ -850,7 +850,7 @@
                                     </a>
 
                                     @if ($Service_Banner == 42)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('service-banner') }}"
                                                     class="nav-link @yield('service_banner')">
@@ -862,7 +862,7 @@
                                     @endif
                                     @if ($Add_Service == 43)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('service-insert') }}"
                                                         class="nav-link @yield('service_create_active')">
@@ -874,7 +874,7 @@
                                         @endif
                                     @endif
                                     @if ($Service_List == 44)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('service-list') }}"
                                                     class="nav-link @yield('service_list_active')">
@@ -899,7 +899,7 @@
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
-                                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                    <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                         <li class="nav-item">
                                             <a href="{{ route('contact-list') }}"
                                                 class="nav-link @yield('contact_list_active')">
@@ -926,7 +926,7 @@
                                                 <i class="right fas fa-angle-left"></i>
                                             </p>
                                         </a>
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('pages') }}"
                                                     class="nav-link @yield('pages_list_active')">
@@ -954,7 +954,7 @@
                                     </a>
 
                                     @if ($Course_Banner == 48)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('course_banner') }}"
                                                     class="nav-link @yield('course_banner')">
@@ -966,7 +966,7 @@
                                     @endif
                                     @if ($Create_Course == 49)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('create-course') }}"
                                                         class="nav-link @yield('create_course_active')">
@@ -978,7 +978,7 @@
                                         @endif
                                     @endif
                                     @if ($Courses_List == 50)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('courses-list') }}"
                                                     class="nav-link @yield('course_list_active')">
@@ -1006,7 +1006,7 @@
                                     </a>
 
                                     @if ($Blog_Categories == 52)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('blog-category') }}"
                                                     class="nav-link @yield('blog_category_active')">
@@ -1018,7 +1018,7 @@
                                     @endif
                                     @if ($Create_Blog == 53)
                                         @if (checkUserType() == 0)
-                                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                            <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                                 <li class="nav-item">
                                                     <a href="{{ route('create-blog') }}"
                                                         class="nav-link @yield('create_blog_active')">
@@ -1030,7 +1030,7 @@
                                         @endif
                                     @endif
                                     @if ($Blog_List == 54)
-                                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                                        <ul class="nav nav-treeview ml-1" style="background-color: #0b5c46;">
                                             <li class="nav-item">
                                                 <a href="{{ route('blogs-list') }}"
                                                     class="nav-link @yield('blog_list_active')">
@@ -1059,7 +1059,7 @@
                             </p>
                         </a>
                         @if ($Batch_Number == 56)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('batch-list') }}"
                                         class="nav-link @yield('batch_list_active')">
@@ -1070,7 +1070,7 @@
                             </ul>
                         @endif
                         @if ($Students_List == 57)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('students-list') }}"
                                         class="nav-link @yield('student_list_active')">
@@ -1081,7 +1081,7 @@
                             </ul>
                         @endif
                         @if ($Admitted_Students_List == 58)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('admited-students-list') }}"
                                         class="nav-link @yield('admited_student_list')">
@@ -1106,7 +1106,7 @@
                             </p>
                         </a>
                         @if ($Designation == 60)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('designation') }}" class="nav-link @yield('designation')">
                                         <i class="fas fa-list nav-icon"></i>
@@ -1116,7 +1116,7 @@
                             </ul>
                         @endif
                         @if ($Users_Or_Employees_List == 61)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview" style="background-color: #032e22;">
                                 <li class="nav-item">
                                     <a href="{{ route('user-list') }}" class="nav-link @yield('user_list_list')">
                                         <i class="fas fa-list nav-icon"></i>

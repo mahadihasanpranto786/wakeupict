@@ -1,71 +1,46 @@
-<div class="space-y-8">
-
-    <!-- Categories Widget -->
-    <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
-        <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
-            <i class="fa fa-folder-open-o"></i>
-            <span>Categories</span>
-        </h4>
-        <ul class="space-y-3">
+<div class="col-md-4">
+    <div class="mb-5">
+        <h5 class="mb-3">Categories</h5>
+        <ul class="list-group">
             @foreach ($blogCategory as $category)
-                @php
-                    $cat_slug = str_replace(' ', '-', $category->category_name);
-                    $catUnderBlog = countBlogCategry($category->category_name);
-                @endphp
-                <li>
-                    <a href="{{ url('our-blogs/' . $cat_slug) }}" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/60 transition-colors">
-                        <span class="text-sm font-medium text-slate-300 group-hover:text-emerald-400 transition-colors">
-                            {{ $category->category_name }}
-                        </span>
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono bg-slate-800 border border-slate-700 text-slate-400 group-hover:border-emerald-500/40 group-hover:text-emerald-400 transition-all">
-                            {{ $catUnderBlog }}
-                        </span>
-                    </a>
+                <li class="list-group-item d-flex justify-content-between align-items-center ">
+                    @php
+                        $cat_slug = str_replace(' ', '-', $category->category_name);
+                        $catUnderBlog = countBlogCategry($category->category_name);
+                    @endphp
+                    {{-- <a href="{{ route('blog-category-details', [$cat_slug]) }}"
+                        class="text-dark">{{ $category->category_name }}</a> --}}
+
+                    <a href="{{ url('our-blogs/' . $cat_slug) }}"
+                        class="text-dark">{{ $category->category_name }}</a>
+                    <span class="badge badge-warning badge-pill">
+                        {{ $catUnderBlog }}
+                    </span>
                 </li>
             @endforeach
         </ul>
     </div>
-
-    <!-- Recent Posts Widget -->
-    <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
-        <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
-            <i class="fa fa-clock-o"></i>
-            <span>Recent Posts</span>
-        </h4>
-        <ul class="space-y-4">
-            @foreach ($resentBlogs as $blog)
+    <div class=" mb-5">
+        <h5 class="mb-3">Recent Posts</h5>
+        @foreach ($resentBlogs as $blog)
+            <li class="list-group-item d-flex justify-content-between align-items-center ">
                 @php
+                    // $blog_slug = str_replace(' ', '-', $blog->blog_title);
                     $blog_slug = $blog->slug_title;
                 @endphp
-                <li>
-                    <a href="{{ url('our-blogs/' . $blog_slug) }}" class="group block p-2.5 rounded-xl hover:bg-slate-800/60 transition-colors">
-                        <span class="text-sm font-medium text-slate-300 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
-                            {{ $blog->blog_title }}
-                        </span>
-                    </a>
-                </li>
-            @endforeach
+                <a href="{{ url('our-blogs/' . $blog_slug) }}" class="text-dark">{{ $blog->blog_title }}</a>
+            </li>
+        @endforeach
+
         </ul>
     </div>
-
-    <!-- Archives Widget -->
-    <div class="rounded-2xl bg-slate-900/70 border border-slate-800/80 p-6 backdrop-blur-md">
-        <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-6 flex items-center gap-2">
-            <i class="fa fa-archive"></i>
-            <span>Archives</span>
-        </h4>
-        <ul class="space-y-3">
-            <li>
-                <a href="#" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/60 transition-colors">
-                    <span class="text-sm font-medium text-slate-300 group-hover:text-emerald-400 transition-colors">
-                        Graphic Design
-                    </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono bg-slate-800 border border-slate-700 text-slate-400">
-                        09
-                    </span>
-                </a>
+    <div class="mb-5">
+        <h5 class="mb-3">Archives</h5>
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center ">
+                <a href="" class="text-dark">Graphic Design</a>
+                <span class="badge badge-warning badge-pill">09</span>
             </li>
         </ul>
     </div>
-
 </div>

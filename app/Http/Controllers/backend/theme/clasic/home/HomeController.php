@@ -56,19 +56,16 @@ class HomeController extends Controller
 
 
         $image = $request->file('slider_image');
-        $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
-        $targetDir = public_path('uploads/slider_image/images');
-        if (!file_exists($targetDir)) {
-            @mkdir($targetDir, 0777, true);
-        }
-        Image::make($image)->resize(1130, 630)->save($targetDir . '/' . $name_gen);
-        $save_url = 'uploads/slider_image/images/' . $name_gen;
+        $name_gen = $image->getClientOriginalName();
+        Image::make($image)->resize(1130, 630)->save('public/uploads/slider_image/images/' . $name_gen);
+        $save_url = 'public/uploads/slider_image/images/' . $name_gen;
         HomeSlider::insert([
             'slider_image' => $save_url,
             'slider_alt' => $request->slider_alt,
             'slider_active' => 1,
             'status' => 1,
             'created_at' => Carbon::now(),
+
         ]);
         $notification = ([
             'success' => 'Slider Added Successfully',
@@ -102,20 +99,11 @@ class HomeController extends Controller
         $save_url =  $slider->slider_image;
         if ($request->file('slider_image')) {
             $old_img = $request->old_img;
-            if (!empty($old_img)) {
-                $oldClean = public_path(ltrim(str_replace('public/', '', $old_img), '/\\'));
-                if (file_exists($oldClean)) {
-                    @unlink($oldClean);
-                }
-            }
+            File::delete($old_img);
             $image = $request->file('slider_image');
-            $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
-            $targetDir = public_path('uploads/slider_image/images');
-            if (!file_exists($targetDir)) {
-                @mkdir($targetDir, 0777, true);
-            }
-            Image::make($image)->resize(1130, 630)->save($targetDir . '/' . $name_gen);
-            $save_url = 'uploads/slider_image/images/' . $name_gen;
+            $name_gen = $image->getClientOriginalName();
+            Image::make($image)->resize(1130, 630)->save('public/uploads/slider_image/images/' . $name_gen);
+            $save_url = 'public/uploads/slider_image/images/' . $name_gen;
         }
 
         HomeSlider::findOrFail($slider_id)->update([
