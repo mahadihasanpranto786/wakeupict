@@ -2,8 +2,24 @@
 <aside id='sidebar_color' class="main-sidebar sidebar-dark-primary elevation-4 text-sm">
     <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Sidebar user panel (optional) -->
-        <h3 class="p-1 text-center text-white">WAKE UP ICT</h3>
+        <!-- Modern Sidebar Brand with Logo -->
+        <div class="sidebar-brand-header">
+            <a href="{{ route('admin') }}" class="brand-link-flex" title="{{ app_setting('site_title', 'Wake Up ICT') }}">
+                <div class="brand-icon-box">
+                    <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT" class="brand-icon-img">
+                </div>
+                <div class="brand-details">
+                    <img src="{{ safe_asset('frontend/image/wict-logo.png') }}" alt="{{ app_setting('site_title', 'Wake Up ICT') }}" class="brand-text-logo">
+                    <div class="brand-tagline">
+                        <span class="live-dot"></span>
+                        <span class="tagline-text">ADMIN CONSOLE</span>
+                    </div>
+                </div>
+            </a>
+            <a href="{{ route('home-page') }}" target="_blank" class="brand-web-btn" title="ওয়েবসাইট দেখুন (Visit Website)">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -1081,11 +1097,11 @@
                             </ul>
                         @endif
                         @if ($Admitted_Students_List == 58)
-                            <ul class="nav nav-treeview" style="background-color: transparent;">
+                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
                                 <li class="nav-item">
                                     <a href="{{ route('admited-students-list') }}"
                                         class="nav-link @yield('admited_student_list')">
-                                        <i class="fas fa-list  nav-icon"></i>
+                                        <i class="fas fa-user-check nav-icon text-success"></i>
                                         <p>Admited Students List</p>
                                     </a>
                                 </li>
@@ -1093,6 +1109,48 @@
                         @endif
                     </li>
                     {{-- ****************************************** student end ************************************************ --}}
+                @endif
+
+                {{-- ****************************************** student portal LMS start ************************************************ --}}
+                <li class="nav-item has-treeview @yield('student_portal_active')">
+                    <a href="#" class="nav-link @yield('menu_active_student_portal')">
+                        <i class="nav-icon fas fa-graduation-cap text-warning"></i>
+                        <p>
+                            Student Portal LMS
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.student-menus.index') }}"
+                                class="nav-link @yield('student_menu_active')">
+                                <i class="fas fa-sitemap nav-icon text-warning"></i>
+                                <p>Student Portal Menus</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.certificates.index') }}"
+                                class="nav-link @yield('lms_certificate_active')">
+                                <i class="fas fa-certificate nav-icon text-success"></i>
+                                <p>LMS Certificates</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.quizzes.index') }}"
+                                class="nav-link @yield('lms_quiz_active')">
+                                <i class="fas fa-file-excel nav-icon text-info"></i>
+                                <p>Quizzes & Excel Import</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/student/dashboard') }}" target="_blank" class="nav-link">
+                                <i class="fas fa-arrow-up-right-from-square nav-icon text-cyan"></i>
+                                <p>Live Student Portal <span class="badge badge-info ml-1" style="font-size: 9px;">View</span></p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {{-- ****************************************** student portal LMS end ************************************************ --}}
                 @endif
                 @if ($Users_Or_Employees == 59)
                     {{-- ****************************************** user  start ************************************************ --}}

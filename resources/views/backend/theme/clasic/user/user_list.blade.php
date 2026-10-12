@@ -133,11 +133,13 @@
                                                         </button>
                                                     </div>
                                                     @if ($user->type != 'Admin')
-                                                        <a title="user excess"
-                                                            class="btn btn-success m-1 btn-sm flex items-center "
+                                                        <a title="Manage Permissions"
+                                                            class="btn btn-success m-1 btn-sm flex items-center"
                                                             href="{{ url('user_excess/' . $user->id) }}">
-                                                            User Excess
+                                                            <i class="fas fa-shield-alt mr-1"></i> Permissions
                                                         </a>
+                                                    @else
+                                                        <span class="badge badge-light border text-muted d-block mt-1">Super Admin</span>
                                                     @endif
 
 

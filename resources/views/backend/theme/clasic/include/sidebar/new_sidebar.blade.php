@@ -2,8 +2,24 @@
 <aside id='sidebar_color' class="main-sidebar sidebar-dark-primary elevation-4 text-sm">
     <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Sidebar user panel (optional) -->
-        <h3 class="p-1 text-center text-white"><a href="{{ route('home-page') }}" target="_blank">WAKE UP ICT</a></h3>
+        <!-- Modern Sidebar Brand with Logo -->
+        <div class="sidebar-brand-header">
+            <a href="{{ route('admin') }}" class="brand-link-flex" title="{{ app_setting('site_title', 'Wake Up ICT') }}">
+                <div class="brand-icon-box">
+                    <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT" class="brand-icon-img">
+                </div>
+                <div class="brand-details">
+                    <img src="{{ safe_asset('frontend/image/wict-logo.png') }}" alt="{{ app_setting('site_title', 'Wake Up ICT') }}" class="brand-text-logo">
+                    <div class="brand-tagline">
+                        <span class="live-dot"></span>
+                        <span class="tagline-text">ADMIN CONSOLE</span>
+                    </div>
+                </div>
+            </a>
+            <a href="{{ route('home-page') }}" target="_blank" class="brand-web-btn" title="ওয়েবসাইট দেখুন (Visit Website)">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
@@ -59,9 +75,85 @@
                                 <p>{{ __('admin.menu.sliders') }}</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.appearance.menus.index') }}" class="nav-link @yield('appearance_menus_active')">
+                                <i class="fas fa-bars nav-icon text-warning"></i>
+                                <p>Frontend Menus</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 {{-- ****************************************** Appearance CMS end ************************************************ --}}
+
+                {{-- ****************************************** Menus & Modules Management start ************************************************ --}}
+                <li class="nav-item has-treeview @yield('module_menu_open')">
+                    <a href="#" class="nav-link @yield('module_active')">
+                        <i class="nav-icon fas fa-folder-tree text-info"></i>
+                        <p>
+                            Menus & Modules
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                        <li class="nav-item">
+                            <a href="{{ route('module') }}" class="nav-link @yield('module_list_active')">
+                                <i class="fas fa-folder nav-icon text-warning"></i>
+                                <p>Admin Modules</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('create_sub_module') }}" class="nav-link @yield('sub_module_active')">
+                                <i class="fas fa-folder-plus nav-icon text-info"></i>
+                                <p>Add Sub-Module</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('create_sub_sub_module') }}" class="nav-link @yield('sub_sub_module_active')">
+                                <i class="fas fa-plus-circle nav-icon text-primary"></i>
+                                <p>Add Action Item</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.appearance.menus.index') }}" class="nav-link @yield('appearance_menus_active')">
+                                <i class="fas fa-bars nav-icon text-success"></i>
+                                <p>Frontend Menus</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {{-- ****************************************** Menus & Modules Management end ************************************************ --}}
+
+                {{-- ****************************************** Users & Access Permissions start ************************************************ --}}
+                <li class="nav-item has-treeview @yield('user_active') @yield('user_menu_open')">
+                    <a href="#" class="nav-link @yield('menu_active_user') @yield('user_active')">
+                        <i class="nav-icon fas fa-user-shield text-success"></i>
+                        <p>
+                            Users & Permissions
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
+                        <li class="nav-item">
+                            <a href="{{ route('user-list') }}" class="nav-link @yield('user_list_list') @yield('user_list_active')">
+                                <i class="fas fa-users nav-icon text-primary"></i>
+                                <p>User / Employee List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('create-user') }}" class="nav-link @yield('create_user_active')">
+                                <i class="fas fa-user-plus nav-icon text-success"></i>
+                                <p>Add New User</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('designation') }}" class="nav-link @yield('designation') @yield('designation_active')">
+                                <i class="fas fa-id-badge nav-icon text-warning"></i>
+                                <p>Designations</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {{-- ****************************************** Users & Access Permissions end ************************************************ --}}
 
                 {{-- ****************************************** account start ************************************************ --}}
 
@@ -682,33 +774,29 @@
                     {{-- ****************************************** student start ************************************************ --}}
 
                 <li class="nav-item has-treeview @yield('student_active')">
-                    <a href="#" class="nav-link  @yield('menu_active_active')">
-                        <i class="nav-icon fas fa-user-graduate"></i>
+                    <a href="#" class="nav-link @yield('menu_active_active')">
+                        <i class="nav-icon fas fa-user-graduate text-info"></i>
                         <p>
                             Students
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
+                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
                         <li class="nav-item">
                             <a href="{{ route('batch-list') }}" class="nav-link @yield('batch_list_active')">
-                                <i class="fas fa-list nav-icon"></i>
+                                <i class="fas fa-layer-group nav-icon text-info"></i>
                                 <p>Batch Number</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
                         <li class="nav-item">
                             <a href="{{ route('students-list') }}" class="nav-link @yield('student_list_active')">
-                                <i class="fas fa-list  nav-icon"></i>
-                                <p> Students List</p>
+                                <i class="fas fa-users nav-icon text-primary"></i>
+                                <p>Students List</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
                         <li class="nav-item">
                             <a href="{{ route('admited-students-list') }}" class="nav-link @yield('admited_student_list')">
-                                <i class="fas fa-list  nav-icon"></i>
+                                <i class="fas fa-user-check nav-icon text-success"></i>
                                 <p>Admited Students List</p>
                             </a>
                         </li>
@@ -716,43 +804,45 @@
                 </li>
                 {{-- ****************************************** student end ************************************************ --}}
 
-                {{-- ****************************************** user  start ************************************************ --}}
-
-                <li class="nav-item has-treeview @yield('user_active')">
-                    <a href="#" class="nav-link  @yield('menu_active_user')">
-                        <i class="nav-icon fas fa-users"></i>
+                {{-- ****************************************** student portal LMS start (Dedicated Separate Menu) ************************************************ --}}
+                <li class="nav-item has-treeview @yield('student_portal_active')">
+                    <a href="#" class="nav-link @yield('menu_active_student_portal')">
+                        <i class="nav-icon fas fa-graduation-cap text-warning"></i>
                         <p>
-                            Users Or Employees
+                            Student Portal LMS
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
+                    <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
                         <li class="nav-item">
-                            <a href="{{ route('designation') }}" class="nav-link @yield('designation')">
-                                <i class="fas fa-list nav-icon"></i>
-                                <p>Designation</p>
+                            <a href="{{ route('admin.student-menus.index') }}" class="nav-link @yield('student_menu_active')">
+                                <i class="fas fa-sitemap nav-icon text-warning"></i>
+                                <p>Student Portal Menus</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
                         <li class="nav-item">
-                            <a href="{{ route('user-list') }}" class="nav-link @yield('user_list_list')">
-                                <i class="fas fa-list nav-icon"></i>
-                                <p>Users Or Employees List</p>
+                            <a href="{{ route('admin.certificates.index') }}" class="nav-link @yield('lms_certificate_active')">
+                                <i class="fas fa-certificate nav-icon text-success"></i>
+                                <p>LMS Certificates</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview" style="background-color: transparent;">
                         <li class="nav-item">
-                            <a href="{{ url('module') }}" class="nav-link  @yield('module')">
-                                <i class="fas fa-list nav-icon"></i>
-                                <p>Module</p>
+                            <a href="{{ route('admin.quizzes.index') }}" class="nav-link @yield('lms_quiz_active')">
+                                <i class="fas fa-file-excel nav-icon text-info"></i>
+                                <p>Quizzes & Excel Import</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('/student/dashboard') }}" target="_blank" class="nav-link">
+                                <i class="fas fa-arrow-up-right-from-square nav-icon text-cyan"></i>
+                                <p>Live Student Portal <span class="badge badge-info ml-1" style="font-size: 9px;">View</span></p>
                             </a>
                         </li>
                     </ul>
                 </li>
+                {{-- ****************************************** student portal LMS end ************************************************ --}}
 
-                {{-- ****************************************** user end ************************************************ --}}
+
 
 
                 {{-- ************************************* employee leave start****************************************? --}}

@@ -9,24 +9,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <!-- Immediate Theme Application (Zero FOUT, Default Light Mode) -->
+    <!-- Immediate Theme Application (System Default Preference with Zero FOUT) -->
     <script>
         (function() {
-            var savedTheme = localStorage.getItem('theme_mode') || '{{ $initialTheme }}';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.remove('light');
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.classList.add('light');
+            function syncWithSystemTheme() {
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    document.documentElement.classList.remove('light');
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                }
+            }
+            syncWithSystemTheme();
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncWithSystemTheme);
             }
         })();
     </script>
 
-    <!-- Fonts: Plus Jakarta Sans, Inter, JetBrains Mono, Noto Sans Bengali, Source Sans Pro -->
+    <!-- Google Fonts: Hind Siliguri for Global Bengali & English Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Dynamic Theme Palette CSS Variables -->
     <style>
@@ -38,20 +44,19 @@
             --brand-cyan: {{ app_setting('theme_cyan_color', '#22d3ee') }};
             --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
         }
+
+        /* Hind Siliguri Global Typography */
+        body, html, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
+            font-family: 'Hind Siliguri', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .font-mono, [class*="font-mono"], code, pre {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+        }
+
         body {
             background-color: #030712;
             color: #f1f5f9;
-            font-family: {{ App::getLocale() == 'bn' ? '"Noto Sans Bengali", "Source Sans Pro", sans-serif' : "'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Source Sans Pro', sans-serif" }};
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* Bangla Global Font Styles */
-        html[lang="bn"],
-        html[lang="bn"] body,
-        [lang="bn"],
-        .font-bangla,
-        .bangla-text {
-            font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
         }
 
         /* Utility Theme Classes */
@@ -172,44 +177,79 @@
             border-color: #cbd5e1 !important;
         }
 
-        /* Typography: Headings & Strong Elements */
-        html.light h1,
-        html.light h2,
-        html.light h3,
-        html.light h4,
-        html.light h5,
-        html.light h6,
-        html.light .text-white,
-        html.light [class*="text-white"],
+        /* Typography: Headings & Strong Elements in Light Mode (Crisp Dark Color) */
+        html.light h1:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
+        html.light h2:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
+        html.light h3:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
+        html.light h4:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
+        html.light h5:not(.btn *),
+        html.light h6:not(.btn *) {
+            color: #0f172a !important;
+        }
+
+        /* Scoped Body & Description text for Light Mode (Deep Slate) */
+        html.light p:not([class*="bg-"]):not(button *):not(.btn *):not(.badge *),
+        html.light li:not([class*="bg-"]):not(button *):not(.btn *),
+        html.light dt, html.light dd, html.light label {
+            color: #1e293b !important;
+        }
+
+        html.light p.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *),
+        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *) {
+            color: #0f172a !important;
+        }
+
+        /* Elements that MUST retain bright white text in Light Mode */
+        html.light .text-white-force,
+        html.light [class*="bg-rose-600"],
+        html.light [class*="bg-rose-500"],
+        html.light [class*="bg-rose-600"] *,
+        html.light [class*="bg-rose-500"] *,
+        html.light [class*="bg-emerald-600"],
+        html.light [class*="bg-emerald-600"] *,
+        html.light [class*="bg-emerald-700"],
+        html.light [class*="bg-emerald-700"] *,
+        html.light .hero-slide *,
+        html.light .btn-shimmer * {
+            color: #ffffff !important;
+        }
+
+        /* Typography: High-Readability Body & Descriptions in Light Mode */
         html.light .text-slate-100,
         html.light [class*="text-slate-100"] {
             color: #0f172a !important;
         }
-
-        /* Typography: High-Readability Body & Descriptions */
         html.light .text-slate-200,
         html.light [class*="text-slate-200"] {
             color: #1e293b !important;
         }
         html.light .text-slate-300,
         html.light [class*="text-slate-300"] {
+            color: #1e293b !important;
+        }
+
+        /* Typography: Subtext, Metadata, Captions in Light Mode */
+        html.light .text-slate-400,
+        html.light [class*="text-slate-400"] {
+            color: #334155 !important;
+        }
+        html.light .text-slate-500,
+        html.light [class*="text-slate-500"] {
+            color: #475569 !important;
+        }
+        html.light .text-slate-600,
+        html.light [class*="text-slate-600"] {
             color: #334155 !important;
         }
 
-        /* Typography: Metadata, Captions, Timestamps */
-        html.light .text-slate-400,
-        html.light [class*="text-slate-400"],
-        html.light .text-slate-500,
-        html.light [class*="text-slate-500"] {
-            color: #64748b !important;
-        }
-
-        /* Accent & Emerald text: Adjusted for White Card Contrast */
+        /* Accent text in Light Mode (Deep Emerald & Cyan) */
         html.light .text-emerald-400,
-        html.light [class*="text-emerald-400"],
+        html.light [class*="text-emerald-400"] {
+            color: #047857 !important;
+        }
         html.light .text-brand-accent,
         html.light [class*="text-brand-accent"] {
-            color: #059669 !important;
+            color: #047857 !important;
         }
         html.light .text-cyan-400,
         html.light [class*="text-cyan-400"] {
@@ -220,16 +260,24 @@
             color: #2563eb !important;
         }
 
+        /* Links in Light Mode */
+        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-slate"]) {
+            color: #1e293b;
+        }
+        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):hover {
+            color: #047857 !important;
+        }
+
         /* Hover Text Transitions */
         html.light [class*="group"]:hover [class*="group-hover:text-emerald-400"],
         html.light [class*="group"]:hover [class*="group-hover:text-brand-primary"],
         html.light [class*="hover:text-emerald-400"]:hover,
         html.light [class*="hover:text-brand-primary"]:hover {
-            color: var(--brand-primary, #10b981) !important;
+            color: #047857 !important;
         }
         html.light [class*="hover:text-white"]:hover,
         html.light [class*="group"]:hover [class*="group-hover:text-white"] {
-            color: #0f172a !important;
+            color: #047857 !important;
         }
 
         /* Form Inputs & Textarea */
@@ -257,10 +305,10 @@
             border-color: #e2e8f0 !important;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06) !important;
         }
-        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]) {
+        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):not([class*="bg-emerald-"]) {
             color: #475569 !important;
         }
-        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):hover {
+        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):not([class*="bg-emerald-"]):hover {
             color: var(--brand-primary, #10b981) !important;
             background-color: #f1f5f9 !important;
         }
@@ -298,30 +346,240 @@
             color: var(--brand-primary, #10b981) !important;
         }
 
-        /* Footer */
-        html.light footer.bg-slate-950,
-        html.light footer {
+        /* Architectural Footer: Adaptive Light and Dark Contrast */
+        html.light .site-footer {
             background-color: #ffffff !important;
             border-top: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
         }
-        html.light footer .border-b,
-        html.light footer .border-t {
-            border-color: #e2e8f0 !important;
+        html.light .site-footer p {
+            color: #334155 !important;
         }
-        html.light footer a:not([class*="bg-brand-primary"]) {
-            color: #64748b !important;
+        html.light .site-footer a {
+            color: #1e293b !important;
         }
-        html.light footer a:not([class*="bg-brand-primary"]):hover {
-            color: var(--brand-primary, #10b981) !important;
+        html.light .site-footer a:hover {
+            color: #047857 !important;
         }
-        html.light footer [class*="bg-slate-900"] {
+        html.light .site-footer h4 {
+            color: #047857 !important;
+            font-weight: 700 !important;
+        }
+        html.light .site-footer li,
+        html.light .site-footer span {
+            color: #334155 !important;
+        }
+        html.light .site-footer i {
+            color: #047857 !important;
+        }
+        html.light .site-footer .social-icon {
             background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+        }
+        html.light .site-footer .social-icon:hover {
+            background-color: #ecfdf5 !important;
+            border-color: #10b981 !important;
+            color: #047857 !important;
+        }
+        html.light .site-footer .border-b,
+        html.light .site-footer .border-slate-800\/80 {
             border-color: #e2e8f0 !important;
+        }
+
+        html.dark .site-footer {
+            background-color: #0b0f19 !important;
+            border-top: 1px solid #1e293b !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark .site-footer p {
+            color: #cbd5e1 !important;
+        }
+        html.dark .site-footer a {
+            color: #cbd5e1 !important;
+        }
+        html.dark .site-footer a:hover {
+            color: #ffffff !important;
+        }
+        html.dark .site-footer h4 {
+            color: #34d399 !important;
+            font-weight: 700 !important;
+        }
+        html.dark .site-footer li,
+        html.dark .site-footer span {
+            color: #cbd5e1 !important;
+        }
+        html.dark .site-footer i {
+            color: #34d399 !important;
+        }
+        html.dark .site-footer .social-icon {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark .site-footer .social-icon:hover {
+            background-color: #1e293b !important;
+            border-color: #34d399 !important;
+            color: #34d399 !important;
+        }
+        html.dark .site-footer .border-b,
+        html.dark .site-footer .border-slate-800\/80 {
+            border-color: #1e293b !important;
+        }
+
+        /* 10MS Bento & Portal Card Enhancements for Light Mode */
+        html.light .bento-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+        }
+        html.light .bento-card h3 {
+            color: #0f172a !important;
+        }
+        html.light .bento-card p {
             color: #475569 !important;
         }
-        html.light footer [class*="bg-slate-900"]:hover {
-            border-color: var(--brand-primary, #10b981) !important;
-            color: var(--brand-primary, #10b981) !important;
+
+        html.light .student-portal-banner {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%) !important;
+            border-color: #a7f3d0 !important;
+            box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.12) !important;
+        }
+        html.light .student-portal-banner h3 {
+            color: #064e3b !important;
+        }
+        html.light .student-portal-banner p {
+            color: #334155 !important;
+        }
+
+        /* About Page & Team Cards (Light & Dark Theme Optimization) */
+        html.light .about-page-wrapper {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        html.light .about-page-wrapper section {
+            background-color: transparent !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light .about-page-wrapper h1,
+        html.light .about-page-wrapper h2,
+        html.light .about-page-wrapper h3,
+        html.light .about-page-wrapper h4,
+        html.light .about-page-wrapper h5 {
+            color: #0f172a !important;
+        }
+        html.light .about-page-wrapper p,
+        html.light .about-page-wrapper .text-slate-300,
+        html.light .about-page-wrapper .text-slate-400 {
+            color: #475569 !important;
+        }
+        html.light .about-page-wrapper .team-card {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        }
+        html.light .about-page-wrapper .team-card:hover {
+            border-color: #10b981 !important;
+            box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.15) !important;
+        }
+        html.light .about-page-wrapper .team-card h3,
+        html.light .about-page-wrapper .team-card h4,
+        html.light .about-page-wrapper .team-card h5 {
+            color: #0f172a !important;
+        }
+        html.light .about-page-wrapper .team-card p {
+            color: #64748b !important;
+        }
+        html.light .about-page-wrapper .team-card div {
+            border-color: #cbd5e1 !important;
+        }
+
+        html.dark .about-page-wrapper .team-card {
+            background-color: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(51, 65, 85, 0.7) !important;
+            box-shadow: 0 4px 25px -2px rgba(0, 0, 0, 0.4) !important;
+        }
+        html.dark .about-page-wrapper .team-card:hover {
+            background-color: rgba(30, 41, 59, 0.95) !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.25) !important;
+        }
+        html.dark .about-page-wrapper .team-card h3,
+        html.dark .about-page-wrapper .team-card h4,
+        html.dark .about-page-wrapper .team-card h5 {
+            color: #ffffff !important;
+        }
+        html.dark .about-page-wrapper .team-card p {
+            color: #94a3b8 !important;
+        }
+
+        /* Universal Dark Mode Light Text Rules */
+        html.dark,
+        html.dark body {
+            background-color: #030712 !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark h1,
+        html.dark h2,
+        html.dark h3,
+        html.dark h4,
+        html.dark h5,
+        html.dark h6 {
+            color: #ffffff !important;
+        }
+        html.dark p {
+            color: #cbd5e1 !important;
+        }
+        html.dark li {
+            color: #cbd5e1 !important;
+        }
+        html.dark .text-slate-400,
+        html.dark [class*="text-slate-400"] {
+            color: #94a3b8 !important;
+        }
+        html.dark .text-slate-300,
+        html.dark [class*="text-slate-300"] {
+            color: #cbd5e1 !important;
+        }
+        html.dark .text-slate-200,
+        html.dark [class*="text-slate-200"] {
+            color: #e2e8f0 !important;
+        }
+        html.dark .text-slate-100,
+        html.dark [class*="text-slate-100"] {
+            color: #f8fafc !important;
+        }
+        html.dark .text-slate-500,
+        html.dark [class*="text-slate-500"] {
+            color: #94a3b8 !important;
+        }
+        html.dark a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="text-emerald"]):not([class*="text-brand"]) {
+            color: #cbd5e1;
+        }
+        html.dark a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):hover {
+            color: #ffffff !important;
+        }
+
+        html.dark .bento-card {
+            background-color: rgba(15, 23, 42, 0.7) !important;
+            border-color: rgba(51, 65, 85, 0.7) !important;
+        }
+        html.dark .bento-card h3 {
+            color: #ffffff !important;
+        }
+        html.dark .bento-card p {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .student-portal-banner {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.5) 0%, rgba(15, 23, 42, 0.95) 50%, #030712 100%) !important;
+            border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+        html.dark .student-portal-banner h3 {
+            color: #ffffff !important;
+        }
+        html.dark .student-portal-banner p {
+            color: #cbd5e1 !important;
         }
 
         /* Pagination Controls */
@@ -608,9 +866,9 @@
                         }
                     },
                     fontFamily: {
-                        sans: {!! App::getLocale() == 'bn' ? '[\'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' : '[\'"Plus Jakarta Sans"\', \'Inter\', \'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' !!},
-                        display: {!! App::getLocale() == 'bn' ? '[\'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' : '[\'"Plus Jakarta Sans"\', \'"Noto Sans Bengali"\', \'"Source Sans Pro"\', \'sans-serif\']' !!},
-                        bangla: ['"Noto Sans Bengali"', '"Source Sans Pro"', 'sans-serif'],
+                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Noto Sans Bengali"', 'sans-serif'],
+                        display: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Noto Sans Bengali"', 'sans-serif'],
+                        bangla: ['"Noto Sans Bengali"', 'sans-serif'],
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {

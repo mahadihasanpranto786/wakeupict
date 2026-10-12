@@ -12,8 +12,8 @@
         <section class="relative min-h-[55vh] sm:min-h-[65vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-grid-mesh border-b border-slate-800/80">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-cyan-500/10 blur-[130px] pointer-events-none rounded-full"></div>
 
-            <div class="absolute inset-0 z-0 opacity-15 mix-blend-luminosity overflow-hidden pointer-events-none">
-                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover filter grayscale" alt="Services Banner">
+            <div class="absolute inset-0 z-0 opacity-20 overflow-hidden pointer-events-none">
+                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover" alt="Services Banner">
             </div>
 
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

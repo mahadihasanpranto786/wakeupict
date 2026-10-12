@@ -14,8 +14,8 @@
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-emerald-500/10 blur-[130px] pointer-events-none rounded-full"></div>
 
             <!-- Background Image Texture -->
-            <div class="absolute inset-0 z-0 opacity-15 mix-blend-luminosity overflow-hidden pointer-events-none">
-                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover filter grayscale" alt="Academic Banner">
+            <div class="absolute inset-0 z-0 opacity-20 overflow-hidden pointer-events-none">
+                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover" alt="Academic Banner">
             </div>
 
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

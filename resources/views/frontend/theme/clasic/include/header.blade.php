@@ -1,98 +1,143 @@
+<!-- 10 Minute School Inspired Top Emergency Helpline & Admission Notice Strip -->
+<div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white py-1.5 px-4 text-xs font-medium shadow-sm transition-all duration-300" id="top-announcement-strip">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2 truncate">
+            <span class="px-2 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 animate-pulse">
+                🔥 অফলাইন ব্যাচ
+            </span>
+            <span class="truncate text-slate-100">
+                নতুন অফলাইন ক্যাম্পাস ল্যাব ব্যাচে ভর্তি চলছে! আধুনিক কম্পিউটার ল্যাবে গ্রুপভিত্তিক ইন্টারেক্টিভ ও প্র্যাকটিক্যাল ট্রেনিং।
+            </span>
+        </div>
+        <div class="hidden sm:flex items-center gap-4 shrink-0 text-[11px] font-mono">
+            <a href="tel:01791612121" class="hover:text-amber-200 transition-colors flex items-center gap-1.5 font-bold">
+                <i class="fa fa-phone"></i>
+                <span>হেল্পলাইন: 01791-612121</span>
+            </a>
+            <span class="text-white/40">|</span>
+            <span class="text-emerald-100 flex items-center gap-1">
+                <i class="fa fa-map-marker"></i> মেইন ক্যাম্পাস ল্যাব
+            </span>
+        </div>
+    </div>
+</div>
+
 <!-- Sticky Floating Navigation Header with Dynamic Theme Colors, Global Theme Switcher & Multi-Language Switcher -->
-<header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 px-4 sm:px-6 lg:px-8">
+<header id="main-header" class="fixed top-8 left-0 right-0 z-40 transition-all duration-300 py-2.5 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <div class="relative flex items-center justify-between px-4 py-2.5 sm:px-6 rounded-2xl bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 shadow-2xl transition-all duration-300">
+        <div class="relative flex items-center justify-between px-4 py-2 sm:px-6 rounded-2xl bg-slate-950/90 backdrop-blur-2xl border border-slate-800/80 shadow-2xl transition-all duration-300">
             
             <!-- Brand Logo -->
-            <a href="{{ route('home-page') }}" class="flex items-center gap-3 group focus:outline-none">
+            <a href="{{ route('home-page') }}" class="flex items-center gap-3 group focus:outline-none shrink-0">
                 <img src="{{ safe_asset('frontend/image/wict-logo.png') }}" alt="{{ app_setting('site_title', 'Wake Up ICT') }}" class="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
             </a>
 
-            <!-- Desktop Navigation Links -->
-            <nav class="hidden lg:flex items-center gap-1 font-medium text-sm text-slate-300">
-                <a href="{{ route('home-page') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('home-page') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    {{ __('frontend.nav.home') }}
-                </a>
-                <a href="{{ route('about-page') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('about-page') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    {{ __('frontend.nav.about') }}
-                </a>
-                <a href="{{ route('academic-training') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('academic-training') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    {{ __('frontend.nav.courses') }}
-                </a>
-                <a href="{{ route('services-page') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('services-page') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    {{ __('frontend.nav.services') }}
-                </a>
-                <a href="{{ route('our-blogs') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('our-blogs*') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    {{ __('frontend.nav.blog') }}
-                </a>
-                <a href="{{ route('facebook-posts') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('facebook-posts') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                    <i class="fa fa-facebook-square mr-1 text-blue-400"></i>
-                    {{ __('frontend.nav.facebook_posts') }}
-                </a>
+            <!-- Course Search Bar (Desktop) -->
+            <div class="hidden 2xl:flex items-center w-44 shrink-0 mx-2">
+                <form action="{{ route('academic-training') }}" method="GET" class="w-full relative">
+                    <input type="text" name="search" placeholder="কোর্স খুঁজুন..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                    <i class="fa fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                </form>
+            </div>
 
-                @php
-                    $post = App\model\TalentHunt::orderBy('id', 'asc')->first();
-                @endphp
+            <!-- Desktop Navigation Links (Dynamically Managed from Backend) -->
+            @php
+                $headerMenus = \App\Services\FrontendMenuService::getTree('header');
+            @endphp
+            <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 font-medium text-[13px] 2xl:text-sm text-slate-300 shrink-0">
+                @foreach($headerMenus as $menu)
+                    @php
+                        $hasChildren = $menu->activeChildren->count() > 0;
+                        $isActive = $menu->isCurrent() || $menu->isChildCurrent();
+                    @endphp
 
-                @if (isset($post) && $post->status == 1)
-                    <a href="{{ route('talent-hunt') }}" class="px-3.5 py-2 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('talent-hunt') ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
-                        Talent Hunt
-                    </a>
-                @endif
+                    @if($hasChildren)
+                        <!-- Dropdown Menu Item -->
+                        <div class="relative group shrink-0">
+                            <a href="{{ $menu->resolveUrl() }}" 
+                               target="{{ $menu->target }}"
+                               class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 inline-flex items-center gap-1 {{ $isActive ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
+                                @if($menu->icon)
+                                    <i class="{{ $menu->icon }} mr-1"></i>
+                                @endif
+                                <span class="whitespace-nowrap">{{ $menu->getTitle() }}</span>
+                                <i class="fa fa-angle-down text-xs text-slate-500 transition-transform group-hover:rotate-180"></i>
+                                @if($menu->badge_text)
+                                    <span class="px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary text-[10px] font-bold">{{ $menu->badge_text }}</span>
+                                @endif
+                            </a>
+                            <!-- Dropdown Box -->
+                            <div class="hidden group-hover:block absolute left-0 mt-1 w-52 rounded-xl bg-slate-950/95 border border-slate-800 shadow-2xl p-1.5 z-50 text-xs backdrop-blur-xl">
+                                @foreach($menu->activeChildren as $child)
+                                    <a href="{{ $child->resolveUrl() }}" 
+                                       target="{{ $child->target }}"
+                                       class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/80 hover:text-brand-primary transition-colors whitespace-nowrap {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                                        <div class="flex items-center gap-2">
+                                            @if($child->icon)
+                                                <i class="{{ $child->icon }}"></i>
+                                            @endif
+                                            <span class="whitespace-nowrap">{{ $child->getTitle() }}</span>
+                                        </div>
+                                        @if($child->badge_text)
+                                            <span class="px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary text-[10px]">{{ $child->badge_text }}</span>
+                                        @endif
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <!-- Direct Link -->
+                        <a href="{{ $menu->resolveUrl() }}" 
+                           target="{{ $menu->target }}"
+                           class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 inline-flex items-center gap-1 {{ $isActive ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
+                            @if($menu->icon)
+                                <i class="{{ $menu->icon }} mr-1"></i>
+                            @endif
+                            <span class="whitespace-nowrap">{{ $menu->getTitle() }}</span>
+                            @if($menu->badge_text)
+                                <span class="px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary text-[10px] font-bold">{{ $menu->badge_text }}</span>
+                            @endif
+                        </a>
+                    @endif
+                @endforeach
             </nav>
 
-            <!-- CTA Action, Theme Switcher & Language Switcher (Desktop) -->
-            <div class="hidden lg:flex items-center gap-2.5">
-                <!-- Global Theme Switcher Dropdown Button -->
-                <div class="relative">
-                    <button type="button" id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-mono text-slate-300 hover:text-white transition-colors focus:outline-none" title="Switch Theme (Light / Dark / Dynamic)">
-                        <span id="theme-icon-dark" class="hidden items-center gap-1.5"><i class="fa fa-moon-o text-brand-primary"></i> Dark</span>
-                        <span id="theme-icon-light" class="flex items-center gap-1.5"><i class="fa fa-sun-o text-amber-400"></i> Light</span>
-                        <span id="theme-icon-custom" class="hidden items-center gap-1.5"><i class="fa fa-magic text-brand-cyan"></i> Dynamic</span>
-                        <i class="fa fa-angle-down text-[10px] text-slate-500 ml-0.5"></i>
-                    </button>
-
-                    <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl p-1.5 z-50 text-xs font-medium backdrop-blur-xl">
-                        <button type="button" onclick="setAppTheme('dark')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors text-left">
-                            <i class="fa fa-moon-o text-brand-primary w-4"></i>
-                            <span>Dark Mode</span>
-                        </button>
-                        <button type="button" onclick="setAppTheme('light')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors text-left">
-                            <i class="fa fa-sun-o text-amber-400 w-4"></i>
-                            <span>Light Mode</span>
-                        </button>
-                        <button type="button" onclick="setAppTheme('custom')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors text-left">
-                            <i class="fa fa-magic text-brand-cyan w-4"></i>
-                            <span>Custom Dynamic</span>
-                        </button>
-                    </div>
-                </div>
+            <!-- CTA Action & Language Switcher (Desktop) -->
+            <div class="hidden lg:flex items-center gap-1.5 2xl:gap-2 shrink-0">
 
                 <!-- Global Language Switcher Pill -->
-                <div class="flex items-center rounded-xl bg-slate-900 border border-slate-700/80 p-1 text-xs font-mono font-medium">
-                    <a href="{{ route('language.switch', 'en') }}" class="px-2.5 py-1 rounded-lg transition-colors {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
+                <div class="flex items-center rounded-xl bg-slate-900 border border-slate-700/80 p-0.5 text-xs font-mono font-medium shrink-0">
+                    <a href="{{ route('language.switch', 'en') }}" class="px-2 py-1 rounded-lg transition-colors {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
                         EN
                     </a>
-                    <span class="text-slate-600 px-1">|</span>
-                    <a href="{{ route('language.switch', 'bn') }}" class="px-2.5 py-1 rounded-lg transition-colors {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
+                    <span class="text-slate-600 px-0.5">|</span>
+                    <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-1 rounded-lg transition-colors {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
                         বাং
                     </a>
                 </div>
 
-                <!-- Contact CTA Button -->
-                <a href="{{ route('contact-us-page') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 hover:shadow-glow-emerald hover:-translate-y-0.5 active:translate-y-0">
-                    <span>{{ __('frontend.nav.contact') }}</span>
-                    <i class="fa fa-arrow-right text-[10px]"></i>
+                <!-- 10 Minute School Style Student Portal Pill -->
+                @if(Auth::guard('student')->check())
+                    <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-brand-primary to-emerald-400 hover:to-brand-accent shadow-glow-emerald transition-all hover:-translate-y-0.5 shrink-0 whitespace-nowrap">
+                        <i class="fa fa-graduation-cap"></i>
+                        <span>ড্যাশবোর্ড</span>
+                    </a>
+                @else
+                    <a href="{{ route('student.login') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white bg-slate-900 border border-slate-700/80 hover:border-brand-primary/50 transition-all shrink-0 whitespace-nowrap">
+                        <i class="fa fa-user-circle text-brand-primary"></i>
+                        <span>স্টুডেন্ট লগইন</span>
+                    </a>
+                @endif
+
+                <!-- 10MS Hotline CTA Button -->
+                <a href="tel:01791612121" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition-all duration-300 shrink-0 whitespace-nowrap">
+                    <i class="fa fa-phone"></i>
+                    <span>হটলাইন</span>
                 </a>
             </div>
 
             <!-- Mobile Controls -->
             <div class="flex lg:hidden items-center gap-2">
-                <!-- Mobile Theme Toggle -->
-                <button type="button" onclick="cycleThemeMobile()" class="p-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 text-xs focus:outline-none" title="Toggle Theme">
-                    <i id="mobile-theme-icon" class="fa fa-moon-o text-brand-primary"></i>
-                </button>
-
                 <!-- Mobile Language Pill -->
                 <div class="flex items-center rounded-lg bg-slate-900 border border-slate-700 p-0.5 text-xs font-mono">
                     <a href="{{ route('language.switch', 'en') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950 font-bold' : 'text-slate-400' }}">EN</a>
@@ -113,39 +158,53 @@
     <!-- Mobile Navigation Overlay -->
     <div id="mobile-menu" class="hidden lg:hidden fixed inset-x-4 top-20 rounded-2xl bg-slate-950/95 backdrop-blur-2xl border border-slate-800 shadow-2xl p-6 transition-all duration-300 z-50">
         <nav class="flex flex-col space-y-2">
-            <a href="{{ route('home-page') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span>{{ __('frontend.nav.home') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
-            <a href="{{ route('about-page') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span>{{ __('frontend.nav.about') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
-            <a href="{{ route('academic-training') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span>{{ __('frontend.nav.courses') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
-            <a href="{{ route('services-page') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span>{{ __('frontend.nav.services') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
-            <a href="{{ route('our-blogs') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span>{{ __('frontend.nav.blog') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
-            <a href="{{ route('facebook-posts') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                <span><i class="fa fa-facebook-square mr-2 text-blue-400"></i>{{ __('frontend.nav.facebook_posts') }}</span>
-                <i class="fa fa-angle-right text-slate-500"></i>
-            </a>
+            @foreach($headerMenus as $menu)
+                @php
+                    $hasChildren = $menu->activeChildren->count() > 0;
+                    $isActive = $menu->isCurrent() || $menu->isChildCurrent();
+                @endphp
+                @if($hasChildren)
+                    <div class="space-y-1">
+                        <div class="px-4 py-1.5 text-xs font-mono uppercase text-slate-500 font-bold">
+                            {{ $menu->getTitle() }}
+                        </div>
+                        @foreach($menu->activeChildren as $child)
+                            <a href="{{ $child->resolveUrl() }}" 
+                               target="{{ $child->target }}"
+                               class="mobile-nav-link flex items-center justify-between px-4 py-2.5 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors pl-6 {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                                <span class="flex items-center gap-2">
+                                    @if($child->icon)
+                                        <i class="{{ $child->icon }}"></i>
+                                    @endif
+                                    <span>{{ $child->getTitle() }}</span>
+                                </span>
+                                <i class="fa fa-angle-right text-slate-500"></i>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <a href="{{ $menu->resolveUrl() }}" 
+                       target="{{ $menu->target }}"
+                       class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors {{ $isActive ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                        <span class="flex items-center gap-2">
+                            @if($menu->icon)
+                                <i class="{{ $menu->icon }}"></i>
+                            @endif
+                            <span>{{ $menu->getTitle() }}</span>
+                            @if($menu->badge_text)
+                                <span class="px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary text-[10px] font-bold">{{ $menu->badge_text }}</span>
+                            @endif
+                        </span>
+                        <i class="fa fa-angle-right text-slate-500"></i>
+                    </a>
+                @endif
+            @endforeach
 
-            @if (isset($post) && $post->status == 1)
-                <a href="{{ route('talent-hunt') }}" class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors">
-                    <span>Talent Hunt</span>
-                    <i class="fa fa-angle-right text-slate-500"></i>
+            <div class="pt-4 mt-2 border-t border-slate-800 space-y-2">
+                <a href="{{ route('student.login') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-slate-900 border border-slate-700 text-white hover:border-brand-primary">
+                    <i class="fa fa-user-circle text-brand-primary"></i>
+                    <span>Student Portal Login</span>
                 </a>
-            @endif
-
-            <div class="pt-4 mt-2 border-t border-slate-800">
                 <a href="{{ route('contact-us-page') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald">
                     <span>{{ __('frontend.nav.contact') }}</span>
                     <i class="fa fa-arrow-right text-xs"></i>
@@ -156,75 +215,7 @@
 </header>
 
 <script>
-    // Theme Switcher Functions
-    function setAppTheme(theme) {
-        localStorage.setItem('theme_mode', theme);
-        document.cookie = "theme_mode=" + theme + "; path=/; max-age=" + (365*24*60*60);
-
-        if (theme === 'light') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
-        } else {
-            document.documentElement.classList.remove('light');
-            document.documentElement.classList.add('dark');
-        }
-
-        updateThemeUI(theme);
-        var dd = document.getElementById('theme-dropdown');
-        if (dd) dd.classList.add('hidden');
-    }
-
-    function updateThemeUI(theme) {
-        var darkIcon = document.getElementById('theme-icon-dark');
-        var lightIcon = document.getElementById('theme-icon-light');
-        var customIcon = document.getElementById('theme-icon-custom');
-        var mobIcon = document.getElementById('mobile-theme-icon');
-
-        if (!darkIcon) return;
-
-        darkIcon.classList.add('hidden');
-        lightIcon.classList.add('hidden');
-        customIcon.classList.add('hidden');
-
-        if (theme === 'light') {
-            lightIcon.classList.remove('hidden');
-            lightIcon.classList.add('flex');
-            if (mobIcon) mobIcon.className = 'fa fa-sun-o text-amber-400';
-        } else if (theme === 'custom') {
-            customIcon.classList.remove('hidden');
-            customIcon.classList.add('flex');
-            if (mobIcon) mobIcon.className = 'fa fa-magic text-brand-cyan';
-        } else {
-            darkIcon.classList.remove('hidden');
-            darkIcon.classList.add('flex');
-            if (mobIcon) mobIcon.className = 'fa fa-moon-o text-brand-primary';
-        }
-    }
-
-    function cycleThemeMobile() {
-        var cur = localStorage.getItem('theme_mode') || 'light';
-        if (cur === 'light') setAppTheme('dark');
-        else if (cur === 'dark') setAppTheme('custom');
-        else setAppTheme('light');
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
-        var curTheme = localStorage.getItem('theme_mode') || 'light';
-        updateThemeUI(curTheme);
-
-        var toggleBtn = document.getElementById('theme-toggle-btn');
-        var dropdown = document.getElementById('theme-dropdown');
-
-        if (toggleBtn && dropdown) {
-            toggleBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                dropdown.classList.toggle('hidden');
-            });
-            document.addEventListener('click', function () {
-                dropdown.classList.add('hidden');
-            });
-        }
-
         // Mobile Menu Toggle
         var btn = document.getElementById('mobile-menu-btn');
         var menu = document.getElementById('mobile-menu');
@@ -233,15 +224,15 @@
 
         if (btn && menu) {
             btn.addEventListener('click', function () {
-                var isOpen = !menu.classList.contains('hidden');
-                if (isOpen) {
-                    menu.classList.add('hidden');
-                    hamburger.classList.remove('hidden');
-                    close.classList.add('hidden');
-                } else {
+                var isHidden = menu.classList.contains('hidden');
+                if (isHidden) {
                     menu.classList.remove('hidden');
-                    hamburger.classList.add('hidden');
-                    close.classList.remove('hidden');
+                    if (hamburger) hamburger.classList.add('hidden');
+                    if (close) close.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                    if (hamburger) hamburger.classList.remove('hidden');
+                    if (close) close.classList.add('hidden');
                 }
             });
         }

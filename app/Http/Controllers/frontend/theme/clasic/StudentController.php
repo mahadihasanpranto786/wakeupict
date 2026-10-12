@@ -17,9 +17,15 @@ class StudentController extends Controller
 {
     function addstudent($course_slug)
     {
-        $courseData = DB::table('courses')->where('course_slug', $course_slug)->first();
+        $course = is_numeric($course_slug)
+            ? Course::where('id', $course_slug)->first()
+            : Course::where('course_slug', $course_slug)->first();
 
-        $course = Course::findOrFail($courseData->id);
+        if (!$course) {
+            $course = Course::where('course_slug', $course_slug)
+                ->orWhere('id', $course_slug)
+                ->firstOrFail();
+        }
 
         $page_content  = Page::where('page_name', '=', 'Student Registration page')->get();
 

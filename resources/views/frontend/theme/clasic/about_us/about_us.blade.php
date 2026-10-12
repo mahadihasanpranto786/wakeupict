@@ -5,15 +5,15 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen">
+<div class="about-page-wrapper relative w-full overflow-hidden bg-slate-950 min-h-screen">
 
     <!--========================== Hero Banner ============================-->
     @if (!empty($banner->image))
         <section class="relative min-h-[55vh] sm:min-h-[65vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-grid-mesh border-b border-slate-800/80">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-emerald-500/10 blur-[130px] pointer-events-none rounded-full"></div>
 
-            <div class="absolute inset-0 z-0 opacity-15 mix-blend-luminosity overflow-hidden pointer-events-none">
-                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover filter grayscale" alt="About Banner">
+            <div class="absolute inset-0 z-0 opacity-20 overflow-hidden pointer-events-none">
+                <img src="{{ URL::asset($banner->image) }}" class="w-full h-full object-cover" alt="About Banner">
             </div>
 
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -83,9 +83,9 @@
             <!-- Leadership / Chairman Card -->
             @if (!empty($chairmanSir->image))
                 <div class="max-w-md mx-auto mb-20 reveal-on-scroll">
-                    <div class="card-interactive-glow rounded-2xl bg-slate-900/80 border border-slate-800/90 p-8 text-center backdrop-blur-xl shadow-2xl hover:border-emerald-500/40 transition-all duration-300 group">
-                        <div class="relative w-36 h-36 mx-auto mb-6 rounded-full overflow-hidden border-4 border-slate-800 group-hover:border-emerald-500 transition-colors">
-                            <img src="{{ URL::asset($chairmanSir->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $chairmanSir->image_alt }}">
+                    <div class="team-card card-interactive-glow rounded-2xl bg-slate-900/80 border border-slate-700/80 p-8 text-center backdrop-blur-xl shadow-2xl hover:border-emerald-500 transition-all duration-300 group">
+                        <div class="relative w-36 h-36 mx-auto mb-6 rounded-full overflow-hidden border-4 border-emerald-500/60 group-hover:border-emerald-400 transition-colors shadow-lg">
+                            <img src="{{ URL::asset($chairmanSir->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $chairmanSir->image_alt }}">
                         </div>
                         <h3 class="text-2xl font-bold text-white mb-1">{{ $chairmanSir->name }}</h3>
                         <p class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">{{ $chairmanSir->designation }}</p>
@@ -93,12 +93,12 @@
                 </div>
             @endif
 
-            <!-- Core Team Grid (Grayscale to Color Cards) -->
+            <!-- Core Team Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
                 @foreach ($abouts as $index => $about)
-                    <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="group block rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 p-6 text-center backdrop-blur-md transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1 card-interactive-glow reveal-on-scroll stagger-{{ ($index % 4) + 1 }}">
-                        <div class="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-2 border-slate-800 group-hover:border-emerald-400 transition-colors">
-                            <img src="{{ URL::asset($about->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $about->image_alt }}">
+                    <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="team-card group block rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-emerald-500/60 p-6 text-center backdrop-blur-md transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 card-interactive-glow reveal-on-scroll stagger-{{ ($index % 4) + 1 }}">
+                        <div class="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-2 border-emerald-500/50 group-hover:border-emerald-400 transition-colors shadow-md">
+                            <img src="{{ URL::asset($about->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $about->image_alt }}">
                         </div>
                         <h4 class="text-base font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">{{ $about->name }}</h4>
                         <p class="text-xs font-mono text-slate-400 uppercase tracking-wide">{{ $about->designation }}</p>
@@ -115,12 +115,12 @@
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                         @foreach ($interns as $index => $intern)
-                            <a href="{{ $intern->slug == null ? '#' : url('members/' . $intern->slug) }}" class="group block rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-cyan-500/40 p-5 text-center transition-all duration-300 hover:-translate-y-1">
-                                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border border-slate-700 group-hover:border-cyan-400 transition-colors">
-                                    <img src="{{ URL::asset($intern->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $intern->image_alt }}">
+                            <a href="{{ $intern->slug == null ? '#' : url('members/' . $intern->slug) }}" class="team-card group block rounded-xl bg-slate-900/80 border border-slate-700/70 hover:border-cyan-500/60 p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-cyan-500/50 group-hover:border-cyan-400 transition-colors shadow-md">
+                                    <img src="{{ URL::asset($intern->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $intern->image_alt }}">
                                 </div>
                                 <h5 class="text-sm font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors">{{ $intern->name }}</h5>
-                                <p class="text-[11px] font-mono text-slate-400 uppercase">{{ $intern->designation }}</p>
+                                <p class="text-[11px] font-mono text-slate-400 uppercase tracking-wide">{{ $intern->designation }}</p>
                             </a>
                         @endforeach
                     </div>
@@ -136,12 +136,12 @@
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                         @foreach ($oldEmployees as $index => $about)
-                            <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="group block rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 p-5 text-center transition-all duration-300 hover:-translate-y-1">
-                                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border border-slate-700 transition-colors">
-                                    <img src="{{ URL::asset($about->image) }}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" alt="{{ $about->image_alt }}">
+                            <a href="{{ $about->slug == null ? '#' : url('members/' . $about->slug) }}" class="team-card group block rounded-xl bg-slate-900/80 border border-slate-700/70 hover:border-emerald-500/60 p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                                <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-slate-600 group-hover:border-emerald-400 transition-colors shadow-md">
+                                    <img src="{{ URL::asset($about->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $about->image_alt }}">
                                 </div>
-                                <h5 class="text-sm font-bold text-white mb-1 group-hover:text-white transition-colors">{{ $about->name }}</h5>
-                                <p class="text-[11px] font-mono text-slate-400 uppercase">{{ $about->designation }}</p>
+                                <h5 class="text-sm font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">{{ $about->name }}</h5>
+                                <p class="text-[11px] font-mono text-slate-400 uppercase tracking-wide">{{ $about->designation }}</p>
                             </a>
                         @endforeach
                     </div>

@@ -41,8 +41,11 @@ class HomeController extends Controller
         $localProjectHeader = LocalProjectHeader::latest()->first();
 
 
+        $courses = \App\model\Course::where("status", 1)->latest()->get();
+
         return view('frontend.theme.clasic.frontend_layouts.home_page',
          compact(
+                'courses',
                 'content_list',
                 'homeSliders',
                 'homeSlider',

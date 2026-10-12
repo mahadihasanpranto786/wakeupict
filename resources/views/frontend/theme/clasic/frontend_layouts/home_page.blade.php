@@ -221,6 +221,334 @@
         </div>
     </section>
 
+    <!--========================== 10 Minute School Inspired: Offline Course Categories & Explorer ============================-->
+    <section id="courses-explorer" class="py-20 sm:py-28 relative bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+        <!-- Ambient Glow -->
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider mb-4">
+                    <i class="fa fa-graduation-cap"></i>
+                    <span>ক্যাম্পাস স্কিলস ও একাডেমিক ট্রেনিং</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                    দেশসেরা <span class="text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-400">অফলাইন ল্যাব কোর্সসমূহ</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-4 leading-relaxed">
+                    সরাসরি ক্যাম্পাসে আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস, অভিজ্ঞ মেন্টরদের নিবিড় গাইডেন্স এবং কোর্স শেষে সরকারি ও ইন্ডাস্ট্রি ভেরিফায়েড সার্টিফিকেট।
+                </p>
+            </div>
+
+            <!-- 10 Minute School Style Category Filter Pills -->
+            <div class="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto pb-4 mb-10 no-scrollbar" id="course-category-tabs">
+                <button type="button" onclick="filterCourses('all', this)" class="category-pill active px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-md">
+                    <i class="fa fa-th-large mr-1.5"></i> সকল কোর্স (All)
+                </button>
+                <button type="button" onclick="filterCourses('graphic', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-paint-brush mr-1.5 text-pink-500 dark:text-pink-400"></i> গ্রাফিক্স ডিজাইন
+                </button>
+                <button type="button" onclick="filterCourses('web', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-code mr-1.5 text-blue-500 dark:text-blue-400"></i> ওয়েব ডেভেলপমেন্ট
+                </button>
+                <button type="button" onclick="filterCourses('ict', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-book mr-1.5 text-emerald-600 dark:text-emerald-400"></i> ক্লাস ৬-১০ ICT
+                </button>
+                <button type="button" onclick="filterCourses('marketing', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-bullhorn mr-1.5 text-amber-500 dark:text-amber-400"></i> ডিজিটাল মার্কেটিং
+                </button>
+                <button type="button" onclick="filterCourses('office', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-desktop mr-1.5 text-indigo-500 dark:text-indigo-400"></i> মাইক্রোসফট অফিস
+                </button>
+                <button type="button" onclick="filterCourses('ai', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
+                    <i class="fa fa-magic mr-1.5 text-cyan-600 dark:text-cyan-400"></i> AI ও আধুনিক টেক
+                </button>
+            </div>
+
+            <!-- Course Cards Grid (10MS Style) -->
+            @if(isset($courses) && count($courses) > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="courses-grid">
+                    @foreach($courses as $course)
+                        @php
+                            $titleLower = strtolower($course->course_title);
+                            $cat = 'other';
+                            if (strpos($titleLower, 'গ্রাফিক') !== false || strpos($titleLower, 'graphic') !== false) {
+                                $cat = 'graphic';
+                            } elseif (strpos($titleLower, 'ওয়েব') !== false || strpos($titleLower, 'ওয়েব') !== false || strpos($titleLower, 'web') !== false) {
+                                $cat = 'web';
+                            } elseif (strpos($titleLower, 'ict') !== false || strpos($titleLower, 'আইসিটি') !== false || strpos($titleLower, 'academic') !== false) {
+                                $cat = 'ict';
+                            } elseif (strpos($titleLower, 'মার্কেটিং') !== false || strpos($titleLower, 'marketing') !== false) {
+                                $cat = 'marketing';
+                            } elseif (strpos($titleLower, 'office') !== false || strpos($titleLower, 'অফিস') !== false) {
+                                $cat = 'office';
+                            } elseif (strpos($titleLower, 'ai') !== false || strpos($titleLower, 'artificial') !== false) {
+                                $cat = 'ai';
+                            }
+
+                            // Price calculation
+                            $cleanPrice = (float)preg_replace('/[^\d.]/', '', $course->price);
+                            $currentPrice = $cleanPrice > 0 ? $cleanPrice : 3500;
+                            $originalPrice = round($currentPrice * 1.35);
+                        @endphp
+                        <div class="course-item rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1.5 shadow-sm" data-category="{{ $cat }}">
+                            
+                            <!-- Thumbnail with 10MS Style Badges -->
+                            <div class="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                                @if($course->image)
+                                    <img src="{{ safe_asset($course->image) }}" alt="{{ $course->course_title }}" onerror="this.onerror=null; this.src='{{ safe_asset('uploads/course/images/1711513200931914.jpg') }}';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-emerald-950/40 text-slate-700 text-4xl">
+                                        <i class="fa fa-laptop text-emerald-500/40"></i>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                                
+                                <!-- Top Floating Badges -->
+                                <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-950/90 backdrop-blur-md border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                                        🔥 অফলাইন ল্যাব
+                                    </span>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[10px] font-bold uppercase tracking-wider shadow">
+                                        ভর্তি চলছে
+                                    </span>
+                                </div>
+
+                                <!-- Schedule pill at bottom of thumbnail -->
+                                <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-slate-200">
+                                    <span class="bg-slate-950/90 px-2.5 py-0.5 rounded-md backdrop-blur-sm border border-slate-800">
+                                        <i class="fa fa-clock-o text-emerald-400 mr-1"></i> {{ $course->time_line ?: '৩ মাস' }}
+                                    </span>
+                                    <span class="bg-slate-950/90 px-2.5 py-0.5 rounded-md backdrop-blur-sm text-cyan-300 border border-slate-800">
+                                        <i class="fa fa-map-marker mr-1"></i> ল্যাব #১
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                                        {{ $course->course_title }}
+                                    </h3>
+                                    
+                                    <!-- 10MS Spec Highlights -->
+                                    <div class="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                                        <div class="flex items-center gap-1.5">
+                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                                            <span>হাতে-কলমে আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                                            <span>প্রিন্টেড লেকচার শিট ও ল্যাব টাস্ক</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                                            <span>অ্যাডমিন ভেরিফায়েড সার্টিফিকেট</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pricing & Action Button -->
+                                <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-xs text-slate-500 dark:text-slate-400 block">কোর্স ফি:</span>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                                                    ৳ {{ number_format($currentPrice) }}
+                                                </span>
+                                                <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-mono">
+                                                    ৳ {{ number_format($originalPrice) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 font-mono text-[10px] font-bold">
+                                            Save 26%
+                                        </span>
+                                    </div>
+
+                                    <!-- 10MS Full-Width Action Button -->
+                                    <a href="{{ route('course-details', $course->course_slug ?: $course->id) }}" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group-hover:shadow-lg">
+                                        <span>বিস্তারিত ও সিলেবাস</span>
+                                        <i class="fa fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Bottom Browse All CTA -->
+            <div class="text-center mt-12">
+                <a href="{{ route('academic-training') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-all shadow-sm">
+                    <i class="fa fa-book text-emerald-600 dark:text-emerald-400"></i>
+                    <span>সকল কোর্স ক্যাটালগ দেখুন</span>
+                    <i class="fa fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!--========================== 10 Minute School Inspired: "কেন ওয়েক আপ আইসিটি?" (Why Us Bento Grid) ============================-->
+    <section class="py-20 sm:py-28 relative bg-slate-100/70 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold mb-2 block">
+                    <i class="fa fa-star text-amber-500 mr-1"></i> আমাদের বিশেষত্ব
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                    কেন ওয়েক আপ আইসিটিতে শিখবেন?
+                </h2>
+                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-4 leading-relaxed">
+                    গতানুগতিক অনলাইন কোর্সের সীমাবদ্ধতা পেরিয়ে সরাসরি ফিজিক্যাল ক্যাম্পাস ল্যাবে হাতে-কলমে শেখার সেরা অভিজ্ঞতা।
+                </p>
+            </div>
+
+            <!-- Bento 4-Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl">
+                        <i class="fa fa-desktop"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">আধুনিক কম্পিউটার ল্যাব</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        ল্যাবে আধুনিক পিসি এবং হাই-স্পিড ইন্টারনেট সমৃদ্ধ পরিবেশে গ্রুপভিত্তিক ইন্টারঅ্যাকশন ও সার্বক্ষণিক প্র্যাকটিস।
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-cyan-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-2xl">
+                        <i class="fa fa-user-circle-o"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">ইন্ডাস্ট্রি এক্সপার্ট ট্রেইনার</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        প্রফেশনাল ডেভেলপার ও অভিজ্ঞ ট্রেইনারদের সরাসরি ক্লাসরুম মেন্টরিং এবং রিয়েল-লাইফ প্রজেক্ট গাইডলাইন।
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl">
+                        <i class="fa fa-file-pdf-o"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">প্রিন্টেড লেকচার ও ল্যাব শিট</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        মুখস্থ নয়, প্রতিটি বিষয়ের সাজানো ক্লাসরুম হ্যান্ডআউট, স্টেপ-বাই-স্টেপ ল্যাব প্র্যাকটিস শিট ও এক্সারসাইজ ফাইল।
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-amber-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl">
+                        <i class="fa fa-certificate"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">ভেরিফায়েড সনদপত্র</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        কোর্স সমাপনী ও ব্যবহারিক পরীক্ষা মূল্যায়নের পর অ্যাডমিন কর্তৃক ইস্যুকৃত কিউআর কোড যুক্ত ভেরিফায়েড সার্টিফিকেট।
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--========================== 10 Minute School Style: Student Portal & Counseling Banner ============================-->
+    <section class="py-16 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="student-portal-banner rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white dark:from-emerald-950/80 dark:via-slate-900/90 dark:to-slate-950 border border-emerald-200 dark:border-emerald-500/30 p-8 sm:p-12 relative overflow-hidden shadow-xl backdrop-blur-xl transition-all duration-200">
+                <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <div class="lg:col-span-8 space-y-4">
+                        <span class="px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-500/30">
+                            <i class="fa fa-graduation-cap"></i>
+                            <span>স্মার্ট স্টুডেন্ট পোর্টাল</span>
+                        </span>
+                        <h3 class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                            আপনার ক্লাসরুম ও অগ্রগতি এখন এক ঠিকানায়
+                        </h3>
+                        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                            ল্যাব শিডিউল, ক্লাসরুম নোটিশ, লেকচার শিট ডাউনলোড, প্র্যাকটিস পরীক্ষা এবং পেমেন্ট রসিদ ম্যানেজ করুন আপনার ডেডিকেটেড স্টুডেন্ট প্যানেল থেকে।
+                        </p>
+                        <div class="pt-2 flex flex-wrap items-center gap-4">
+                            @if(Auth::guard('student')->check())
+                                <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
+                                    <i class="fa fa-tachometer"></i>
+                                    <span>ড্যাশবোর্ডে প্রবেশ করুন</span>
+                                </a>
+                            @else
+                                <a href="{{ route('student.login') }}" class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
+                                    <i class="fa fa-sign-in"></i>
+                                    <span>স্টুডেন্ট লগইন</span>
+                                </a>
+                                <a href="{{ route('student.register') }}" class="px-5 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-all flex items-center gap-2 shadow-sm">
+                                    <i class="fa fa-user-plus text-emerald-600 dark:text-emerald-400"></i>
+                                    <span>নতুন শিক্ষার্থী নিবন্ধন</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-emerald-200 dark:border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-md">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center mx-auto text-xl border border-emerald-100 dark:border-none">
+                            <i class="fa fa-phone"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">ফ্রি ক্যারিয়ার কাউন্সেলিং</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            কোন কোর্সটি আপনার ক্যারিয়ারের জন্য উপযুক্ত তা নির্ধারণে আমাদের এক্সপার্টদের সাথে কথা বলুন।
+                        </p>
+                        <a href="tel:01791612121" class="block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-slate-800 dark:text-emerald-400 font-bold text-xs border border-emerald-600 dark:border-emerald-500/30 transition-all shadow-sm">
+                            <i class="fa fa-phone mr-1"></i> ০১৭৯১-৬১২১২১
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    function filterCourses(category, btn) {
+        var isLight = document.documentElement.classList.contains('light');
+        // Toggle active pill button
+        document.querySelectorAll('#course-category-tabs .category-pill').forEach(function(p) {
+            p.classList.remove('active', 'bg-emerald-600', 'bg-emerald-500', 'text-white', 'text-slate-950', 'shadow-md', 'shadow-glow-emerald');
+            if (isLight) {
+                p.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700', 'shadow-sm');
+            } else {
+                p.classList.add('bg-slate-900', 'border', 'border-slate-700/80', 'text-slate-300');
+            }
+        });
+        btn.classList.add('active');
+        if (isLight) {
+            btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700', 'shadow-sm');
+            btn.classList.add('bg-emerald-600', 'text-white', 'shadow-md');
+        } else {
+            btn.classList.remove('bg-slate-900', 'border-slate-700/80', 'text-slate-300');
+            btn.classList.add('bg-emerald-500', 'text-slate-950', 'shadow-glow-emerald');
+        }
+
+        // Filter cards
+        var cards = document.querySelectorAll('#courses-grid .course-item');
+        cards.forEach(function(card) {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    </script>
+
     <!--========================== National Work (Dynamic Case Studies) ============================-->
     @if (!empty($nationalWork) && count($nationalWork) > 0)
         <section id="national-work" class="py-24 sm:py-32 relative">

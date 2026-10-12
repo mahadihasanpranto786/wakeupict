@@ -371,48 +371,85 @@ class UserController extends Controller
     function user_excess($user_id){
         $user = User::findOrFail($user_id);
         if (Auth::user()->type == 'Admin') {
-            $modules = Module::orderBy('id', "ASC")
-                    ->where('orgine', 0)
+            // Retrieve root folder modules
+            $modules = Module::where('orgine', 0)
                     ->where('parents', 0)
+                    ->where('status', 1)
+                    ->orderBy('id', "ASC")
                     ->get();
+
+            // Load submodules and sub-submodules
+            foreach ($modules as $mod) {
+                $mod->subModules = Module::where('parents', $mod->id)
+                    ->where('status', 1)
+                    ->orderBy('id', 'ASC')
+                    ->get();
+
+                foreach ($mod->subModules as $sub) {
+                    $sub->subSubModules = Module::where('parents', $sub->id)
+                        ->where('status', 1)
+                        ->orderBy('id', 'ASC')
+                        ->get();
+                }
+            }
+
+            // Current assigned module IDs for this user
+            $assignedModuleIds = UserRoll::where('user_id', $user_id)
+                    ->where('is_deleted', 0)
+                    ->where('status', 1)
+                    ->pluck('module_id')
+                    ->toArray();
+
             $user_roll = UserRoll::with('user')
                     ->with('module')->where('user_id', $user_id)
                     ->where('is_deleted', 0)
                     ->where('status', 1)
                     ->latest()
-                    ->paginate(10);
-            return view('backend.theme.clasic.user.user_excess', compact('user_roll','user','modules'));
+                    ->paginate(15);
+
+            return view('backend.theme.clasic.user.user_excess', compact('user_roll','user','modules', 'assignedModuleIds'));
         } else {
             $notification = ([
-                'error' => 'Sorry You Have No Permission for Excess This One!',
+                'error' => 'Sorry You Have No Permission for Access This One!',
             ]);
             return redirect()->back()->with($notification);
         }
-     
     }
-    
 
     function user_excess_store(Request $request){
-        // dd($request->all());
-        foreach($request->module_id as $module_id){
-            $userExit =  UserRoll::where('user_id',$request->id)->where('module_id',$module_id)->first();
-            if (isset($userExit->module_id)) {
-                UserRoll::findOrFail($userExit->id)->update([
-                    'user_id' => $request->id,
-                    'module_id' => $module_id,
+        $userId = $request->id;
+        $selectedModules = $request->input('module_id', []);
+
+        if (!is_array($selectedModules)) {
+            $selectedModules = [];
+        }
+
+        // Delete/unassign any module not in the selected list
+        UserRoll::where('user_id', $userId)
+            ->whereNotIn('module_id', $selectedModules)
+            ->delete();
+
+        // Assign or ensure active for all selected modules
+        foreach($selectedModules as $module_id){
+            $userExit = UserRoll::where('user_id', $userId)->where('module_id', $module_id)->first();
+            if ($userExit) {
+                $userExit->update([
+                    'is_deleted' => 0,
+                    'status' => 1,
                     'updated_at' => Carbon::now()
                 ]);
             } else {
                 UserRoll::create([
-                    'user_id' => $request->id,
+                    'user_id' => $userId,
                     'module_id' => $module_id,
+                    'is_deleted' => 0,
+                    'status' => 1,
                     'created_at' => Carbon::now()
                 ]);
             }
-
-
         }
-        return redirect()->back()->with('success', 'User Excess Stored Successfully.');
+
+        return redirect()->back()->with('success', 'User Permissions Stored Successfully.');
     }
 
     // function user_excess_page($user_id){

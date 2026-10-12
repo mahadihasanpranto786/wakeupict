@@ -6,16 +6,43 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Zero-FOUT Theme Initializer -->
+    <!-- Zero-FOUT Theme Initializer with System Default Auto-Detection -->
     <script>
         (function() {
-            var savedTheme = localStorage.getItem('theme_mode') || 'dark';
-            if (savedTheme === 'light') {
+            var getSystemTheme = function() {
+                return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+            };
+            var savedTheme = localStorage.getItem('theme_mode');
+            var effectiveTheme = savedTheme && savedTheme !== 'custom' ? savedTheme : 'dark';
+            if (effectiveTheme === 'light') {
                 document.documentElement.classList.remove('dark');
                 document.documentElement.classList.add('light');
             } else {
                 document.documentElement.classList.remove('light');
                 document.documentElement.classList.add('dark');
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            });
+
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem('theme_mode')) {
+                        var newTheme = e.matches ? 'dark' : 'light';
+                        if (newTheme === 'light') {
+                            document.documentElement.classList.remove('dark');
+                            document.documentElement.classList.add('light');
+                        } else {
+                            document.documentElement.classList.remove('light');
+                            document.documentElement.classList.add('dark');
+                        }
+                    }
+                });
             }
         })();
     </script>
@@ -55,18 +82,32 @@
             --brand-cyan: {{ app_setting('theme_cyan_color', '#22d3ee') }};
             --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
         }
-        html, body, .wrapper, .content-wrapper {
+        html.dark, html.dark body, html.dark .wrapper, html.dark .content-wrapper {
             background-color: #030712 !important;
             background: #030712 !important;
             color: #e2e8f0 !important;
+        }
+        html.light, html.light body, html.light .wrapper, html.light .content-wrapper {
+            background-color: #f8fafc !important;
+            background: #f8fafc !important;
+            color: #0f172a !important;
         }
         .main-sidebar, aside.main-sidebar {
             background-color: #040a15 !important;
             background: #040a15 !important;
         }
-        .main-header, nav.main-header {
+        html.dark .main-header, html.dark nav.main-header {
             background-color: rgba(4,10,21,0.97) !important;
             background: rgba(4,10,21,0.97) !important;
+            border-bottom: 1px solid #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+        html.light .main-header, html.light nav.main-header {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
         }
 
         /* Bangla Global Font Styles */
@@ -79,7 +120,7 @@
         [lang="bn"],
         .font-bangla,
         .bangla-text {
-            font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
+            font-family: 'Hind Siliguri', "Noto Sans Bengali", system-ui, -apple-system, sans-serif !important;
         }
 
         /* Animated Logo Preloader in Admin Panel */
@@ -135,7 +176,7 @@
     @stack('css')
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed" style="background-color:#030712;color:#e2e8f0;">
+<body class="hold-transition sidebar-mini layout-fixed">
     <!-- Dynamic Theme Preloader with Animated Logo -->
     <div id="preloader" style="position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #030712; transition: opacity 0.5s ease-out;">
         <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; margin-bottom: 20px;">
@@ -566,9 +607,11 @@
             if (theme === 'light') {
                 document.documentElement.classList.remove('dark');
                 document.documentElement.classList.add('light');
+                document.body.classList.remove('dark-mode');
             } else {
                 document.documentElement.classList.remove('light');
                 document.documentElement.classList.add('dark');
+                document.body.classList.add('dark-mode');
             }
             updateAdminThemeUI(theme);
         }

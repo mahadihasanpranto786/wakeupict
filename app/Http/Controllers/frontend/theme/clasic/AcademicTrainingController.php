@@ -25,8 +25,15 @@ class AcademicTrainingController extends Controller
 
     function courseDetails($course_id)
     {
-        $courseData = Course::where('course_slug', $course_id)->first();
-        $courses = Course::findOrFail($courseData->id);
+        $courses = is_numeric($course_id)
+            ? Course::where('id', $course_id)->first()
+            : Course::where('course_slug', $course_id)->first();
+
+        if (!$courses) {
+            $courses = Course::where('course_slug', $course_id)
+                ->orWhere('id', $course_id)
+                ->firstOrFail();
+        }
 
         $Courseitem = $courses->courseItem()->where('status', 1)->orderBy("course_order", 'ASC')->get();
 
@@ -37,7 +44,7 @@ class AcademicTrainingController extends Controller
         $course_title = $courses->course_title;
         $page_content = DB::select('SELECT * FROM `pages` WHERE page_name = ?', [$course_title]);
 
-        $moreCourses = Course::where('id', '!=', $course_id)->where('status', 1)->get();
+        $moreCourses = Course::where('id', '!=', $courses->id)->where('status', 1)->get();
 
         return view('frontend.theme.clasic.academic_training.course_details.course_details', compact('courses', 'page_content', 'Courseitem', 'course_fassilities', 'course_members', 'moreCourses'));
     }

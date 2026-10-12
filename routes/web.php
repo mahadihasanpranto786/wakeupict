@@ -19,6 +19,14 @@ Route::middleware(['web'])->group(function () {
         Route::post('/home/update', 'backend\AppearanceController@updateHome')->name('appearance.home.update');
         Route::get('/sections', 'backend\AppearanceController@sections')->name('appearance.sections');
         Route::post('/sections/update', 'backend\AppearanceController@updateSections')->name('appearance.sections.update');
+
+        // Universal Frontend Dynamic Menu Builder
+        Route::get('/menus', 'backend\theme\clasic\appearance\FrontendMenuController@index')->name('admin.appearance.menus.index');
+        Route::post('/menus', 'backend\theme\clasic\appearance\FrontendMenuController@store')->name('admin.appearance.menus.store');
+        Route::put('/menus/{id}', 'backend\theme\clasic\appearance\FrontendMenuController@update')->name('admin.appearance.menus.update');
+        Route::post('/menus/{id}/toggle', 'backend\theme\clasic\appearance\FrontendMenuController@toggle')->name('admin.appearance.menus.toggle');
+        Route::post('/menus/reset-defaults', 'backend\theme\clasic\appearance\FrontendMenuController@resetDefaults')->name('admin.appearance.menus.reset');
+        Route::delete('/menus/{id}', 'backend\theme\clasic\appearance\FrontendMenuController@destroy')->name('admin.appearance.menus.destroy');
     });
 
     // Facebook Graph API Posts Feed
@@ -556,7 +564,7 @@ Route::middleware(['web'])->group(function () {
 
     // user excess start
     Route::get('/user_excess/{user_id}', 'backend\theme\clasic\user\UserController@user_excess')->name('user_excess');
-    Route::post('/user_excess', 'backend\theme\clasic\user\UserController@user_excess_store')->name('user_excess');
+    Route::post('/user_excess', 'backend\theme\clasic\user\UserController@user_excess_store')->name('user_excess.store');
     Route::get('/user_excess_page/{user_id}', 'backend\theme\clasic\user\UserController@user_excess_page')->name('user_excess_page');
     Route::get('/delete_user_excess/{excess_id}', 'backend\theme\clasic\user\UserController@delete_user_excess')->name('delete_user_excess');
     Route::get('/delete-all-excess/{user_id}', 'backend\theme\clasic\user\UserController@deleteAllUserExcess');
@@ -701,3 +709,91 @@ Route::get('/export-data/{id}', 'ExcelDataCotroller@export');
 Route::post('/import-data', 'ExcelDataCotroller@import')->name('import-data');
 
 // ************************************************** test end *************************************************
+
+// =========================================================================
+// WAKE UP ICT STUDENT PORTAL & LMS ROUTES
+// =========================================================================
+Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
+    // Guest student auth routes
+    Route::get('/login', 'frontend\theme\clasic\StudentAuthController@showLoginForm')->name('login');
+    Route::post('/login', 'frontend\theme\clasic\StudentAuthController@login')->name('login.submit');
+    Route::get('/register', 'frontend\theme\clasic\StudentAuthController@showRegisterForm')->name('register');
+    Route::post('/register', 'frontend\theme\clasic\StudentAuthController@register')->name('register.submit');
+    Route::post('/logout', 'frontend\theme\clasic\StudentAuthController@logout')->name('logout');
+
+    // Authenticated student routes
+    Route::group(['middleware' => ['auth:student']], function () {
+        Route::get('/dashboard', 'frontend\theme\clasic\StudentDashboardController@index')->name('dashboard');
+
+        // Profile routes
+        Route::get('/profile', 'frontend\theme\clasic\StudentProfileController@index')->name('profile.index');
+        Route::get('/profile/edit', 'frontend\theme\clasic\StudentProfileController@edit')->name('profile.edit');
+        Route::post('/profile/update', 'frontend\theme\clasic\StudentProfileController@update')->name('profile.update');
+        Route::post('/profile/password', 'frontend\theme\clasic\StudentProfileController@updatePassword')->name('profile.password');
+
+        // Dynamic Menu Feature Route Handlers (protected by student.feature)
+        // My Learning (LMS Course, Curriculum, Interactive Player, Materials & Progress)
+        Route::get('/courses/my', 'frontend\theme\clasic\StudentCourseController@myCourses')->name('courses.my')->middleware('student.feature:my_courses');
+        Route::get('/courses/browse', 'frontend\theme\clasic\StudentCourseController@browseCourses')->name('courses.browse')->middleware('student.feature:browse_courses');
+        Route::get('/courses/{id}', 'frontend\theme\clasic\StudentCourseController@courseDetails')->name('courses.details');
+        Route::post('/courses/{id}/enroll', 'frontend\theme\clasic\StudentCourseController@enroll')->name('courses.enroll');
+        Route::get('/courses/{courseId}/learn/{lessonId?}', 'frontend\theme\clasic\StudentCourseController@learn')->name('courses.learn');
+        Route::post('/courses/lessons/{lessonId}/toggle-complete', 'frontend\theme\clasic\StudentCourseController@toggleLessonComplete')->name('courses.toggle-lesson');
+        Route::get('/materials', 'frontend\theme\clasic\StudentCourseController@materials')->name('materials.index')->middleware('student.feature:learning_materials');
+        Route::get('/progress', 'frontend\theme\clasic\StudentCourseController@progress')->name('progress.index')->middleware('student.feature:course_progress');
+
+        // Classes & Attendance (Class Schedules, Real-Time Attendance Analytics, Live Zoom/Meet & Recordings)
+        Route::get('/schedule', 'frontend\theme\clasic\StudentScheduleController@schedule')->name('schedule.index')->middleware('student.feature:class_schedule');
+        Route::get('/attendance', 'frontend\theme\clasic\StudentScheduleController@attendance')->name('attendance.index')->middleware('student.feature:attendance_history');
+        Route::get('/live-classes', 'frontend\theme\clasic\StudentScheduleController@liveClasses')->name('live.index')->middleware('student.feature:live_classes');
+        Route::get('/recorded-classes', 'frontend\theme\clasic\StudentScheduleController@recordedClasses')->name('recorded.index')->middleware('student.feature:recorded_classes');
+
+        // Quiz & Examination (Online Quizzes, Live Exams, Auto-Grading & Results)
+        Route::get('/exams/upcoming', 'frontend\theme\clasic\StudentQuizController@upcomingExams')->name('exams.upcoming')->middleware('student.feature:upcoming_exams');
+        Route::get('/quiz', 'frontend\theme\clasic\StudentQuizController@onlineQuiz')->name('quiz.index')->middleware('student.feature:online_quiz');
+        Route::get('/practice', 'frontend\theme\clasic\StudentQuizController@practiceTests')->name('practice.index')->middleware('student.feature:practice_tests');
+        Route::get('/results', 'frontend\theme\clasic\StudentQuizController@allResults')->name('results.index')->middleware('student.feature:results');
+        Route::get('/exams/history', 'frontend\theme\clasic\StudentQuizController@examHistory')->name('exams.history')->middleware('student.feature:exam_history');
+        Route::get('/quiz/{id}', 'frontend\theme\clasic\StudentQuizController@lobby')->name('quiz.lobby');
+        Route::post('/quiz/{id}/start', 'frontend\theme\clasic\StudentQuizController@startQuiz')->name('quiz.start');
+        Route::get('/quiz/attempt/{attemptId}', 'frontend\theme\clasic\StudentQuizController@takeQuiz')->name('quiz.take');
+        Route::post('/quiz/attempt/{attemptId}/save-answer', 'frontend\theme\clasic\StudentQuizController@saveAnswer')->name('quiz.save-answer');
+        Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
+        Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
+
+        // Assignments & Projects (Coursework, File Uploads, Capstones & Rubric Feedback)
+        Route::get('/assignments', 'frontend\theme\clasic\StudentAssignmentController@assignments')->name('assignments.index')->middleware('student.feature:my_assignments');
+        Route::get('/assignments/submit', 'frontend\theme\clasic\StudentAssignmentController@showSubmit')->name('assignments.submit')->middleware('student.feature:submit_assignment');
+        Route::get('/assignments/{id}/submit', 'frontend\theme\clasic\StudentAssignmentController@showSubmit')->name('assignments.submit.id');
+        Route::post('/assignments/{id}/submit', 'frontend\theme\clasic\StudentAssignmentController@storeSubmission')->name('assignments.store');
+        Route::get('/projects', 'frontend\theme\clasic\StudentAssignmentController@projects')->name('projects.index')->middleware('student.feature:project_submissions');
+        Route::get('/assignments/feedback', 'frontend\theme\clasic\StudentAssignmentController@feedback')->name('assignments.feedback')->middleware('student.feature:teacher_feedback');
+
+        // Fees & Payments (Course Fees, Installment Schedules, Online Payments & Receipts)
+        Route::get('/fees', 'frontend\theme\clasic\StudentPaymentController@fees')->name('fees.index')->middleware('student.feature:course_fees');
+        Route::get('/payments/history', 'frontend\theme\clasic\StudentPaymentController@paymentHistory')->name('payments.history')->middleware('student.feature:payment_history');
+        Route::get('/dues', 'frontend\theme\clasic\StudentPaymentController@outstandingDues')->name('dues.index')->middleware('student.feature:outstanding_dues');
+        Route::get('/receipts', 'frontend\theme\clasic\StudentPaymentController@receipts')->name('receipts.index')->middleware('student.feature:receipts');
+        Route::get('/receipts/{receiptNumber}/print', 'frontend\theme\clasic\StudentPaymentController@printReceipt')->name('receipts.print');
+        Route::post('/payments/submit', 'frontend\theme\clasic\StudentPaymentController@submitPayment')->name('payments.submit');
+
+        // Certificates & Achievements
+        Route::get('/certificates', 'frontend\theme\clasic\StudentCertificateController@certificates')->name('certificates.index')->middleware('student.feature:certificates_achievements');
+        Route::get('/certificates/{code}', 'frontend\theme\clasic\StudentCertificateController@viewCertificate')->name('certificates.view');
+
+        // Notifications & Broadcast Announcements
+        Route::get('/notifications', 'frontend\theme\clasic\StudentNotificationController@index')->name('notifications.index')->middleware('student.feature:notifications_announcements');
+        Route::post('/notifications/{id}/mark-read', 'frontend\theme\clasic\StudentNotificationController@markAsRead')->name('notifications.mark-read');
+        Route::post('/notifications/mark-all-read', 'frontend\theme\clasic\StudentNotificationController@markAllRead')->name('notifications.mark-all-read');
+
+        // Helpdesk & Support Communication Tickets
+        Route::get('/support', 'frontend\theme\clasic\StudentSupportController@index')->name('support.index')->middleware('student.feature:support_communication');
+        Route::get('/support/create', 'frontend\theme\clasic\StudentSupportController@create')->name('support.create');
+        Route::post('/support', 'frontend\theme\clasic\StudentSupportController@store')->name('support.store');
+        Route::get('/support/{id}', 'frontend\theme\clasic\StudentSupportController@show')->name('support.show');
+        Route::post('/support/{id}/reply', 'frontend\theme\clasic\StudentSupportController@reply')->name('support.reply');
+    });
+});
+
+// Public Independent Certificate Verification Portal
+Route::get('/verify/certificate/{hash}', 'frontend\theme\clasic\StudentCertificateController@verifyCertificate')->name('certificates.verify');

@@ -8,10 +8,25 @@
 <div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-28 pb-24">
 
     <!-- Course Title & Overview Hero -->
-    <section class="relative py-12 border-b border-slate-800/80 bg-slate-900/30">
+    <section class="relative py-12 border-b border-slate-800/80 bg-gradient-to-b from-slate-900/60 to-slate-950">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-4">
-                <span>{{ __('frontend.academic.course_blueprint') }}</span>
+            <div class="flex flex-wrap items-center gap-2.5 mb-4">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono tracking-wider uppercase font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>{{ __('frontend.academic.course_blueprint') }}</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono tracking-wider font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span>অফলাইন ল্যাব ব্যাচ</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-mono tracking-wider font-semibold">
+                    <i class="fa fa-desktop text-[11px]"></i>
+                    <span>আধুনিক কম্পিউটার ল্যাব</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono tracking-wider font-semibold">
+                    <i class="fa fa-certificate text-[11px]"></i>
+                    <span>ভেরিফায়েড সার্টিফিকেট</span>
+                </span>
             </div>
             <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-6 leading-tight">
                 {{ $courses->course_title }}
@@ -154,11 +169,19 @@
                         </ul>
 
                         <!-- Direct Enrollment CTA Button -->
-                        <a href="{{ url('training/' . $courses->course_slug . '/student-registration') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                        <a href="{{ url('training/' . $courses->course_slug . '/student-registration') }}" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-bold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
                             <i class="fa fa-graduation-cap"></i>
                             <span>{{ __('frontend.academic.register_btn') }}</span>
                         </a>
 
+                        <!-- 10MS Offline Campus Hotline & Counseling -->
+                        <div class="mt-4 pt-4 border-t border-slate-800 text-center space-y-2">
+                            <p class="text-xs text-slate-400">ক্যাম্পাসে এসে সরাসরি কথা বলতে কল করুন:</p>
+                            <a href="tel:{{ app_setting('contact_phone', '01791612121') }}" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all">
+                                <i class="fa fa-phone text-emerald-400"></i>
+                                <span>{{ app_setting('contact_phone', '01791-612121') }}</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 

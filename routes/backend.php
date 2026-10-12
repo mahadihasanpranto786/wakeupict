@@ -523,7 +523,7 @@ Route::get('/delete-designation/{designation_id}', 'backend\theme\clasic\user\Us
 
 // user excess start 
 Route::get('/user_excess/{user_id}', 'backend\theme\clasic\user\UserController@user_excess')->name('user_excess');
-Route::post('/user_excess', 'backend\theme\clasic\user\UserController@user_excess_store')->name('user_excess');
+Route::post('/user_excess', 'backend\theme\clasic\user\UserController@user_excess_store')->name('user_excess.store');
 Route::get('/user_excess_page/{user_id}', 'backend\theme\clasic\user\UserController@user_excess_page')->name('user_excess_page');
 Route::get('/delete_user_excess/{excess_id}', 'backend\theme\clasic\user\UserController@delete_user_excess')->name('delete_user_excess');
 Route::get('/delete-all-excess/{user_id}', 'backend\theme\clasic\user\UserController@deleteAllUserExcess');
@@ -592,9 +592,36 @@ Route::get('/deny-application/{application_id}', 'backend\theme\clasic\EmployeeL
 
 // ================================================== employee leave end =========================================================//
 
+// ================================================== Student Panel Dynamic Menus =========================================================//
+Route::group(['prefix' => 'admin/student-menus', 'as' => 'admin.student-menus.'], function () {
+    Route::get('/', 'backend\theme\clasic\student\StudentMenuController@index')->name('index');
+    Route::post('/', 'backend\theme\clasic\student\StudentMenuController@store')->name('store');
+    Route::put('/{id}', 'backend\theme\clasic\student\StudentMenuController@update')->name('update');
+    Route::post('/{id}/toggle', 'backend\theme\clasic\student\StudentMenuController@toggle')->name('toggle');
+    Route::post('/{id}/move/{direction}', 'backend\theme\clasic\student\StudentMenuController@move')->name('move');
+    Route::post('/reset-defaults', 'backend\theme\clasic\student\StudentMenuController@resetDefaults')->name('reset');
+    Route::delete('/{id}', 'backend\theme\clasic\student\StudentMenuController@destroy')->name('destroy');
+});
 
+// ================================================== LMS Admin Certificate Management =========================================================//
+Route::group(['prefix' => 'admin/certificates', 'as' => 'admin.certificates.'], function () {
+    Route::get('/', 'backend\theme\clasic\lms\AdminCertificateController@index')->name('index');
+    Route::post('/', 'backend\theme\clasic\lms\AdminCertificateController@store')->name('store');
+    Route::put('/{id}', 'backend\theme\clasic\lms\AdminCertificateController@update')->name('update');
+    Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminCertificateController@toggle')->name('toggle');
+    Route::delete('/{id}', 'backend\theme\clasic\lms\AdminCertificateController@destroy')->name('destroy');
+});
+
+// ================================================== LMS Admin Quizzes & Excel Bulk Import =========================================================//
+Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function () {
+    Route::get('/', 'backend\theme\clasic\lms\AdminQuizController@index')->name('index');
+    Route::post('/', 'backend\theme\clasic\lms\AdminQuizController@store')->name('store');
+    Route::post('/import', 'backend\theme\clasic\lms\AdminQuizController@importExcel')->name('import');
+    Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
+    Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');
+    Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
+});
 
 //**************************************** BACKEND ROUTES END*************************************************** */
-
 
 });
