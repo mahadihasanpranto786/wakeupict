@@ -29,13 +29,31 @@
         })();
     </script>
 
-    <!-- Google Fonts: Hind Siliguri for Global Bengali & English Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Dynamic Theme Palette CSS Variables -->
+    <!-- Bengali & Global Typography: my_kalpurush & Inherit -->
     <style>
+        @font-face {
+            font-family: 'my_kalpurush';
+            font-display: swap;
+            font-style: normal;
+            font-weight: 100 900;
+            src: local('my_kalpurush'), local('Kalpurush'), local('Kalpurush ANSI'),
+                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
+                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Kalpurush';
+            font-display: swap;
+            font-style: normal;
+            font-weight: 100 900;
+            src: local('Kalpurush'), local('my_kalpurush'), local('Kalpurush ANSI'),
+                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
+                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
+        }
+
+        html {
+            font-family: my_kalpurush, 'Kalpurush', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
         :root {
             --brand-primary: {{ app_setting('theme_primary_color', '#10b981') }};
             --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '16, 185, 129') }};
@@ -45,9 +63,13 @@
             --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
         }
 
-        /* Hind Siliguri Global Typography */
+        /* Clean Uncluttered Typography per User Directive */
         body, html, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
-            font-family: 'Hind Siliguri', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: my_kalpurush;
+            font-family: inherit;
+            font-weight: 500;
+            line-height: 1.1;
+            color: inherit;
         }
         .font-mono, [class*="font-mono"], code, pre {
             font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;

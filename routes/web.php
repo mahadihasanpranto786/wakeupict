@@ -758,6 +758,8 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::post('/quiz/{id}/start', 'frontend\theme\clasic\StudentQuizController@startQuiz')->name('quiz.start');
         Route::get('/quiz/attempt/{attemptId}', 'frontend\theme\clasic\StudentQuizController@takeQuiz')->name('quiz.take');
         Route::post('/quiz/attempt/{attemptId}/save-answer', 'frontend\theme\clasic\StudentQuizController@saveAnswer')->name('quiz.save-answer');
+        Route::post('/quiz/attempt/{attemptId}/toggle-flag', 'frontend\theme\clasic\StudentQuizController@toggleFlag')->name('quiz.toggle-flag');
+        Route::post('/quiz/attempt/{attemptId}/switch-view-mode', 'frontend\theme\clasic\StudentQuizController@switchViewMode')->name('quiz.switch-view-mode');
         Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
         Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
 

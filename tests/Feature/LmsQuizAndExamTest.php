@@ -215,4 +215,224 @@ class LmsQuizAndExamTest extends TestCase
         $historyResponse->assertStatus(200);
         $historyResponse->assertSee('Passed');
     }
+
+    /**
+     * ALL QUESTIONS VIEW: Selecting an option immediately locks that question
+     * while other questions remain answerable. Attempting to change locked answer fails.
+     */
+    public function testAllQuestionsViewLocksAnswerImmediatelyAndKeepsOtherQuestionsAnswerable()
+    {
+        // Start quiz in all_questions view mode
+        $startResponse = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $this->quiz->id), [
+                'view_mode' => 'all_questions',
+            ]);
+
+        $attempt = LmsQuizAttempt::where('quiz_id', $this->quiz->id)
+            ->where('student_account_id', $this->student->id)
+            ->where('status', 'in_progress')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($attempt);
+        $this->assertEquals('all_questions', $attempt->view_mode);
+
+        // 1. Select answer for Q1 in all_questions mode -> should immediately finalize and lock!
+        $res1 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1CorrectOpt->id],
+                'view_mode' => 'all_questions',
+                'action' => 'save',
+            ]);
+
+        $res1->assertStatus(200);
+        $res1->assertJson([
+            'status' => 'success',
+            'is_finalized' => true,
+            'state' => 'finalized',
+        ]);
+
+        $q1Answer = LmsQuizAnswer::where('attempt_id', $attempt->id)->where('question_id', $this->q1->id)->first();
+        $this->assertNotNull($q1Answer);
+        $this->assertTrue((bool)$q1Answer->is_finalized);
+
+        // 2. Try to change Q1 answer to wrong option -> must be rejected by server with 422 LOCKED!
+        $res2 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1WrongOpt->id],
+                'view_mode' => 'all_questions',
+                'action' => 'save',
+            ]);
+
+        $res2->assertStatus(422);
+        $res2->assertJson([
+            'status' => 'error',
+            'code' => 'LOCKED',
+        ]);
+
+        // Q1 option must remain untouched (still correct option)
+        $q1Answer->refresh();
+        $this->assertEquals([$this->q1CorrectOpt->id], $q1Answer->selected_option_ids_array);
+
+        // 3. Q2 is unanswered -> must still be answerable!
+        $res3 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q2->id,
+                'selected_option_ids' => [$this->q2CorrectOpt->id],
+                'view_mode' => 'all_questions',
+                'action' => 'save',
+            ]);
+
+        $res3->assertStatus(200);
+        $res3->assertJson([
+            'status' => 'success',
+            'is_finalized' => true,
+        ]);
+
+        // Clean up attempt
+        LmsQuizAnswer::where('attempt_id', $attempt->id)->delete();
+        $attempt->delete();
+    }
+
+    /**
+     * ONE-BY-ONE VIEW: Selecting an option creates a draft that can be changed.
+     * Only Submit Answer finalizes and locks the question.
+     */
+    public function testOneByOneViewAllowsDraftOptionChangeUntilSubmittedAndLocked()
+    {
+        // Start quiz in one_by_one view mode
+        $startResponse = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $this->quiz->id), [
+                'view_mode' => 'one_by_one',
+            ]);
+
+        $attempt = LmsQuizAttempt::where('quiz_id', $this->quiz->id)
+            ->where('student_account_id', $this->student->id)
+            ->where('status', 'in_progress')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($attempt);
+
+        // 1. Select initial option for Q1 as draft (not finalized)
+        $draftRes1 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1WrongOpt->id],
+                'view_mode' => 'one_by_one',
+                'action' => 'save',
+                'finalize' => false,
+            ]);
+
+        $draftRes1->assertStatus(200);
+        $draftRes1->assertJson([
+            'status' => 'success',
+            'is_finalized' => false,
+            'state' => 'draft',
+        ]);
+
+        $q1Ans = LmsQuizAnswer::where('attempt_id', $attempt->id)->where('question_id', $this->q1->id)->first();
+        $this->assertFalse((bool)$q1Ans->is_finalized);
+        $this->assertEquals([$this->q1WrongOpt->id], $q1Ans->selected_option_ids_array);
+
+        // 2. Change option before submission -> allowed!
+        $draftRes2 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1CorrectOpt->id],
+                'view_mode' => 'one_by_one',
+                'action' => 'save',
+                'finalize' => false,
+            ]);
+
+        $draftRes2->assertStatus(200);
+        $draftRes2->assertJson([
+            'status' => 'success',
+            'is_finalized' => false,
+            'state' => 'draft',
+        ]);
+
+        $q1Ans->refresh();
+        $this->assertFalse((bool)$q1Ans->is_finalized);
+        $this->assertEquals([$this->q1CorrectOpt->id], $q1Ans->selected_option_ids_array);
+
+        // 3. Finalize and Submit Answer for Q1 -> locks it!
+        $finalizeRes = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1CorrectOpt->id],
+                'view_mode' => 'one_by_one',
+                'action' => 'finalize',
+                'finalize' => true,
+            ]);
+
+        $finalizeRes->assertStatus(200);
+        $finalizeRes->assertJson([
+            'status' => 'success',
+            'is_finalized' => true,
+            'state' => 'finalized',
+        ]);
+
+        $q1Ans->refresh();
+        $this->assertTrue((bool)$q1Ans->is_finalized);
+
+        // 4. Try to change after finalization -> rejected by server with 422 LOCKED!
+        $afterLockRes = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.save-answer', $attempt->id), [
+                'question_id' => $this->q1->id,
+                'selected_option_ids' => [$this->q1WrongOpt->id],
+                'view_mode' => 'one_by_one',
+                'action' => 'save',
+            ]);
+
+        $afterLockRes->assertStatus(422);
+        $afterLockRes->assertJson([
+            'status' => 'error',
+            'code' => 'LOCKED',
+        ]);
+
+        // Clean up attempt
+        LmsQuizAnswer::where('attempt_id', $attempt->id)->delete();
+        $attempt->delete();
+    }
+
+    /**
+     * Test page refresh and reconnection preserves locked states
+     */
+    public function testRefreshPreservesLockedAnswers()
+    {
+        $attempt = LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 99,
+            'started_at' => \Carbon\Carbon::now(),
+            'total_marks' => 20.00,
+            'status' => 'in_progress',
+            'view_mode' => 'all_questions',
+            'question_set' => 'Set A',
+        ]);
+
+        LmsQuizAnswer::create([
+            'attempt_id' => $attempt->id,
+            'question_id' => $this->q1->id,
+            'selected_option_ids' => json_encode([$this->q1CorrectOpt->id]),
+            'is_finalized' => true,
+            'finalized_at' => \Carbon\Carbon::now(),
+        ]);
+
+        // Refresh/revisit the take page
+        $takeRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.take', $attempt->id));
+
+        $takeRes->assertStatus(200);
+        // HTML rendered has disabled input and locked badge
+        $takeRes->assertSee('disabled');
+        $takeRes->assertSee('লকড');
+
+        // Clean up
+        LmsQuizAnswer::where('attempt_id', $attempt->id)->delete();
+        $attempt->delete();
+    }
 }

@@ -13,6 +13,9 @@ class LmsQuizAnswer extends Model
     protected $casts = [
         'is_correct' => 'boolean',
         'marks_obtained' => 'float',
+        'is_finalized' => 'boolean',
+        'finalized_at' => 'datetime',
+        'is_flagged' => 'boolean',
     ];
 
     public function attempt()
@@ -40,5 +43,13 @@ class LmsQuizAnswer extends Model
         }
 
         return array_filter(explode(',', $this->selected_option_ids));
+    }
+
+    /**
+     * Check if answer is locked
+     */
+    public function isLocked()
+    {
+        return (bool)$this->is_finalized;
     }
 }

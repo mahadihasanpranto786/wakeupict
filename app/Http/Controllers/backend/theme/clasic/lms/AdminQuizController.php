@@ -74,20 +74,35 @@ class AdminQuizController extends Controller
             'duration_minutes' => 'required|integer|min:1|max:300',
             'pass_marks'       => 'nullable|numeric|min:0',
             'is_published'     => 'nullable|boolean',
+            'view_mode'        => 'nullable|in:all_questions,one_by_one',
+            'subject_code'     => 'nullable|string|max:20',
+            'board_name'       => 'nullable|string|max:100',
+            'question_set'     => 'nullable|string|max:20',
+            'negative_marks'   => 'nullable|numeric|min:0',
+            'result_release_policy' => 'nullable|in:immediate,after_deadline,admin_publish',
+            'locking_policy'   => 'nullable|in:mode_default,instant_lock,confirm_lock',
         ]);
 
         $quiz = LmsQuiz::create([
-            'course_id'         => $request->course_id,
-            'title'             => $request->title,
-            'description'       => $request->description,
-            'quiz_type'         => $request->quiz_type,
-            'duration_minutes'  => (int)$request->duration_minutes,
-            'total_marks'       => 0, // auto-calculated from questions
-            'pass_marks'        => $request->pass_marks ?: 5.0,
-            'shuffle_questions' => true,
-            'shuffle_options'   => true,
-            'max_attempts'      => 0, // unlimited
-            'is_published'      => $request->has('is_published') ? (bool)$request->is_published : true,
+            'course_id'             => $request->course_id,
+            'title'                 => $request->title,
+            'description'           => $request->description,
+            'quiz_type'             => $request->quiz_type,
+            'duration_minutes'      => (int)$request->duration_minutes,
+            'total_marks'           => 0, // auto-calculated from questions
+            'pass_marks'            => $request->pass_marks ?: 5.0,
+            'shuffle_questions'     => true,
+            'shuffle_options'       => true,
+            'max_attempts'          => 0, // unlimited
+            'is_published'          => $request->has('is_published') ? (bool)$request->is_published : true,
+            'view_mode'             => $request->input('view_mode', 'all_questions'),
+            'subject_code'          => $request->input('subject_code', '101'),
+            'board_name'            => $request->input('board_name', 'ঢাকা শিক্ষা বোর্ড'),
+            'question_set'          => $request->input('question_set', 'Set A'),
+            'negative_marks'        => (float)$request->input('negative_marks', 0.0),
+            'result_release_policy' => $request->input('result_release_policy', 'immediate'),
+            'locking_policy'        => $request->input('locking_policy', 'mode_default'),
+            'allow_question_flagging' => true,
         ]);
 
         return redirect()->back()->with('success', "Quiz '{$quiz->title}' created successfully! You can now import MCQs via Excel.");
@@ -198,5 +213,106 @@ class AdminQuizController extends Controller
         });
 
         return redirect()->back()->with('success', "Quiz '{$title}' and its questions were deleted successfully.");
+    }
+
+    /**
+     * Generate / Distribute Question Sets (Set A, Set B, Set C, Set D)
+     */
+    public function generateSets(Request $request, $id)
+    {
+        $quiz = LmsQuiz::findOrFail($id);
+        $baseQuestions = LmsQuestion::where('quiz_id', $quiz->id)->with('options')->get();
+
+        if ($baseQuestions->isEmpty()) {
+            return redirect()->back()->withErrors(['error' => 'কুইজে কোনো প্রশ্ন নেই। প্রথমে এক্সেল থেকে প্রশ্ন আপলোড করুন।']);
+        }
+
+        $targetSets = $request->input('sets', ['Set A', 'Set B', 'Set C', 'Set D']);
+        if (!is_array($targetSets)) {
+            $targetSets = ['Set A', 'Set B', 'Set C', 'Set D'];
+        }
+
+        DB::beginTransaction();
+        try {
+            // Assign existing questions to Set A if not set
+            foreach ($baseQuestions as $idx => $q) {
+                if (empty($q->set_code) || $q->set_code === 'Set A') {
+                    $q->update(['set_code' => 'Set A']);
+                }
+            }
+
+            // Create variations for Set B, Set C, etc. with shuffled option order
+            $currentOrder = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
+            foreach ($targetSets as $set) {
+                if ($set === 'Set A') continue;
+
+                // Check if this set already has questions
+                $existingCount = LmsQuestion::where('quiz_id', $quiz->id)->where('set_code', $set)->count();
+                if ($existingCount > 0) continue;
+
+                $shuffledQuestions = $baseQuestions->shuffle();
+                foreach ($shuffledQuestions as $bq) {
+                    $currentOrder++;
+                    $newQ = LmsQuestion::create([
+                        'quiz_id'        => $quiz->id,
+                        'question_text'  => $bq->question_text,
+                        'question_type'  => $bq->question_type,
+                        'marks'          => $bq->marks,
+                        'negative_marks' => $bq->negative_marks,
+                        'set_code'       => $set,
+                        'category'       => $bq->category,
+                        'chapter'        => $bq->chapter,
+                        'topic'          => $bq->topic,
+                        'difficulty'     => $bq->difficulty,
+                        'stimulus'       => $bq->stimulus,
+                        'explanation'    => $bq->explanation,
+                        'order_index'    => $currentOrder,
+                        'is_active'      => true,
+                    ]);
+
+                    // Shuffle options for this set
+                    $opts = $bq->options->shuffle();
+                    foreach ($opts as $oIdx => $opt) {
+                        \App\model\LmsQuestionOption::create([
+                            'question_id' => $newQ->id,
+                            'option_text' => $opt->option_text,
+                            'is_correct'  => $opt->is_correct,
+                            'order_index' => $oIdx + 1,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', "সফলভাবে সেট " . implode(', ', $targetSets) . " তৈরি ও অপশন শাফলিং সম্পন্ন হয়েছে!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'সেট তৈরিতে সমস্যা হয়েছে: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Admin Assessment Performance & Exam Reports
+     */
+    public function reports(Request $request)
+    {
+        $query = \App\model\LmsQuizAttempt::with(['quiz.course', 'student'])->latest('submitted_at');
+
+        if ($request->filled('quiz_id')) {
+            $query->where('quiz_id', $request->quiz_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('set')) {
+            $query->where('question_set', $request->set);
+        }
+
+        $attempts = $query->paginate(25)->appends($request->all());
+        $quizzes = LmsQuiz::orderBy('title', 'asc')->get();
+
+        return view('backend.theme.clasic.lms.quizzes.reports', compact('attempts', 'quizzes'));
     }
 }

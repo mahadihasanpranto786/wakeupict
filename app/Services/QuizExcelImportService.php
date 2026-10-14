@@ -76,6 +76,9 @@ class QuizExcelImportService
         $importedCount = 0;
         $errors = [];
         $currentOrder = LmsQuestion::where('quiz_id', $quizId)->max('order_index') ?: 0;
+        $existingQuestions = LmsQuestion::where('quiz_id', $quizId)->pluck('question_text')->map(function($t) {
+            return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
+        })->toArray();
 
         DB::beginTransaction();
 
@@ -91,6 +94,12 @@ class QuizExcelImportService
                     continue; // Skip blank rows
                 }
 
+                $normalizedQ = strtolower(trim(preg_replace('/\s+/', ' ', $qText)));
+                if (in_array($normalizedQ, $existingQuestions)) {
+                    $errors[] = "Row {$rowIndex}: Duplicate question detected and skipped ('" . mb_substr($qText, 0, 45) . "...').";
+                    continue;
+                }
+
                 $optA = isset($colMap['option_a'], $row[$colMap['option_a']]) ? trim((string)$row[$colMap['option_a']]) : '';
                 $optB = isset($colMap['option_b'], $row[$colMap['option_b']]) ? trim((string)$row[$colMap['option_b']]) : '';
                 $optC = isset($colMap['option_c'], $row[$colMap['option_c']]) ? trim((string)$row[$colMap['option_c']]) : '';
@@ -103,20 +112,39 @@ class QuizExcelImportService
 
                 $rawCorrect = isset($colMap['correct'], $row[$colMap['correct']]) ? trim((string)$row[$colMap['correct']]) : 'A';
                 $marks = isset($colMap['marks'], $row[$colMap['marks']]) && is_numeric($row[$colMap['marks']]) ? (float)$row[$colMap['marks']] : 1.0;
+                $negMarks = isset($colMap['negative_marks'], $row[$colMap['negative_marks']]) && is_numeric($row[$colMap['negative_marks']]) ? abs((float)$row[$colMap['negative_marks']]) : null;
                 $explanation = isset($colMap['explanation'], $row[$colMap['explanation']]) ? trim((string)$row[$colMap['explanation']]) : null;
+                $setCode = isset($colMap['set_code'], $row[$colMap['set_code']]) && trim((string)$row[$colMap['set_code']]) !== '' ? trim((string)$row[$colMap['set_code']]) : ($quiz->question_set ?: 'Set A');
+                $category = isset($colMap['category'], $row[$colMap['category']]) ? trim((string)$row[$colMap['category']]) : null;
+                $chapter = isset($colMap['chapter'], $row[$colMap['chapter']]) ? trim((string)$row[$colMap['chapter']]) : null;
+                $topic = isset($colMap['topic'], $row[$colMap['topic']]) ? trim((string)$row[$colMap['topic']]) : null;
+                $difficulty = isset($colMap['difficulty'], $row[$colMap['difficulty']]) ? strtolower(trim((string)$row[$colMap['difficulty']])) : 'medium';
+                if (!in_array($difficulty, ['easy', 'medium', 'hard'])) {
+                    $difficulty = 'medium';
+                }
+                $stimulus = isset($colMap['stimulus'], $row[$colMap['stimulus']]) ? trim((string)$row[$colMap['stimulus']]) : null;
 
                 $currentOrder++;
 
                 // Create Question
                 $question = LmsQuestion::create([
-                    'quiz_id'       => $quizId,
-                    'question_text' => $qText,
-                    'question_type' => 'mcq',
-                    'marks'         => $marks > 0 ? $marks : 1.0,
-                    'explanation'   => $explanation ?: null,
-                    'order_index'   => $currentOrder,
-                    'is_active'     => true,
+                    'quiz_id'        => $quizId,
+                    'question_text'  => $qText,
+                    'question_type'  => 'mcq_single',
+                    'marks'          => $marks > 0 ? $marks : 1.0,
+                    'negative_marks' => $negMarks,
+                    'set_code'       => $setCode,
+                    'category'       => $category,
+                    'chapter'        => $chapter,
+                    'topic'          => $topic,
+                    'difficulty'     => $difficulty,
+                    'stimulus'       => $stimulus,
+                    'explanation'    => $explanation ?: null,
+                    'order_index'    => $currentOrder,
+                    'is_active'      => true,
                 ]);
+
+                $existingQuestions[] = $normalizedQ;
 
                 // Determine correct option
                 $correctIndex = $this->resolveCorrectOption($rawCorrect, [$optA, $optB, $optC, $optD]);
@@ -207,6 +235,34 @@ class QuizExcelImportService
             elseif (in_array($h, ['marks', 'mark', 'points', 'point', 'score', 'নম্বর'])) {
                 $map['marks'] = $colLetter;
             }
+            // Negative Marks
+            elseif (in_array($h, ['negativemarks', 'negativemark', 'negative', 'negmarks', 'ভুলনম্বর', 'নেগেটিভমার্ক', 'ভুলকাটা'])) {
+                $map['negative_marks'] = $colLetter;
+            }
+            // Set Code (Set A, Set B, Set C, Set D)
+            elseif (in_array($h, ['set', 'setcode', 'সেট', 'questiongroup', 'group'])) {
+                $map['set_code'] = $colLetter;
+            }
+            // Category / Subject
+            elseif (in_array($h, ['category', 'ক্যাটাগরি', 'ক্যাটেগরি', 'subject', 'বিষয়', 'বিষয়'])) {
+                $map['category'] = $colLetter;
+            }
+            // Chapter
+            elseif (in_array($h, ['chapter', 'অধ্যায়', 'অধ্যায়', 'পাঠ'])) {
+                $map['chapter'] = $colLetter;
+            }
+            // Topic
+            elseif (in_array($h, ['topic', 'টপিক', 'বিষয়বস্তু'])) {
+                $map['topic'] = $colLetter;
+            }
+            // Difficulty
+            elseif (in_array($h, ['difficulty', 'level', 'লেভেল', 'কঠিন্যতা'])) {
+                $map['difficulty'] = $colLetter;
+            }
+            // Stimulus / Passage
+            elseif (in_array($h, ['stimulus', 'passage', 'context', 'উদ্দীপক'])) {
+                $map['stimulus'] = $colLetter;
+            }
             // Explanation
             elseif (in_array($h, ['explanation', 'explain', 'solution', 'ব্যাখ্যা'])) {
                 $map['explanation'] = $colLetter;
@@ -251,7 +307,23 @@ class QuizExcelImportService
      */
     public function generateSampleCsv()
     {
-        $headers = ['question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option', 'marks', 'explanation'];
+        $headers = [
+            'question_text',
+            'option_a',
+            'option_b',
+            'option_c',
+            'option_d',
+            'correct_option',
+            'marks',
+            'negative_marks',
+            'set_code',
+            'category',
+            'chapter',
+            'topic',
+            'difficulty',
+            'stimulus',
+            'explanation'
+        ];
 
         $sampleRows = [
             [
@@ -262,6 +334,13 @@ class QuizExcelImportService
                 'Laser Printer',
                 'A',
                 '1',
+                '0.25',
+                'Set A',
+                'Computer Basics',
+                'Hardware Fundamentals',
+                'Input Devices',
+                'easy',
+                '',
                 'Keyboard feeds data and keystrokes into the central processing unit.'
             ],
             [
@@ -272,7 +351,31 @@ class QuizExcelImportService
                 '৫টি',
                 'B',
                 '1',
+                '0.25',
+                'Set A',
+                'ICT Academic',
+                'Computer Structure',
+                'CPU Architecture',
+                'medium',
+                '',
                 'CPU প্রধানত তিনটি অংশে বিভক্ত: ALU, Control Unit এবং Registers/Memory Unit.'
+            ],
+            [
+                'উদ্দীপকের আলোকে নিচের কোনটি সত্য?',
+                'i ও ii',
+                'i ও iii',
+                'ii ও iii',
+                'i, ii ও iii',
+                'D',
+                '1',
+                '0.50',
+                'Set B',
+                'Bangla Sahitya',
+                'গদ্য',
+                'উপন্যাস বিশ্লেষণ',
+                'hard',
+                'জালালের দুই বউয়ের মধ্যে মিমি ছোট। সে সংসার সম্পর্কে উদাসীন।',
+                'উদ্দীপকে মিমির স্বাধীনচেতা ও চঞ্চল মনোভাব সবকটি বৈশিষ্ট্যকে সমর্থন করে।'
             ],
             [
                 'HTML ভাষায় সবচেয়ে বড় শিরোনাম (Largest Heading) প্রদর্শনের ট্যাগ কোনটি?',
@@ -282,6 +385,13 @@ class QuizExcelImportService
                 '<header>',
                 'C',
                 '1',
+                '0.25',
+                'Set B',
+                'Web Development',
+                'HTML5 Basics',
+                'Semantic Headers',
+                'easy',
+                '',
                 '<h1> ট্যাগটি HTML স্ট্যান্ডার্ড অনুসারে প্রধান শিরোনামের জন্য নির্ধারিত।'
             ],
             [
@@ -292,17 +402,14 @@ class QuizExcelImportService
                 '=SUM(A1:A10)',
                 'D',
                 '1',
+                '0.25',
+                'Set A',
+                'Office Applications',
+                'Spreadsheet Analysis',
+                'Mathematical Formulas',
+                'easy',
+                '',
                 '=SUM() ফাংশন নির্বাচিত সেল রেঞ্জের মোট যোগফল বের করে।'
-            ],
-            [
-                'Graphic Design এ RGB কালার মোড প্রধানত কিসের জন্য ব্যবহৃত হয়?',
-                'ডিজিটাল স্ক্রিন ও ওয়েব ডিসপ্লে',
-                'অফসেট প্রিন্টিং',
-                'বিলবোর্ড ভিনাইল প্রিন্ট',
-                'লেজার কাটিং',
-                'A',
-                '1',
-                'RGB (Red Green Blue) কালার মোড স্ক্রিন ও ডিজিটাল মিডিয়ার জন্য আদর্শ।'
             ]
         ];
 

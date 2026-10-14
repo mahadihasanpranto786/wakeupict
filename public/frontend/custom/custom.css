@@ -44,11 +44,36 @@
     font-weight: normal;
   }
 
+@font-face {
+    font-family: 'my_kalpurush';
+    font-display: swap;
+    font-style: normal;
+    font-weight: 100 900;
+    src: local('my_kalpurush'), local('Kalpurush'), local('Kalpurush ANSI'),
+         url('/frontend/fonts/Kalpurush.woff2') format('woff2'),
+         url('/frontend/fonts/Kalpurush.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Kalpurush';
+    font-display: swap;
+    font-style: normal;
+    font-weight: 100 900;
+    src: local('Kalpurush'), local('my_kalpurush'), local('Kalpurush ANSI'),
+         url('/frontend/fonts/Kalpurush.woff2') format('woff2'),
+         url('/frontend/fonts/Kalpurush.ttf') format('truetype');
+}
+
 /* Bangla Global Font Definition */
 html[lang="bn"],
 html[lang="bn"] body,
 [lang="bn"],
 .font-bangla,
 .bangla-text {
-    font-family: "Noto Sans Bengali", "Source Sans Pro", sans-serif !important;
+    font-family: my_kalpurush;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
 }
+

@@ -120,7 +120,10 @@
         [lang="bn"],
         .font-bangla,
         .bangla-text {
-            font-family: 'Hind Siliguri', "Noto Sans Bengali", system-ui, -apple-system, sans-serif !important;
+            font-family: my_kalpurush, 'Kalpurush', inherit !important;
+            font-weight: 500;
+            line-height: 1.1;
+            color: inherit;
         }
 
         /* Animated Logo Preloader in Admin Panel */

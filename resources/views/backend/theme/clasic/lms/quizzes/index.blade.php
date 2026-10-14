@@ -20,11 +20,14 @@
                     </p>
                 </div>
                 <div class="col-sm-6 text-sm-right mt-2 mt-sm-0">
+                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-outline-primary shadow-sm mr-1">
+                        <i class="fas fa-chart-line mr-1"></i> পরীক্ষার রিপোর্ট
+                    </a>
                     <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-outline-info shadow-sm mr-1">
-                        <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ফরম্যাট ডাউনলোড
+                        <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ডাউনলোড
                     </a>
                     <button type="button" class="btn btn-success shadow-sm mr-1" data-toggle="modal" data-target="#excelImportModal">
-                        <i class="fas fa-file-upload mr-1"></i> এক্সেল থেকে আপলোড
+                        <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
                     </button>
                     <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#createQuizModal">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ
@@ -138,12 +141,13 @@
                     <tr>
                         <th class="text-center" style="width: 50px;">#</th>
                         <th>কোর্স ও কুইজ শিরোনাম</th>
+                        <th>মোড ও সেট</th>
                         <th>ধরণ ও সময়</th>
                         <th class="text-center">প্রশ্ন সংখ্যা</th>
                         <th class="text-center">মোট নম্বর</th>
-                        <th class="text-center">পাস মার্ক</th>
+                        <th class="text-center">নেগেটিভ মার্ক</th>
                         <th class="text-center">স্ট্যাটাস</th>
-                        <th class="text-center" style="width: 170px;">অ্যাকশন</th>
+                        <th class="text-center" style="width: 190px;">অ্যাকশন</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -154,12 +158,27 @@
                                 <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ $quiz->title }}</div>
                                 <div class="text-xs text-primary font-weight-semibold">
                                     <i class="fas fa-graduation-cap mr-1"></i> {{ $quiz->course ? $quiz->course->course_title : 'General / All' }}
+                                    @if($quiz->subject_code)
+                                        <span class="badge badge-light border ml-1">কোড: {{ $quiz->subject_code }}</span>
+                                    @endif
                                 </div>
                                 @if($quiz->description)
                                     <div class="text-xs text-muted font-italic text-truncate mt-0.5" style="max-width: 280px;">
                                         {{ $quiz->description }}
                                     </div>
                                 @endif
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge badge-info text-xs px-2 py-0.5">
+                                        {{ $quiz->view_mode == 'one_by_one' ? '১টি করে প্রশ্ন' : 'সকল প্রশ্ন (বোর্ড পেপার)' }}
+                                    </span>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge badge-light border text-xs px-2 py-0.5 font-weight-bold text-dark">
+                                        {{ $quiz->question_set ?: 'Set A' }} ({{ \App\model\LmsQuiz::getBengaliSetCode($quiz->question_set) }})
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 <span class="badge badge-light border text-capitalize px-2 py-1">
@@ -176,9 +195,10 @@
                             </td>
                             <td class="text-center font-weight-bold text-dark">
                                 {{ number_format($quiz->total_marks, 0) }}
+                                <div class="text-xs text-muted">পাস: {{ number_format($quiz->pass_marks, 0) }}</div>
                             </td>
-                            <td class="text-center text-sm text-muted">
-                                {{ number_format($quiz->pass_marks, 0) }}
+                            <td class="text-center text-sm font-weight-semibold {{ $quiz->negative_marks > 0 ? 'text-danger' : 'text-muted' }}">
+                                {{ $quiz->negative_marks > 0 ? '-' . number_format($quiz->negative_marks, 2) : '০.০০' }}
                             </td>
                             <td class="text-center">
                                 @if($quiz->is_published)
@@ -206,6 +226,11 @@
                                         <i class="fas fa-file-upload"></i>
                                     </button>
 
+                                    <!-- Generate Question Sets -->
+                                    <button type="button" class="btn btn-outline-primary" title="সেট ক, খ, গ, ঘ তৈরি করুন" onclick="openGenerateSetsModal({{ $quiz->id }}, '{{ addslashes($quiz->title) }}')">
+                                        <i class="fas fa-layer-group"></i>
+                                    </button>
+
                                     <!-- Delete -->
                                     <form action="{{ route('admin.quizzes.destroy', $quiz->id) }}" method="POST" class="d-inline" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই কুইজ এবং এর সকল প্রশ্ন মুছে ফেলতে চান?')">
                                         @csrf
@@ -219,7 +244,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 text-secondary d-block"></i>
                                 কোন কুইজ পাওয়া যায়নি। এক্সেল শিট থেকে বা ম্যানুয়ালি কুইজ তৈরি করতে উপরের বোতামগুলো ব্যবহার করুন।
                             </td>
@@ -410,6 +435,44 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
+                                <label class="font-weight-bold text-sm">প্রশ্ন প্রদর্শন মোড <span class="text-danger">*</span></label>
+                                <select name="view_mode" class="form-control" required>
+                                    <option value="all_questions">সকল প্রশ্ন একসাথে (বোর্ড পরীক্ষার পেপার)</option>
+                                    <option value="one_by_one">১টি করে প্রশ্ন (One-by-One)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">প্রশ্ন সেট <span class="text-danger">*</span></label>
+                                <select name="question_set" class="form-control" required>
+                                    <option value="Set A">সেট ক (Set A)</option>
+                                    <option value="Set B">সেট খ (Set B)</option>
+                                    <option value="Set C">সেট গ (Set C)</option>
+                                    <option value="Set D">সেট ঘ (Set D)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">বিষয় কোড</label>
+                                <input type="text" name="subject_code" class="form-control" value="101" placeholder="যেমন: 101 বা 154">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">শিক্ষা বোর্ড / প্রতিষ্ঠান নাম</label>
+                                <input type="text" name="board_name" class="form-control" value="ঢাকা শিক্ষা বোর্ড" placeholder="যেমন: ঢাকা বোর্ড / Wake Up ICT">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
                                 <label class="font-weight-bold text-sm">ধরণ <span class="text-danger">*</span></label>
                                 <select name="quiz_type" class="form-control" required>
                                     <option value="practice">অনুশীলন (Practice)</option>
@@ -428,9 +491,28 @@
 
                     <div class="row">
                         <div class="col-6">
-                            <div class="form-group mb-0">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">ভুল উত্তরের নেগেটিভ মার্ক</label>
+                                <input type="number" step="0.05" name="negative_marks" class="form-control" value="0.00" min="0" placeholder="যেমন: 0.25 বা 0.50">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
                                 <label class="font-weight-bold text-sm">পাস মার্কস</label>
                                 <input type="number" step="0.5" name="pass_marks" class="form-control" value="5.0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold text-sm">ফলাফল প্রকাশের নীতি</label>
+                                <select name="result_release_policy" class="form-control">
+                                    <option value="immediate">পরীক্ষা শেষে তাৎক্ষণিক প্রকাশ</option>
+                                    <option value="after_deadline">নির্ধারিত সময়সীমা শেষ হলে</option>
+                                    <option value="admin_publish">অ্যাডমিন কর্তৃক প্রকাশ সাপেক্ষে</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-6">
@@ -447,6 +529,58 @@
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
                     <button type="submit" class="btn btn-primary font-weight-bold">কুইজ সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Generate Question Sets -->
+<div class="modal fade" id="generateSetsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg border-0">
+            <form id="generateSetsForm" action="" method="POST">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold">
+                        <i class="fas fa-layer-group mr-1"></i> প্রশ্ন সেট জেনারেটর (Set A, B, C, D)
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4 space-y-3">
+                    <p class="text-sm text-dark font-weight-semibold mb-2">
+                        কুইজ: <span id="generateSetsQuizTitle" class="text-primary font-weight-bold"></span>
+                    </p>
+                    <div class="alert alert-info border-0 text-xs py-2">
+                        <i class="fas fa-info-circle mr-1"></i> বিদ্যমান প্রশ্নভাণ্ডার থেকে স্বয়ংক্রিয়ভাবে অপশন ও প্রশ্ন শাফলিং করে ভিন্ন ভিন্ন সেট তৈরি হবে।
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold text-sm">তৈরি করার জন্য সেটগুলো নির্বাচন করুন:</label>
+                        <div class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" id="setA" name="sets[]" value="Set A" checked>
+                            <label class="custom-control-label" for="setA">সেট ক (Set A) — প্রধান সেট</label>
+                        </div>
+                        <div class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" id="setB" name="sets[]" value="Set B" checked>
+                            <label class="custom-control-label" for="setB">সেট খ (Set B) — অপশন শাফলিং ভ্যারিয়েন্ট</label>
+                        </div>
+                        <div class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" id="setC" name="sets[]" value="Set C" checked>
+                            <label class="custom-control-label" for="setC">সেট গ (Set C) — অপশন শাফলিং ভ্যারিয়েন্ট</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="setD" name="sets[]" value="Set D" checked>
+                            <label class="custom-control-label" for="setD">সেট ঘ (Set D) — অপশন শাফলিং ভ্যারিয়েন্ট</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">
+                        <i class="fas fa-magic mr-1"></i> সেট তৈরি শুরু করুন
+                    </button>
                 </div>
             </form>
         </div>
@@ -483,6 +617,12 @@ function openImportForQuiz(quizId, quizTitle) {
     var select = document.getElementById('targetQuizSelect');
     select.value = quizId;
     $('#excelImportModal').modal('show');
+}
+
+function openGenerateSetsModal(quizId, quizTitle) {
+    document.getElementById('generateSetsQuizTitle').innerText = quizTitle;
+    document.getElementById('generateSetsForm').action = "/admin/quizzes/" + quizId + "/generate-sets";
+    $('#generateSetsModal').modal('show');
 }
 
 function updateFileName(input) {

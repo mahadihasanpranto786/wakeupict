@@ -26,6 +26,17 @@ class StudentAccount extends Authenticatable
         'status' => 'integer',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->student_id_code)) {
+                $model->student_id_code = static::generateUniqueStudentId();
+            }
+        });
+    }
+
     /**
      * Relationship to formally admitted student record
      */

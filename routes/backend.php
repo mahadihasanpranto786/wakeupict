@@ -618,6 +618,8 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::post('/', 'backend\theme\clasic\lms\AdminQuizController@store')->name('store');
     Route::post('/import', 'backend\theme\clasic\lms\AdminQuizController@importExcel')->name('import');
     Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
+    Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
+    Route::post('/{id}/generate-sets', 'backend\theme\clasic\lms\AdminQuizController@generateSets')->name('generate-sets');
     Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');
     Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
 });

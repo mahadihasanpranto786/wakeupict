@@ -12,6 +12,7 @@ class LmsQuestion extends Model
 
     protected $casts = [
         'marks' => 'float',
+        'negative_marks' => 'float',
         'order_index' => 'integer',
         'is_active' => 'boolean',
     ];
@@ -29,5 +30,14 @@ class LmsQuestion extends Model
     public function answers()
     {
         return $this->hasMany(LmsQuizAnswer::class, 'question_id');
+    }
+
+    /**
+     * Return Bengali option letter corresponding to 0, 1, 2, 3
+     */
+    public static function getBengaliOptionLetter($index)
+    {
+        $letters = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+        return isset($letters[$index]) ? $letters[$index] : (string)($index + 1);
     }
 }

@@ -12,9 +12,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Immediate Theme Application (System Default Preference with Zero FOUT) -->
+    <!-- Immediate Theme Application (Pure System Default Auto-Sync) -->
     <script>
         (function() {
+            try {
+                localStorage.removeItem('theme_mode');
+                document.cookie = "theme_mode=;path=/;max-age=0";
+            } catch(e) {}
             function syncWithSystemTheme() {
                 var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (prefersDark) {
@@ -27,13 +31,41 @@
             }
             syncWithSystemTheme();
             if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncWithSystemTheme);
+                var mql = window.matchMedia('(prefers-color-scheme: dark)');
+                if (mql.addEventListener) {
+                    mql.addEventListener('change', syncWithSystemTheme);
+                } else if (mql.addListener) {
+                    mql.addListener(syncWithSystemTheme);
+                }
             }
         })();
     </script>
 
-    <!-- Theme Dynamic Palette -->
+    <!-- Bengali & Global Typography: my_kalpurush & Inherit -->
     <style>
+        @font-face {
+            font-family: 'my_kalpurush';
+            font-display: swap;
+            font-style: normal;
+            font-weight: 100 900;
+            src: local('my_kalpurush'), local('Kalpurush'), local('Kalpurush ANSI'),
+                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
+                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Kalpurush';
+            font-display: swap;
+            font-style: normal;
+            font-weight: 100 900;
+            src: local('Kalpurush'), local('my_kalpurush'), local('Kalpurush ANSI'),
+                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
+                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
+        }
+
+        html {
+            font-family: my_kalpurush, 'Kalpurush', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
         :root {
             --brand-primary: {{ app_setting('theme_primary_color', '#10b981') }};
             --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '16, 185, 129') }};
@@ -43,9 +75,13 @@
             --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
         }
 
-        /* System Default Typography with Native OS Fonts & Bengali Fallback */
-        body, html, button, input, select, textarea {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Bengali", sans-serif;
+        /* Clean Uncluttered Typography per User Directive */
+        body, html, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
+            font-family: my_kalpurush;
+            font-family: inherit;
+            font-weight: 500;
+            line-height: 1.1;
+            color: inherit;
         }
         .font-mono, [class*="font-mono"], code, pre {
             font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;

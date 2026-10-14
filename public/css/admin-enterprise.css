@@ -34,8 +34,8 @@
   --adm-text-muted:  #64748b;
   --adm-text-dim:    #94a3b8;
 
-  --adm-font:        'Hind Siliguri', 'Inter', 'Plus Jakarta Sans', "Noto Sans Bengali", system-ui, sans-serif;
-  --adm-font-bn:     'Hind Siliguri', "Noto Sans Bengali", sans-serif;
+  --adm-font:        my_kalpurush, 'Kalpurush', 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --adm-font-bn:     my_kalpurush, 'Kalpurush', inherit;
   --adm-mono:        'JetBrains Mono', monospace;
 
   --adm-radius:      10px;
