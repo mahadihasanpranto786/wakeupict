@@ -117,7 +117,7 @@
                 </div>
 
                 <!-- 10 Minute School Style Student Portal Pill -->
-                @if(Auth::guard('student')->check())
+                @if(function_exists('is_student_logged_in') && is_student_logged_in())
                     <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-brand-primary to-emerald-400 hover:to-brand-accent shadow-glow-emerald transition-all hover:-translate-y-0.5 shrink-0 whitespace-nowrap">
                         <i class="fa fa-graduation-cap"></i>
                         <span>ড্যাশবোর্ড</span>
@@ -201,10 +201,17 @@
             @endforeach
 
             <div class="pt-4 mt-2 border-t border-slate-800 space-y-2">
-                <a href="{{ route('student.login') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-slate-900 border border-slate-700 text-white hover:border-brand-primary">
-                    <i class="fa fa-user-circle text-brand-primary"></i>
-                    <span>Student Portal Login</span>
-                </a>
+                @if(function_exists('is_student_logged_in') && is_student_logged_in())
+                    <a href="{{ route('student.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-brand-primary text-slate-950">
+                        <i class="fa fa-graduation-cap"></i>
+                        <span>Student Dashboard</span>
+                    </a>
+                @else
+                    <a href="{{ route('student.login') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-slate-900 border border-slate-700 text-white hover:border-brand-primary">
+                        <i class="fa fa-user-circle text-brand-primary"></i>
+                        <span>Student Portal Login</span>
+                    </a>
+                @endif
                 <a href="{{ route('contact-us-page') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald">
                     <span>{{ __('frontend.nav.contact') }}</span>
                     <i class="fa fa-arrow-right text-xs"></i>

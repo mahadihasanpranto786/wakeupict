@@ -481,7 +481,7 @@
                             ল্যাব শিডিউল, ক্লাসরুম নোটিশ, লেকচার শিট ডাউনলোড, প্র্যাকটিস পরীক্ষা এবং পেমেন্ট রসিদ ম্যানেজ করুন আপনার ডেডিকেটেড স্টুডেন্ট প্যানেল থেকে।
                         </p>
                         <div class="pt-2 flex flex-wrap items-center gap-4">
-                            @if(Auth::guard('student')->check())
+                            @if(function_exists('is_student_logged_in') && is_student_logged_in())
                                 <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
                                     <i class="fa fa-tachometer"></i>
                                     <span>ড্যাশবোর্ডে প্রবেশ করুন</span>

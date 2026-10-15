@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 @php
     $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'light';
-    $studentUser = Auth::guard('student')->user();
+    $studentUser = function_exists('student_user') ? student_user() : null;
     $studentMenus = \App\Services\StudentMenuService::getTree();
 @endphp
 <html lang="{{ App::getLocale() }}" class="{{ $initialTheme }} scroll-smooth">

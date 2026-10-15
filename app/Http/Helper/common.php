@@ -188,4 +188,38 @@ if (!function_exists('safe_asset')) {
 
         return asset($clean);
     }
+}
+
+if (!function_exists('is_student_logged_in')) {
+    /**
+     * Safely check if a student is logged in without throwing if the guard is unconfigured or cached.
+     */
+    function is_student_logged_in()
+    {
+        try {
+            if (config()->has('auth.guards.student') && \Illuminate\Support\Facades\Auth::guard('student')->check()) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            return false;
+        }
+        return false;
+    }
+}
+
+if (!function_exists('student_user')) {
+    /**
+     * Safely get the logged in student user without throwing.
+     */
+    function student_user()
+    {
+        try {
+            if (config()->has('auth.guards.student') && \Illuminate\Support\Facades\Auth::guard('student')->check()) {
+                return \Illuminate\Support\Facades\Auth::guard('student')->user();
+            }
+        } catch (\Throwable $e) {
+            return null;
+        }
+        return null;
+    }
 }
