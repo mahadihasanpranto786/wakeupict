@@ -23,9 +23,9 @@
                     <a href="{{ route('admin.question-papers.index') }}" class="btn btn-outline-warning shadow-sm mr-1">
                         <i class="fas fa-layer-group mr-1"></i> পেপার বিল্ডার
                     </a>
-                    <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-info shadow-sm mr-1">
+                    <button type="button" class="btn btn-outline-info shadow-sm mr-1" data-toggle="modal" data-target="#excelImportModal">
                         <i class="fas fa-file-excel mr-1"></i> এক্সেল ইমপোর্ট
-                    </a>
+                    </button>
                     <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#createQuestionModal">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন প্রশ্ন তৈরি
                     </button>
@@ -634,6 +634,194 @@
         </div>
     </div>
 
+    <!-- Modal: Excel Import directly into Question Book / Quiz -->
+    <div class="modal fade" id="excelImportModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <form action="{{ route('admin.question-book.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title font-weight-bold">
+                            <i class="fas fa-file-excel mr-1"></i> এক্সেল / সিএসভি থেকে MCQ প্রশ্ন আপলোড
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Instruction alert with sample download -->
+                        <div class="alert alert-light border border-success/30 p-3 mb-4 rounded shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div class="pr-2">
+                                    <h6 class="font-weight-bold text-success mb-1">
+                                        <i class="fas fa-info-circle mr-1"></i> এক্সেল কলামের নিয়মাবলী:
+                                    </h6>
+                                    <p class="text-xs text-muted mb-0">
+                                        এক্সেল শিটে <code>question_text</code>, <code>option_a</code>, <code>option_b</code>, <code>option_c</code>, <code>option_d</code>, <code>correct_option</code> (A/B/C/D), <code>marks</code> ও <code>explanation</code> কলাম থাকতে হবে। (ঐচ্ছিক: <code>category</code>, <code>chapter</code>, <code>topic</code>, <code>difficulty</code>, <code>set_code</code>)
+                                    </p>
+                                </div>
+                                <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-success font-weight-bold text-nowrap mt-2 mt-sm-0">
+                                    <i class="fas fa-download mr-1"></i> নমুনা টেমপ্লেট
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Target Mode Selector -->
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-sm text-dark mb-2">আপলোড করার মাধ্যম নির্বাচন করুন:</label>
+                            <div class="row">
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 mb-0 shadow-sm" id="qbModeCardLibrary" for="qbModeLibrary" style="cursor: pointer; border-color: #28a745 !important; background-color: #ffffff;">
+                                        <input type="radio" id="qbModeLibrary" name="import_mode" value="library" class="mr-2" checked onchange="toggleQbImportMode()" style="width: 17px; height: 17px; accent-color: #28a745; cursor: pointer; flex-shrink: 0;">
+                                        <span class="font-weight-bold text-dark text-sm">
+                                            সরাসরি প্রশ্ন লাইব্রেরিতে
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 mb-0 bg-light" id="qbModeCardExisting" for="qbModeExisting" style="cursor: pointer;">
+                                        <input type="radio" id="qbModeExisting" name="import_mode" value="existing_quiz" class="mr-2" onchange="toggleQbImportMode()" style="width: 17px; height: 17px; accent-color: #28a745; cursor: pointer; flex-shrink: 0;">
+                                        <span class="font-weight-bold text-dark text-sm">
+                                            বিদ্যমান কোনো কুইজে
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 mb-0 bg-light" id="qbModeCardNew" for="qbModeNew" style="cursor: pointer;">
+                                        <input type="radio" id="qbModeNew" name="import_mode" value="new_quiz" class="mr-2" onchange="toggleQbImportMode()" style="width: 17px; height: 17px; accent-color: #28a745; cursor: pointer; flex-shrink: 0;">
+                                        <span class="font-weight-bold text-dark text-sm">
+                                            নতুন কুইজ তৈরি করে
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Block 1: Library Defaults (Course / Category / Chapter) -->
+                        <div id="qbLibraryBlock" class="p-3 border rounded bg-light mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        <label class="font-weight-bold text-xs">কোর্স / বিষয় (ঐচ্ছিক)</label>
+                                        <select name="course_id" id="qbLibraryCourseId" class="form-control form-control-sm">
+                                            <option value="">-- সাধারণ প্রশ্ন ব্যাংক (General Bank) --</option>
+                                            @foreach($courses as $c)
+                                                <option value="{{ $c->id }}">{{ $c->course_title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        <label class="font-weight-bold text-xs">ডিফল্ট ক্যাটাগরি / বিষয়</label>
+                                        <input type="text" name="default_category" class="form-control form-control-sm" placeholder="যেমন: ICT, Bangla, English" list="qbImportCategoryList">
+                                        <datalist id="qbImportCategoryList">
+                                            @foreach($categories as $cat)
+                                                <option value="{{ $cat }}">
+                                            @endforeach
+                                        </datalist>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold text-xs">ডিফল্ট অধ্যায় / পাঠ</label>
+                                        <input type="text" name="default_chapter" class="form-control form-control-sm" placeholder="যেমন: Chapter 1: Information Technology" list="qbImportChapterList">
+                                        <datalist id="qbImportChapterList">
+                                            @foreach($chapters as $chap)
+                                                <option value="{{ $chap }}">
+                                            @endforeach
+                                        </datalist>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold text-xs">ডিফল্ট সেট কোড</label>
+                                        <input type="text" name="default_set_code" class="form-control form-control-sm" value="Set A">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Block 2: Existing Quiz Selection -->
+                        <div id="qbExistingQuizBlock" class="form-group" style="display: none;">
+                            <label class="font-weight-bold text-sm">টার্গেট কুইজ নির্বাচন করুন <span class="text-danger">*</span></label>
+                            <select name="quiz_id" id="qbTargetQuizSelect" class="form-control">
+                                <option value="">-- কুইজ নির্বাচন করুন --</option>
+                                @if(isset($quizzes))
+                                    @foreach($quizzes as $q)
+                                        <option value="{{ $q->id }}">
+                                            {{ $q->title }} ({{ $q->course ? $q->course->course_title : 'General' }} | বর্তমানে {{ $q->questions_count }} টি প্রশ্ন)
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+
+                        <!-- Block 3: New Quiz Configuration -->
+                        <div id="qbNewQuizBlock" class="p-3 border rounded bg-light mb-3" style="display: none;">
+                            <h6 class="font-weight-bold text-primary mb-3">
+                                <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ কনফিগারেশন:
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold text-sm">কোর্স ক্যাটাগরি <span class="text-danger">*</span></label>
+                                        <select name="new_quiz_course_id" id="qbNewQuizCourseId" class="form-control">
+                                            <option value="">-- কোর্স নির্বাচন করুন --</option>
+                                            @foreach($courses as $c)
+                                                <option value="{{ $c->id }}">{{ $c->course_title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold text-sm">কুইজের শিরোনাম <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_quiz_title" id="qbNewQuizTitle" class="form-control" placeholder="যেমন: ICT চ্যাপ্টার ৩ MCQ টেস্ট">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold text-sm">কুইজের ধরণ</label>
+                                        <select name="quiz_type" class="form-control">
+                                            <option value="practice">অনুশীলন (Practice)</option>
+                                            <option value="exam">চূড়ান্ত পরীক্ষা (Live Exam)</option>
+                                            <option value="class_test">ক্লাস টেস্ট (Class Test)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold text-sm">পরীক্ষার সময় (মিনিট)</label>
+                                        <input type="number" name="duration_minutes" class="form-control" value="20" min="1" max="300">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File input -->
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-sm">এক্সেল বা সিএসভি ফাইল নির্বাচন করুন (.xlsx, .xls, .csv) <span class="text-danger">*</span></label>
+                            <div class="custom-file">
+                                <input type="file" name="excel_file" class="custom-file-input" id="qbExcelFileField" accept=".xlsx,.xls,.csv" required onchange="updateQbFileName(this)">
+                                <label class="custom-file-label" for="qbExcelFileField" id="qbExcelFileLabel">ফাইল বেছে নিন (.xlsx বা .csv)</label>
+                            </div>
+                            <small class="form-text text-muted">সর্বোচ্চ ফাইল সাইজ: ১০ মেগাবাইট।</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
+                        <button type="submit" class="btn btn-success font-weight-bold px-4">
+                            <i class="fas fa-cloud-upload-alt mr-1"></i> আপলোড শুরু করুন
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -772,6 +960,74 @@
                 .catch(function(err) {
                     body.innerHTML = '<div class="alert alert-danger">সার্ভার ত্রুটি: ' + err + '</div>';
                 });
+        }
+
+        // Excel Import Mode Toggle
+        function toggleQbImportMode() {
+            var selectedRadio = document.querySelector('input[name="import_mode"]:checked');
+            if (!selectedRadio) return;
+            var mode = selectedRadio.value;
+
+            // Highlight selected card visually
+            var cards = {
+                'library': document.getElementById('qbModeCardLibrary'),
+                'existing_quiz': document.getElementById('qbModeCardExisting'),
+                'new_quiz': document.getElementById('qbModeCardNew')
+            };
+
+            for (var key in cards) {
+                if (cards[key]) {
+                    if (key === mode) {
+                        cards[key].style.borderColor = '#28a745';
+                        cards[key].style.backgroundColor = '#ffffff';
+                        cards[key].classList.add('shadow-sm');
+                        cards[key].classList.remove('bg-light');
+                    } else {
+                        cards[key].style.borderColor = '';
+                        cards[key].style.backgroundColor = '';
+                        cards[key].classList.remove('shadow-sm');
+                        cards[key].classList.add('bg-light');
+                    }
+                }
+            }
+
+            var libBlock = document.getElementById('qbLibraryBlock');
+            var existingBlock = document.getElementById('qbExistingQuizBlock');
+            var newBlock = document.getElementById('qbNewQuizBlock');
+            var courseField = document.getElementById('qbLibraryCourseId');
+            var newCourseField = document.getElementById('qbNewQuizCourseId');
+            var targetQuiz = document.getElementById('qbTargetQuizSelect');
+
+            if (mode === 'library') {
+                if (libBlock) libBlock.style.display = 'block';
+                if (existingBlock) existingBlock.style.display = 'none';
+                if (newBlock) newBlock.style.display = 'none';
+                if (targetQuiz) targetQuiz.removeAttribute('required');
+                if (newCourseField) newCourseField.removeAttribute('name');
+                if (courseField) courseField.setAttribute('name', 'course_id');
+            } else if (mode === 'existing_quiz') {
+                if (libBlock) libBlock.style.display = 'none';
+                if (existingBlock) existingBlock.style.display = 'block';
+                if (newBlock) newBlock.style.display = 'none';
+                if (targetQuiz) targetQuiz.setAttribute('required', 'required');
+                if (newCourseField) newCourseField.removeAttribute('name');
+                if (courseField) courseField.removeAttribute('name');
+            } else {
+                if (libBlock) libBlock.style.display = 'none';
+                if (existingBlock) existingBlock.style.display = 'none';
+                if (newBlock) newBlock.style.display = 'block';
+                if (targetQuiz) targetQuiz.removeAttribute('required');
+                if (courseField) courseField.removeAttribute('name');
+                if (newCourseField) newCourseField.setAttribute('name', 'course_id');
+            }
+        }
+
+        function updateQbFileName(input) {
+            var fileName = input.files && input.files[0] ? input.files[0].name : 'ফাইল বেছে নিন (.xlsx বা .csv)';
+            var label = document.getElementById('qbExcelFileLabel');
+            if (label) {
+                label.textContent = fileName;
+            }
         }
     </script>
 @endsection

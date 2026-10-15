@@ -10,14 +10,18 @@ use App\model\LmsQuestionPaper;
 use App\model\LmsQuestionPaperItem;
 use App\model\Course;
 use App\model\LmsQuiz;
+use App\Services\QuizExcelImportService;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class QuestionBookController extends Controller
 {
-    public function __construct()
+    protected $importService;
+
+    public function __construct(QuizExcelImportService $importService)
     {
         $this->middleware('auth');
+        $this->importService = $importService;
     }
 
     /**
@@ -98,11 +102,12 @@ class QuestionBookController extends Controller
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
         $chapters = LmsQuestion::whereNotNull('chapter')->where('chapter', '!=', '')->distinct()->pluck('chapter')->sort()->values();
         $papers = LmsQuestionPaper::whereIn('status', ['draft', 'review', 'approved'])->orderBy('title', 'asc')->get();
+        $quizzes = LmsQuiz::with('course')->withCount('questions')->latest('id')->get();
 
         $viewStyle = $request->input('view', 'book'); // 'book' or 'list'
 
         return view('backend.theme.clasic.lms.question_book.index', compact(
-            'questions', 'stats', 'courses', 'categories', 'chapters', 'papers', 'viewStyle'
+            'questions', 'stats', 'courses', 'categories', 'chapters', 'papers', 'quizzes', 'viewStyle'
         ));
     }
 
@@ -373,5 +378,82 @@ class QuestionBookController extends Controller
         }
 
         return redirect()->back()->with('info', 'কোনো কার্যকর অ্যাকশন সম্পাদিত হয়নি।');
+    }
+
+    /**
+     * Bulk Import Questions from Excel/CSV directly into Question Book / Quiz
+     */
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file'     => 'required|file|max:10240', // 10MB max
+            'import_mode'    => 'required|in:library,existing_quiz,new_quiz',
+            'course_id'      => 'nullable|exists:courses,id',
+            'quiz_id'        => 'nullable|exists:lms_quizzes,id',
+            'new_quiz_title' => 'nullable|string|max:191',
+        ]);
+
+        $file = $request->file('excel_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($ext, ['xlsx', 'xls', 'csv', 'txt'])) {
+            return redirect()->back()->withErrors(['excel_file' => 'শুধুমাত্র .xlsx, .xls এবং .csv স্প্রেডশিট ফাইল অনুমোদিত।']);
+        }
+
+        $quiz = null;
+        $courseId = $request->course_id ?: null;
+        $mode = $request->input('import_mode', 'library');
+
+        if ($mode === 'existing_quiz') {
+            if (!$request->filled('quiz_id')) {
+                return redirect()->back()->withErrors(['quiz_id' => 'অনুগ্রহ করে একটি বিদ্যমান কুইজ নির্বাচন করুন।']);
+            }
+            $quiz = LmsQuiz::findOrFail($request->quiz_id);
+            $courseId = $quiz->course_id;
+        } elseif ($mode === 'new_quiz') {
+            if (!$request->filled('course_id')) {
+                return redirect()->back()->withErrors(['course_id' => 'নতুন কুইজের জন্য একটি কোর্স নির্বাচন আবশ্যক।']);
+            }
+            $course = Course::findOrFail($request->course_id);
+            $quizTitle = $request->new_quiz_title ?: ('Offline MCQ Assessment: ' . $course->course_title);
+
+            $quiz = LmsQuiz::create([
+                'course_id'        => $course->id,
+                'title'            => $quizTitle,
+                'description'      => 'Imported from Excel into Question Library for ' . $course->course_title,
+                'quiz_type'        => $request->input('quiz_type', 'practice'),
+                'duration_minutes' => (int)$request->input('duration_minutes', 20),
+                'total_marks'      => 0,
+                'pass_marks'       => 5.0,
+                'shuffle_questions'=> true,
+                'shuffle_options'  => true,
+                'max_attempts'     => 0,
+                'is_published'     => true,
+            ]);
+            $courseId = $course->id;
+        }
+
+        $defaults = [
+            'category' => $request->input('default_category'),
+            'chapter'  => $request->input('default_chapter'),
+            'set_code' => $request->input('default_set_code', 'Set A'),
+        ];
+
+        $result = $this->importService->importFromFile($file->getRealPath(), $quiz ? $quiz->id : null, $courseId, $defaults);
+
+        if (!$result['success'] || $result['imported_count'] === 0) {
+            $errMsg = !empty($result['errors']) ? implode(' ', $result['errors']) : 'এক্সেল ফাইল থেকে প্রশ্ন ইমপোর্ট করা যায়নি।';
+            return redirect()->back()->withErrors(['excel_file' => $errMsg]);
+        }
+
+        $msg = "এক্সেল থেকে সফলভাবে {$result['imported_count']} টি বহুনির্বাচনি (MCQ) প্রশ্ন প্রশ্ন লাইব্রেরিতে যুক্ত হয়েছে!";
+        if ($quiz) {
+            $msg .= " (কুইজ: '{$quiz->title}', মোট নম্বর: {$result['total_marks']})";
+        }
+        if (!empty($result['errors'])) {
+            $msg .= " [সতর্কবার্তা: " . count($result['errors']) . " টি রো সতর্কবার্তা রয়েছে]";
+        }
+
+        return redirect()->route('admin.question-book.index')->with('success', $msg);
     }
 }

@@ -297,24 +297,24 @@
                     </div>
 
                     <!-- Target Mode Selector -->
-                    <div class="form-group">
-                        <label class="font-weight-bold text-sm">আপলোড করার মাধ্যম নির্বাচন করুন:</label>
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-sm text-dark mb-2">আপলোড করার মাধ্যম নির্বাচন করুন:</label>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="custom-control custom-radio border rounded p-2.5 bg-light">
-                                    <input type="radio" id="modeExisting" name="import_mode" value="existing" class="custom-control-input" checked onchange="toggleImportMode()">
-                                    <label class="custom-control-label font-weight-bold text-dark" for="modeExisting">
+                                <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 mb-0 shadow-sm" id="quizModeCardExisting" for="modeExisting" style="cursor: pointer; border-color: #28a745 !important; background-color: #ffffff;">
+                                    <input type="radio" id="modeExisting" name="import_mode" value="existing" class="mr-2" checked onchange="toggleImportMode()" style="width: 17px; height: 17px; accent-color: #28a745; cursor: pointer; flex-shrink: 0;">
+                                    <span class="font-weight-bold text-dark text-sm">
                                         বিদ্যমান কোনো কুইজে যোগ করুন
-                                    </label>
-                                </div>
+                                    </span>
+                                </label>
                             </div>
                             <div class="col-md-6 mt-2 mt-md-0">
-                                <div class="custom-control custom-radio border rounded p-2.5 bg-light">
-                                    <input type="radio" id="modeNew" name="import_mode" value="new" class="custom-control-input" onchange="toggleImportMode()">
-                                    <label class="custom-control-label font-weight-bold text-dark" for="modeNew">
+                                <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 mb-0 bg-light" id="quizModeCardNew" for="modeNew" style="cursor: pointer;">
+                                    <input type="radio" id="modeNew" name="import_mode" value="new" class="mr-2" onchange="toggleImportMode()" style="width: 17px; height: 17px; accent-color: #28a745; cursor: pointer; flex-shrink: 0;">
+                                    <span class="font-weight-bold text-dark text-sm">
                                         কোর্স ক্যাটাগরি ভিত্তিক নতুন কুইজ তৈরি করুন
-                                    </label>
-                                </div>
+                                    </span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -595,19 +595,45 @@ function toggleImportMode() {
     var targetSelect = document.getElementById('targetQuizSelect');
     var newCourse = document.getElementById('newQuizCourseId');
     var newTitle = document.getElementById('newQuizTitle');
+    var cardExisting = document.getElementById('quizModeCardExisting');
+    var cardNew = document.getElementById('quizModeCardNew');
 
     if (mode === 'new') {
-        existingBlock.style.display = 'none';
-        newBlock.style.display = 'block';
-        targetSelect.removeAttribute('required');
-        newCourse.setAttribute('required', 'required');
-        newTitle.setAttribute('required', 'required');
+        if (existingBlock) existingBlock.style.display = 'none';
+        if (newBlock) newBlock.style.display = 'block';
+        if (targetSelect) targetSelect.removeAttribute('required');
+        if (newCourse) newCourse.setAttribute('required', 'required');
+        if (newTitle) newTitle.setAttribute('required', 'required');
+        if (cardNew) {
+            cardNew.style.borderColor = '#28a745';
+            cardNew.style.backgroundColor = '#ffffff';
+            cardNew.classList.add('shadow-sm');
+            cardNew.classList.remove('bg-light');
+        }
+        if (cardExisting) {
+            cardExisting.style.borderColor = '';
+            cardExisting.style.backgroundColor = '';
+            cardExisting.classList.remove('shadow-sm');
+            cardExisting.classList.add('bg-light');
+        }
     } else {
-        existingBlock.style.display = 'block';
-        newBlock.style.display = 'none';
-        targetSelect.setAttribute('required', 'required');
-        newCourse.removeAttribute('required');
-        newTitle.removeAttribute('required');
+        if (existingBlock) existingBlock.style.display = 'block';
+        if (newBlock) newBlock.style.display = 'none';
+        if (targetSelect) targetSelect.setAttribute('required', 'required');
+        if (newCourse) newCourse.removeAttribute('required');
+        if (newTitle) newTitle.removeAttribute('required');
+        if (cardExisting) {
+            cardExisting.style.borderColor = '#28a745';
+            cardExisting.style.backgroundColor = '#ffffff';
+            cardExisting.classList.add('shadow-sm');
+            cardExisting.classList.remove('bg-light');
+        }
+        if (cardNew) {
+            cardNew.style.borderColor = '';
+            cardNew.style.backgroundColor = '';
+            cardNew.classList.remove('shadow-sm');
+            cardNew.classList.add('bg-light');
+        }
     }
 }
 

@@ -18,9 +18,12 @@ class QuizExcelImportService
      * @param int $quizId
      * @return array [ 'success' => bool, 'imported_count' => int, 'errors' => array ]
      */
-    public function importFromFile($filePath, $quizId)
+    public function importFromFile($filePath, $quizId = null, $courseId = null, array $defaults = [])
     {
-        $quiz = LmsQuiz::findOrFail($quizId);
+        $quiz = $quizId ? LmsQuiz::find($quizId) : null;
+        if ($quiz && !$courseId) {
+            $courseId = $quiz->course_id;
+        }
 
         try {
             $spreadsheet = IOFactory::load($filePath);
@@ -75,10 +78,23 @@ class QuizExcelImportService
 
         $importedCount = 0;
         $errors = [];
-        $currentOrder = LmsQuestion::where('quiz_id', $quizId)->max('order_index') ?: 0;
-        $existingQuestions = LmsQuestion::where('quiz_id', $quizId)->pluck('question_text')->map(function($t) {
-            return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
-        })->toArray();
+
+        if ($quiz) {
+            $currentOrder = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
+            $existingQuestions = LmsQuestion::where('quiz_id', $quiz->id)->pluck('question_text')->map(function($t) {
+                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
+            })->toArray();
+        } elseif ($courseId) {
+            $currentOrder = LmsQuestion::where('course_id', $courseId)->max('order_index') ?: 0;
+            $existingQuestions = LmsQuestion::where('course_id', $courseId)->pluck('question_text')->map(function($t) {
+                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
+            })->toArray();
+        } else {
+            $currentOrder = LmsQuestion::max('order_index') ?: 0;
+            $existingQuestions = LmsQuestion::latest('id')->take(500)->pluck('question_text')->map(function($t) {
+                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
+            })->toArray();
+        }
 
         DB::beginTransaction();
 
@@ -114,10 +130,10 @@ class QuizExcelImportService
                 $marks = isset($colMap['marks'], $row[$colMap['marks']]) && is_numeric($row[$colMap['marks']]) ? (float)$row[$colMap['marks']] : 1.0;
                 $negMarks = isset($colMap['negative_marks'], $row[$colMap['negative_marks']]) && is_numeric($row[$colMap['negative_marks']]) ? abs((float)$row[$colMap['negative_marks']]) : null;
                 $explanation = isset($colMap['explanation'], $row[$colMap['explanation']]) ? trim((string)$row[$colMap['explanation']]) : null;
-                $setCode = isset($colMap['set_code'], $row[$colMap['set_code']]) && trim((string)$row[$colMap['set_code']]) !== '' ? trim((string)$row[$colMap['set_code']]) : ($quiz->question_set ?: 'Set A');
-                $category = isset($colMap['category'], $row[$colMap['category']]) ? trim((string)$row[$colMap['category']]) : null;
-                $chapter = isset($colMap['chapter'], $row[$colMap['chapter']]) ? trim((string)$row[$colMap['chapter']]) : null;
-                $topic = isset($colMap['topic'], $row[$colMap['topic']]) ? trim((string)$row[$colMap['topic']]) : null;
+                $setCode = isset($colMap['set_code'], $row[$colMap['set_code']]) && trim((string)$row[$colMap['set_code']]) !== '' ? trim((string)$row[$colMap['set_code']]) : ($quiz ? ($quiz->question_set ?: 'Set A') : ($defaults['set_code'] ?? 'Set A'));
+                $category = isset($colMap['category'], $row[$colMap['category']]) && trim((string)$row[$colMap['category']]) !== '' ? trim((string)$row[$colMap['category']]) : ($defaults['category'] ?? null);
+                $chapter = isset($colMap['chapter'], $row[$colMap['chapter']]) && trim((string)$row[$colMap['chapter']]) !== '' ? trim((string)$row[$colMap['chapter']]) : ($defaults['chapter'] ?? null);
+                $topic = isset($colMap['topic'], $row[$colMap['topic']]) && trim((string)$row[$colMap['topic']]) !== '' ? trim((string)$row[$colMap['topic']]) : ($defaults['topic'] ?? null);
                 $difficulty = isset($colMap['difficulty'], $row[$colMap['difficulty']]) ? strtolower(trim((string)$row[$colMap['difficulty']])) : 'medium';
                 if (!in_array($difficulty, ['easy', 'medium', 'hard'])) {
                     $difficulty = 'medium';
@@ -128,7 +144,8 @@ class QuizExcelImportService
 
                 // Create Question
                 $question = LmsQuestion::create([
-                    'quiz_id'        => $quizId,
+                    'quiz_id'        => $quiz ? $quiz->id : null,
+                    'course_id'      => $courseId,
                     'question_text'  => $qText,
                     'question_type'  => 'mcq_single',
                     'marks'          => $marks > 0 ? $marks : 1.0,
@@ -174,8 +191,11 @@ class QuizExcelImportService
             }
 
             // Update Quiz total marks
-            $totalQuizMarks = LmsQuestion::where('quiz_id', $quizId)->sum('marks');
-            $quiz->update(['total_marks' => $totalQuizMarks]);
+            $totalQuizMarks = 0;
+            if ($quiz) {
+                $totalQuizMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+                $quiz->update(['total_marks' => $totalQuizMarks]);
+            }
 
             DB::commit();
 

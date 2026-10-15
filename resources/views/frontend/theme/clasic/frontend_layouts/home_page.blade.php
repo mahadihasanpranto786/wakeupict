@@ -17,9 +17,9 @@
         <!-- Ambient Background Texture from Active Slide -->
         <div class="absolute inset-0 z-0 opacity-10 mix-blend-luminosity overflow-hidden pointer-events-none">
             @if(isset($homeSliders) && count($homeSliders) > 0)
-                <img id="hero-ambient-bg" src="{{ safe_asset($homeSliders[0]->slider_image) }}" alt="Ambient Background" class="w-full h-full object-cover filter grayscale contrast-125 transition-all duration-1000">
+                <img id="hero-ambient-bg" src="{{ safe_asset($homeSliders[0]->slider_image) }}" alt="Ambient Background" class="w-full h-full object-cover filter grayscale contrast-125 transition-all duration-1000" onerror="this.onerror=null; this.src='{{ asset('public/uploads/slider_image/images/wakeupict-brought-ideas-to-life-with-text.png') }}';">
             @elseif(!empty($homeSlider->slider_image))
-                <img id="hero-ambient-bg" src="{{ safe_asset($homeSlider->slider_image) }}" alt="Ambient Background" class="w-full h-full object-cover filter grayscale contrast-125">
+                <img id="hero-ambient-bg" src="{{ safe_asset($homeSlider->slider_image) }}" alt="Ambient Background" class="w-full h-full object-cover filter grayscale contrast-125" onerror="this.onerror=null; this.src='{{ asset('public/uploads/slider_image/images/wakeupict-brought-ideas-to-life-with-text.png') }}';">
             @endif
         </div>
         
@@ -121,7 +121,7 @@
                             <!-- Slides -->
                             @foreach($homeSliders as $idx => $slide)
                                 <div class="hero-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}" data-index="{{ $idx }}" data-bg="{{ safe_asset($slide->slider_image) }}">
-                                    <img src="{{ safe_asset($slide->slider_image) }}" alt="{{ $slide->slider_alt }}" class="w-full h-full object-cover filter brightness-95 contrast-105">
+                                    <img src="{{ safe_asset($slide->slider_image) }}" alt="{{ $slide->slider_alt }}" class="w-full h-full object-cover filter brightness-95 contrast-105" onerror="this.onerror=null; this.src='{{ asset('public/uploads/slider_image/images/wakeupict-brought-ideas-to-life-with-text.png') }}';">
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                                     
                                     <!-- Slide Caption Overlay -->
@@ -158,7 +158,7 @@
                     @elseif(!empty($homeSlider->slider_image))
                         <!-- Single Slider Fallback -->
                         <div class="relative w-full aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden border border-slate-800/90 shadow-2xl bg-slate-900">
-                            <img src="{{ safe_asset($homeSlider->slider_image) }}" alt="{{ $homeSlider->slider_alt }}" class="w-full h-full object-cover">
+                            <img src="{{ safe_asset($homeSlider->slider_image) }}" alt="{{ $homeSlider->slider_alt }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ asset('public/uploads/slider_image/images/wakeupict-brought-ideas-to-life-with-text.png') }}';">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
                             <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6">
                                 <h3 class="text-base sm:text-lg font-bold text-white drop-shadow-md">

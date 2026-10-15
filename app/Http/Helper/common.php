@@ -150,12 +150,13 @@ if (!function_exists('app_setting')) {
 
 if (!function_exists('safe_asset')) {
     /**
-     * Generate an asset URL while safely stripping any redundant 'public/' prefix.
+     * Generate an asset URL while safely stripping any redundant 'public/' prefix
+     * and ensuring fallback if file does not exist on disk.
      */
-    function safe_asset($path)
+    function safe_asset($path, $fallback = null)
     {
         if (empty($path)) {
-            return '';
+            return $fallback ? asset($fallback) : '';
         }
         if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
             return $path;
@@ -164,6 +165,27 @@ if (!function_exists('safe_asset')) {
         if (strpos($clean, 'public/') === 0) {
             $clean = substr($clean, 7);
         }
+
+        // Check if file exists on disk, otherwise gracefully fallback
+        if (!file_exists(public_path($clean))) {
+            if ($fallback && file_exists(public_path($fallback))) {
+                return asset($fallback);
+            }
+            if (strpos($clean, 'slider_image') !== false) {
+                $fallbackSliders = [
+                    'uploads/slider_image/images/wakeupict-brought-ideas-to-life-with-text.png',
+                    'uploads/slider_image/images/wakeupict-360-marketing-solution-with-text.png',
+                    'uploads/slider_image/images/wakeupict-creative-in-affordable-price-with-text.png',
+                    'uploads/slider_image/images/1876937981124383.jpg',
+                ];
+                foreach ($fallbackSliders as $fb) {
+                    if (file_exists(public_path($fb))) {
+                        return asset($fb);
+                    }
+                }
+            }
+        }
+
         return asset($clean);
     }
 }

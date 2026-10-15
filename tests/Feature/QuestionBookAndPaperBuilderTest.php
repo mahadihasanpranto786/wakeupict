@@ -13,6 +13,7 @@ use App\model\LmsQuestionPaperItem;
 use App\model\LmsQuiz;
 use App\model\Course;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\UploadedFile;
 
 class QuestionBookAndPaperBuilderTest extends TestCase
 {
@@ -484,5 +485,110 @@ class QuestionBookAndPaperBuilderTest extends TestCase
         $builderResponse->assertRedirect('/login');
 
         $paper->delete();
+    }
+
+    /**
+     * Test 10: Admin can import MCQ questions into Question Book directly via CSV/Excel
+     */
+    public function test_admin_can_import_questions_into_question_book_via_csv()
+    {
+        $csvData = "question_text,option_a,option_b,option_c,option_d,correct_option,marks,explanation\n";
+        $csvData .= "\"What does CSS stand for in web styling?\",\"Cascading Style Sheets\",\"Creative Style System\",\"Computer Styling Sheet\",\"Colorful Style Source\",\"A\",\"1.0\",\"CSS stands for Cascading Style Sheets.\"\n";
+        $csvData .= "\"Which protocol is used to browse websites?\",\"FTP\",\"HTTP\",\"SMTP\",\"SSH\",\"B\",\"1.0\",\"HTTP is the protocol for web communication.\"\n";
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'qb_import_') . '.csv';
+        file_put_contents($tempPath, $csvData);
+
+        $uploadedFile = new UploadedFile(
+            $tempPath,
+            'qb_test_import.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-book.import'), [
+                'import_mode'      => 'library',
+                'course_id'        => $this->course->id,
+                'default_category' => 'Web Development',
+                'default_chapter'  => 'Chapter 2: CSS Basics',
+                'excel_file'       => $uploadedFile,
+            ]);
+
+        $response->assertRedirect(route('admin.question-book.index'));
+        $response->assertSessionHas('success');
+
+        // Verify questions created in DB
+        $q1 = LmsQuestion::where('question_text', 'What does CSS stand for in web styling?')->first();
+        $this->assertNotNull($q1);
+        $this->assertEquals($this->course->id, $q1->course_id);
+        $this->assertEquals('Web Development', $q1->category);
+        $this->assertEquals('Chapter 2: CSS Basics', $q1->chapter);
+        $this->assertCount(4, $q1->options);
+        $this->assertTrue((bool)$q1->options[0]->is_correct);
+
+        $q2 = LmsQuestion::where('question_text', 'Which protocol is used to browse websites?')->first();
+        $this->assertNotNull($q2);
+        $this->assertEquals('HTTP', $q2->options[1]->option_text);
+        $this->assertTrue((bool)$q2->options[1]->is_correct);
+
+        // Clean up
+        if ($q1) {
+            $q1->options()->delete();
+            $q1->delete();
+        }
+        if ($q2) {
+            $q2->options()->delete();
+            $q2->delete();
+        }
+    }
+
+    /**
+     * Test 11: Admin can import into a new quiz created directly from Question Book
+     */
+    public function test_admin_can_import_into_new_quiz_from_question_book()
+    {
+        $csvData = "question_text,option_a,option_b,option_c,option_d,correct_option,marks,explanation\n";
+        $csvData .= "\"What is binary value of decimal 2?\",\"00\",\"10\",\"01\",\"11\",\"B\",\"2.0\",\"Decimal 2 equals 10 in binary.\"\n";
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'qb_newquiz_') . '.csv';
+        file_put_contents($tempPath, $csvData);
+
+        $uploadedFile = new UploadedFile(
+            $tempPath,
+            'qb_newquiz.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-book.import'), [
+                'import_mode'      => 'new_quiz',
+                'course_id'        => $this->course->id,
+                'new_quiz_title'   => 'Imported Digital Number System Test',
+                'quiz_type'        => 'exam',
+                'duration_minutes' => 30,
+                'excel_file'       => $uploadedFile,
+            ]);
+
+        $response->assertRedirect(route('admin.question-book.index'));
+        $response->assertSessionHas('success');
+
+        $quiz = LmsQuiz::where('title', 'Imported Digital Number System Test')->first();
+        $this->assertNotNull($quiz);
+        $this->assertEquals(2.0, $quiz->total_marks);
+
+        $q = LmsQuestion::where('quiz_id', $quiz->id)->first();
+        $this->assertNotNull($q);
+        $this->assertEquals('What is binary value of decimal 2?', $q->question_text);
+
+        // Clean up
+        if ($q) {
+            $q->options()->delete();
+            $q->delete();
+        }
+        $quiz->delete();
     }
 }

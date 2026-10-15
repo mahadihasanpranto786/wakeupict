@@ -628,6 +628,7 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
 Route::group(['prefix' => 'admin/question-book', 'as' => 'admin.question-book.'], function () {
     Route::get('/', 'backend\theme\clasic\lms\QuestionBookController@index')->name('index');
     Route::post('/', 'backend\theme\clasic\lms\QuestionBookController@store')->name('store');
+    Route::post('/import', 'backend\theme\clasic\lms\QuestionBookController@importExcel')->name('import');
     Route::get('/{id}/preview', 'backend\theme\clasic\lms\QuestionBookController@preview')->name('preview');
     Route::post('/{id}/duplicate', 'backend\theme\clasic\lms\QuestionBookController@duplicate')->name('duplicate');
     Route::post('/{id}/archive-toggle', 'backend\theme\clasic\lms\QuestionBookController@archiveToggle')->name('archive-toggle');
