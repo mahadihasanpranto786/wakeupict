@@ -827,6 +827,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('admin.question-book.index') }}" class="nav-link @yield('lms_question_book_active')">
+                                <i class="fas fa-book-open nav-icon text-primary"></i>
+                                <p>Question Book Library</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.question-papers.index') }}" class="nav-link @yield('lms_question_paper_active')">
+                                <i class="fas fa-layer-group nav-icon text-warning"></i>
+                                <p>Paper Builder <span class="badge badge-success ml-1" style="font-size: 9px;">Drag & Drop</span></p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('admin.quizzes.index') }}" class="nav-link @yield('lms_quiz_active')">
                                 <i class="fas fa-file-excel nav-icon text-info"></i>
                                 <p>Quizzes & Excel Import</p>

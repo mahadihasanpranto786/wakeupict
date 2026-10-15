@@ -110,7 +110,12 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
         }
 
-        /* Bangla Global Font Styles */
+        /* Modern Typography Stack: Inter, Plus Jakarta Sans, Noto Sans Bengali */
+        html, body, button, input, select, textarea, .main-sidebar, .main-header, .content-wrapper {
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        }
+
+        /* Bangla High-Legibility Font Styles */
         html[lang="bn"],
         html[lang="bn"] body,
         html[lang="bn"] .wrapper,
@@ -120,9 +125,9 @@
         [lang="bn"],
         .font-bangla,
         .bangla-text {
-            font-family: my_kalpurush, 'Kalpurush', inherit !important;
+            font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             font-weight: 500;
-            line-height: 1.1;
+            line-height: 1.25;
             color: inherit;
         }
 

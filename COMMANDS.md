@@ -13,7 +13,7 @@
 2. **Color Contrast**:
    - **Light Mode**: Background is light (`#FFFFFF`, `#F8FAFC`). Headings, body text, links, descriptions, and footer content MUST be **DARK, HIGH-CONTRAST** (`#0F172A`, `#1E293B`, `#334155`). Never use faint/washed-out grey text on light backgrounds.
    - **Dark Mode**: Background is deep dark (`#030712`, `#0B0F19`, `#0F172A`). Headings and text MUST be **CRISP LIGHT** (`#FFFFFF`, `#F1F5F9`, `#CBD5E1`).
-3. **Typography / Font Family**: Use **my_kalpurush** (`my_kalpurush`, 'Kalpurush', inherit) with `font-family: my_kalpurush; font-family: inherit; font-weight: 500; line-height: 1.1; color: inherit;` across all frontend, student portal, and examination pages for neat, uncluttered Bengali and English typography.
+3. **Typography / Font Family**: Modern Clean Sans-Serif font stack (`'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`) across admin panel, frontend, student portal, and examination pages for sleek, high-contrast, uncluttered Bengali and English typography without any serif/Times New Roman fallbacks.
 4. **Official Office Phone & Hotline**: Always use **`01791612121`** (`+880 1791-612121` / `01791-612121`).
 5. **Course Structure**: All courses are conducted in interactive **group batches with multiple students** in high-tech computer labs — **NOT 1:1**. Never use "১:১" in course descriptions or marketing text.
 6. **Backend-Driven Frontend Menus**: All frontend header and footer menus must be dynamically managed from the Admin Portal (`/admin/appearance/menus`). Navbar menu items must never wrap into two lines (`whitespace-nowrap`).
@@ -41,7 +41,7 @@
 | **Footer Background** | `#FFFFFF` with `#E2E8F0` border | `#0B0F19` with `#1E293B` border |
 | **Footer Text & Links** | Dark `#1E293B` / `#334155` | Light `#CBD5E1` |
 | **Footer Section Titles** | Dark Emerald `#047857` | Mint Emerald `#34D399` |
-| **Font Family** | my_kalpurush (`my_kalpurush`, 'Kalpurush', inherit) | my_kalpurush (`my_kalpurush`, 'Kalpurush', inherit) |
+| **Font Family** | Modern Sans-Serif (`'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif`) | Modern Sans-Serif (`'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif`) |
 
 ---
 

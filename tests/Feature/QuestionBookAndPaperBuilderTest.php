@@ -1,0 +1,488 @@
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use App\User;
+use App\model\StudentAccount;
+use App\model\LmsQuestion;
+use App\model\LmsQuestionOption;
+use App\model\LmsQuestionPaper;
+use App\model\LmsQuestionPaperSection;
+use App\model\LmsQuestionPaperItem;
+use App\model\LmsQuiz;
+use App\model\Course;
+use Illuminate\Support\Facades\Hash;
+
+class QuestionBookAndPaperBuilderTest extends TestCase
+{
+    protected $adminUser;
+    protected $student;
+    protected $course;
+    protected $sampleQuestion;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 1. Authenticated Admin User
+        $this->adminUser = User::first() ?: User::create([
+            'name'        => 'Paper Builder Admin',
+            'email'       => 'admin_test_paper_' . rand(1000, 9999) . '@wakeupict.test',
+            'password'    => Hash::make('password123'),
+            'excess_type' => 'admin',
+        ]);
+
+        // 2. Student User
+        $this->student = StudentAccount::create([
+            'student_id_code' => StudentAccount::generateUniqueStudentId(),
+            'name'     => 'Exam Student Test',
+            'phone'    => '01711' . rand(100000, 999999),
+            'email'    => 'student_paper_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => Hash::make('secret123'),
+            'status'   => 1,
+        ]);
+
+        // 3. Sample Course
+        $this->course = Course::where('status', 1)->first() ?: Course::create([
+            'course_title' => 'Advanced ICT & Programming',
+            'course_slug'  => 'advanced-ict-' . rand(100, 999),
+            'time_line'    => '3 Months',
+            'price'        => 5000,
+            'status'       => 1,
+        ]);
+
+        // 4. Sample Library Question
+        $this->sampleQuestion = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'question_text' => 'What is the full form of HTML in web technology?',
+            'question_type' => 'mcq_single',
+            'marks'         => 1.00,
+            'negative_marks'=> 0.25,
+            'category'      => 'Web Development',
+            'chapter'       => 'Chapter 1: Internet & HTML',
+            'topic'         => 'HTML Fundamentals',
+            'difficulty'    => 'easy',
+            'explanation'   => 'HTML stands for HyperText Markup Language.',
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+
+        LmsQuestionOption::create([
+            'question_id' => $this->sampleQuestion->id,
+            'option_text' => 'HyperText Markup Language',
+            'is_correct'  => true,
+            'order_index' => 1,
+        ]);
+
+        LmsQuestionOption::create([
+            'question_id' => $this->sampleQuestion->id,
+            'option_text' => 'HighText Machine Language',
+            'is_correct'  => false,
+            'order_index' => 2,
+        ]);
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->sampleQuestion) {
+            $this->sampleQuestion->options()->delete();
+            $this->sampleQuestion->delete();
+        }
+
+        if ($this->student) {
+            $this->student->delete();
+        }
+
+        parent::tearDown();
+    }
+
+    /**
+     * Test 1: Question Book Index and Filters
+     */
+    public function test_question_book_index_loads_with_filters()
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->get(route('admin.question-book.index', [
+                'course_id'  => $this->course->id,
+                'category'   => 'Web Development',
+                'difficulty' => 'easy',
+            ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('ডিজিটাল প্রশ্ন বই ও প্রশ্ন লাইব্রেরি');
+        $response->assertSee('What is the full form of HTML');
+    }
+
+    /**
+     * Test 2: AJAX Question Preview
+     */
+    public function test_ajax_question_preview_returns_json()
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->get(route('admin.question-book.preview', $this->sampleQuestion->id));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'question' => [
+                'id'            => $this->sampleQuestion->id,
+                'question_text' => 'What is the full form of HTML in web technology?',
+                'category'      => 'Web Development',
+            ]
+        ]);
+    }
+
+    /**
+     * Test 3: Question Creation & Duplication in Question Book
+     */
+    public function test_question_can_be_created_and_duplicated()
+    {
+        // Store
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-book.store'), [
+                'question_text' => 'Which memory is non-volatile?',
+                'question_type' => 'mcq_single',
+                'marks'         => 1.0,
+                'difficulty'    => 'medium',
+                'course_id'     => $this->course->id,
+                'options'       => ['ROM', 'RAM'],
+                'correct_option'=> 0,
+            ]);
+
+        $response->assertSessionHas('success');
+        $newQ = LmsQuestion::where('question_text', 'Which memory is non-volatile?')->first();
+        $this->assertNotNull($newQ);
+        $this->assertCount(2, $newQ->options);
+
+        // Duplicate
+        $dupResponse = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-book.duplicate', $newQ->id));
+
+        $dupResponse->assertSessionHas('success');
+        $this->assertDatabaseHas('lms_questions', [
+            'question_text' => 'Which memory is non-volatile? (Copy)',
+        ]);
+
+        // Clean up
+        LmsQuestionOption::where('question_id', $newQ->id)->delete();
+        $newQ->delete();
+        $dup = LmsQuestion::where('question_text', 'Which memory is non-volatile? (Copy)')->first();
+        if ($dup) {
+            $dup->options()->delete();
+            $dup->delete();
+        }
+    }
+
+    /**
+     * Test 4: Question Paper Creation and Studio Access
+     */
+    public function test_question_paper_creation_and_builder_access()
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-papers.store'), [
+                'title'            => 'Final Exam ICT 2026',
+                'course_id'        => $this->course->id,
+                'exam_name'        => 'Annual Final Exam',
+                'subject_name'     => 'Information Technology',
+                'subject_code'     => '154',
+                'academic_year'    => '2026',
+                'duration_minutes' => 60,
+                'total_marks'      => 50.0,
+                'paper_set'        => 'Set A',
+            ]);
+
+        $paper = LmsQuestionPaper::where('title', 'Final Exam ICT 2026')->first();
+        $this->assertNotNull($paper);
+        $this->assertEquals('Set A', $paper->paper_set);
+
+        // Verify default Section A was created
+        $this->assertCount(1, $paper->sections);
+        $this->assertEquals('A', $paper->sections->first()->section_code);
+
+        // Access Builder Studio
+        $builderResponse = $this->actingAs($this->adminUser)
+            ->get(route('admin.question-papers.builder', $paper->id));
+
+        $builderResponse->assertStatus(200);
+        $builderResponse->assertSee('Final Exam ICT 2026');
+        $builderResponse->assertSee('প্রশ্ন লাইব্রেরি');
+
+        // Clean up
+        $paper->sections()->delete();
+        $paper->delete();
+    }
+
+    /**
+     * Test 5: Add Question to Paper, Freeze Snapshot, and Save Draft
+     */
+    public function test_drag_and_drop_add_item_and_save_draft()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-TEST-001',
+            'title'            => 'Test Paper Snapshot',
+            'course_id'        => $this->course->id,
+            'exam_name'        => 'Term Exam',
+            'subject_name'     => 'ICT',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 45,
+            'total_marks'      => 10.0,
+            'status'           => 'draft',
+            'paper_set'        => 'Set A',
+        ]);
+
+        $section = LmsQuestionPaperSection::create([
+            'paper_id'     => $paper->id,
+            'title'        => 'Section A: MCQ',
+            'section_code' => 'A',
+            'order_index'  => 1,
+        ]);
+
+        // Add Item
+        $addResponse = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.question-papers.add-item', $paper->id), [
+                'question_id' => $this->sampleQuestion->id,
+                'section_id'  => $section->id,
+                'marks'       => 2.0,
+            ]);
+
+        $addResponse->assertStatus(200);
+        $addResponse->assertJson(['success' => true]);
+
+        $item = LmsQuestionPaperItem::where('paper_id', $paper->id)->first();
+        $this->assertNotNull($item);
+        $this->assertEquals(2.0, $item->marks);
+
+        // Verify Immutable Snapshot was saved
+        $snapshot = $item->snapshot;
+        $this->assertNotNull($snapshot);
+        $this->assertEquals('What is the full form of HTML in web technology?', $snapshot['question_text']);
+        $this->assertCount(2, $snapshot['options']);
+
+        // Test saveDraft API
+        $draftResponse = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.question-papers.save-draft', $paper->id), [
+                'sections' => [
+                    [
+                        'id' => $section->id,
+                        'items' => [
+                            ['id' => $item->id, 'marks' => 3.5]
+                        ]
+                    ]
+                ]
+            ]);
+
+        $draftResponse->assertStatus(200);
+        $draftResponse->assertJson(['success' => true]);
+
+        $item->refresh();
+        $this->assertEquals(3.5, $item->marks);
+
+        // Clean up
+        $paper->items()->delete();
+        $paper->sections()->delete();
+        $paper->delete();
+    }
+
+    /**
+     * Test 6: Board Print and Teacher Answer Key Views
+     */
+    public function test_board_print_and_teacher_answer_key_views()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-TEST-PRINT',
+            'title'            => 'Board Print Test Paper',
+            'course_id'        => $this->course->id,
+            'exam_name'        => 'Final Board Assessment',
+            'subject_name'     => 'Information & Communication Technology',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 60,
+            'total_marks'      => 20.0,
+            'status'           => 'approved',
+            'paper_set'        => 'Set A',
+        ]);
+
+        $section = LmsQuestionPaperSection::create([
+            'paper_id'     => $paper->id,
+            'title'        => 'ক-বিভাগ: বহুনির্বাচনি অভীক্ষা',
+            'section_code' => 'ক',
+            'order_index'  => 1,
+        ]);
+
+        $item = LmsQuestionPaperItem::create([
+            'paper_id'    => $paper->id,
+            'section_id'  => $section->id,
+            'question_id' => $this->sampleQuestion->id,
+            'order_index' => 1,
+            'marks'       => 1.0,
+        ]);
+        $item->freezeSnapshot();
+
+        // 1. Board Print View
+        $printResponse = $this->actingAs($this->adminUser)
+            ->get(route('admin.question-papers.print-board', $paper->id));
+
+        $printResponse->assertStatus(200);
+        $printResponse->assertSee('Final Board Assessment');
+        $printResponse->assertSee('ক-বিভাগ: বহুনির্বাচনি অভীক্ষা');
+        $printResponse->assertSee('What is the full form of HTML');
+
+        // 2. Teacher Answer Key View
+        $keyResponse = $this->actingAs($this->adminUser)
+            ->get(route('admin.question-papers.teacher-key', $paper->id));
+
+        $keyResponse->assertStatus(200);
+        $keyResponse->assertSee('শিক্ষক মূল্যায়ন নির্দেশিকা');
+        $keyResponse->assertSee('HyperText Markup Language');
+        $keyResponse->assertSee('HTML stands for HyperText Markup Language.');
+
+        // Clean up
+        $paper->items()->delete();
+        $paper->sections()->delete();
+        $paper->delete();
+    }
+
+    /**
+     * Test 7: Variant Set Generation (Set A -> Set B)
+     */
+    public function test_variant_set_generation()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-TEST-VARIANT',
+            'title'            => 'Master Assessment',
+            'course_id'        => $this->course->id,
+            'exam_name'        => 'Term 1',
+            'subject_name'     => 'ICT',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 30,
+            'total_marks'      => 10.0,
+            'status'           => 'approved',
+            'paper_set'        => 'Set A',
+        ]);
+
+        $section = LmsQuestionPaperSection::create([
+            'paper_id'     => $paper->id,
+            'title'        => 'Section A: MCQ',
+            'section_code' => 'A',
+            'order_index'  => 1,
+        ]);
+
+        $item = LmsQuestionPaperItem::create([
+            'paper_id'    => $paper->id,
+            'section_id'  => $section->id,
+            'question_id' => $this->sampleQuestion->id,
+            'order_index' => 1,
+            'marks'       => 1.0,
+        ]);
+        $item->freezeSnapshot();
+
+        // Clone to Set B
+        $cloneResponse = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-papers.generate-variants', $paper->id), [
+                'target_set' => 'Set B',
+            ]);
+
+        $cloneResponse->assertSessionHas('success');
+
+        $clonedPaper = LmsQuestionPaper::where('master_paper_id', $paper->id)->where('paper_set', 'Set B')->first();
+        $this->assertNotNull($clonedPaper);
+        $this->assertEquals('Set B', $clonedPaper->paper_set);
+        $this->assertCount(1, $clonedPaper->items);
+
+        // Clean up
+        $clonedPaper->items()->delete();
+        $clonedPaper->sections()->delete();
+        $clonedPaper->delete();
+
+        $paper->items()->delete();
+        $paper->sections()->delete();
+        $paper->delete();
+    }
+
+    /**
+     * Test 8: One-Click Publish to Online Quiz System
+     */
+    public function test_publish_paper_to_online_quiz_system()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-TEST-ONLINE',
+            'title'            => 'Annual Live Online Quiz 2026',
+            'course_id'        => $this->course->id,
+            'exam_name'        => 'Online Exam',
+            'subject_name'     => 'ICT',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 45,
+            'total_marks'      => 20.0,
+            'status'           => 'approved',
+            'paper_set'        => 'Set A',
+        ]);
+
+        $section = LmsQuestionPaperSection::create([
+            'paper_id'     => $paper->id,
+            'title'        => 'Section A: MCQ',
+            'section_code' => 'A',
+            'order_index'  => 1,
+        ]);
+
+        $item = LmsQuestionPaperItem::create([
+            'paper_id'    => $paper->id,
+            'section_id'  => $section->id,
+            'question_id' => $this->sampleQuestion->id,
+            'order_index' => 1,
+            'marks'       => 1.0,
+        ]);
+        $item->freezeSnapshot();
+
+        // Publish Online
+        $publishResponse = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-papers.publish-online', $paper->id));
+
+        $publishResponse->assertSessionHas('success');
+
+        $paper->refresh();
+        $this->assertEquals('published', $paper->status);
+        $this->assertNotNull($paper->linked_quiz_id);
+
+        // Verify linked LmsQuiz was created and exists in database
+        $linkedQuiz = LmsQuiz::find($paper->linked_quiz_id);
+        $this->assertNotNull($linkedQuiz);
+        $this->assertEquals('Annual Live Online Quiz 2026', $linkedQuiz->title);
+        $this->assertTrue($linkedQuiz->is_published);
+
+        // Clean up
+        $linkedQuiz->delete();
+        $paper->items()->delete();
+        $paper->sections()->delete();
+        $paper->delete();
+    }
+
+    /**
+     * Test 9: Security - Unauthenticated User Redirected
+     */
+    public function test_unauthenticated_user_cannot_access_builder_or_teacher_key()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-TEST-AUTH',
+            'title'            => 'Confidential Exam',
+            'exam_name'        => 'Board Exam',
+            'subject_name'     => 'ICT',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 60,
+            'total_marks'      => 100.0,
+            'status'           => 'draft',
+        ]);
+
+        $response = $this->get(route('admin.question-papers.teacher-key', $paper->id));
+        $response->assertRedirect('/login');
+
+        $builderResponse = $this->get(route('admin.question-papers.builder', $paper->id));
+        $builderResponse->assertRedirect('/login');
+
+        $paper->delete();
+    }
+}

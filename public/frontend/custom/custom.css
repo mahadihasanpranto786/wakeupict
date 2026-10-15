@@ -70,10 +70,9 @@ html[lang="bn"] body,
 [lang="bn"],
 .font-bangla,
 .bangla-text {
-    font-family: my_kalpurush;
-    font-family: inherit;
+    font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-weight: 500;
-    line-height: 1.1;
+    line-height: 1.25;
     color: inherit;
 }
 

@@ -624,6 +624,37 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
 });
 
+// ================================================== Question Book & Digital Question Library =========================================================//
+Route::group(['prefix' => 'admin/question-book', 'as' => 'admin.question-book.'], function () {
+    Route::get('/', 'backend\theme\clasic\lms\QuestionBookController@index')->name('index');
+    Route::post('/', 'backend\theme\clasic\lms\QuestionBookController@store')->name('store');
+    Route::get('/{id}/preview', 'backend\theme\clasic\lms\QuestionBookController@preview')->name('preview');
+    Route::post('/{id}/duplicate', 'backend\theme\clasic\lms\QuestionBookController@duplicate')->name('duplicate');
+    Route::post('/{id}/archive-toggle', 'backend\theme\clasic\lms\QuestionBookController@archiveToggle')->name('archive-toggle');
+    Route::post('/bulk-action', 'backend\theme\clasic\lms\QuestionBookController@bulkAction')->name('bulk-action');
+    Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionBookController@destroy')->name('destroy');
+});
+
+// ================================================== Drag-and-Drop Question Paper Builder =========================================================//
+Route::group(['prefix' => 'admin/question-papers', 'as' => 'admin.question-papers.'], function () {
+    Route::get('/', 'backend\theme\clasic\lms\QuestionPaperBuilderController@index')->name('index');
+    Route::post('/', 'backend\theme\clasic\lms\QuestionPaperBuilderController@store')->name('store');
+    Route::get('/{id}/builder', 'backend\theme\clasic\lms\QuestionPaperBuilderController@builder')->name('builder');
+    Route::get('/{id}/library-questions', 'backend\theme\clasic\lms\QuestionPaperBuilderController@libraryQuestions')->name('library-questions');
+    Route::post('/{id}/save-draft', 'backend\theme\clasic\lms\QuestionPaperBuilderController@saveDraft')->name('save-draft');
+    Route::post('/{id}/add-item', 'backend\theme\clasic\lms\QuestionPaperBuilderController@addItem')->name('add-item');
+    Route::delete('/{id}/items/{itemId}', 'backend\theme\clasic\lms\QuestionPaperBuilderController@removeItem')->name('remove-item');
+    Route::post('/{id}/sections', 'backend\theme\clasic\lms\QuestionPaperBuilderController@addSection')->name('add-section');
+    Route::delete('/{id}/sections/{sectionId}', 'backend\theme\clasic\lms\QuestionPaperBuilderController@deleteSection')->name('delete-section');
+    Route::post('/{id}/auto-select', 'backend\theme\clasic\lms\QuestionPaperBuilderController@autoSelectQuestions')->name('auto-select');
+    Route::get('/{id}/print-board', 'backend\theme\clasic\lms\QuestionPaperBuilderController@printBoard')->name('print-board');
+    Route::get('/{id}/teacher-key', 'backend\theme\clasic\lms\QuestionPaperBuilderController@teacherKey')->name('teacher-key');
+    Route::post('/{id}/generate-variants', 'backend\theme\clasic\lms\QuestionPaperBuilderController@generateVariantSets')->name('generate-variants');
+    Route::post('/{id}/publish-online', 'backend\theme\clasic\lms\QuestionPaperBuilderController@publishOnline')->name('publish-online');
+    Route::put('/{id}/settings', 'backend\theme\clasic\lms\QuestionPaperBuilderController@updateSettings')->name('update-settings');
+    Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionPaperBuilderController@destroy')->name('destroy');
+});
+
 //**************************************** BACKEND ROUTES END*************************************************** */
 
 });

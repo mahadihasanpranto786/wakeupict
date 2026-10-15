@@ -41,29 +41,14 @@
         })();
     </script>
 
-    <!-- Bengali & Global Typography: my_kalpurush & Inherit -->
-    <style>
-        @font-face {
-            font-family: 'my_kalpurush';
-            font-display: swap;
-            font-style: normal;
-            font-weight: 100 900;
-            src: local('my_kalpurush'), local('Kalpurush'), local('Kalpurush ANSI'),
-                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
-                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
-        }
-        @font-face {
-            font-family: 'Kalpurush';
-            font-display: swap;
-            font-style: normal;
-            font-weight: 100 900;
-            src: local('Kalpurush'), local('my_kalpurush'), local('Kalpurush ANSI'),
-                 url('{{ asset('frontend/fonts/Kalpurush.woff2') }}') format('woff2'),
-                 url('{{ asset('frontend/fonts/Kalpurush.ttf') }}') format('truetype');
-        }
+    <!-- Bengali & Global Typography: Modern Sans-Serif (Plus Jakarta Sans, Inter, Noto Sans Bengali) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <style>
         html {
-            font-family: my_kalpurush, 'Kalpurush', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         :root {
@@ -75,12 +60,9 @@
             --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
         }
 
-        /* Clean Uncluttered Typography per User Directive */
+        /* Clean Uncluttered Modern Typography */
         body, html, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
-            font-family: my_kalpurush;
-            font-family: inherit;
-            font-weight: 500;
-            line-height: 1.1;
+            font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: inherit;
         }
         .font-mono, [class*="font-mono"], code, pre {
