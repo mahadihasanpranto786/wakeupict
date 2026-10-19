@@ -15,7 +15,7 @@ class AcademicTrainingController extends Controller
     function index()
     {
         $content_list = Page::where('page_name', '=', 'Academic')->get();
-        $courseData = Course::latest()->get();
+        $courseData = Course::where('status', 1)->orderBy('sort_order', 'ASC')->orderBy('id', 'ASC')->get();
         $banner = CourseBanner::where('status',1)->where('active_status',1)->first();
         return view('frontend.theme.clasic.academic_training.academic_training', compact('content_list', 'courseData', 'banner'));
     }

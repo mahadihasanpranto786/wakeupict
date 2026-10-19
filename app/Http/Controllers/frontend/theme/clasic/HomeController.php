@@ -41,7 +41,7 @@ class HomeController extends Controller
         $localProjectHeader = LocalProjectHeader::latest()->first();
 
 
-        $courses = \App\model\Course::where("status", 1)->latest()->get();
+        $courses = \App\model\Course::where("status", 1)->orderBy('sort_order', 'ASC')->orderBy('id', 'ASC')->get();
 
         return view('frontend.theme.clasic.frontend_layouts.home_page',
          compact(

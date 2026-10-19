@@ -36,6 +36,17 @@
                 </div>
             @endif
 
+            <!-- Default Password Tip for Online Admitted Students -->
+            <div class="mb-6 p-3.5 rounded-2xl bg-brand-primary/10 border border-brand-primary/30 text-xs text-slate-300 space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-brand-primary">
+                    <i class="fa fa-info-circle text-sm"></i>
+                    <span>অনলাইন ভর্তি হওয়া শিক্ষার্থীদের জন্য:</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
+                    ইউজারনেম হিসেবে আপনার <strong>Student ID</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
+                </p>
+            </div>
+
             <!-- Form -->
             <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-5">
                 @csrf
