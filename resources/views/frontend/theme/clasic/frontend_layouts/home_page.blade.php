@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
 
     <!--========================== Globant-Inspired Auto-Sliding Hero ============================-->
     <section class="relative min-h-[92vh] flex items-center justify-center pt-28 pb-16 lg:py-0 overflow-hidden bg-grid-mesh">
@@ -30,12 +30,12 @@
                 <div class="lg:col-span-7 flex flex-col justify-center text-left reveal-on-scroll">
                     
                     <!-- Live Status Badge with Floating Wave -->
-                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-brand-primary/30 text-brand-primary text-xs font-mono tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-sm animate-badge-float">
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 dark:bg-slate-900/90 dark:border-brand-primary/30 dark:text-brand-primary text-xs font-mono font-bold tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-xs animate-badge-float">
                         <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 dark:bg-brand-primary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-brand-primary"></span>
                         </span>
-                        <span>{{ app_setting('hero_badge', __('frontend.hero.badge')) }}</span>
+                        <span class="text-emerald-950 dark:text-brand-primary font-black">{{ app_setting('hero_badge', __('frontend.hero.badge')) }}</span>
                     </div>
 
                     <!-- Kinetic Display Headline with Animated Gradient Shimmer -->
@@ -230,9 +230,9 @@
             
             <!-- Section Header -->
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider mb-4">
-                    <i class="fa fa-graduation-cap"></i>
-                    <span>ক্যাম্পাস স্কিলস ও একাডেমিক ট্রেনিং</span>
+                <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400 font-mono text-xs font-black uppercase tracking-wider mb-4 shadow-xs animate-badge-float">
+                    <i class="fa fa-graduation-cap text-emerald-800 dark:text-emerald-400 text-sm"></i>
+                    <span class="text-emerald-950 dark:text-emerald-400 font-black">ক্যাম্পাস স্কিলস ও একাডেমিক ট্রেনিং</span>
                 </div>
                 <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                     দেশসেরা <span class="text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-400">অফলাইন ল্যাব কোর্সসমূহ</span>
@@ -244,26 +244,26 @@
 
             <!-- 10 Minute School Style Category Filter Pills -->
             <div class="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto pb-4 mb-10 no-scrollbar" id="course-category-tabs">
-                <button type="button" onclick="filterCourses('all', this)" class="category-pill active px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-md">
-                    <i class="fa fa-th-large mr-1.5"></i> সকল কোর্স (All)
+                <button type="button" onclick="filterCourses('all', this)" class="category-pill active px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-th-large mr-1.5"></i> <span>সকল কোর্স (All)</span>
                 </button>
-                <button type="button" onclick="filterCourses('graphic', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-paint-brush mr-1.5 text-pink-500 dark:text-pink-400"></i> গ্রাফিক্স ডিজাইন
+                <button type="button" onclick="filterCourses('graphic', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-paint-brush mr-1.5 text-pink-500 dark:text-pink-400"></i> <span>গ্রাফিক্স ডিজাইন</span>
                 </button>
-                <button type="button" onclick="filterCourses('web', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-code mr-1.5 text-blue-500 dark:text-blue-400"></i> ওয়েব ডেভেলপমেন্ট
+                <button type="button" onclick="filterCourses('web', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-code mr-1.5 text-blue-500 dark:text-blue-400"></i> <span>ওয়েব ডেভেলপমেন্ট</span>
                 </button>
-                <button type="button" onclick="filterCourses('ict', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-book mr-1.5 text-emerald-600 dark:text-emerald-400"></i> ক্লাস ৬-১০ ICT
+                <button type="button" onclick="filterCourses('ict', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-book mr-1.5 text-emerald-600 dark:text-emerald-400"></i> <span>ক্লাস ৬-১০ ICT</span>
                 </button>
-                <button type="button" onclick="filterCourses('marketing', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-bullhorn mr-1.5 text-amber-500 dark:text-amber-400"></i> ডিজিটাল মার্কেটিং
+                <button type="button" onclick="filterCourses('marketing', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-bullhorn mr-1.5 text-amber-500 dark:text-amber-400"></i> <span>ডিজিটাল মার্কেটিং</span>
                 </button>
-                <button type="button" onclick="filterCourses('office', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-desktop mr-1.5 text-indigo-500 dark:text-indigo-400"></i> মাইক্রোসফট অফিস
+                <button type="button" onclick="filterCourses('office', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-desktop mr-1.5 text-indigo-500 dark:text-indigo-400"></i> <span>মাইক্রোসফট অফিস</span>
                 </button>
-                <button type="button" onclick="filterCourses('ai', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm">
-                    <i class="fa fa-magic mr-1.5 text-cyan-600 dark:text-cyan-400"></i> AI ও আধুনিক টেক
+                <button type="button" onclick="filterCourses('ai', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
+                    <i class="fa fa-magic mr-1.5 text-cyan-600 dark:text-cyan-400"></i> <span>AI ও আধুনিক টেক</span>
                 </button>
             </div>
 
@@ -313,7 +313,7 @@
                                     </span>
                                 </div>
                                 <div class="absolute top-3 right-3">
-                                    <span class="px-2 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[10px] font-bold uppercase tracking-wider shadow">
+                                    <span class="px-2 py-0.5 rounded-full bg-rose-600 text-black font-mono text-[10px] font-black uppercase tracking-wider shadow" style="color: #000000 !important;">
                                         ভর্তি চলছে
                                     </span>
                                 </div>
@@ -518,23 +518,12 @@
 
     <script>
     function filterCourses(category, btn) {
-        var isLight = document.documentElement.classList.contains('light');
         // Toggle active pill button
         document.querySelectorAll('#course-category-tabs .category-pill').forEach(function(p) {
-            p.classList.remove('active', 'bg-emerald-600', 'bg-emerald-500', 'text-white', 'text-slate-950', 'shadow-md', 'shadow-glow-emerald');
-            if (isLight) {
-                p.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700', 'shadow-sm');
-            } else {
-                p.classList.add('bg-slate-900', 'border', 'border-slate-700/80', 'text-slate-300');
-            }
+            p.classList.remove('active');
         });
-        btn.classList.add('active');
-        if (isLight) {
-            btn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700', 'shadow-sm');
-            btn.classList.add('bg-emerald-600', 'text-white', 'shadow-md');
-        } else {
-            btn.classList.remove('bg-slate-900', 'border-slate-700/80', 'text-slate-300');
-            btn.classList.add('bg-emerald-500', 'text-slate-950', 'shadow-glow-emerald');
+        if (btn) {
+            btn.classList.add('active');
         }
 
         // Filter cards
@@ -575,7 +564,7 @@
                         @php
                             $targetBlog = App\model\Blog::find($project->blog_id);
                             $blog_slug = $targetBlog ? $targetBlog->slug_title : '';
-                            $isFeatured = ($index % 3 == 0);
+                            $isFeatured = ($index === 0);
                         @endphp
 
                         <div class="{{ $isFeatured ? 'lg:col-span-8' : 'lg:col-span-4' }} group">
@@ -619,7 +608,7 @@
 
     <!--========================== International Projects ============================-->
     @if (!empty($internationalWorks) && count($internationalWorks) > 0)
-        <section class="py-24 sm:py-32 relative bg-slate-900/30 border-t border-slate-800/80">
+        <section id="international-works" class="py-24 sm:py-32 relative bg-slate-900/30 border-t border-slate-800/80">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -639,21 +628,49 @@
                         @php
                             $targetBlog = App\model\Blog::find($work->blog_id);
                             $blog_slug = $targetBlog ? $targetBlog->slug_title : '';
+
+                            // Dynamic specific project titles as requested
+                            $workTitle = '';
+                            $badgeText = '';
+                            if ($work->blog_id == 43) {
+                                $workTitle = App::getLocale() == 'bn' ? 'ইউনাইটেড হসপিটাল — হার্ট কপ' : 'United Hospital — Heart Cop';
+                                $badgeText = App::getLocale() == 'bn' ? 'আন্তর্জাতিক প্রজেক্ট' : 'International Project';
+                            } elseif ($work->blog_id == 51) {
+                                $workTitle = App::getLocale() == 'bn' ? 'লাইভ স্টক ও ইনভেন্টরি ম্যানেজমেন্ট' : 'Live Stock Management System';
+                                $badgeText = App::getLocale() == 'bn' ? 'আন্তর্জাতিক প্রজেক্ট' : 'International Project';
+                            } elseif ($work->blog_id == 15) {
+                                $workTitle = App::getLocale() == 'bn' ? 'রেন্ট-এ-কার ও ফ্লিট ট্রিপ ম্যানেজমেন্ট' : 'Online Rent-A-Car & Trip Management';
+                                $badgeText = App::getLocale() == 'bn' ? 'আন্তর্জাতিক প্রজেক্ট' : 'International Project';
+                            } elseif ($work->blog_id == 53) {
+                                $workTitle = App::getLocale() == 'bn' ? 'ইব্রাহিম কার্ডিয়াক হসপিটাল — হার্ট কপ' : 'Ibrahim Cardiac Hospital — Heart Cop';
+                                $badgeText = App::getLocale() == 'bn' ? 'আন্তর্জাতিক প্রজেক্ট' : 'International Project';
+                            } else {
+                                $workTitle = $targetBlog ? $targetBlog->blog_title : __('frontend.home.view_enterprise_solution');
+                                $badgeText = __('frontend.home.international_badge');
+                            }
                         @endphp
-                        <div class="group relative rounded-2xl overflow-hidden border border-slate-800/80 hover:border-brand-cyan/40 transition-all duration-300 hover:shadow-card-dark hover:-translate-y-1 bg-slate-950">
+                        <div class="group relative rounded-2xl overflow-hidden border border-slate-800/80 hover:border-brand-cyan/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-slate-950">
                             <a href="{{ !empty($blog_slug) ? url('our-blogs/' . $blog_slug) : '#' }}" class="block aspect-[16/10] sm:aspect-[16/9] overflow-hidden relative">
-                                <img src="{{ safe_asset($work->image) }}" alt="{{ $work->image_alt }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-90 group-hover:brightness-100">
+                                <img src="{{ safe_asset($work->image) }}" alt="{{ $work->image_alt }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-95 group-hover:brightness-100">
                                 
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                                <!-- High contrast dark gradient overlay ensuring crisp white text on all photos -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent"></div>
                                 
-                                <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                                    <div>
-                                        <span class="text-xs font-mono uppercase tracking-widest text-brand-cyan block mb-1">{{ __('frontend.home.international_badge') }}</span>
-                                        <h4 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
-                                            {{ __('frontend.home.view_enterprise_solution') }}
+                                <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 card-overlay-text">
+                                    <div class="flex-1">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[11px] sm:text-xs font-mono uppercase tracking-wider font-extrabold mb-2.5 shadow-md international-badge-black" style="background-color: #ffffff !important; color: #000000 !important;">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            <span style="color: #000000 !important; font-weight: 800;">{{ $badgeText }}</span>
+                                        </span>
+                                        <h4 class="text-xl sm:text-2xl font-black text-white group-hover:text-cyan-300 transition-colors drop-shadow-md leading-snug international-card-title" style="color: #ffffff !important;">
+                                            {{ $workTitle }}
                                         </h4>
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-200 font-medium mt-1.5 drop-shadow-sm international-card-sub" style="color: #f1f5f9 !important;">
+                                            <span style="color: #f1f5f9 !important;">{{ __('frontend.home.view_enterprise_solution') }}</span>
+                                            <i class="fa fa-arrow-right text-[10px] text-cyan-400"></i>
+                                        </div>
                                     </div>
-                                    <div class="w-10 h-10 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-brand-cyan group-hover:bg-brand-cyan group-hover:text-slate-950 transition-all duration-300">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-center text-cyan-300 group-hover:bg-cyan-400 group-hover:text-slate-950 transition-all duration-300 shrink-0 shadow-lg">
                                         <i class="fa fa-arrow-right text-sm"></i>
                                     </div>
                                 </div>

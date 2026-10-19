@@ -281,3 +281,59 @@
 #10 C:\\Herd\\wakeupict\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #11 {main}
 "} 
+[2026-10-19 12:41:30] local.ERROR: The "--execute" option does not exist. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): The \"--execute\" option does not exist. at C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php:201)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php(143): Symfony\\Component\\Console\\Input\\ArgvInput->addLongOption('execute', 'App\\\\model\\\\Inter...')
+#1 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php(79): Symfony\\Component\\Console\\Input\\ArgvInput->parseLongOption('--execute=App\\\\m...')
+#2 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\Input.php(55): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#3 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Command\\Command.php(214): Symfony\\Component\\Console\\Input\\Input->bind(Object(Symfony\\Component\\Console\\Input\\InputDefinition))
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(170): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#5 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(1009): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#6 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(273): Symfony\\Component\\Console\\Application->doRunCommand(Object(Laravel\\Tinker\\Console\\TinkerCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(149): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#8 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(90): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(133): Illuminate\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#10 C:\\Herd\\wakeupict\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#11 {main}
+"} 
+[2026-10-19 12:56:24] local.ERROR: The "--execute" option does not exist. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): The \"--execute\" option does not exist. at C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php:201)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php(143): Symfony\\Component\\Console\\Input\\ArgvInput->addLongOption('execute', 'print_r(App\\\\mod...')
+#1 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\ArgvInput.php(79): Symfony\\Component\\Console\\Input\\ArgvInput->parseLongOption('--execute=print...')
+#2 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Input\\Input.php(55): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#3 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Command\\Command.php(214): Symfony\\Component\\Console\\Input\\Input->bind(Object(Symfony\\Component\\Console\\Input\\InputDefinition))
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(170): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#5 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(1009): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#6 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(273): Symfony\\Component\\Console\\Application->doRunCommand(Object(Laravel\\Tinker\\Console\\TinkerCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#7 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(149): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#8 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(90): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#9 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(133): Illuminate\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#10 C:\\Herd\\wakeupict\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#11 {main}
+"} 
+[2026-10-19 12:57:06] local.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'title' in 'field list' (SQL: select `id`, `title`, `slug`, `image` from `blogs`) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'title' in 'field list' (SQL: select `id`, `title`, `slug`, `image` from `blogs`) at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'title' in 'field list' at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:326)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('select `id`, `t...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(333): Illuminate\\Database\\Connection->run('select `id`, `t...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2130): Illuminate\\Database\\Connection->select('select `id`, `t...', Array, true)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2118): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2604): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2119): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(521): Illuminate\\Database\\Query\\Builder->get(Array)
+#7 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(505): Illuminate\\Database\\Eloquent\\Builder->getModels(Array)
+#8 C:\\Herd\\wakeupict\\check_national.php(7): Illuminate\\Database\\Eloquent\\Builder->get()
+#9 {main}
+"} 
+[2026-10-19 13:05:06] local.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'seat_capacity' in 'field list' (SQL: select `id`, `course_title`, `seat_capacity`, `total_classes`, `course_fee` from `courses`) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'seat_capacity' in 'field list' (SQL: select `id`, `course_title`, `seat_capacity`, `total_classes`, `course_fee` from `courses`) at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'seat_capacity' in 'field list' at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:326)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('select `id`, `c...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(333): Illuminate\\Database\\Connection->run('select `id`, `c...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2130): Illuminate\\Database\\Connection->select('select `id`, `c...', Array, true)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2118): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2604): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2119): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(521): Illuminate\\Database\\Query\\Builder->get(Array)
+#7 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(505): Illuminate\\Database\\Eloquent\\Builder->getModels(Array)
+#8 C:\\Herd\\wakeupict\\check_course_batch.php(11): Illuminate\\Database\\Eloquent\\Builder->get()
+#9 {main}
+"} 

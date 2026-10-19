@@ -4,7 +4,7 @@
     $studentUser = function_exists('student_user') ? student_user() : null;
     $studentMenus = \App\Services\StudentMenuService::getTree();
 @endphp
-<html lang="{{ App::getLocale() }}" class="{{ $initialTheme }} scroll-smooth">
+<html lang="{{ App::getLocale() }}" class="light scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -12,32 +12,18 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Immediate Theme Application (Pure System Default Auto-Sync) -->
+    <!-- Immediate Theme Application: Default to Light -->
     <script>
         (function() {
+            var activeTheme = 'light';
             try {
-                localStorage.removeItem('theme_mode');
-                document.cookie = "theme_mode=;path=/;max-age=0";
+                var storedTheme = localStorage.getItem('theme_mode');
+                if (storedTheme === 'dark') {
+                    activeTheme = 'dark';
+                }
             } catch(e) {}
-            function syncWithSystemTheme() {
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    document.documentElement.classList.remove('light');
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                }
-            }
-            syncWithSystemTheme();
-            if (window.matchMedia) {
-                var mql = window.matchMedia('(prefers-color-scheme: dark)');
-                if (mql.addEventListener) {
-                    mql.addEventListener('change', syncWithSystemTheme);
-                } else if (mql.addListener) {
-                    mql.addListener(syncWithSystemTheme);
-                }
-            }
+            document.documentElement.classList.remove('dark', 'light');
+            document.documentElement.classList.add(activeTheme);
         })();
     </script>
 
@@ -70,8 +56,8 @@
         }
 
         body {
-            background-color: #030712;
-            color: #f1f5f9;
+            background-color: #f8fafc;
+            color: #0f172a;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -248,21 +234,40 @@
         }
 
         /* Preserve bright text for colored badges / status buttons */
-        html.light .bg-rose-500,
-        html.light .bg-rose-600,
+        html.light .bg-rose-500:not(.bg-rose-600),
         html.light .bg-blue-500,
         html.light .bg-blue-600,
         html.light .bg-emerald-500,
         html.light .bg-emerald-600 {
             color: #ffffff !important;
         }
-        html.light .bg-rose-500 *,
-        html.light .bg-rose-600 *,
+        html.light .bg-rose-500:not(.bg-rose-600) *,
         html.light .bg-blue-500 *,
         html.light .bg-blue-600 *,
         html.light .bg-emerald-500 *,
         html.light .bg-emerald-600 * {
             color: #ffffff !important;
+        }
+
+        /* User Directive: bg-rose-600 and bg-emerald-100 buttons & badges MUST have black font */
+        .bg-rose-600,
+        .bg-rose-600 *,
+        [class*="bg-rose-600"],
+        [class*="bg-rose-600"] *,
+        .bg-emerald-100,
+        .bg-emerald-100 *,
+        [class*="bg-emerald-100"],
+        [class*="bg-emerald-100"] *,
+        html.light .bg-rose-600,
+        html.light .bg-rose-600 *,
+        html.light [class*="bg-rose-600"],
+        html.light [class*="bg-rose-600"] *,
+        html.light .bg-emerald-100,
+        html.light .bg-emerald-100 *,
+        html.light [class*="bg-emerald-100"],
+        html.light [class*="bg-emerald-100"] * {
+            color: #000000 !important;
+            font-weight: 800 !important;
         }
 
         /* Color accents calibrated for light mode */

@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-32 pb-24">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen pt-36 sm:pt-44 pb-24">
 
     <!-- Article Header -->
     <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
@@ -22,11 +22,11 @@
         </div>
     </header>
 
-    <!-- Main Header Image -->
+    <!-- Main Header Image (Full Uncropped View) -->
     @if (!empty($blog->header_image))
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl aspect-[16/9] sm:aspect-[21/9]">
-                <img src="{{ asset($blog->header_image) }}" alt="{{ $blog->image_alt }}" class="w-full h-full object-cover">
+            <div class="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex items-center justify-center">
+                <img src="{{ asset($blog->header_image) }}" alt="{{ $blog->image_alt }}" class="w-full h-auto block object-contain rounded-2xl">
             </div>
         </div>
     @endif
@@ -52,18 +52,18 @@
                                 {!! $content->short_description !!}
                             </div>
                         </div>
-                        <div class="rounded-xl overflow-hidden border border-slate-800">
+                        <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
                             <a href="{{ URL::asset($content->file) }}">
-                                <img src="{{ asset($content->file) }}" class="w-full h-auto object-cover" alt="{{ $content->image_alt }}">
+                                <img src="{{ asset($content->file) }}" class="w-full h-auto block object-contain" alt="{{ $content->image_alt }}">
                             </a>
                         </div>
                     </div>
 
                 @elseif ($content->content_design == 'Right side')
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div class="rounded-xl overflow-hidden border border-slate-800 order-2 md:order-1">
+                        <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 order-2 md:order-1">
                             <a href="{{ URL::asset($content->file) }}">
-                                <img src="{{ asset($content->file) }}" class="w-full h-auto object-cover" alt="{{ $content->image_alt }}">
+                                <img src="{{ asset($content->file) }}" class="w-full h-auto block object-contain" alt="{{ $content->image_alt }}">
                             </a>
                         </div>
                         <div class="order-1 md:order-2">
@@ -78,9 +78,9 @@
 
                 @elseif ($content->content_design == 'Middle')
                     <div class="space-y-6 text-center">
-                        <div class="max-w-2xl mx-auto rounded-xl overflow-hidden border border-slate-800">
+                        <div class="max-w-2xl mx-auto rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
                             <a href="{{ URL::asset($content->file) }}">
-                                <img src="{{ asset($content->file) }}" class="w-full h-auto object-cover mx-auto" alt="{{ $content->image_alt }}">
+                                <img src="{{ asset($content->file) }}" class="w-full h-auto block object-contain mx-auto" alt="{{ $content->image_alt }}">
                             </a>
                         </div>
                         <div>

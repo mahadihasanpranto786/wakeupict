@@ -3,7 +3,7 @@
 @section('title', __('frontend.nav.facebook_posts') . ' — ' . app_setting('site_title', 'Wake Up ICT'))
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 pt-28 pb-24">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen pt-28 pb-24">
 
     <!-- Ambient Glowing Backdrops -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-brand-primary/15 via-brand-cyan/10 to-blue-600/10 blur-[140px] pointer-events-none rounded-full"></div>

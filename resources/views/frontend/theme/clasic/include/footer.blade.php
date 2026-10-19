@@ -87,43 +87,45 @@
                 <ul class="space-y-3 text-sm">
                     @foreach($footerQuickMenus as $fMenu)
                         <li>
-                            <a href="{{ $fMenu->resolveUrl() }}" target="{{ $fMenu->target }}" class="text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-colors duration-200 flex items-center gap-2">
+                            <a href="{{ $fMenu->resolveUrl() }}" target="{{ $fMenu->target }}" class="text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-colors duration-200 flex items-center gap-2 group">
                                 @if($fMenu->icon)
                                     <i class="{{ $fMenu->icon }} text-xs text-emerald-600 dark:text-emerald-400"></i>
                                 @endif
-                                <span>{{ $fMenu->getTitle() }}</span>
+                                <span class="group-hover:translate-x-0.5 transition-transform">{{ $fMenu->getTitle() }}</span>
                             </a>
                         </li>
                     @endforeach
+                    <li class="pt-2 border-t border-slate-200 dark:border-slate-800">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
+                            <i class="fa fa-lock text-emerald-600 dark:text-emerald-400"></i>
+                            <span>{{ App::getLocale() == 'bn' ? 'অ্যাডমিন লগইন' : 'Admin Login' }}</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
-            <!-- Column 3: Platform Capabilities (Col 3) -->
+            <!-- Column 3: Platform Capabilities & Dynamic Course Outlines (Col 3) -->
+            @php
+                $footerCourses = \App\model\Course::where('status', 1)->orderBy('id', 'asc')->take(6)->get();
+            @endphp
             <div class="lg:col-span-3">
                 <h4 class="text-xs font-mono uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-6 font-bold">
                     {{ __('frontend.footer.programs') }}
                 </h4>
                 <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                    <li class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
-                        <span>{{ __('frontend.footer.track_1') }}</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
-                        <span>{{ __('frontend.footer.track_2') }}</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
-                        <span>{{ __('frontend.footer.track_3') }}</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
-                        <span>{{ __('frontend.footer.track_4') }}</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
-                        <span>{{ __('frontend.footer.track_5') }}</span>
-                    </li>
+                    @forelse($footerCourses as $fCourse)
+                        <li>
+                            <a href="{{ url('training/' . $fCourse->course_slug) }}" class="text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 group-hover:scale-125 transition-transform flex-shrink-0"></span>
+                                <span class="line-clamp-1 group-hover:translate-x-0.5 transition-transform">{{ $fCourse->course_title }}</span>
+                            </a>
+                        </li>
+                    @empty
+                        <li class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
+                            <span>{{ __('frontend.footer.track_1') }}</span>
+                        </li>
+                    @endforelse
                 </ul>
             </div>
 

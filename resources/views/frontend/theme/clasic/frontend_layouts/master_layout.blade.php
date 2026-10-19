@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 @php
-    $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'light';
+    $initialTheme = isset($_COOKIE['theme_mode']) && in_array($_COOKIE['theme_mode'], ['light', 'dark']) ? $_COOKIE['theme_mode'] : 'light';
 @endphp
-<html lang="{{ App::getLocale() }}" class="{{ $initialTheme }} scroll-smooth">
+<html lang="{{ App::getLocale() }}" class="light scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <!-- Immediate Theme Application (System Default Preference with Zero FOUT) -->
+    <!-- Immediate Theme Application: Default to Light in Frontend -->
     <script>
         (function() {
-            function syncWithSystemTheme() {
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    document.documentElement.classList.remove('light');
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
+            var activeTheme = 'light';
+            try {
+                var storedTheme = localStorage.getItem('theme_mode');
+                if (storedTheme === 'dark') {
+                    activeTheme = 'dark';
                 }
-            }
-            syncWithSystemTheme();
-            if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncWithSystemTheme);
-            }
+            } catch(e) {}
+            document.documentElement.classList.remove('dark', 'light');
+            document.documentElement.classList.add(activeTheme);
         })();
     </script>
 
@@ -57,9 +52,14 @@
             font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
         }
 
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
         body {
-            background-color: #030712;
-            color: #f1f5f9;
+            background-color: #f8fafc;
+            color: #0f172a;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -81,7 +81,8 @@
         }
 
         /* =========================================================
-           ENTERPRISE LIGHT MODE SYSTEM (Universal for All Pages)
+           ENTERPRISE LIGHT MODE SYSTEM (Universal for All Frontend Pages)
+           Default Theme is Light: 100% WCAG Contrast & Crystal-Clear Colors
            ========================================================= */
         html.light,
         html.light body {
@@ -94,7 +95,8 @@
         html.light div.bg-slate-950,
         html.light section.bg-slate-950,
         html.light main.bg-slate-950,
-        html.light [class*="min-h-screen"].bg-slate-950 {
+        html.light [class*="min-h-screen"].bg-slate-950,
+        html.light [class*="bg-slate-950"] {
             background-color: #f8fafc !important;
         }
 
@@ -102,7 +104,9 @@
         html.light section.bg-slate-900\/20,
         html.light section.bg-slate-900\/30,
         html.light section.bg-slate-900\/40,
-        html.light section[class*="bg-slate-900/"] {
+        html.light section[class*="bg-slate-900/"],
+        html.light div[class*="bg-slate-900/40"],
+        html.light div[class*="bg-slate-900/30"] {
             background-color: #f1f5f9 !important;
         }
 
@@ -111,12 +115,15 @@
         html.light div[class*="bg-slate-900"],
         html.light article[class*="bg-slate-900"],
         html.light [class*="rounded-2xl"][class*="bg-slate-900"],
+        html.light [class*="rounded-3xl"][class*="bg-slate-900"],
         html.light [class*="rounded-xl"][class*="bg-slate-900"],
         html.light [class*="bg-slate-900/"],
         html.light .bg-slate-900,
         html.light [class*="bg-brand-surface"],
         html.light [class*="bg-brand-card"],
-        html.light [class*="bg-brand-dark"] {
+        html.light [class*="bg-brand-dark"],
+        html.light .course-item,
+        html.light .accordion-item {
             background-color: #ffffff !important;
             border-color: #e2e8f0 !important;
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
@@ -124,7 +131,8 @@
 
         /* Card Hover Effects */
         html.light a[class*="bg-slate-900"]:hover,
-        html.light div[class*="hover:-translate-y-1"]:hover {
+        html.light div[class*="hover:-translate-y-1"]:hover,
+        html.light div[class*="hover:-translate-y-1.5"]:hover {
             border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5) !important;
             box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05) !important;
         }
@@ -150,6 +158,48 @@
             --tw-gradient-from: rgba(15, 23, 42, 0.45) !important;
         }
 
+        /* Neutralize dark gradients on sections & cards in Light Mode */
+        html.light section[class*="from-slate-9"],
+        html.light section[class*="to-slate-9"],
+        html.light section[class*="bg-gradient-to-"][class*="from-slate-"],
+        html.light div.student-card[class*="from-slate-9"],
+        html.light div.student-card[class*="to-slate-9"] {
+            background-image: none !important;
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Badge and Chip contrast in Light Mode */
+        html.light [class*="bg-emerald-500/10"]:not(button):not(.header-hotline-btn),
+        html.light [class*="bg-emerald-500/20"]:not(button):not(.header-hotline-btn) {
+            background-color: #ecfdf5 !important;
+            border-color: #a7f3d0 !important;
+            color: #047857 !important;
+        }
+        html.light [class*="bg-rose-500/10"],
+        html.light [class*="bg-rose-500/20"] {
+            background-color: #fff1f2 !important;
+            border-color: #fecdd3 !important;
+            color: #be123c !important;
+        }
+        html.light [class*="bg-cyan-500/10"],
+        html.light [class*="bg-cyan-500/20"] {
+            background-color: #ecfeff !important;
+            border-color: #a5f3fc !important;
+            color: #0e7490 !important;
+        }
+        html.light [class*="bg-amber-500/10"],
+        html.light [class*="bg-amber-500/20"] {
+            background-color: #fffbeb !important;
+            border-color: #fde68a !important;
+            color: #b45309 !important;
+        }
+        html.light [class*="bg-blue-500/10"],
+        html.light [class*="bg-blue-500/20"] {
+            background-color: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
+        }
+
         /* Secondary Badges, Chips, Track Pills & Counts */
         html.light [class*="bg-slate-800"],
         html.light .bg-slate-800,
@@ -157,14 +207,14 @@
         html.light [class*="bg-slate-950/80"],
         html.light [class*="bg-slate-950/90"] {
             background-color: #f1f5f9 !important;
-            border-color: #e2e8f0 !important;
-            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+            color: #1e293b !important;
         }
 
         /* Interactive Hover on Secondary Elements */
         html.light [class*="hover:bg-slate-800"]:hover,
         html.light [class*="hover:bg-slate-900"]:hover {
-            background-color: #f1f5f9 !important;
+            background-color: #e2e8f0 !important;
         }
 
         /* Universal Borders */
@@ -181,58 +231,112 @@
             border-color: #cbd5e1 !important;
         }
 
-        /* Typography: Headings & Strong Elements in Light Mode (Crisp Dark Color) */
-        html.light h1:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
-        html.light h2:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
-        html.light h3:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
-        html.light h4:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *),
-        html.light h5:not(.btn *),
-        html.light h6:not(.btn *) {
+        /* Typography: Headings & Strong Elements in Light Mode (Deep Navy Contrast) */
+        html.light h1:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *):not(#top-announcement-strip *):not(#international-works *),
+        html.light h2:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *):not(#top-announcement-strip *):not(#international-works *),
+        html.light h3:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *):not(#top-announcement-strip *):not(#international-works *),
+        html.light h4:not([class*="bg-emerald-"]):not([class*="bg-rose-"]):not(.btn *):not(#top-announcement-strip *):not(#international-works *),
+        html.light h5:not(.btn *):not(#top-announcement-strip *):not(#international-works *),
+        html.light h6:not(.btn *):not(#top-announcement-strip *):not(#international-works *) {
             color: #0f172a !important;
         }
 
-        /* Scoped Body & Description text for Light Mode (Deep Slate) */
-        html.light p:not([class*="bg-"]):not(button *):not(.btn *):not(.badge *),
-        html.light li:not([class*="bg-"]):not(button *):not(.btn *),
-        html.light dt, html.light dd, html.light label {
-            color: #1e293b !important;
+        /* International Works Overlay Cards — Always Pure White Heading */
+        #international-works .international-card-title,
+        html.light #international-works .international-card-title,
+        #international-works h4,
+        html.light #international-works h4,
+        html.light #international-works .card-overlay-text h4 {
+            color: #ffffff !important;
+        }
+        #international-works .international-card-sub,
+        html.light #international-works .international-card-sub,
+        html.light #international-works .card-overlay-text .international-card-sub * {
+            color: #f1f5f9 !important;
+        }
+        #international-works .international-badge-black,
+        html.light #international-works .international-badge-black,
+        html.light #international-works .international-badge-black * {
+            color: #000000 !important;
         }
 
-        html.light p.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *),
-        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *) {
+
+        /* Universal Text-White Override in Light Mode */
+        html.light .text-white:not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-blue"]):not([class*="bg-teal"]):not([class*="bg-indigo"]):not([class*="bg-brand"]):not([class*="bg-amber"]):not([class*="bg-purple"]):not([class*="bg-red"]):not([class*="bg-green"]):not(.text-white-force):not(button):not(button *):not(.btn):not(.btn *):not(.badge):not(.badge *):not(.hero-slide *):not(#top-announcement-strip *):not(.btn-shimmer *):not([class*="btn-"]):not([class*="btn-"] *),
+        html.light div.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
+        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
+        html.light p.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *) {
+            color: #0f172a !important;
+        }
+
+        /* Scoped Body, Paragraph & Description Text for Light Mode (Crisp Deep Slate) */
+        html.light p:not([class*="bg-"]):not(button *):not(.btn *):not(.badge *):not(#top-announcement-strip *),
+        html.light li:not([class*="bg-"]):not(button *):not(.btn *):not(#top-announcement-strip *),
+        html.light dt, html.light dd, html.light label {
             color: #0f172a !important;
         }
 
         /* Elements that MUST retain bright white text in Light Mode */
         html.light .text-white-force,
-        html.light [class*="bg-rose-600"],
-        html.light [class*="bg-rose-500"],
-        html.light [class*="bg-rose-600"] *,
-        html.light [class*="bg-rose-500"] *,
+        html.light #top-announcement-strip,
+        html.light #top-announcement-strip *,
+        html.light [class*="bg-rose-500"]:not([class*="bg-rose-600"]),
+        html.light [class*="bg-rose-500"]:not([class*="bg-rose-600"]) *,
         html.light [class*="bg-emerald-600"],
         html.light [class*="bg-emerald-600"] *,
         html.light [class*="bg-emerald-700"],
         html.light [class*="bg-emerald-700"] *,
+        html.light [class*="bg-emerald-500"],
+        html.light [class*="bg-emerald-500"] *,
         html.light .hero-slide *,
         html.light .btn-shimmer * {
             color: #ffffff !important;
         }
 
-        /* Typography: High-Readability Body & Descriptions in Light Mode */
+        /* User Directive: Buttons, badges, and elements with bg-rose-600 and bg-emerald-100 MUST have black font */
+        [class*="bg-rose-600"],
+        [class*="bg-rose-600"] *,
+        button[class*="bg-rose-600"],
+        a[class*="bg-rose-600"],
+        .btn[class*="bg-rose-600"],
+        span[class*="bg-rose-600"],
+        html.light [class*="bg-rose-600"],
+        html.light [class*="bg-rose-600"] *,
+        html.light button[class*="bg-rose-600"],
+        html.light a[class*="bg-rose-600"],
+        html.light .btn[class*="bg-rose-600"],
+        html.light span[class*="bg-rose-600"],
+        [class*="bg-emerald-100"],
+        [class*="bg-emerald-100"] *,
+        button[class*="bg-emerald-100"],
+        a[class*="bg-emerald-100"],
+        .btn[class*="bg-emerald-100"],
+        span[class*="bg-emerald-100"],
+        html.light [class*="bg-emerald-100"],
+        html.light [class*="bg-emerald-100"] *,
+        html.light button[class*="bg-emerald-100"],
+        html.light a[class*="bg-emerald-100"],
+        html.light .btn[class*="bg-emerald-100"],
+        html.light span[class*="bg-emerald-100"] {
+            color: #000000 !important;
+            font-weight: 800 !important;
+        }
+
+        /* Typography: High-Readability Body & Slate Classes in Light Mode */
         html.light .text-slate-100,
-        html.light [class*="text-slate-100"] {
+        html.light [class*="text-slate-100"]:not(#top-announcement-strip *) {
             color: #0f172a !important;
         }
         html.light .text-slate-200,
         html.light [class*="text-slate-200"] {
-            color: #1e293b !important;
+            color: #0f172a !important;
         }
         html.light .text-slate-300,
         html.light [class*="text-slate-300"] {
             color: #1e293b !important;
         }
 
-        /* Typography: Subtext, Metadata, Captions in Light Mode */
+        /* Typography: Subtext, Metadata, Captions in Light Mode (High Contrast Slate) */
         html.light .text-slate-400,
         html.light [class*="text-slate-400"] {
             color: #334155 !important;
@@ -246,30 +350,47 @@
             color: #334155 !important;
         }
 
-        /* Accent text in Light Mode (Deep Emerald & Cyan) */
+        /* Accent text in Light Mode (Deep Emerald, Cyan, Blue, Amber) */
         html.light .text-emerald-400,
-        html.light [class*="text-emerald-400"] {
-            color: #047857 !important;
-        }
+        html.light [class*="text-emerald-400"],
         html.light .text-brand-accent,
         html.light [class*="text-brand-accent"] {
             color: #047857 !important;
         }
         html.light .text-cyan-400,
-        html.light [class*="text-cyan-400"] {
-            color: #0891b2 !important;
+        html.light [class*="text-cyan-400"],
+        html.light .text-cyan-300,
+        html.light [class*="text-cyan-300"] {
+            color: #0284c7 !important;
         }
         html.light .text-blue-400,
         html.light [class*="text-blue-400"] {
-            color: #2563eb !important;
+            color: #1d4ed8 !important;
+        }
+        html.light .text-amber-400,
+        html.light [class*="text-amber-400"] {
+            color: #b45309 !important;
+        }
+        html.light .text-indigo-400,
+        html.light [class*="text-indigo-400"] {
+            color: #4338ca !important;
+        }
+        html.light .text-rose-400,
+        html.light [class*="text-rose-400"] {
+            color: #be123c !important;
+        }
+
+        /* Counter Tickers & Metric Numbers */
+        html.light [data-counter-target] {
+            color: #0f172a !important;
         }
 
         /* Links in Light Mode */
-        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-slate"]) {
-            color: #1e293b;
+        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-slate"]):not(#top-announcement-strip *) {
+            color: #0f172a;
         }
-        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):hover {
-            color: #047857 !important;
+        html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not(#top-announcement-strip *):hover {
+            color: var(--brand-primary, #10b981) !important;
         }
 
         /* Hover Text Transitions */
@@ -281,7 +402,7 @@
         }
         html.light [class*="hover:text-white"]:hover,
         html.light [class*="group"]:hover [class*="group-hover:text-white"] {
-            color: #047857 !important;
+            color: var(--brand-primary, #10b981) !important;
         }
 
         /* Form Inputs & Textarea */
@@ -295,47 +416,120 @@
         }
         html.light input::placeholder,
         html.light textarea::placeholder {
-            color: #94a3b8 !important;
+            color: #64748b !important;
+        }
+        html.light select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
         }
         html.light input:focus,
-        html.light textarea:focus {
+        html.light textarea:focus,
+        html.light select:focus {
             border-color: var(--brand-primary, #10b981) !important;
             box-shadow: 0 0 0 2px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
         }
 
-        /* Header Navigation & Dropdowns */
-        html.light #main-header .rounded-2xl {
-            background-color: rgba(255, 255, 255, 0.94) !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06) !important;
-        }
-        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):not([class*="bg-emerald-"]) {
-            color: #475569 !important;
-        }
-        html.light #main-header a:not(.bg-brand-primary):not([class*="bg-brand-primary"]):not([class*="bg-emerald-"]):hover {
-            color: var(--brand-primary, #10b981) !important;
-            background-color: #f1f5f9 !important;
-        }
-        html.light #main-header a[class*="text-brand-primary"] {
-            color: var(--brand-primary, #10b981) !important;
-            background-color: #f1f5f9 !important;
-        }
-        html.light #theme-toggle-btn {
-            background-color: #f1f5f9 !important;
-            border-color: #e2e8f0 !important;
+        /* Breadcrumbs in Light Mode */
+        html.light nav[aria-label="Breadcrumb"] a {
             color: #334155 !important;
         }
-        html.light #theme-dropdown {
+        html.light nav[aria-label="Breadcrumb"] a:hover {
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light nav[aria-label="Breadcrumb"] span {
+            color: #64748b !important;
+        }
+        html.light nav[aria-label="Breadcrumb"] span.text-brand-primary {
+            color: var(--brand-primary, #10b981) !important;
+        }
+
+        /* Tables in Light Mode */
+        html.light table {
             background-color: #ffffff !important;
             border-color: #e2e8f0 !important;
-            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12) !important;
         }
-        html.light #theme-dropdown button {
-            color: #334155 !important;
+        html.light th {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #e2e8f0 !important;
         }
-        html.light #theme-dropdown button:hover {
+        html.light td {
+            color: #1e293b !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light tr:hover td {
+            background-color: #f8fafc !important;
+        }
+
+        /* Header Navigation & Dropdowns */
+        html.light #main-header .rounded-2xl {
+            background-color: rgba(255, 255, 255, 0.96) !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
+        }
+        html.light #main-header nav a {
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+        html.light #main-header nav a:hover {
+            color: var(--brand-primary, #10b981) !important;
+            background-color: #f1f5f9 !important;
+        }
+        html.light #main-header nav a[class*="text-brand-primary"] {
+            color: var(--brand-primary, #10b981) !important;
+            background-color: #ecfdf5 !important;
+        }
+        html.light #main-header input {
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light #main-header input::placeholder {
+            color: #64748b !important;
+        }
+        html.light #main-header .fa-search {
+            color: #64748b !important;
+        }
+        html.light #main-header div[class*="group-hover:block"] {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12) !important;
+        }
+        html.light #main-header div[class*="group-hover:block"] a {
+            color: #0f172a !important;
+        }
+        html.light #main-header div[class*="group-hover:block"] a:hover {
             background-color: #f1f5f9 !important;
             color: var(--brand-primary, #10b981) !important;
+        }
+        html.light #main-header a[href*="student/login"] {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light #main-header a[href*="student/login"]:hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light #main-header a[href*="tel:01791612121"],
+        html.light .header-hotline-btn {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3) !important;
+        }
+        html.light #main-header a[href*="tel:01791612121"] *,
+        html.light .header-hotline-btn * {
+            color: #ffffff !important;
+        }
+        html.light #main-header a[href*="tel:01791612121"]:hover,
+        html.light .header-hotline-btn:hover {
+            background-color: #047857 !important;
+            border-color: #047857 !important;
+            color: #ffffff !important;
+        }
+        html.light #mobile-menu-btn {
+            color: #0f172a !important;
         }
         html.light #mobile-menu {
             background-color: rgba(255, 255, 255, 0.98) !important;
@@ -343,7 +537,7 @@
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15) !important;
         }
         html.light #mobile-menu .mobile-nav-link {
-            color: #1e293b !important;
+            color: #0f172a !important;
         }
         html.light #mobile-menu .mobile-nav-link:hover {
             background-color: #f1f5f9 !important;
@@ -839,6 +1033,239 @@
         }
         .animate-badge-float {
             animation: badge-float 3.5s ease-in-out infinite;
+        }
+
+        /* 9. Interactive Accordion Polish & Light Mode Contrast */
+        .accordion-item {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .accordion-item:hover {
+            transform: translateY(-2px);
+        }
+        html.light .accordion-item {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.04) !important;
+        }
+        html.light .accordion-item:hover {
+            border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5) !important;
+            box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08) !important;
+        }
+        html.light .accordion-toggle {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        html.light .accordion-toggle:hover {
+            background-color: #f8fafc !important;
+        }
+        html.light .accordion-toggle span,
+        html.light .accordion-toggle .accordion-title,
+        html.light .accordion-toggle span.text-white,
+        html.light [class*="accordion"] button span {
+            color: #0f172a !important;
+        }
+        html.light .accordion-toggle:hover span.accordion-title {
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light .accordion-toggle .font-mono {
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+            border: 1px solid #a7f3d0 !important;
+        }
+        html.light .accordion-toggle .fa-chevron-down {
+            color: #64748b !important;
+        }
+        html.light .accordion-toggle:hover .fa-chevron-down {
+            color: #047857 !important;
+        }
+        html.light .accordion-item div[id^="content-item-"] {
+            background-color: #ffffff !important;
+            border-top-color: #f1f5f9 !important;
+            color: #334155 !important;
+        }
+        html.light .accordion-item div[id^="content-item-"] * {
+            color: #334155 !important;
+        }
+        html.light .accordion-item div[id^="content-item-"] strong {
+            color: #0f172a !important;
+        }
+
+        /* 10. Card Hover Micro-Lift & Soft Pulse Glow */
+        .hover-card-lift {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+        }
+        .hover-card-lift:hover {
+            transform: translateY(-4px);
+        }
+        html.light .hover-card-lift:hover {
+            box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.1) !important;
+            border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.4) !important;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(var(--brand-primary-rgb, 16, 185, 129), 0.35);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(var(--brand-primary-rgb, 16, 185, 129), 0);
+            }
+        }
+        .animate-pulse-glow {
+            animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* 11. Top Announcement Strip Newsfeed Continuous Running Marquee Animation */
+        @keyframes newsfeed-ticker {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+            100% {
+                transform: translate3d(-50%, 0, 0);
+            }
+        }
+        .newsfeed-container {
+            overflow: hidden;
+            position: relative;
+            white-space: nowrap;
+            background: transparent !important;
+        }
+        .newsfeed-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: newsfeed-ticker 42s linear infinite;
+            will-change: transform;
+        }
+        .newsfeed-container:hover .newsfeed-track {
+            animation-play-state: paused;
+        }
+
+        /* 12. Pill Badges Crystal-Clear Contrast in Light Mode */
+        html.light div.inline-flex.rounded-full[class*="bg-emerald-"] span,
+        html.light div.inline-flex.rounded-full[class*="bg-emerald-"] i,
+        html.light div.inline-flex.rounded-full[class*="border-emerald-"] span,
+        html.light div.inline-flex.rounded-full[class*="border-emerald-"] i {
+            color: #064e3b !important;
+            font-weight: 800 !important;
+        }
+        html.light div.inline-flex.rounded-full[class*="bg-emerald-100"] {
+            background-color: #d1fae5 !important;
+            border-color: #6ee7b7 !important;
+        }
+
+        /* 13. Filter Count Badge Contrast */
+        .filter-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 9999px;
+            font-weight: 800 !important;
+            font-size: 11px !important;
+        }
+        .course-filter-btn.active .filter-count,
+        html.light .course-filter-btn.active .filter-count {
+            background-color: rgba(255, 255, 255, 0.28) !important;
+            color: #ffffff !important;
+        }
+        .course-filter-btn:not(.active) .filter-count,
+        html.light .course-filter-btn:not(.active) .filter-count {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+
+        /* 14. Course Syllabus CTA Button */
+        html.light .course-item-card a .inline-flex.rounded-xl {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25) !important;
+        }
+        html.light .course-item-card a .inline-flex.rounded-xl * {
+            color: #ffffff !important;
+        }
+        /* 15. Top Announcement Strip Gap Fix (Flush against browser viewport top even on 110% zoom) */
+        #top-announcement-strip {
+            top: -2px !important;
+            padding-top: calc(0.375rem + 2px) !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* 16. Home Page Category Pills Styling */
+        .category-pill {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            font-weight: 700 !important;
+            display: inline-flex;
+            align-items: center;
+        }
+        .category-pill.active {
+            background-color: #059669 !important;
+            border: 1px solid #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px -1px rgba(5, 150, 105, 0.35) !important;
+        }
+        .category-pill.active * {
+            color: #ffffff !important;
+        }
+        html.light .category-pill:not(.active) {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        html.light .category-pill:not(.active) span {
+            color: #1e293b !important;
+        }
+        html.light .category-pill:not(.active):hover {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light .category-pill:not(.active):hover span {
+            color: #0f172a !important;
+        }
+        html.dark .category-pill:not(.active) {
+            background-color: #0f172a !important;
+            border: 1px solid #334155 !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark .category-pill:not(.active) span {
+            color: #cbd5e1 !important;
+        }
+        html.dark .category-pill:not(.active):hover {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #ffffff !important;
+        }
+        html.dark .category-pill:not(.active):hover span {
+            color: #ffffff !important;
+        }
+
+        /* 17. Image Overlay Cards: Always Crisp White Text in Both Light & Dark Modes */
+        #international-works h4,
+        #international-works h4 *,
+        #international-works .card-overlay-text h4,
+        #international-works .card-overlay-text h4 *,
+        html.light #international-works h4,
+        html.light #international-works h4 *,
+        html.light #international-works .card-overlay-text h4,
+        html.light #international-works .card-overlay-text h4 * {
+            color: #ffffff !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        }
+        #international-works .group:hover h4,
+        #international-works .group:hover h4 *,
+        html.light #international-works .group:hover h4,
+        html.light #international-works .group:hover h4 * {
+            color: #67e8f9 !important; /* cyan-300 */
+        }
+        #international-works .card-overlay-text span:not([class*="text-cyan"]),
+        html.light #international-works .card-overlay-text span:not([class*="text-cyan"]) {
+            color: #ffffff !important;
         }
     </style>
 
