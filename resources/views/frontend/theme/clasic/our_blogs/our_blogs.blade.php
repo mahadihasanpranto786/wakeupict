@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-32 pb-24">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen pt-32 pb-24">
 
     <!-- Header Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">

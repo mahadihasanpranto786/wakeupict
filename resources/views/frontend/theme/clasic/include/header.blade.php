@@ -1,24 +1,47 @@
-<!-- 10 Minute School Inspired Top Emergency Helpline & Admission Notice Strip -->
-<div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white py-1.5 px-4 text-xs font-medium shadow-sm transition-all duration-300" id="top-announcement-strip">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        <div class="flex items-center gap-2 truncate">
-            <span class="px-2 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 animate-pulse">
-                🔥 অফলাইন ব্যাচ
-            </span>
-            <span class="truncate text-slate-100">
-                নতুন অফলাইন ক্যাম্পাস ল্যাব ব্যাচে ভর্তি চলছে! আধুনিক কম্পিউটার ল্যাবে গ্রুপভিত্তিক ইন্টারেক্টিভ ও প্র্যাকটিক্যাল ট্রেনিং।
+<!-- 10 Minute School Inspired Top Emergency Helpline & Admission Notice Strip with Running Newsfeed -->
+<div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white py-1.5 px-3 sm:px-6 lg:px-8 text-xs font-medium shadow-sm transition-all duration-300" id="top-announcement-strip">
+    <div class="w-full flex items-center justify-between gap-3 sm:gap-4">
+        
+        <!-- Left: Pinned Pulse Badge (Zero gap layout) -->
+        <div class="flex items-center gap-2 shrink-0 z-10">
+            <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1.5 border border-white/30 shadow-xs animate-pulse">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
+                <span>🔥 অফলাইন ব্যাচ</span>
             </span>
         </div>
-        <div class="hidden sm:flex items-center gap-4 shrink-0 text-[11px] font-mono">
-            <a href="tel:01791612121" class="hover:text-amber-200 transition-colors flex items-center gap-1.5 font-bold">
-                <i class="fa fa-phone"></i>
-                <span>হেল্পলাইন: 01791-612121</span>
+
+        <!-- Center: Dynamic Continuous Running Newsfeed Ticker -->
+        <div class="newsfeed-container flex-1 overflow-hidden relative mx-2 cursor-pointer" title="মাউস হোভার করে থামান">
+            <div class="newsfeed-track flex items-center whitespace-nowrap text-white font-medium text-[11px] sm:text-xs">
+                @for ($seg = 0; $seg < 4; $seg++)
+                <div class="newsfeed-segment inline-flex items-center gap-4 shrink-0 pr-6" {!! $seg > 0 ? 'aria-hidden="true"' : '' !!}>
+                    <span>নতুন অফলাইন ক্যাম্পাস ল্যাব ব্যাচে ভর্তি চলছে! আধুনিক কম্পিউটার ল্যাবে গ্রুপভিত্তিক ইন্টারেক্টিভ ও প্র্যাকটিক্যাল ট্রেনিং।</span>
+                    <span class="text-amber-300 font-bold">✦</span>
+                    <span>ভেরিফায়েড সার্টিফিকেট ও ইন্ডাস্ট্রি-স্ট্যান্ডার্ড স্কিল ডেভেলপমেন্ট</span>
+                    <span class="text-amber-300 font-bold">✦</span>
+                    <span>সীমিত আসন, সরাসরি ল্যাব সিট বুকিং চলছে!</span>
+                    <span class="text-amber-300 font-bold">✦</span>
+                    <span>সরাসরি মেইন ক্যাম্পাস ভিজিট করুন: নান্নু টাওয়ার (৩য় তলা), পান্না চত্বর, রাজবাড়ী</span>
+                    <span class="text-amber-300 font-bold">✦</span>
+                    <span>হটলাইন: 01791-612121</span>
+                    <span class="text-amber-300 font-bold">✦</span>
+                </div>
+                @endfor
+            </div>
+        </div>
+
+        <!-- Right: Pinned Helpline & Campus Info -->
+        <div class="hidden sm:flex items-center gap-3 shrink-0 text-[11px] font-mono z-10">
+            <a href="tel:01791612121" class="hover:text-amber-200 transition-colors flex items-center gap-1.5 font-bold bg-white/15 hover:bg-white/25 px-2.5 py-0.5 rounded-lg border border-white/25 shadow-xs">
+                <i class="fa fa-phone text-amber-300"></i>
+                <span>01791-612121</span>
             </a>
             <span class="text-white/40">|</span>
             <span class="text-emerald-100 flex items-center gap-1">
-                <i class="fa fa-map-marker"></i> মেইন ক্যাম্পাস ল্যাব
+                <i class="fa fa-map-marker text-amber-300"></i> মেইন ক্যাম্পাস ল্যাব
             </span>
         </div>
+
     </div>
 </div>
 
@@ -130,7 +153,7 @@
                 @endif
 
                 <!-- 10MS Hotline CTA Button -->
-                <a href="tel:01791612121" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition-all duration-300 shrink-0 whitespace-nowrap">
+                <a href="tel:01791612121" class="header-hotline-btn inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500/10 dark:border dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-500 dark:hover:text-slate-950 transition-all duration-300 shrink-0 whitespace-nowrap shadow-sm">
                     <i class="fa fa-phone"></i>
                     <span>হটলাইন</span>
                 </a>

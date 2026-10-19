@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="about-page-wrapper relative w-full overflow-hidden bg-slate-950 min-h-screen">
+<div class="about-page-wrapper relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
 
     <!--========================== Hero Banner ============================-->
     @if (!empty($banner->image))
@@ -151,16 +151,16 @@
         </div>
     </section>
 
-    <!--========================== High-Impact Dark CTA ============================-->
-    <section class="py-20 relative border-t border-slate-800/80 bg-gradient-to-b from-slate-950 to-slate-900">
+    <!--========================== High-Impact CTA ============================-->
+    <section class="py-20 relative border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-gradient-to-b dark:from-slate-950 dark:to-slate-900">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <h2 class="text-3xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
                 {{ __('frontend.about.cta_title') }}
             </h2>
-            <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-8">
+            <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed mb-8">
                 {{ __('frontend.about.cta_sub') }}
             </p>
-            <a href="{{ route('contact-us-page') }}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+            <a href="{{ route('contact-us-page') }}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 transition-all duration-300 shadow-sm hover:-translate-y-1">
                 <span>{{ __('frontend.about.cta_button') }}</span>
                 <i class="fa fa-arrow-right text-xs"></i>
             </a>

@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
 
     <!--========================== Hero Banner ============================-->
     @if (!empty($banner->image))
@@ -58,19 +58,19 @@
             <div class="flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-6 mb-12 sm:mb-16 scrollbar-none">
                 <button type="button" data-filter="all" class="course-filter-btn active px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase font-semibold transition-all flex items-center gap-2 border">
                     <span>{{ __('frontend.academic.filter_all') }}</span>
-                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full bg-slate-950/20 text-current font-bold">{{ count($courseData) }}</span>
+                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full font-bold">{{ count($courseData) }}</span>
                 </button>
                 <button type="button" data-filter="engineering" class="course-filter-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase font-semibold transition-all flex items-center gap-2 border">
                     <span>{{ __('frontend.academic.filter_engineering') }}</span>
-                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-current font-bold">2</span>
+                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full font-bold">2</span>
                 </button>
                 <button type="button" data-filter="product" class="course-filter-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase font-semibold transition-all flex items-center gap-2 border">
                     <span>{{ __('frontend.academic.filter_product') }}</span>
-                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-current font-bold">2</span>
+                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full font-bold">2</span>
                 </button>
                 <button type="button" data-filter="cloud" class="course-filter-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-mono tracking-wider uppercase font-semibold transition-all flex items-center gap-2 border">
                     <span>{{ __('frontend.academic.filter_cloud') }}</span>
-                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-current font-bold">2</span>
+                    <span class="filter-count text-[11px] px-2 py-0.5 rounded-full font-bold">2</span>
                 </button>
             </div>
 
@@ -148,9 +148,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold tracking-wider uppercase bg-slate-800/80 group-hover:bg-emerald-500 text-slate-200 group-hover:text-slate-950 border border-slate-700/80 group-hover:border-emerald-500 transition-all duration-300">
-                                        <span>{{ __('frontend.academic.view_syllabus') }}</span>
-                                        <i class="fa fa-arrow-right text-[10px]"></i>
+                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-slate-800/80 dark:hover:bg-emerald-500 dark:text-slate-200 dark:hover:text-slate-950 border border-emerald-600 dark:border-slate-700/80 transition-all duration-300 shadow-sm">
+                                        <span class="text-white font-bold">{{ __('frontend.academic.view_syllabus') }}</span>
+                                        <i class="fa fa-arrow-right text-[10px] text-white"></i>
                                     </div>
                                 </div>
 
@@ -195,14 +195,29 @@
     }
     .course-filter-btn.active {
         background-color: #10b981 !important;
-        color: #030712 !important;
+        color: #ffffff !important;
         border-color: #10b981 !important;
         font-weight: 700;
         box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.35);
     }
+    .course-filter-btn .filter-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 9999px;
+        font-weight: 800 !important;
+        font-size: 11px !important;
+    }
     .course-filter-btn.active .filter-count {
-        background-color: rgba(3, 7, 18, 0.25);
-        color: #030712;
+        background-color: rgba(255, 255, 255, 0.28) !important;
+        color: #ffffff !important;
+    }
+    .course-filter-btn:not(.active) .filter-count {
+        background-color: #1e293b !important;
+        color: #94a3b8 !important;
     }
 
     /* Light Mode Filter Tabs */
@@ -224,8 +239,12 @@
         box-shadow: 0 6px 16px -2px rgba(16, 185, 129, 0.3);
     }
     html.light .course-filter-btn.active .filter-count {
-        background-color: rgba(255, 255, 255, 0.25);
-        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.28) !important;
+        color: #ffffff !important;
+    }
+    html.light .course-filter-btn:not(.active) .filter-count {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
     }
 
     /* Course Card Smooth Filtering Animation */

@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
 
     <!--========================== Hero Banner ============================-->
     @if (!empty($banner->image))
@@ -82,7 +82,7 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('contact-us-page') }}" class="btn-shimmer flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                        <a href="{{ route('contact-us-page') }}" class="btn-shimmer flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 transition-all duration-300 shadow-sm hover:-translate-y-1">
                             <span>{{ __('frontend.services.partner_btn') }}</span>
                             <i class="fa fa-arrow-right text-xs"></i>
                         </a>

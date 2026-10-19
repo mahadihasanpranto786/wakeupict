@@ -55,7 +55,7 @@
     }
 </style>
 
-<div class="relative w-full overflow-hidden bg-slate-950 text-slate-100 min-h-screen pt-28 pb-24">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pt-28 pb-24">
     <!-- Ambient Background Lighting & Mesh -->
     <div class="absolute inset-0 bg-grid-mesh opacity-20 pointer-events-none"></div>
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-brand-primary/10 rounded-full blur-[160px] pointer-events-none"></div>

@@ -9,13 +9,13 @@
 ## 📌 1. Active User Directives & Commands (Edit Anytime)
 *Add your custom instructions, project requirements, rules, or temporary directives below. The AI will read and obey them on every turn.*
 
-1. **Theme Mode**: Always use **System Default** theme. Do not add manual theme toggle buttons to the header or navbars. The website must automatically detect and synchronize with the visitor's operating system / device theme (`prefers-color-scheme: dark` / `light`).
+1. **Theme Mode**: The **Default Theme is LIGHT** in frontend (`html.light`). All frontend pages must display light-theme-friendly, high-contrast, crystal-clear font colors (`#0F172A`, `#1E293B`, `#334155`) on light surfaces. Visitors can use dark mode if explicitly set in preferences, but by default the entire frontend loads in clean Light Mode. Do not add manual theme toggle buttons to header or navbars.
 2. **Color Contrast**:
    - **Light Mode**: Background is light (`#FFFFFF`, `#F8FAFC`). Headings, body text, links, descriptions, and footer content MUST be **DARK, HIGH-CONTRAST** (`#0F172A`, `#1E293B`, `#334155`). Never use faint/washed-out grey text on light backgrounds.
    - **Dark Mode**: Background is deep dark (`#030712`, `#0B0F19`, `#0F172A`). Headings and text MUST be **CRISP LIGHT** (`#FFFFFF`, `#F1F5F9`, `#CBD5E1`).
 3. **Typography / Font Family**: Modern Clean Sans-Serif font stack (`'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`) across admin panel, frontend, student portal, and examination pages for sleek, high-contrast, uncluttered Bengali and English typography without any serif/Times New Roman fallbacks.
 4. **Official Office Phone & Hotline**: Always use **`01791612121`** (`+880 1791-612121` / `01791-612121`).
-5. **Course Structure**: All courses are conducted in interactive **group batches with multiple students** in high-tech computer labs — **NOT 1:1**. Never use "১:১" in course descriptions or marketing text.
+5. **Course Structure & Batch Capacity**: All courses are conducted in interactive **group batches with 10 students per batch (`১০ জন`)** in high-tech computer labs — **NOT 1:1**. Never use "১:১" in course descriptions or marketing text.
 6. **Backend-Driven Frontend Menus**: All frontend header and footer menus must be dynamically managed from the Admin Portal (`/admin/appearance/menus`). Navbar menu items must never wrap into two lines (`whitespace-nowrap`).
 7. **Offline LMS Operations**:
    - The platform manages physical/offline classroom training batches.
@@ -23,8 +23,10 @@
    - Certificates are published from the Admin Portal upon batch completion, after which they become visible in the Student Portal.
    - Quizzes are bulk-uploaded via Excel/CSV by category and course.
 8. **Code Stability & Testing**:
-   - Always run `vendor\bin\phpunit` before completing tasks. All 47+ tests must pass with zero failures.
+   - Always run `vendor\bin\phpunit` before completing tasks. All tests must pass with zero failures.
    - Maintain clean Blade code, PSR standards, and preserve existing routes and controllers.
+9. **Button & Badge Font Directives**:
+   - Buttons, badges, and pills with `bg-rose-600` and `bg-emerald-100` MUST have **black font** (`#000000 !important; font-weight: 800;`).
 
 ---
 

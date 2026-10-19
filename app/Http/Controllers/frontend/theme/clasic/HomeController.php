@@ -28,13 +28,13 @@ class HomeController extends Controller
         $timeDate= date("Y-m-d h:i:sa");
         Visitor::create(['ip_address' => $UserIP,'visit_time' =>$timeDate]);
 
-        $nationalWork=NationalWork::where("active_project", 1)->take(3)->get();
+        $nationalWork = NationalWork::where("active_project", 1)->orderBy('id', 'asc')->get();
         $nationalWorkHeader = NationalWorkHeader::latest()->first();
         $content_list = Page::where('page_name', '=', 'Home')->get();
         $homeSliders = HomeSlider::where("slider_active", 1)->latest()->get();
         $homeSlider = HomeSlider::where("slider_active", 1)->first();
         $projects = DevelopmentProject::where("active_project", 1)->take(3)->get();
-        $internationalWorks = InternationalWork::where("active_work", 1)->take(3)->get();
+        $internationalWorks = InternationalWork::where("active_work", 1)->orderBy('id', 'asc')->take(4)->get();
         $localProjects = LocalProject::where("active_local", 1)->take(3)->get();
         $developmentProjectHeader = DevelopmentProjectHeader::latest()->first();
         $internationalProjectHeader = InternationalProjectHeader::latest()->first();

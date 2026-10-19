@@ -5,7 +5,7 @@
 @endforeach
 
 @section('maincontent')
-<div class="relative w-full overflow-hidden bg-slate-950 min-h-screen pt-32 pb-24">
+<div class="relative w-full overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen pt-32 pb-24">
 
     <!-- Header Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center sm:text-left">
@@ -163,7 +163,7 @@
 
                         <!-- Submit Button -->
                         <div class="pt-4">
-                            <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1 active:translate-y-0">
+                            <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 transition-all duration-300 shadow-sm hover:-translate-y-1 active:translate-y-0">
                                 <span>{{ __('frontend.contact.submit_btn') }}</span>
                                 <i class="fa fa-paper-plane text-xs"></i>
                             </button>
