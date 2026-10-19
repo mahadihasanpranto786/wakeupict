@@ -814,7 +814,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="{{ route('admin.student-menus.index') }}" class="nav-link @yield('student_menu_active')">
                                 <i class="fas fa-sitemap nav-icon text-warning"></i>
                                 <p>Student Portal Menus</p>
@@ -825,7 +825,7 @@
                                 <i class="fas fa-certificate nav-icon text-success"></i>
                                 <p>LMS Certificates</p>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a href="{{ route('admin.question-book.index') }}" class="nav-link @yield('lms_question_book_active')">
                                 <i class="fas fa-book-open nav-icon text-primary"></i>
@@ -838,18 +838,18 @@
                                 <p>Paper Builder <span class="badge badge-success ml-1" style="font-size: 9px;">Drag & Drop</span></p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="{{ route('admin.quizzes.index') }}" class="nav-link @yield('lms_quiz_active')">
                                 <i class="fas fa-file-excel nav-icon text-info"></i>
                                 <p>Quizzes & Excel Import</p>
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a href="{{ url('/student/dashboard') }}" target="_blank" class="nav-link">
                                 <i class="fas fa-arrow-up-right-from-square nav-icon text-cyan"></i>
                                 <p>Live Student Portal <span class="badge badge-info ml-1" style="font-size: 9px;">View</span></p>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
                 {{-- ****************************************** student portal LMS end ************************************************ --}}

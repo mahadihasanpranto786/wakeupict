@@ -116,17 +116,6 @@ class FrontendMenuService
                     'order_index' => 6,
                     'status' => true,
                 ],
-                [
-                    'location' => 'header',
-                    'title_en' => 'Talent Hunt',
-                    'title_bn' => 'ট্যালেন্ট হান্ট',
-                    'route_name' => 'talent-hunt',
-                    'url' => '/talent-hunt',
-                    'badge_text' => 'New',
-                    'badge_color' => 'brand-primary',
-                    'order_index' => 7,
-                    'status' => true,
-                ],
             ];
 
             foreach ($headerMenus as $item) {

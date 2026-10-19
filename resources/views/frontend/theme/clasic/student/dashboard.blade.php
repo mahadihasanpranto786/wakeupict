@@ -45,7 +45,7 @@
             </div>
 
             <!-- 10MS Style Quick Navigation Shortcuts -->
-            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <!-- <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                 <a href="{{ route('student.materials.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
                     <i class="fa fa-file-pdf-o text-rose-400"></i>
                     <span>লেকচার শিট</span>
@@ -58,7 +58,7 @@
                     <i class="fa fa-plus-circle"></i>
                     <span>নতুন কোর্স</span>
                 </a>
-            </div>
+            </div> -->
         </div>
     </div>
 
@@ -68,7 +68,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         <!-- Enrolled Course Card -->
-        <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300">
+        <!-- <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-medium text-slate-400">নিবন্ধিত কোর্স (Enrolled)</span>
                 <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
@@ -82,10 +82,10 @@
                 <i class="fa fa-check-circle"></i>
                 <span>{{ $batch ? 'ব্যাচ: ' . $batch->batch_number : 'অ্যাডমিশন সম্পন্ন' }}</span>
             </p>
-        </div>
+        </div> -->
 
         <!-- Attendance / Batch Status -->
-        <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-cyan-500/40 transition-all duration-300">
+        <!-- <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-cyan-500/40 transition-all duration-300">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-medium text-slate-400">অফলাইন ল্যাব ব্যাচ</span>
                 <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-sm">
@@ -99,10 +99,10 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
                 <span>সরাসরি ল্যাব প্র্যাকটিস চলমান</span>
             </p>
-        </div>
+        </div> -->
 
         <!-- Total Paid Fee -->
-        <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300">
+        <!-- <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-medium text-slate-400">পরিশোধিত ফি (Paid)</span>
                 <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
@@ -116,10 +116,10 @@
                 <span>{{ count($payments) }} টি রসিদ যাচাইকৃত</span>
                 <a href="{{ route('student.receipts.index') }}" class="text-emerald-400 hover:underline">রসিদ</a>
             </p>
-        </div>
+        </div> -->
 
         <!-- Outstanding Dues -->
-        <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300">
+        <!-- <div class="student-card rounded-2xl bg-slate-900/80 border border-slate-800/80 p-5 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-medium text-slate-400">বকেয়া কিস্তি (Dues)</span>
                 <div class="w-9 h-9 rounded-xl {{ $dueFee > 0 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400' }} flex items-center justify-center text-sm">
@@ -135,7 +135,7 @@
                     <a href="{{ route('student.fees.index') }}" class="text-rose-400 hover:underline">পরিশোধ</a>
                 @endif
             </p>
-        </div>
+        </div> -->
 
     </div>
 
@@ -146,7 +146,7 @@
         
         <!-- Left: Course Overview & Details (2 columns) -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 sm:p-8 backdrop-blur-xl">
+            <!-- <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 sm:p-8 backdrop-blur-xl">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
                     <div>
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -197,10 +197,10 @@
                         </a>
                     </div>
                 @endif
-            </div>
+            </div> -->
 
             <!-- Recent Payments Record -->
-            <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 sm:p-8 backdrop-blur-xl">
+            <!-- <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 sm:p-8 backdrop-blur-xl">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
                     <div>
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -242,14 +242,14 @@
                 @else
                     <p class="text-xs text-slate-400 text-center py-6">No payment records available yet.</p>
                 @endif
-            </div>
+            </div> -->
         </div>
 
         <!-- Right: Profile Info & Quick Shortcuts (1 column) -->
         <div class="space-y-6">
             
             <!-- Student Identity Card -->
-            <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 backdrop-blur-xl space-y-4">
+            <!-- <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 backdrop-blur-xl space-y-4">
                 <div class="flex items-center gap-4">
                     <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}" class="w-14 h-14 rounded-2xl object-cover border border-slate-700">
                     <div class="min-w-0 flex-1">
@@ -280,10 +280,10 @@
                     <i class="fa fa-id-card-o"></i>
                     <span>View Student Profile</span>
                 </a>
-            </div>
+            </div> -->
 
             <!-- Helpdesk & Helpline Notice -->
-            <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 backdrop-blur-xl">
+            <!-- <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800/80 p-6 backdrop-blur-xl">
                 <div class="w-10 h-10 rounded-xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center mb-4">
                     <i class="fa fa-headphones text-lg"></i>
                 </div>
@@ -295,7 +295,7 @@
                     <p class="text-slate-400">জরুরি হেল্পলাইন:</p>
                     <p class="text-white font-bold font-mono">{{ app_setting('contact_phone', '01791-612121') }}</p>
                 </div>
-            </div>
+            </div> -->
 
         </div>
 

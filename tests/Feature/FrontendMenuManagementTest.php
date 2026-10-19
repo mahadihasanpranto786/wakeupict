@@ -7,9 +7,12 @@ use App\User;
 use App\model\FrontendMenu;
 use App\Services\FrontendMenuService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class FrontendMenuManagementTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected $adminUser;
 
     protected function setUp(): void
@@ -21,8 +24,6 @@ class FrontendMenuManagementTest extends TestCase
             'email' => 'admin_menu_test_' . rand(1000, 9999) . '@wakeupict.test',
             'password' => Hash::make('secret123'),
         ]);
-
-        FrontendMenuService::seedDefaults('header');
     }
 
     /**
@@ -71,6 +72,9 @@ class FrontendMenuManagementTest extends TestCase
             'title_en' => 'Special Workshops',
             'url' => '/workshops',
         ]);
+
+        FrontendMenu::where('location', 'header')->where('title_en', 'Special Workshops')->delete();
+        FrontendMenuService::clearCache();
 
         $response->assertRedirect(route('admin.appearance.menus.index', ['location' => 'header']));
     }
@@ -141,7 +145,7 @@ class FrontendMenuManagementTest extends TestCase
      */
     public function test_public_homepage_renders_dynamic_frontend_menus()
     {
-        FrontendMenu::create([
+        $testMenu = FrontendMenu::create([
             'location' => 'header',
             'title_en' => 'Unique Dynamic Link 2026',
             'url' => '/unique-test',
@@ -152,8 +156,13 @@ class FrontendMenuManagementTest extends TestCase
 
         FrontendMenuService::clearCache();
 
-        $response = $this->get(route('home-page'));
-        $response->assertStatus(200);
-        $response->assertSee('Unique Dynamic Link 2026');
+        try {
+            $response = $this->get(route('home-page'));
+            $response->assertStatus(200);
+            $response->assertSee('Unique Dynamic Link 2026');
+        } finally {
+            $testMenu->delete();
+            FrontendMenuService::clearCache();
+        }
     }
 }
