@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout Repository
+      - name: ⬇️ Checkout Repository (Full History)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: 🌐 Sync Files via FTP to Server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -24,20 +24,25 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_SERVER_DIR || './' }}
+          log-level: verbose
           exclude: |
             **/.git*
             **/.git*/**
             **/.github/**
             **/node_modules/**
             **/vendor/**
+            **/tests/**
+            **/.env*
+            **/storage/logs/**
+            **/storage/framework/cache/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
             **/public/khanmethodbd/**
             **/public/rjml/**
             **/public/projects/**
             **/public/stg/**
             **/public/abc/**
             **/public/sandbox/**
-            **/tests/**
-            **/.env* 
             **/.agents/**
             **/scratch/**
             **/phpunit.xml

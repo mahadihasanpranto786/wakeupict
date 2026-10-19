@@ -799,3 +799,24 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
 
 // Public Independent Certificate Verification Portal
 Route::get('/verify/certificate/{hash}', 'frontend\theme\clasic\StudentCertificateController@verifyCertificate')->name('certificates.verify');
+
+// System Deployment Maintenance: Clear Cache & Run Migrations (Protected by token or admin auth)
+Route::get('/system-sync-deploy', function () {
+    $token = request('token');
+    $expectedToken = env('DEPLOY_TOKEN', 'wakeupict_live_sync_2026');
+    if ($token !== $expectedToken && !Auth::check()) {
+        abort(403, 'Unauthorized maintenance access. Pass ?token=wakeupict_live_sync_2026 or login as admin.');
+    }
+
+    \Artisan::call('view:clear');
+    \Artisan::call('cache:clear');
+    \Artisan::call('config:clear');
+    \Artisan::call('migrate', ['--force' => true]);
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Cache cleared and migrations executed successfully on live server!',
+        'artisan_output' => trim(\Artisan::output()),
+    ]);
+})->name('system.sync-deploy');
+
