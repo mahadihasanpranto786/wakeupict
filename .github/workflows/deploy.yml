@@ -29,8 +29,15 @@ jobs:
             **/.git*/**
             **/.github/**
             **/node_modules/**
+            **/vendor/**
+            **/public/khanmethodbd/**
+            **/public/rjml/**
+            **/public/projects/**
+            **/public/stg/**
+            **/public/abc/**
+            **/public/sandbox/**
             **/tests/**
-            **/.env
+            **/.env*
             **/storage/logs/**
             **/storage/framework/cache/**
             **/storage/framework/sessions/**
@@ -40,4 +47,6 @@ jobs:
             **/phpunit.xml
             **/sql/**
             **/*.sql
-            **/error_log
+            **/error_log*
+            **/*.log
+            **/*.md
