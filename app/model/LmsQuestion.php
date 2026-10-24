@@ -253,33 +253,152 @@ class LmsQuestion extends Model
     }
 
     /**
-     * Find related questions sharing the same concept or parent
+     * Get a clean, human-readable correct answer string for display
+     */
+    public function getFormattedCorrectAnswer()
+    {
+        if ($this->question_type === 'true_false') {
+            $ans = strtolower(trim((string)$this->correct_answer_text));
+            if (in_array($ans, ['true', '1', 't', 'স', 'সত্য'])) {
+                return 'সত্য (True)';
+            }
+            if (in_array($ans, ['false', '0', 'f', 'মি', 'মিথ্যা'])) {
+                return 'মিথ্যা (False)';
+            }
+            if (!empty($this->correct_answer_text)) {
+                return $this->correct_answer_text;
+            }
+            $correctOpt = $this->options ? $this->options->where('is_correct', true)->first() : null;
+            return $correctOpt ? $correctOpt->option_text : 'সত্য';
+        }
+
+        if (!empty($this->correct_answer_text)) {
+            return $this->correct_answer_text;
+        }
+
+        $correctOpt = $this->options ? $this->options->where('is_correct', true)->first() : null;
+        if ($correctOpt) {
+            return $correctOpt->option_text;
+        }
+
+        return 'উপলব্ধ নয়';
+    }
+
+    /**
+     * Normalize question text for comparing variations and eliminating duplicates
+     */
+    public static function normalizeQuestionText($text)
+    {
+        $text = mb_strtolower(trim((string)$text), 'UTF-8');
+        // Strip question marks, punctuation, multiple spaces, and special symbols
+        $text = preg_replace('/[?।,\.\-_:;!~`#\$%^&*+=\|\/\\\\\(\)\[\]\{\}"\'\s]+/u', ' ', $text);
+        return trim($text);
+    }
+
+    /**
+     * Find related questions sharing the same concept or parent,
+     * guaranteeing diverse question formats, zero duplicate questions,
+     * and excluding the current question text.
      */
     public function getRelatedConceptQuestions($limit = 6)
     {
         $currentId = $this->id;
         $parentId = $this->parent_question_id;
-        $conceptTitle = $this->getEffectiveConceptTitle();
+        $conceptTitle = trim((string)$this->getEffectiveConceptTitle());
 
-        $query = self::where('id', '!=', $currentId)
-            ->where('is_active', true);
+        $currentNorm = self::normalizeQuestionText($this->question_text);
+        $seenTexts = [$currentNorm => true];
+        $results = collect();
 
-        $query->where(function($q) use ($currentId, $parentId, $conceptTitle) {
-            // Derived from this question
-            $q->where('parent_question_id', $currentId);
+        // 1. Direct children & parent/siblings (highest priority: true format derivations)
+        $family = self::where('id', '!=', $currentId)
+            ->where('is_active', true)
+            ->where(function($query) use ($currentId, $parentId) {
+                $query->where('parent_question_id', $currentId);
+                if ($parentId) {
+                    $query->orWhere('id', $parentId)
+                          ->orWhere('parent_question_id', $parentId);
+                }
+            })
+            ->orderByRaw("CASE WHEN question_type != ? THEN 0 ELSE 1 END", [$this->question_type])
+            ->with('options')
+            ->get();
 
-            // Sibling derived from same parent
-            if ($parentId) {
-                $q->orWhere('id', $parentId)
-                  ->orWhere('parent_question_id', $parentId);
+        foreach ($family as $item) {
+            $norm = self::normalizeQuestionText($item->question_text);
+            if ($norm !== '' && !isset($seenTexts[$norm])) {
+                $seenTexts[$norm] = true;
+                $results->push($item);
             }
+        }
 
-            // Or sharing the same concept title
-            if ($conceptTitle) {
-                $q->orWhere('concept_title', $conceptTitle);
+        // 2. Questions with exact same Concept Title
+        if ($conceptTitle !== '' && $results->count() < $limit) {
+            $conceptMatches = self::where('id', '!=', $currentId)
+                ->where('is_active', true)
+                ->where('concept_title', $conceptTitle)
+                ->whereNotIn('id', $results->pluck('id')->push($currentId)->all())
+                ->orderByRaw("CASE WHEN question_type != ? THEN 0 ELSE 1 END", [$this->question_type])
+                ->with('options')
+                ->get();
+
+            foreach ($conceptMatches as $item) {
+                $norm = self::normalizeQuestionText($item->question_text);
+                if ($norm !== '' && !isset($seenTexts[$norm])) {
+                    $seenTexts[$norm] = true;
+                    $results->push($item);
+                }
             }
-        });
+        }
 
-        return $query->take($limit)->get();
+        // 3. Related Concept Keywords & Chapter (e.g. computer meaning, origin, fundamentals)
+        if ($results->count() < $limit) {
+            $rawWords = array_merge(
+                explode(' ', $conceptTitle),
+                explode(' ', (string)$this->question_text)
+            );
+            $stopWords = ['এবং', 'ও', 'বা', 'কী', 'কি', 'কোনটি', 'হলো', 'করে', 'থেকে', 'এর', 'কে', 'হলে', 'না', 'হচ্ছে', 'হবে', 'বলা'];
+            $cleanWords = [];
+            foreach ($rawWords as $w) {
+                $clean = preg_replace('/[?।,\.\-_:;\s\(\)\[\]"\']+/u', '', $w);
+                if (mb_strlen($clean, 'UTF-8') >= 3 && !in_array($clean, $stopWords)) {
+                    $cleanWords[] = $clean;
+                }
+            }
+            $cleanWords = array_unique(array_slice($cleanWords, 0, 4));
+
+            if (!empty($cleanWords)) {
+                $keywordMatches = self::where('id', '!=', $currentId)
+                    ->where('is_active', true)
+                    ->whereNotIn('id', $results->pluck('id')->push($currentId)->all())
+                    ->where(function($sub) use ($cleanWords) {
+                        foreach ($cleanWords as $cw) {
+                            $sub->orWhere('concept_title', 'LIKE', "%{$cw}%")
+                                ->orWhere('question_text', 'LIKE', "%{$cw}%");
+                        }
+                        if (!empty($this->chapter)) {
+                            $sub->orWhere('chapter', $this->chapter);
+                        }
+                    })
+                    ->orderByRaw("CASE WHEN question_type != ? THEN 0 ELSE 1 END", [$this->question_type])
+                    ->take(30)
+                    ->with('options')
+                    ->get();
+
+                foreach ($keywordMatches as $item) {
+                    if ($results->count() >= $limit) break;
+                    $norm = self::normalizeQuestionText($item->question_text);
+                    if ($norm !== '' && !isset($seenTexts[$norm])) {
+                        $seenTexts[$norm] = true;
+                        $results->push($item);
+                    }
+                }
+            }
+        }
+
+        // Return collection prioritized by format diversity (non-matching types first)
+        return $results->sortBy(function($item) {
+            return ($item->question_type !== $this->question_type) ? 0 : 1;
+        })->take($limit)->values();
     }
 }

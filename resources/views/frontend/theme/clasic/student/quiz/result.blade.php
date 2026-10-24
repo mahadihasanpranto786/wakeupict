@@ -612,12 +612,12 @@
                             </button>
 
                             <!-- Detailed Concept-Based Explanation Box -->
-                            <div id="explanation-box-{{ $q->id }}" class="hidden explanation-content mt-2.5 rounded-2xl bg-slate-50/90 dark:bg-slate-950/80 border-2 border-emerald-500/30 dark:border-emerald-500/20 p-3.5 sm:p-4 text-xs font-serif text-slate-800 dark:text-slate-200 leading-relaxed space-y-3 print:block shadow-sm">
+                            <div id="explanation-box-{{ $q->id }}" class="hidden explanation-content mt-2.5 rounded-2xl bg-slate-50/95 dark:bg-slate-950/90 border-2 border-emerald-500/30 dark:border-emerald-500/20 p-4 sm:p-5 text-xs sm:text-sm font-sans text-slate-800 dark:text-slate-200 leading-relaxed space-y-3.5 print:block shadow-sm">
                                 
                                 <!-- Header Strip: Concept Title & Faculty Verification Status -->
-                                <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-slate-800">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs">
+                                <div class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs">
                                             <i class="fa fa-lightbulb-o"></i>
                                         </span>
                                         <div>
@@ -632,128 +632,134 @@
 
                                     <div class="flex items-center gap-1.5 text-[11px]">
                                         @if($q->explanation_status === 'verified')
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 font-bold border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800 text-[10px]" style="color:#000000 !important; font-weight:800;">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 font-bold border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800 text-[11px]" style="color:#000000 !important; font-weight:800;">
                                                 <i class="fa fa-check-circle text-emerald-700"></i> যাচাইকৃত (Verified by ICT Faculty)
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 text-[10px]">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 text-[11px]">
                                                 <i class="fa fa-clock-o text-amber-600"></i> পর্যালোচনাধীন (Pending Faculty Review)
                                             </span>
                                         @endif
                                     </div>
                                 </div>
 
-                                <!-- SECTION 1: Direct Explanation & Reason (সঠিক উত্তর ও মূল যুক্তি) -->
-                                @if($q->explanation)
-                                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                                        <div class="font-bold text-[11px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                                            <i class="fa fa-check-circle"></i> সঠিক উত্তর ও মূল সমাধান (Direct Answer & Logic) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($q->explanation)) !!}
-                                        </div>
+                                <!-- UNIFIED CONCEPT EXPLANATION PARAGRAPH (এক নজরে সম্পূর্ণ কনসেপ্ট ও মূল ব্যাখ্যা) -->
+                                <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+                                    <div class="font-bold text-xs sm:text-sm text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs">
+                                            <i class="fa fa-book"></i>
+                                        </span>
+                                        <span>মূল কনসেপ্ট ও বিস্তারিত ব্যাখ্যা (Core Concept & Explanation) :</span>
                                     </div>
-                                @endif
 
-                                <!-- SECTION 2: Conceptual Explanation (মূল কনসেপ্ট ও বিশদ শিখন) -->
-                                @if($cExp)
-                                    <div class="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 space-y-1">
-                                        <div class="font-bold text-[11px] text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
-                                            <i class="fa fa-book"></i> মূল কনসেপ্ট ও বিস্তারিত শিখন (Conceptual Understanding) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cExp)) !!}
-                                        </div>
+                                    <!-- The complete comprehensive paragraph -->
+                                    <div class="text-slate-800 dark:text-slate-100 text-xs sm:text-sm leading-relaxed space-y-2 font-sans">
+                                        @if($q->explanation && $cExp)
+                                            <p>
+                                                <strong class="text-emerald-700 dark:text-emerald-400 font-semibold">সঠিক উত্তর ও মূল ব্যাখ্যা:</strong> 
+                                                {!! nl2br(e($q->explanation)) !!} {!! nl2br(e($cExp)) !!}
+                                            </p>
+                                        @elseif($q->explanation)
+                                            <p>
+                                                <strong class="text-emerald-700 dark:text-emerald-400 font-semibold">সঠিক উত্তর ও মূল ব্যাখ্যা:</strong> 
+                                                {!! nl2br(e($q->explanation)) !!}
+                                            </p>
+                                        @elseif($cExp)
+                                            <p>
+                                                <strong class="text-emerald-700 dark:text-emerald-400 font-semibold">মূল কনসেপ্ট:</strong> 
+                                                {!! nl2br(e($cExp)) !!}
+                                            </p>
+                                        @endif
+
+                                        @if($cStep)
+                                            <p class="text-slate-700 dark:text-slate-200">
+                                                <strong class="text-indigo-700 dark:text-indigo-400 font-semibold">ধাপ ও সমাধান:</strong> {!! nl2br(e($cStep)) !!}
+                                            </p>
+                                        @endif
+
+                                        @if($cRules)
+                                            <p class="text-slate-700 dark:text-slate-200">
+                                                <strong class="text-amber-700 dark:text-amber-400 font-semibold">নিয়মাবলী ও সূত্র:</strong> {!! nl2br(e($cRules)) !!}
+                                            </p>
+                                        @endif
+
+                                        @if($cWrong)
+                                            <p class="text-rose-800 dark:text-rose-300">
+                                                <strong class="text-rose-700 dark:text-rose-400 font-semibold">অন্যান্য অপশনগুলো কেন ভুল:</strong> {!! nl2br(e($cWrong)) !!}
+                                            </p>
+                                        @endif
                                     </div>
-                                @endif
 
-                                <!-- SECTION 3: Step-by-Step Reasoning / Derivation (ধাপে ধাপে সমাধান ও যুক্তি) -->
-                                @if($cStep)
-                                    <div class="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                                        <div class="font-bold text-[11px] text-slate-900 dark:text-white flex items-center gap-1.5">
-                                            <i class="fa fa-sort-numeric-asc text-indigo-600"></i> ধাপে ধাপে সমাধান ও নিয়ম (Step-by-Step Derivation) :
+                                    <!-- Compact Bottom Highlights (Mistakes & Memory Aid) -->
+                                    @if($cMistakes || $cMemory)
+                                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap gap-2 text-xs">
+                                            @if($cMistakes)
+                                                <div class="inline-flex items-start gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 text-xs">
+                                                    <i class="fa fa-exclamation-triangle text-amber-600 mt-0.5 shrink-0"></i>
+                                                    <span><strong>পরীক্ষার সতর্কতা:</strong> {!! e($cMistakes) !!}</span>
+                                                </div>
+                                            @endif
+                                            @if($cMemory)
+                                                <div class="inline-flex items-start gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 text-purple-950 dark:text-purple-300 text-xs">
+                                                    <i class="fa fa-magic text-purple-600 mt-0.5 shrink-0"></i>
+                                                    <span><strong>মনে রাখার সহজ কৌশল:</strong> {!! e($cMemory) !!}</span>
+                                                </div>
+                                            @endif
                                         </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cStep)) !!}
-                                        </div>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
 
-                                <!-- SECTION 4: Why Other Options Are Incorrect (অন্যান্য অপশনগুলো কেন ভুল) -->
-                                @if($cWrong)
-                                    <div class="p-3 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 space-y-1">
-                                        <div class="font-bold text-[11px] text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
-                                            <i class="fa fa-times-circle text-rose-600"></i> অন্যান্য অপশন কেন ভুল ও তাদের প্রয়োগ (Analysis of Other Options) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cWrong)) !!}
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- SECTION 5: Important Facts and Rules (গুরুত্বপূর্ণ তথ্য, সূত্র ও শর্ত) -->
-                                @if($cRules)
-                                    <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 space-y-1">
-                                        <div class="font-bold text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                                            <i class="fa fa-star text-amber-600"></i> গুরুত্বপূর্ণ তথ্য, সূত্র ও নিয়মাবলী (Key Rules & Facts) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cRules)) !!}
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- SECTION 6: Common Mistakes & Traps (পরীক্ষায় সাধারণ ভুল ও ফাঁদ) -->
-                                @if($cMistakes)
-                                    <div class="p-3 rounded-xl bg-amber-50/40 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/60 space-y-1">
-                                        <div class="font-bold text-[11px] text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                                            <i class="fa fa-exclamation-triangle text-amber-600"></i> পরীক্ষায় সাধারণ ভুল ও সতর্কবার্তা (Common Mistakes & Traps) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cMistakes)) !!}
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- SECTION 7: Memory Aid & Analogy (মনে রাখার সহজ কৌশল) -->
-                                @if($cMemory)
-                                    <div class="p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/50 space-y-1">
-                                        <div class="font-bold text-[11px] text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
-                                            <i class="fa fa-magic text-purple-600"></i> মনে রাখার সহজ কৌশল বা নেমোনিক (Memory Aid / Mnemonic) :
-                                        </div>
-                                        <div class="text-slate-800 dark:text-slate-200 text-xs pl-5 font-sans leading-relaxed">
-                                            {!! nl2br(e($cMemory)) !!}
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- SECTION 8: Related Question Variations & Practice (একই কনসেপ্টের অন্যান্য প্রশ্ন ও অনুশীলন) -->
+                                <!-- SECTION 8: Related Question Variations & Practice (একই কনসেপ্টের ভিন্নধর্মী প্রশ্ন ও অনুশীলন) -->
                                 @if($relatedQs->isNotEmpty())
-                                    <div class="p-3 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-2">
-                                        <div class="flex items-center justify-between">
-                                            <div class="font-bold text-[11px] text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                <i class="fa fa-random text-emerald-600"></i> একই কনসেপ্টের বিভিন্ন ফরম্যাটের প্রশ্ন ও অনুশীলন (Variations & Practice) :
+                                    <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-2.5 shadow-2xs">
+                                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                                            <div class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[11px]">
+                                                    <i class="fa fa-random"></i>
+                                                </span>
+                                                <span>একই কনসেপ্টের বিভিন্ন ফরম্যাটের প্রশ্ন ও অনুশীলন (Variations & Practice) :</span>
                                             </div>
-                                            <span class="text-[10px] text-slate-500 font-mono">({{ $relatedQs->count() }} টি সম্পর্কিত প্রশ্ন)</span>
+                                            <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                                {{ $relatedQs->count() }} টি সম্পর্কিত প্রশ্ন
+                                            </span>
                                         </div>
 
-                                        <div class="space-y-1.5 pt-1">
+                                        <div class="space-y-2 pt-1">
                                             @foreach($relatedQs as $rq)
-                                                <div class="p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs flex items-start justify-between gap-2 shadow-2xs">
-                                                    <div class="space-y-1">
-                                                        <div class="flex items-center gap-1.5 flex-wrap">
-                                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                                                {{ $rq->getTypeLabel() }}
-                                                            </span>
-                                                            <span class="text-slate-900 dark:text-slate-100 font-medium font-sans">
-                                                                {{ Str::limit($rq->question_text, 100) }}
+                                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors flex items-start justify-between gap-3 shadow-2xs">
+                                                    <div class="space-y-1.5 flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            @if($rq->question_type === 'true_false')
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                                                                    সত্য / মিথ্যা (True/False)
+                                                                </span>
+                                                            @elseif($rq->question_type === 'fill_blanks')
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                                                                    শূন্যস্থান পূরণ (Fill in Blanks)
+                                                                </span>
+                                                            @elseif($rq->question_type === 'short_answer')
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+                                                                    সংক্ষিপ্ত উত্তর (Short Answer)
+                                                                </span>
+                                                            @else
+                                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                                                                    {{ $rq->getTypeLabel() }}
+                                                                </span>
+                                                            @endif
+                                                            <span class="text-slate-900 dark:text-slate-100 font-semibold text-xs sm:text-sm">
+                                                                {{ $rq->question_text }}
                                                             </span>
                                                         </div>
-                                                        <div class="text-[11px] text-emerald-700 dark:text-emerald-400 font-sans pl-1">
-                                                            <strong class="text-slate-500">বোর্ড সঠিক উত্তর :</strong> {{ $rq->correct_answer_text ?: ($rq->options->where('is_correct', true)->first() ? $rq->options->where('is_correct', true)->first()->option_text : 'N/A') }}
+                                                        <div class="flex items-center gap-2 flex-wrap text-xs pt-0.5">
+                                                            <span class="font-bold text-slate-600 dark:text-slate-400">বোর্ড সঠিক উত্তর :</span>
+                                                            <span class="font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                                                {{ $rq->getFormattedCorrectAnswer() }}
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    <span class="text-[10px] text-slate-400 font-mono shrink-0 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">#{{ $rq->id }}</span>
+                                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono shrink-0 bg-white dark:bg-slate-900 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800">
+                                                        #{{ $rq->id }}
+                                                    </span>
                                                 </div>
                                             @endforeach
                                         </div>

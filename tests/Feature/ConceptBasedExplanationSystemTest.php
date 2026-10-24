@@ -271,4 +271,63 @@ class ConceptBasedExplanationSystemTest extends TestCase
         $this->assertStringContainsString('Computer', $q1->question_text);
         $this->assertTrue(LmsQuestion::count() >= 347, 'All 347 original MCQs must remain intact');
     }
+
+    /**
+     * Test related questions excludes identical duplicate texts and prioritizes diverse formats
+     */
+    public function test_related_concept_questions_excludes_duplicate_texts_and_prioritizes_different_formats()
+    {
+        $concept = 'টেস্ট ইউনিক কনসেপ্ট ' . uniqid();
+
+        // Target question
+        $target = LmsQuestion::create([
+            'question_text' => 'ইনপুট ডিভাইস কী?',
+            'question_type' => 'mcq_single',
+            'concept_title' => $concept,
+            'is_active'     => true,
+        ]);
+
+        // Duplicate question with same text (e.g. uploaded twice or from multiple quizzes)
+        $duplicate = LmsQuestion::create([
+            'question_text' => 'ইনপুট ডিভাইস কী ?',
+            'question_type' => 'mcq_single',
+            'concept_title' => $concept,
+            'is_active'     => true,
+        ]);
+
+        // True/False variation
+        $tfVariation = LmsQuestion::create([
+            'question_text'       => 'কীবোর্ড একটি ইনপুট ডিভাইস।',
+            'question_type'       => 'true_false',
+            'correct_answer_text' => 'true',
+            'concept_title'       => $concept,
+            'is_active'           => true,
+        ]);
+
+        // Fill blanks variation
+        $fibVariation = LmsQuestion::create([
+            'question_text'       => 'মাউস একটি ________ ডিভাইস।',
+            'question_type'       => 'fill_blanks',
+            'correct_answer_text' => 'ইনপুট',
+            'concept_title'       => $concept,
+            'is_active'           => true,
+        ]);
+
+        $related = $target->getRelatedConceptQuestions(4);
+
+        // Assert duplicate question is strictly excluded
+        $this->assertFalse($related->contains('id', $duplicate->id), 'Duplicate questions with identical text must not be shown');
+        $this->assertFalse($related->contains('id', $target->id), 'Target question itself must never be in related variations');
+
+        // Assert distinct format variations are included
+        $this->assertTrue($related->contains('id', $tfVariation->id));
+        $this->assertTrue($related->contains('id', $fibVariation->id));
+
+        // Format diversity check: first item should be a different format than target's mcq_single
+        $this->assertNotEquals('mcq_single', $related->first()->question_type);
+
+        // Assert formatted answer returns human readable Bengali
+        $this->assertEquals('সত্য (True)', $tfVariation->getFormattedCorrectAnswer());
+        $this->assertEquals('ইনপুট', $fibVariation->getFormattedCorrectAnswer());
+    }
 }

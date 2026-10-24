@@ -597,30 +597,36 @@
             </div>
 
             <!-- Dynamic Navigation Links -->
+            <!-- Dynamic Navigation Links -->
             <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
                 @foreach($studentMenus as $menu)
+                    {{-- Only show quiz_examination menu open, hide everything else as requested --}}
+                    @if($menu->menu_key !== 'quiz_examination')
+                        @continue
+                    @endif
+
                     @php
                         $hasChildren = $menu->activeChildren->count() > 0;
                         $isCurrent = $menu->isCurrent();
                         $isChildCurrent = $menu->isChildCurrent();
-                        $isOpen = $isCurrent || $isChildCurrent;
+                        $isOpen = true; // Kept open by default
                     @endphp
 
                     @if($hasChildren)
-                        <!-- Parent with Submenus (Collapsible) -->
-                        <div class="menu-group" x-data="{ open: {{ $isOpen ? 'true' : 'false' }} }">
+                        <!-- Parent with Submenus (Collapsible & Open by default) -->
+                        <div class="menu-group" x-data="{ open: true }">
                             <button type="button" 
                                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow-icon').classList.toggle('rotate-90');"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isOpen ? 'bg-slate-800/60 text-white border border-slate-700/50' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 bg-slate-800/60 text-white border border-slate-700/50">
                                 <div class="flex items-center gap-3 truncate">
-                                    <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isOpen ? 'text-brand-primary' : 'text-slate-400' }}"></i>
+                                    <i class="{{ $menu->icon }} text-sm w-4 text-center text-brand-primary"></i>
                                     <span class="truncate">{{ $menu->getTitle() }}</span>
                                 </div>
-                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 {{ $isOpen ? 'rotate-90 text-brand-primary' : 'text-slate-500' }}"></i>
+                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 rotate-90 text-brand-primary"></i>
                             </button>
 
-                            <!-- Submenu Items -->
-                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1 {{ $isOpen ? '' : 'hidden' }}">
+                            <!-- Submenu Items (Always open by default) -->
+                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1">
                                 @foreach($menu->activeChildren as $child)
                                     @php $childCurrent = $child->isCurrent(); @endphp
                                     <a href="{{ $child->resolveUrl() }}" 
@@ -682,22 +688,17 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Right: Theme Toggle, Notifications & Profile Dropdown -->
-                <div class="flex items-center gap-3">
-                    
-                    <!-- Theme Mode Toggle -->
+ 
+                <div class="flex items-center gap-3"> 
                     <button id="theme-toggle" type="button" class="p-2.5 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all hover:border-brand-primary/40 focus:outline-none" title="Toggle Theme">
                         <i class="fa fa-sun-o hidden dark:inline text-amber-400"></i>
                         <i class="fa fa-moon-o inline dark:hidden text-indigo-400"></i>
                     </button>
-
-                    <!-- Language Switcher -->
+ 
                     <a href="{{ url('locale/' . (App::getLocale() == 'bn' ? 'en' : 'bn')) }}" class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-brand-primary transition-colors">
                         {{ App::getLocale() == 'bn' ? 'English' : 'বাংলা' }}
                     </a>
-
-                    <!-- Notification Bell -->
+ 
                     @php
                         $unreadNotifCount = 0;
                         if (!empty($studentUser->id)) {
@@ -713,17 +714,14 @@
                                 {{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}
                             </span>
                         @endif
-                    </a>
-
-                    <!-- Profile Dropdown Trigger -->
+                    </a> 
                     <div class="relative" id="profile-dropdown-wrapper">
                         <button id="profile-dropdown-btn" type="button" class="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 transition-all focus:outline-none">
                             <img src="{{ $studentUser->avatar_url }}" alt="{{ $studentUser->name }}" class="w-8 h-8 rounded-xl object-cover border border-slate-700">
                             <span class="hidden md:inline text-xs font-bold text-white max-w-[120px] truncate">{{ $studentUser->name }}</span>
                             <i class="fa fa-angle-down text-slate-400 text-xs"></i>
                         </button>
-
-                        <!-- Dropdown Menu -->
+ 
                         <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-2 z-50">
                             <div class="px-3 py-2.5 border-b border-slate-800 mb-1">
                                 <p class="text-xs font-bold text-white">{{ $studentUser->name }}</p>
@@ -785,6 +783,9 @@
             <!-- Mobile Dynamic Links -->
             <nav class="flex-1 py-6 space-y-1.5">
                 @foreach($studentMenus as $menu)
+                    @if($menu->menu_key !== 'quiz_examination')
+                        @continue
+                    @endif
                     @php $hasChildren = $menu->activeChildren->count() > 0; @endphp
                     @if($hasChildren)
                         <div class="pt-2 pb-1">
