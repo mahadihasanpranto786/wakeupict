@@ -542,7 +542,7 @@
             </div>
 
             <!-- Online Publishing Action Card -->
-            <!-- <div class="card shadow-sm border-0 bg-gradient-success text-white">
+            <div class="card shadow-sm border-0 bg-gradient-success text-white">
                 <div class="card-body p-3">
                     <h6 class="font-weight-bold mb-1"><i class="fas fa-cloud-upload-alt mr-1"></i> অনলাইন পরীক্ষা পাবলিশ</h6>
                     <p class="text-xs text-white-50 mb-2">
@@ -555,7 +555,7 @@
                         </button>
                     </form>
                 </div>
-            </div> -->
+            </div>
 
         </div>
     </div>
