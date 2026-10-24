@@ -763,10 +763,6 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
         Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
 
-        // BTEB OMR Sheet & Dynamic Litho Code Builder
-        Route::get('/bteb-omr', 'frontend\theme\clasic\StudentOmrController@index')->name('omr.index')->middleware('student.feature:bteb_omr_sheet');
-        Route::get('/bteb-omr/print', 'frontend\theme\clasic\StudentOmrController@print')->name('omr.print');
-        Route::post('/bteb-omr/generate', 'frontend\theme\clasic\StudentOmrController@generate')->name('omr.generate');
 
         // Assignments & Projects (Coursework, File Uploads, Capstones & Rubric Feedback)
         Route::get('/assignments', 'frontend\theme\clasic\StudentAssignmentController@assignments')->name('assignments.index')->middleware('student.feature:my_assignments');
@@ -804,3 +800,18 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
 
 // Public Independent Certificate Verification Portal
 Route::get('/verify/certificate/{hash}', 'frontend\theme\clasic\StudentCertificateController@verifyCertificate')->name('certificates.verify');
+
+// Redirect legacy student OMR routes to Admin OMR Builder (Admin only feature)
+Route::get('/student/bteb-omr', function () {
+    return redirect()->route('admin.bteb-omr.index', request()->query());
+})->name('student.omr.index');
+
+Route::get('/student/bteb-omr/print', function () {
+    return redirect()->route('admin.bteb-omr.print', request()->query());
+})->name('student.omr.print');
+
+Route::post('/student/bteb-omr/generate', 'frontend\theme\clasic\StudentOmrController@generate')->name('student.omr.generate');
+
+Route::get('/bteb-omr', function () {
+    return redirect()->route('admin.bteb-omr.index', request()->query());
+});

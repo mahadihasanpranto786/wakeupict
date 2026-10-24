@@ -15,6 +15,11 @@ class StudentOmrController extends Controller
      */
     public function index(Request $request)
     {
+        // If accessed via student route, redirect to admin route
+        if ($request->routeIs('student.omr.*') || $request->is('bteb-omr*')) {
+            return redirect()->route('admin.bteb-omr.index', $request->query());
+        }
+
         $student = function_exists('student_user') ? student_user() : Auth::guard('student')->user();
 
         // 1. Initial Litho Code (From request or freshly generated)
@@ -35,6 +40,11 @@ class StudentOmrController extends Controller
         $subjectCode = $request->query('subject_code', '00076');
         $examYear = $request->query('exam_year', '2026');
 
+        $pageSize = strtolower($request->query('page_size', 'a4'));
+        if (!in_array($pageSize, ['a4', 'legal', 'letter'])) {
+            $pageSize = 'a4';
+        }
+
         // If student is logged in and requested 'student' mode or initial load, pre-fill with student record
         if ($student && $mode === 'student') {
             if (!empty($student->student_id_code)) {
@@ -49,7 +59,7 @@ class StudentOmrController extends Controller
         $qrPayload = "BTEB-OMR|LITHO:{$lithoCode}|REG:{$registration}|SUB:{$subjectCode}|YR:{$examYear}";
         $qrSvg = OmrService::generateQrSvg($qrPayload, 76);
 
-        return view('frontend.theme.clasic.student.omr.index', compact(
+        return view('backend.theme.clasic.lms.omr.index', compact(
             'student',
             'lithoCode',
             'mode',
@@ -63,12 +73,13 @@ class StudentOmrController extends Controller
             'subjectCode',
             'examYear',
             'barcodeSvg',
-            'qrSvg'
+            'qrSvg',
+            'pageSize'
         ));
     }
 
     /**
-     * Clean Print View (A4 Board Standard)
+     * Clean Print View (A4, Legal, Letter Standards)
      * Supports single sheet or batch multi-page printing with consecutive Litho codes
      */
     public function print(Request $request)
@@ -86,6 +97,11 @@ class StudentOmrController extends Controller
         $session = $request->query('session', '0022');
         $subjectCode = $request->query('subject_code', '00076');
         $examYear = $request->query('exam_year', '2026');
+
+        $pageSize = strtolower($request->query('page_size', 'a4'));
+        if (!in_array($pageSize, ['a4', 'legal', 'letter'])) {
+            $pageSize = 'a4';
+        }
 
         // Generate list of sheets with unique Litho codes
         $lithoCodes = OmrService::generateBatch($startLitho, $count);
@@ -113,7 +129,7 @@ class StudentOmrController extends Controller
             ];
         }
 
-        return view('frontend.theme.clasic.student.omr.print', compact('sheets', 'count', 'mode'));
+        return view('backend.theme.clasic.lms.omr.print', compact('sheets', 'count', 'mode', 'pageSize'));
     }
 
     /**

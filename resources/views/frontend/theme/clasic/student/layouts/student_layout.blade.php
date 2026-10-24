@@ -628,6 +628,11 @@
                             <!-- Submenu Items (Always open by default) -->
                             <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1">
                                 @foreach($menu->activeChildren as $child)
+                                    {{-- BTEB OMR & Litho is purely an Admin tool - never show in student portal --}}
+                                    @if($child->menu_key === 'bteb_omr_sheet')
+                                        @continue
+                                    @endif
+
                                     @php $childCurrent = $child->isCurrent(); @endphp
                                     <a href="{{ $child->resolveUrl() }}" 
                                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {{ $childCurrent ? 'bg-brand-primary/10 text-brand-primary font-semibold border border-brand-primary/20' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
@@ -792,6 +797,10 @@
                             <p class="px-3 text-[10px] font-mono tracking-wider text-slate-400 uppercase font-bold">{{ $menu->getTitle() }}</p>
                             <div class="mt-1 space-y-1">
                                 @foreach($menu->activeChildren as $child)
+                                    {{-- BTEB OMR & Litho is purely an Admin tool - never show in student portal --}}
+                                    @if($child->menu_key === 'bteb_omr_sheet')
+                                        @continue
+                                    @endif
                                     <a href="{{ $child->resolveUrl() }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800">
                                         <i class="{{ $child->icon }} text-xs w-4 text-center text-brand-primary"></i>
                                         <span>{{ $child->getTitle() }}</span>

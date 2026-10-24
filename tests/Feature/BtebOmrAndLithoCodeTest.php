@@ -75,12 +75,12 @@ class BtebOmrAndLithoCodeTest extends TestCase
     }
 
     /**
-     * Test 2: Student can access BTEB OMR Sheet builder page
+     * Test 2: Admin can access BTEB OMR Sheet builder page in Admin layout
      */
-    public function test_student_can_view_bteb_omr_sheet_builder()
+    public function test_admin_can_view_bteb_omr_sheet_builder()
     {
-        $response = $this->actingAs($this->student, 'student')
-            ->get(route('student.omr.index'));
+        $response = $this->actingAs($this->adminUser)
+            ->get(route('admin.bteb-omr.index'));
 
         $response->assertStatus(200);
         $response->assertSee('বাংলাদেশ কারিগরি শিক্ষা বোর্ড');
@@ -90,34 +90,50 @@ class BtebOmrAndLithoCodeTest extends TestCase
         $response->assertSee('রেজিস্ট্রেশন নম্বর নিজেরটা লিখবেন। (ডানদিক থেকে লিখবেন)');
         $response->assertSee('রোল নম্বর');
         $response->assertSee('omr-header-cell');
-        $response->assertSee('bubble-filled');
+        $response->assertSee('সাইজ:');
+        $response->assertSee('ব্ল্যাঙ্ক প্র্যাকটিস');
     }
 
     /**
-     * Test 3: Standalone clean print view with batch multi-page support
+     * Test 3: Standalone clean print view with batch multi-page and variant page size (A4, Legal, Letter)
      */
-    public function test_bteb_omr_sheet_batch_print_view()
+    public function test_bteb_omr_sheet_batch_print_view_with_variant_page_sizes()
     {
-        $response = $this->actingAs($this->student, 'student')
-            ->get(route('student.omr.print', [
+        // A4 Print
+        $responseA4 = $this->actingAs($this->adminUser)
+            ->get(route('admin.bteb-omr.print', [
                 'start_litho' => '2078873062',
                 'count'       => 2,
                 'mode'        => 'guide',
+                'page_size'   => 'a4',
             ]));
 
-        $response->assertStatus(200);
-        $response->assertSee('2078873062');
-        $response->assertSee('2078873063');
-        $response->assertSee('এইটা সবার ফোনে সেভ করে রাখবেন');
+        $responseA4->assertStatus(200);
+        $responseA4->assertSee('2078873062');
+        $responseA4->assertSee('2078873063');
+        $responseA4->assertSee('এইটা সবার ফোনে সেভ করে রাখবেন');
+        $responseA4->assertSee('size-a4');
+
+        // Legal Print
+        $responseLegal = $this->actingAs($this->adminUser)
+            ->get(route('admin.bteb-omr.print', [
+                'start_litho' => '2078873062',
+                'count'       => 1,
+                'mode'        => 'blank',
+                'page_size'   => 'legal',
+            ]));
+
+        $responseLegal->assertStatus(200);
+        $responseLegal->assertSee('size-legal');
     }
 
     /**
-     * Test 4: AJAX Litho code auto-generation endpoint
+     * Test 4: AJAX Litho code auto-generation endpoint for admin
      */
     public function test_ajax_litho_code_generation()
     {
-        $response = $this->actingAs($this->student, 'student')
-            ->postJson(route('student.omr.generate'), [
+        $response = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.bteb-omr.generate'), [
                 'action' => 'single',
                 'prefix' => '20',
             ]);
@@ -132,21 +148,20 @@ class BtebOmrAndLithoCodeTest extends TestCase
     }
 
     /**
-     * Test 5: Admin can access BTEB OMR Sheet Builder
+     * Test 5: Student route redirects to admin route
      */
-    public function test_admin_can_access_bteb_omr_sheet()
+    public function test_student_route_redirects_to_admin()
     {
         $response = $this->actingAs($this->adminUser)
-            ->get(route('admin.bteb-omr.index'));
+            ->get(route('student.omr.index'));
 
-        $response->assertStatus(200);
-        $response->assertSee('বাংলাদেশ কারিগরি শিক্ষা বোর্ড');
+        $response->assertRedirect(route('admin.bteb-omr.index'));
     }
 
     /**
-     * Test 6: Student panel menu includes BTEB OMR Sheet item
+     * Test 6: Student panel menu tree DOES NOT include BTEB OMR Sheet item (admin only)
      */
-    public function test_student_menu_tree_has_bteb_omr_sheet()
+    public function test_student_menu_tree_does_not_have_bteb_omr_sheet()
     {
         StudentMenuService::clearCache();
         $tree = StudentMenuService::getTree();
@@ -155,7 +170,6 @@ class BtebOmrAndLithoCodeTest extends TestCase
         $this->assertNotNull($examMenu);
 
         $omrMenu = $examMenu->activeChildren->firstWhere('menu_key', 'bteb_omr_sheet');
-        $this->assertNotNull($omrMenu, 'BTEB OMR Sheet menu should be in student menu tree under quiz_examination');
-        $this->assertEquals(route('student.omr.index'), $omrMenu->resolveUrl());
+        $this->assertNull($omrMenu, 'BTEB OMR Sheet menu should NOT be in student menu tree; it is an admin-only tool');
     }
 }
