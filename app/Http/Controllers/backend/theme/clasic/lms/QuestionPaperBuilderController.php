@@ -272,8 +272,15 @@ class QuestionPaperBuilderController extends Controller
             $qQuery->where('category', $request->category);
         }
 
-        if ($request->filled('question_type')) {
-            $qQuery->where('question_type', $request->question_type);
+        $typeParam = $request->input('type') ?: $request->input('question_type');
+        if (!empty($typeParam)) {
+            if ($typeParam === 'mcq') {
+                $qQuery->whereIn('question_type', ['mcq_single', 'mcq_multi', 'mcq']);
+            } elseif ($typeParam === 'descriptive') {
+                $qQuery->whereIn('question_type', ['descriptive', 'translation']);
+            } else {
+                $qQuery->where('question_type', $typeParam);
+            }
         }
 
         if ($request->filled('difficulty')) {
@@ -323,13 +330,22 @@ class QuestionPaperBuilderController extends Controller
 
         // Check duplicate
         $existing = LmsQuestionPaperItem::where('paper_id', $paper->id)->where('question_id', $questionId)->first();
-        if ($existing && !$request->boolean('allow_duplicate')) {
+        $allowDuplicate = filter_var($request->input('allow_duplicate'), FILTER_VALIDATE_BOOLEAN);
+        if ($existing && !$allowDuplicate) {
             return response()->json([
                 'success' => false,
                 'is_duplicate' => true,
                 'message' => 'এই প্রশ্নটি ইতিমধ্যে এই প্রশ্নপত্রে যুক্ত আছে। আপনি কি পুনরায় যুক্ত করতে চান?'
             ], 422);
         }
+
+        // Check if a related version from the same source concept is already in paper
+        $rootId = $question->parent_question_id ?: $question->id;
+        $relatedExists = LmsQuestionPaperItem::where('paper_id', $paper->id)
+            ->where('question_id', '!=', $question->id)
+            ->whereHas('masterQuestion', function($mq) use ($rootId) {
+                $mq->where('id', $rootId)->orWhere('parent_question_id', $rootId);
+            })->exists();
 
         $nextOrder = ($paper->items()->max('order_index') ?: 0) + 1;
         $marks = $request->filled('marks') ? (float)$request->marks : ($question->marks ?: 1.00);
@@ -362,6 +378,7 @@ class QuestionPaperBuilderController extends Controller
                 'question_type' => $question->getTypeLabel(),
                 'marks'         => (float)$item->marks,
                 'stimulus'      => $question->stimulus,
+                'correct_answer_text' => $question->correct_answer_text,
                 'options'       => $question->options->map(function ($o, $idx) {
                     return [
                         'letter'     => LmsQuestion::getBengaliOptionLetter($idx),
@@ -496,7 +513,14 @@ class QuestionPaperBuilderController extends Controller
         }
 
         if ($request->filled('question_type')) {
-            $query->where('question_type', $request->question_type);
+            $type = $request->question_type;
+            if ($type === 'mcq') {
+                $query->whereIn('question_type', ['mcq_single', 'mcq_multi', 'mcq']);
+            } elseif ($type === 'descriptive') {
+                $query->whereIn('question_type', ['descriptive', 'translation']);
+            } else {
+                $query->where('question_type', $type);
+            }
         }
 
         if ($request->filled('difficulty')) {
@@ -686,6 +710,7 @@ class QuestionPaperBuilderController extends Controller
         try {
             // Find or create linked LmsQuiz
             $quiz = $paper->linkedQuiz ?: new LmsQuiz();
+            $quiz->paper_id              = $paper->id;
             $quiz->course_id             = $paper->course_id;
             $quiz->title                 = $paper->title;
             $quiz->description           = $paper->instructions;
@@ -701,24 +726,6 @@ class QuestionPaperBuilderController extends Controller
             $quiz->is_published          = true;
             $quiz->save();
 
-            // Link existing questions or clone if necessary
-            $currOrder = 0;
-            $unsupportedTypes = [];
-
-            foreach ($paper->items as $it) {
-                $currOrder++;
-                $q = $it->masterQuestion;
-                if ($q) {
-                    if (!$q->quiz_id) {
-                        $q->update(['quiz_id' => $quiz->id, 'order_index' => $currOrder]);
-                    }
-
-                    if (!in_array($q->question_type, ['mcq_single', 'mcq_multi', 'true_false'])) {
-                        $unsupportedTypes[] = $q->getTypeLabel();
-                    }
-                }
-            }
-
             $paper->update([
                 'status'         => 'published',
                 'linked_quiz_id' => $quiz->id,
@@ -726,13 +733,7 @@ class QuestionPaperBuilderController extends Controller
 
             DB::commit();
 
-            $warning = '';
-            if (!empty($unsupportedTypes)) {
-                $typesList = implode(', ', array_unique($unsupportedTypes));
-                $warning = " দ্রষ্টব্য: কিছু প্রশ্ন ({$typesList}) অনলাইনে হস্তচালিত গ্রেডিং (Manual Grading) প্রয়োজন হবে।";
-            }
-
-            return redirect()->back()->with('success', "প্রশ্নপত্রটি সফলভাবে অনলাইন পরীক্ষা হিসেবে প্রকাশিত হয়েছে! কুইজ আইডি: #{$quiz->id}.{$warning}");
+            return redirect()->back()->with('success', "প্রশ্নপত্রটি সফলভাবে অনলাইন পরীক্ষা হিসেবে প্রকাশিত হয়েছে! কুইজ আইডি: #{$quiz->id}। শিক্ষার্থীরা এখন স্টুডেন্ট পোর্টাল থেকে এই পরীক্ষা দিতে পারবে।");
         } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'অনলাইন প্রকাশনা ব্যর্থ হয়েছে: ' . $e->getMessage()]);

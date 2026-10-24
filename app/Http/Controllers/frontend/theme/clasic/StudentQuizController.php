@@ -163,54 +163,109 @@ class StudentQuizController extends Controller
         $assignedSet = $request->input('question_set', $quiz->question_set ?: 'Set A');
 
         // Fetch questions for this attempt and freeze a snapshot
-        $questionsQuery = $quiz->activeQuestions()->with('options');
-        $availableSets = $quiz->getAvailableSets();
-        if (count($availableSets) > 1 && $assignedSet) {
-            $questionsQuery->where(function($q) use ($assignedSet) {
-                $q->where('set_code', $assignedSet)
-                  ->orWhereNull('set_code')
-                  ->orWhere('set_code', '');
-            });
-        }
-        $rawQuestions = $questionsQuery->get();
-        if ($rawQuestions->isEmpty()) {
-            $rawQuestions = $quiz->activeQuestions()->with('options')->get();
-        }
-
-        if ($quiz->shuffle_questions) {
-            $rawQuestions = $rawQuestions->shuffle();
-        }
-
-        // Freeze questions and options snapshot (excluding correct answers for security)
         $snapshot = [];
-        foreach ($rawQuestions as $q) {
-            $opts = $q->options;
-            if ($quiz->shuffle_options) {
-                $opts = $opts->shuffle();
-            }
 
-            $optsArray = [];
-            foreach ($opts as $o) {
-                $optsArray[] = [
-                    'id' => $o->id,
-                    'text' => $o->option_text,
-                    'order' => $o->order_index,
+        // Check if quiz is linked to a structured Question Paper with sections
+        if ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->exists()) {
+            $paperItems = $quiz->paper->items()
+                ->with(['masterQuestion.options', 'section'])
+                ->orderBy('order_index', 'asc')
+                ->get();
+
+            foreach ($paperItems as $it) {
+                $q = $it->masterQuestion;
+                if (!$q) continue;
+
+                $opts = $q->options;
+                if ($quiz->shuffle_options) {
+                    $opts = $opts->shuffle();
+                }
+
+                $optsArray = [];
+                foreach ($opts as $o) {
+                    $optsArray[] = [
+                        'id' => $o->id,
+                        'text' => $o->option_text,
+                        'order' => $o->order_index,
+                    ];
+                }
+
+                $snapshot[] = [
+                    'id'                   => $q->id,
+                    'paper_item_id'        => $it->id,
+                    'section_id'           => $it->section_id,
+                    'section_title'        => $it->section ? $it->section->title : null,
+                    'section_instructions' => $it->section ? $it->section->instructions : null,
+                    'section_code'         => $it->section ? $it->section->section_code : null,
+                    'question_text'        => $it->getQuestionText(),
+                    'question_type'        => $it->getQuestionType(),
+                    'marks'                => (float)$it->marks,
+                    'negative_marks'       => $it->negative_marks !== null ? (float)$it->negative_marks : null,
+                    'set_code'             => $q->set_code,
+                    'category'             => $q->category,
+                    'chapter'              => $q->chapter,
+                    'topic'                => $q->topic,
+                    'stimulus'             => $it->getStimulus(),
+                    'hints'                => $it->getHints(),
+                    'cq_subquestions'      => $it->getCqSubquestions(),
+                    'matching_pairs'       => $it->getMatchingPairs(),
+                    'options'              => $optsArray,
                 ];
             }
+        } else {
+            // Standard Quiz question retrieval
+            $questionsQuery = $quiz->activeQuestions()->with('options');
+            $availableSets = $quiz->getAvailableSets();
+            if (count($availableSets) > 1 && $assignedSet) {
+                $questionsQuery->where(function($q) use ($assignedSet) {
+                    $q->where('set_code', $assignedSet)
+                      ->orWhereNull('set_code')
+                      ->orWhere('set_code', '');
+                });
+            }
+            $rawQuestions = $questionsQuery->get();
+            if ($rawQuestions->isEmpty()) {
+                $rawQuestions = $quiz->activeQuestions()->with('options')->get();
+            }
 
-            $snapshot[] = [
-                'id' => $q->id,
-                'question_text' => $q->question_text,
-                'question_type' => $q->question_type,
-                'marks' => (float)$q->marks,
-                'negative_marks' => $q->negative_marks !== null ? (float)$q->negative_marks : null,
-                'set_code' => $q->set_code,
-                'category' => $q->category,
-                'chapter' => $q->chapter,
-                'topic' => $q->topic,
-                'stimulus' => $q->stimulus,
-                'options' => $optsArray,
-            ];
+            if ($quiz->shuffle_questions) {
+                $rawQuestions = $rawQuestions->shuffle();
+            }
+
+            foreach ($rawQuestions as $q) {
+                $opts = $q->options;
+                if ($quiz->shuffle_options) {
+                    $opts = $opts->shuffle();
+                }
+
+                $optsArray = [];
+                foreach ($opts as $o) {
+                    $optsArray[] = [
+                        'id' => $o->id,
+                        'text' => $o->option_text,
+                        'order' => $o->order_index,
+                    ];
+                }
+
+                $snapshot[] = [
+                    'id'              => $q->id,
+                    'section_id'      => null,
+                    'section_title'   => null,
+                    'question_text'   => $q->question_text,
+                    'question_type'   => $q->question_type,
+                    'marks'           => (float)$q->marks,
+                    'negative_marks'  => $q->negative_marks !== null ? (float)$q->negative_marks : null,
+                    'set_code'        => $q->set_code,
+                    'category'        => $q->category,
+                    'chapter'         => $q->chapter,
+                    'topic'           => $q->topic,
+                    'stimulus'        => $q->stimulus,
+                    'hints'           => $q->hints,
+                    'cq_subquestions' => $q->cq_subquestions_decoded,
+                    'matching_pairs'  => $q->matching_pairs_decoded,
+                    'options'         => $optsArray,
+                ];
+            }
         }
 
         $viewMode = $request->input('view_mode', $quiz->view_mode ?: 'all_questions');
@@ -320,10 +375,11 @@ class StudentQuizController extends Controller
         $questionId = (int)$request->input('question_id');
         $selectedOptionIds = $request->input('selected_option_ids');
         $textAnswer = $request->input('text_answer');
+        $cqAnswers = $request->input('cq_answers');
         $action = $request->input('action', 'save'); // 'save', 'finalize'
 
-        // Check if question exists and belongs to quiz
-        $question = LmsQuestion::where('quiz_id', $quiz->id)->find($questionId);
+        // Check if question exists in bank or snapshot
+        $question = LmsQuestion::find($questionId);
         if (!$question && empty($attempt->questions_snapshot)) {
             return response()->json(['status' => 'error', 'message' => 'Question not found'], 404);
         }
@@ -351,8 +407,6 @@ class StudentQuizController extends Controller
         }
 
         // Determine locking behavior per mode and quiz policy:
-        // In ALL QUESTIONS VIEW mode: selection immediately locks and finalizes that question!
-        // In ONE-BY-ONE VIEW mode: selection creates draft; only 'finalize' action locks it!
         $currentViewMode = $request->input('view_mode') ?: ($attempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'));
 
         $shouldFinalize = false;
@@ -361,16 +415,19 @@ class StudentQuizController extends Controller
         } elseif ($quiz->locking_policy === 'confirm_lock') {
             $shouldFinalize = ($action === 'finalize' || $request->input('finalize') == true);
         } else {
-            // mode_default (system default):
             if ($currentViewMode === 'all_questions') {
-                $shouldFinalize = true; // All questions view: instant lock
+                if ($textAnswer !== null || $cqAnswers !== null) {
+                    $shouldFinalize = ($action === 'finalize' || $request->input('finalize') == true);
+                } else {
+                    $shouldFinalize = true; // All questions view: instant lock for option clicks
+                }
             } else {
-                $shouldFinalize = ($action === 'finalize' || $request->input('finalize') == true); // One-by-one: draft until submit
+                $shouldFinalize = ($action === 'finalize' || $request->input('finalize') == true);
             }
         }
 
         // Safe DB transaction to prevent race conditions
-        $answer = \Illuminate\Support\Facades\DB::transaction(function () use ($attempt, $questionId, $selectedOptionIdsJson, $textAnswer, $shouldFinalize) {
+        $answer = \Illuminate\Support\Facades\DB::transaction(function () use ($attempt, $questionId, $selectedOptionIdsJson, $textAnswer, $cqAnswers, $shouldFinalize) {
             $ans = LmsQuizAnswer::lockForUpdate()->firstOrNew([
                 'attempt_id' => $attempt->id,
                 'question_id' => $questionId,
@@ -381,7 +438,13 @@ class StudentQuizController extends Controller
             }
 
             $ans->selected_option_ids = $selectedOptionIdsJson;
-            $ans->text_answer = $textAnswer;
+            if ($textAnswer !== null) {
+                $ans->text_answer = $textAnswer;
+            }
+            if ($cqAnswers !== null) {
+                $ans->cq_answers = is_array($cqAnswers) ? json_encode($cqAnswers, JSON_UNESCAPED_UNICODE) : (string)$cqAnswers;
+            }
+
             if ($shouldFinalize) {
                 $ans->is_finalized = true;
                 $ans->finalized_at = Carbon::now();
@@ -470,7 +533,7 @@ class StudentQuizController extends Controller
             // Save any final posted answers if submitted via form POST
             if ($request->has('answers') && is_array($request->answers)) {
                 foreach ($request->answers as $qId => $optVal) {
-                    $selectedIds = is_array($optVal) ? json_encode($optVal) : json_encode([$optVal]);
+                    $selectedIds = is_array($optVal) ? json_encode(array_values(array_map('intval', $optVal))) : json_encode([(int)$optVal]);
                     $existing = LmsQuizAnswer::where('attempt_id', $attempt->id)->where('question_id', $qId)->first();
                     if (!$existing || !$existing->is_finalized) {
                         LmsQuizAnswer::updateOrCreate([
@@ -478,6 +541,40 @@ class StudentQuizController extends Controller
                             'question_id' => $qId,
                         ], [
                             'selected_option_ids' => $selectedIds,
+                            'is_finalized' => true,
+                            'finalized_at' => Carbon::now(),
+                        ]);
+                    }
+                }
+            }
+
+            // Save text answers if posted (Fill in blanks, short questions, translation)
+            if ($request->has('text_answers') && is_array($request->text_answers)) {
+                foreach ($request->text_answers as $qId => $textVal) {
+                    $existing = LmsQuizAnswer::where('attempt_id', $attempt->id)->where('question_id', $qId)->first();
+                    if (!$existing || !$existing->is_finalized) {
+                        LmsQuizAnswer::updateOrCreate([
+                            'attempt_id' => $attempt->id,
+                            'question_id' => $qId,
+                        ], [
+                            'text_answer' => trim($textVal),
+                            'is_finalized' => true,
+                            'finalized_at' => Carbon::now(),
+                        ]);
+                    }
+                }
+            }
+
+            // Save CQ answers if posted
+            if ($request->has('cq_answers') && is_array($request->cq_answers)) {
+                foreach ($request->cq_answers as $qId => $cqVal) {
+                    $existing = LmsQuizAnswer::where('attempt_id', $attempt->id)->where('question_id', $qId)->first();
+                    if (!$existing || !$existing->is_finalized) {
+                        LmsQuizAnswer::updateOrCreate([
+                            'attempt_id' => $attempt->id,
+                            'question_id' => $qId,
+                        ], [
+                            'cq_answers' => json_encode($cqVal, JSON_UNESCAPED_UNICODE),
                             'is_finalized' => true,
                             'finalized_at' => Carbon::now(),
                         ]);
@@ -524,14 +621,31 @@ class StudentQuizController extends Controller
 
         if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
             $snapshotQIds = collect($attempt->questions_snapshot)->pluck('id')->toArray();
-            $questions = $quiz->questions()->with('options')->whereIn('id', $snapshotQIds)->get()->sortBy(function($q) use ($snapshotQIds) {
-                return array_search($q->id, $snapshotQIds);
-            })->values();
+            $snapshotMap = collect($attempt->questions_snapshot)->keyBy('id');
+            $questions = LmsQuestion::with(['options', 'parentQuestion', 'derivedQuestions'])
+                ->whereIn('id', $snapshotQIds)
+                ->get()
+                ->sortBy(function($q) use ($snapshotQIds) {
+                    return array_search($q->id, $snapshotQIds);
+                })->values();
+
+            foreach ($questions as $q) {
+                if (isset($snapshotMap[$q->id])) {
+                    $snap = $snapshotMap[$q->id];
+                    if (isset($snap['section_title'])) {
+                        $q->section_title = $snap['section_title'];
+                    }
+                    if (isset($snap['section_instructions'])) {
+                        $q->section_instructions = $snap['section_instructions'];
+                    }
+                }
+            }
+
             if ($questions->isEmpty()) {
-                $questions = $quiz->questions()->with('options')->get();
+                $questions = $quiz->getExamQuestions();
             }
         } else {
-            $questions = $quiz->questions()->with('options')->get();
+            $questions = $quiz->getExamQuestions();
         }
 
         $answers = $attempt->answers->keyBy('question_id');
@@ -574,7 +688,11 @@ class StudentQuizController extends Controller
         }
 
         $quiz = $attempt->quiz;
-        $questions = $quiz->questions()->with('options')->get();
+        $questions = $quiz->getExamQuestions();
+        if ($questions->isEmpty()) {
+            $questions = $quiz->questions()->with('options')->get();
+        }
+
         $totalMarksObtained = 0.0;
         $totalNegativeDeducted = 0.0;
 
@@ -601,41 +719,133 @@ class StudentQuizController extends Controller
                 $studentOptionIds = is_array($decoded) ? array_map('intval', $decoded) : [(int)$answer->selected_option_ids];
             }
 
-            // If question was not answered by student
-            if (empty($studentOptionIds)) {
-                $answer->is_correct = null;
-                $answer->marks_obtained = 0.0;
+            $qType = $question->question_type;
+
+            // 1. MCQ Single / Multiple Select / Objective
+            if ($qType === 'mcq_single' || $qType === 'mcq' || $qType === 'mcq_multi' || ($qType === 'true_false' && count($correctOptionIds) > 0)) {
+                if (empty($studentOptionIds)) {
+                    $answer->is_correct = null;
+                    $answer->marks_obtained = 0.0;
+                    $answer->grading_status = 'auto_graded';
+                    $answer->save();
+                    continue;
+                }
+
+                $isCorrect = false;
+                if ($qType === 'mcq_multi') {
+                    sort($correctOptionIds);
+                    sort($studentOptionIds);
+                    $isCorrect = ($correctOptionIds === $studentOptionIds);
+                } else {
+                    $isCorrect = (count($studentOptionIds) === 1 && in_array($studentOptionIds[0], $correctOptionIds));
+                }
+
+                if ($isCorrect) {
+                    $marks = (float)$question->marks;
+                    $totalMarksObtained += $marks;
+                } else {
+                    $negMark = $question->negative_marks !== null
+                        ? abs((float)$question->negative_marks)
+                        : abs((float)($quiz->negative_marks ?: 0.0));
+                    $marks = -$negMark;
+                    $totalNegativeDeducted += $negMark;
+                    $totalMarksObtained += $marks;
+                }
+
+                $answer->is_correct = $isCorrect;
+                $answer->marks_obtained = $marks;
+                $answer->grading_status = 'auto_graded';
                 $answer->save();
-                continue;
             }
+            // 2. True / False with text answer (e.g. 'true'/'false' or 'স'/'মি')
+            elseif ($qType === 'true_false') {
+                $studentText = trim(mb_strtolower((string)$answer->text_answer, 'UTF-8'));
+                $expected = trim(mb_strtolower((string)$question->correct_answer_text, 'UTF-8'));
 
-            $isCorrect = false;
+                if ($studentText === '') {
+                    $answer->is_correct = null;
+                    $answer->marks_obtained = 0.0;
+                    $answer->grading_status = 'auto_graded';
+                    $answer->save();
+                    continue;
+                }
 
-            if ($question->question_type === 'mcq_single' || $question->question_type === 'true_false' || $question->question_type === 'mcq') {
-                $isCorrect = (count($studentOptionIds) === 1 && in_array($studentOptionIds[0], $correctOptionIds));
-            } elseif ($question->question_type === 'mcq_multi') {
-                sort($correctOptionIds);
-                sort($studentOptionIds);
-                $isCorrect = ($correctOptionIds === $studentOptionIds);
+                $isTrueStudent = in_array($studentText, ['true', '1', 'স', 'সত্য', 't', 'yes']);
+                $isTrueExpected = in_array($expected, ['true', '1', 'স', 'সত্য', 't', 'yes']);
+                $isCorrect = ($isTrueStudent === $isTrueExpected);
+
+                if ($isCorrect) {
+                    $marks = (float)$question->marks;
+                    $totalMarksObtained += $marks;
+                } else {
+                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $marks = -$negMark;
+                    $totalNegativeDeducted += $negMark;
+                    $totalMarksObtained += $marks;
+                }
+
+                $answer->is_correct = $isCorrect;
+                $answer->marks_obtained = $marks;
+                $answer->grading_status = 'auto_graded';
+                $answer->save();
             }
+            // 3. Fill in the Blanks (Intelligent matching against expected answer alternatives)
+            elseif ($qType === 'fill_blanks') {
+                $studentText = trim((string)$answer->text_answer);
+                $expectedRaw = (string)$question->correct_answer_text;
 
-            if ($isCorrect) {
-                $marks = (float)$question->marks;
-                $totalMarksObtained += $marks;
-            } else {
-                // Apply negative marking if configured
-                $negMark = $question->negative_marks !== null
-                    ? abs((float)$question->negative_marks)
-                    : abs((float)($quiz->negative_marks ?: 0.0));
+                if ($studentText === '') {
+                    $answer->is_correct = null;
+                    $answer->marks_obtained = 0.0;
+                    $answer->grading_status = 'auto_graded';
+                    $answer->save();
+                    continue;
+                }
 
-                $marks = -$negMark;
-                $totalNegativeDeducted += $negMark;
-                $totalMarksObtained += $marks; // Deduct negative mark
+                // Strip punctuation & lowercase for fuzzy Bengali and English matching
+                $cleanStudent = trim(mb_strtolower(str_replace(['।', '.', ',', ';', '"', "'", '!', ' '], '', $studentText), 'UTF-8'));
+                $alternatives = preg_split('/[,\|\/]/', $expectedRaw);
+                $isCorrect = false;
+
+                foreach ($alternatives as $alt) {
+                    $cleanAlt = trim(mb_strtolower(str_replace(['।', '.', ',', ';', '"', "'", '!', ' '], '', $alt), 'UTF-8'));
+                    if ($cleanAlt !== '' && $cleanStudent === $cleanAlt) {
+                        $isCorrect = true;
+                        break;
+                    }
+                }
+
+                if ($isCorrect) {
+                    $marks = (float)$question->marks;
+                    $totalMarksObtained += $marks;
+                } else {
+                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $marks = -$negMark;
+                    $totalNegativeDeducted += $negMark;
+                    $totalMarksObtained += $marks;
+                }
+
+                $answer->is_correct = $isCorrect;
+                $answer->marks_obtained = $marks;
+                $answer->grading_status = 'auto_graded';
+                $answer->save();
             }
-
-            $answer->is_correct = $isCorrect;
-            $answer->marks_obtained = $marks;
-            $answer->save();
+            // 4. Subjective Questions: Short Answer, Translation, Descriptive, Creative (CQ)
+            else {
+                $hasContent = !empty($answer->text_answer) || !empty($answer->cq_answers);
+                if ($hasContent) {
+                    $answer->grading_status = 'pending_review';
+                    // If teacher already assigned manual marks, preserve them
+                    if ($answer->marks_obtained > 0) {
+                        $totalMarksObtained += $answer->marks_obtained;
+                    }
+                } else {
+                    $answer->is_correct = null;
+                    $answer->marks_obtained = 0.0;
+                    $answer->grading_status = 'not_answered';
+                }
+                $answer->save();
+            }
         }
 
         // Clamp final score to minimum 0

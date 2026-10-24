@@ -176,7 +176,7 @@
                 <span id="autosaveIndicator" class="badge badge-light border text-muted mr-2">
                     <i class="fas fa-check-circle text-success mr-1"></i> ড্রাফট সক্রিয়
                 </span>
-                <button type="button" class="btn btn-sm btn-outline-info mr-1" data-toggle="modal" data-target="#autoPickModal">
+                <button type="button" class="btn btn-sm btn-outline-info mr-1" data-toggle="modal" data-target="#autoPickModal" onclick="prepareAutoPickModal()">
                     <i class="fas fa-magic mr-1"></i> অটো প্রশ্ন বাছাই
                 </button>
                 <a href="{{ route('admin.question-papers.print-board', $paper->id) }}" target="_blank" class="btn btn-sm btn-outline-dark mr-1">
@@ -214,7 +214,7 @@
                     </div>
                 </div>
                 <!-- Library Filter Dropdowns -->
-                <div class="row g-1">
+                <div class="row g-1 mb-2">
                     <div class="col-6">
                         <select id="libCategoryFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
                             <option value="">-- ক্যাটাগরি --</option>
@@ -231,6 +231,18 @@
                             <option value="hard">কঠিন</option>
                         </select>
                     </div>
+                </div>
+                <div class="mb-1">
+                    <select id="libTypeFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
+                        <option value="">-- সকল প্রশ্নের ধরন (All Types) --</option>
+                        <option value="mcq">MCQ (বহুনির্বাচনি)</option>
+                        <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                        <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                        <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short)</option>
+                        <option value="creative">সৃজনশীল (CQ)</option>
+                        <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                        <option value="descriptive">রচনামূলক (Descriptive)</option>
+                    </select>
                 </div>
             </div>
 
@@ -398,11 +410,15 @@
                                             {{ $item->getQuestionText() }}
                                         </div>
 
-                                        <!-- Options Preview -->
+                                        <!-- Multi-Type Options & Details Preview -->
                                         @php
                                             $opts = $item->getQuestionOptions();
+                                            $itemType = $item->getQuestionType();
+                                            $correctAnswerText = $item->getCorrectAnswerText();
+                                            $hints = $item->getHints();
+                                            $cqSubs = $item->getCqSubquestions();
                                         @endphp
-                                        @if(!empty($opts))
+                                        @if(!empty($opts) && count($opts) > 0)
                                             <div class="row row-cols-1 row-cols-sm-2 g-2">
                                                 @foreach($opts as $optIdx => $o)
                                                     @php
@@ -416,6 +432,34 @@
                                                         <span class="{{ $isCorrect ? 'text-success font-weight-bold' : 'text-dark' }}">{{ $optText }}</span>
                                                     </div>
                                                 @endforeach
+                                            </div>
+                                        @elseif($itemType === 'true_false')
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-warning text-dark mr-1">সত্য / মিথ্যা</span>
+                                                সঠিক উত্তর: <strong class="text-success">{{ $correctAnswerText ?: 'সত্য' }}</strong>
+                                            </div>
+                                        @elseif(in_array($itemType, ['fill_blanks', 'fill_in_the_blanks']))
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-info mr-1">শূন্যস্থান পূরণ</span>
+                                                প্রত্যাশিত শব্দ: <strong class="text-success">{{ $correctAnswerText }}</strong>
+                                                @if($hints)
+                                                    <span class="badge badge-light border ml-1">ক্লু: {{ $hints }}</span>
+                                                @endif
+                                            </div>
+                                        @elseif(!empty($cqSubs) && is_array($cqSubs))
+                                            <div class="p-2 rounded bg-light border text-xs">
+                                                <div class="font-weight-bold text-dark mb-1">উপপ্রশ্নসমূহ:</div>
+                                                @foreach($cqSubs as $subKey => $sub)
+                                                    <div class="mb-0.5 text-muted">
+                                                        <strong>({{ isset($sub['label']) ? $sub['label'] : $subKey }})</strong> {{ isset($sub['text']) ? $sub['text'] : '' }}
+                                                        <span class="badge badge-secondary ml-1">{{ isset($sub['marks']) ? $sub['marks'] : 1 }} নম্বর</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif(!empty($correctAnswerText))
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-secondary mr-1">মডেল উত্তর</span>
+                                                <span class="text-dark font-italic">{{ $correctAnswerText }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -614,10 +658,24 @@
                     <div class="modal-body">
                         <div class="form-group mb-2">
                             <label class="text-xs font-weight-bold">কোন সেকশনে যুক্ত হবে: <span class="text-danger">*</span></label>
-                            <select id="autoPickSectionSelect" class="form-control custom-select" required>
+                            <select id="autoPickSectionSelect" class="form-control custom-select" onchange="syncSectionTypeToModal()" required>
                                 @foreach($paper->sections as $sec)
-                                    <option value="{{ $sec->id }}">{{ $sec->title }}</option>
+                                    <option value="{{ $sec->id }}" data-type="{{ $sec->question_type }}">{{ $sec->title }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="text-xs font-weight-bold">প্রশ্নের ধরন (Question Type):</label>
+                            <select id="autoPickQuestionType" class="form-control custom-select font-weight-bold text-dark">
+                                <option value="">-- যেকোনো ধরনের প্রশ্ন (All Types) --</option>
+                                <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                                <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                                <option value="mcq">MCQ (বহুনির্বাচনি)</option>
+                                <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short Question)</option>
+                                <option value="creative">সৃজনশীল (Creative CQ)</option>
+                                <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                                <option value="descriptive">রচনামূলক (Descriptive)</option>
+                                <option value="matching">বাম-ডান মিলকরণ (Matching)</option>
                             </select>
                         </div>
                         <div class="row">
@@ -829,6 +887,8 @@
                     optionsHtml += '<div class="col mb-1 text-xs"><span class="badge ' + badgeCls + ' mr-1">' + o.letter + '</span><span class="' + cls + '">' + escapeHtml(o.text) + '</span></div>';
                 });
                 optionsHtml += '</div>';
+            } else if (item.correct_answer_text) {
+                optionsHtml = '<div class="text-xs text-muted mb-1"><span class="badge badge-light border mr-1">সঠিক উত্তর/শব্দ:</span> <strong class="text-success">' + escapeHtml(item.correct_answer_text) + '</strong></div>';
             }
 
             return `
@@ -1047,11 +1107,13 @@
             var search = document.getElementById('libSearchInput').value;
             var cat = document.getElementById('libCategoryFilter').value;
             var diff = document.getElementById('libDiffFilter').value;
+            var type = document.getElementById('libTypeFilter') ? document.getElementById('libTypeFilter').value : '';
 
             var params = new URLSearchParams();
             if (search) params.append('search', search);
             if (cat) params.append('category', cat);
             if (diff) params.append('difficulty', diff);
+            if (type) params.append('type', type);
 
             var container = document.getElementById('libraryScrollContainer');
             container.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="text-xs mt-2">লোড হচ্ছে...</p></div>';
@@ -1247,9 +1309,47 @@
             });
         }
 
+        // Sync modal fields when opening Auto-Pick modal
+        function prepareAutoPickModal() {
+            var libType = document.getElementById('libTypeFilter');
+            var modalType = document.getElementById('autoPickQuestionType');
+            if (libType && modalType && libType.value) {
+                modalType.value = libType.value;
+            } else {
+                syncSectionTypeToModal();
+            }
+
+            var libCat = document.getElementById('libCategoryFilter');
+            var modalCat = document.getElementById('autoPickCategory');
+            if (libCat && modalCat && libCat.value) {
+                modalCat.value = libCat.value;
+            }
+
+            var libDiff = document.getElementById('libDiffFilter');
+            var modalDiff = document.getElementById('autoPickDifficulty');
+            if (libDiff && modalDiff && libDiff.value) {
+                modalDiff.value = libDiff.value;
+            }
+        }
+
+        // Sync question type from section data-type attribute
+        function syncSectionTypeToModal() {
+            var secSelect = document.getElementById('autoPickSectionSelect');
+            var modalType = document.getElementById('autoPickQuestionType');
+            if (!secSelect || !modalType) return;
+            var selectedOption = secSelect.options[secSelect.selectedIndex];
+            if (selectedOption && selectedOption.getAttribute('data-type')) {
+                var secType = selectedOption.getAttribute('data-type');
+                if (secType) {
+                    modalType.value = secType;
+                }
+            }
+        }
+
         // 13. Auto-Pick / Random Questions via AJAX (Zero Full Page Reload)
         function submitAutoPickAJAX() {
             var sectionId = document.getElementById('autoPickSectionSelect').value;
+            var qType = document.getElementById('autoPickQuestionType').value;
             var category = document.getElementById('autoPickCategory').value;
             var chapter = document.getElementById('autoPickChapter').value;
             var diff = document.getElementById('autoPickDifficulty').value;
@@ -1264,6 +1364,7 @@
                 },
                 body: JSON.stringify({
                     section_id: sectionId,
+                    question_type: qType,
                     category: category,
                     chapter: chapter,
                     difficulty: diff,

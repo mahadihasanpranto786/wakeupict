@@ -24,7 +24,7 @@
 
     foreach ($questions as $q) {
         $ans = isset($existingAnswers[$q->id]) ? $existingAnswers[$q->id] : null;
-        if ($ans && !empty($ans->selected_option_ids_array)) {
+        if ($ans && (!empty($ans->selected_option_ids_array) || !empty($ans->text_answer) || !empty($ans->cq_answers))) {
             $answeredCount++;
         } else {
             $unansweredCount++;
@@ -190,13 +190,36 @@
 
                     <!-- Continuous Questions Stream -->
                     <div class="space-y-6 pt-2">
+                        @php
+                            $activeSectionTitle = null;
+                        @endphp
                         @foreach($questions as $index => $q)
                             @php
+                                $secTitle = isset($q->section_title) ? $q->section_title : null;
+                                $secInstr = isset($q->section_instructions) ? $q->section_instructions : null;
+                                $qType = isset($q->question_type) ? $q->question_type : 'mcq';
                                 $savedAns = isset($existingAnswers[$q->id]) ? $existingAnswers[$q->id] : null;
                                 $savedOptionIds = $savedAns ? $savedAns->selected_option_ids_array : [];
+                                $savedTextAns = $savedAns ? (string)$savedAns->text_answer : '';
+                                $savedCqAns = $savedAns && $savedAns->cq_answers ? (is_array($savedAns->cq_answers) ? $savedAns->cq_answers : json_decode($savedAns->cq_answers, true)) : [];
                                 $isFinalized = $savedAns ? (bool)$savedAns->is_finalized : false;
                                 $isFlagged = in_array($q->id, $flaggedQuestionIds ?: []);
                             @endphp
+
+                            <!-- Bangladeshi Board Exam Section Header Banner -->
+                            @if(!empty($secTitle) && $secTitle !== $activeSectionTitle)
+                                @php $activeSectionTitle = $secTitle; @endphp
+                                <div class="my-6 p-3.5 sm:p-4 rounded-2xl bg-slate-100 dark:bg-slate-950/90 border-2 border-slate-300 dark:border-slate-700 text-center space-y-1 shadow-sm">
+                                    <h4 class="text-base sm:text-lg font-black text-slate-950 dark:text-white font-serif tracking-wide">
+                                        {{ $secTitle }}
+                                    </h4>
+                                    @if(!empty($secInstr))
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 font-serif font-medium">
+                                            [{{ $secInstr }}]
+                                        </p>
+                                    @endif
+                                </div>
+                            @endif
 
                             <div id="q-item-{{ $q->id }}" class="border-b border-slate-200 dark:border-slate-800/80 pb-6 last:border-b-0 space-y-3 scroll-mt-36 transition-all {{ $isFinalized ? 'opacity-95' : '' }}">
                                 
@@ -235,42 +258,153 @@
                                     </div>
                                 </div>
 
-                                <!-- OMR Styled Options (Bangla Letters: ক, খ, গ, ঘ) -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                                    @foreach($q->options as $optIdx => $opt)
-                                        @php
-                                            $isSelected = in_array($opt->id, $savedOptionIds);
-                                            $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
-                                        @endphp
+                                <!-- TYPE 1: MCQ & Objective Options -->
+                                @if(in_array($qType, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']) || ($qType === 'true_false' && count($q->options) > 0))
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                                        @foreach($q->options as $optIdx => $opt)
+                                            @php
+                                                $isSelected = in_array($opt->id, $savedOptionIds);
+                                                $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
+                                            @endphp
 
-                                        <label id="opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 border-emerald-400 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60' : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800/80 hover:border-slate-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200') }}">
-                                            
-                                            <!-- Hidden Native Input -->
-                                            <input 
-                                                type="radio" 
-                                                name="q_ans_{{ $q->id }}" 
-                                                value="{{ $opt->id }}"
-                                                {{ $isSelected ? 'checked' : '' }}
+                                            <label id="opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 border-emerald-400 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60' : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800/80 hover:border-slate-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200') }}">
+                                                
+                                                <input 
+                                                    type="radio" 
+                                                    name="q_ans_{{ $q->id }}" 
+                                                    value="{{ $opt->id }}"
+                                                    {{ $isSelected ? 'checked' : '' }}
+                                                    {{ $isFinalized ? 'disabled' : '' }}
+                                                    onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'all_questions')"
+                                                    class="sr-only">
+
+                                                <span id="bubble-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? 'bg-slate-900 border-slate-900 dark:bg-emerald-500 dark:border-emerald-500 text-white dark:text-slate-950 ring-2 ring-emerald-500/40' : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
+                                                    ({{ $bngLetter }})
+                                                </span>
+
+                                                <span class="text-xs sm:text-sm pt-0.5 leading-snug flex-1">
+                                                    {{ $opt->option_text }}
+                                                </span>
+
+                                                @if($isSelected && $isFinalized)
+                                                    <i class="fa fa-lock text-emerald-600 dark:text-emerald-400 text-xs mt-1 shrink-0"></i>
+                                                @endif
+                                            </label>
+                                        @endforeach
+                                    </div>
+
+                                <!-- TYPE 2: True / False (সত্য/মিথ্যা) -->
+                                @elseif($qType === 'true_false')
+                                    @php
+                                        $currentTf = mb_strtolower(trim($savedTextAns), 'UTF-8');
+                                        $isTrue = in_array($currentTf, ['true', '1', 'স', 'সত্য', 't']);
+                                        $isFalse = in_array($currentTf, ['false', '0', 'মি', 'মিথ্যা', 'f']);
+                                    @endphp
+                                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                                        <button type="button" 
+                                                onclick="handleTextAnswer({{ $q->id }}, 'সত্য', false)"
                                                 {{ $isFinalized ? 'disabled' : '' }}
-                                                onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'all_questions')"
-                                                class="sr-only">
+                                                class="px-5 py-2.5 rounded-xl border-2 font-bold text-xs font-serif transition-all flex items-center gap-2 {{ $isTrue ? 'bg-emerald-600 border-emerald-600 text-white shadow-md' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-emerald-500' }}">
+                                            <i class="fa {{ $isTrue ? 'fa-check-circle' : 'fa-circle-o' }}"></i>
+                                            <span>সত্য (স)</span>
+                                        </button>
+                                        <button type="button" 
+                                                onclick="handleTextAnswer({{ $q->id }}, 'মিথ্যা', false)"
+                                                {{ $isFinalized ? 'disabled' : '' }}
+                                                class="px-5 py-2.5 rounded-xl border-2 font-bold text-xs font-serif transition-all flex items-center gap-2 {{ $isFalse ? 'bg-rose-600 border-rose-600 text-white shadow-md' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-rose-500' }}">
+                                            <i class="fa {{ $isFalse ? 'fa-times-circle' : 'fa-circle-o' }}"></i>
+                                            <span>মিথ্যা (মি)</span>
+                                        </button>
+                                    </div>
 
-                                            <!-- Authentic OMR Circular Bubble -->
-                                            <span id="bubble-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? 'bg-slate-900 border-slate-900 dark:bg-emerald-500 dark:border-emerald-500 text-white dark:text-slate-950 ring-2 ring-emerald-500/40' : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
-                                                ({{ $bngLetter }})
-                                            </span>
-
-                                            <!-- Option Text -->
-                                            <span class="text-xs sm:text-sm pt-0.5 leading-snug flex-1">
-                                                {{ $opt->option_text }}
-                                            </span>
-
-                                            @if($isSelected && $isFinalized)
-                                                <i class="fa fa-lock text-emerald-600 dark:text-emerald-400 text-xs mt-1 shrink-0"></i>
+                                <!-- TYPE 3: Fill in the Blanks (সঠিক শব্দ দিয়ে শূন্যস্থান পূরণ) -->
+                                @elseif(in_array($qType, ['fill_blanks', 'fill_in_the_blanks']))
+                                    <div class="space-y-2 pt-1">
+                                        @if(!empty($q->hints))
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-serif font-bold">
+                                                <i class="fa fa-info-circle"></i>
+                                                <span>সম্ভাব্য শব্দ / ক্লু: <strong>{{ $q->hints }}</strong></span>
+                                            </div>
+                                        @endif
+                                        <div class="flex items-center gap-3 max-w-md">
+                                            <input type="text" 
+                                                   id="text-ans-{{ $q->id }}"
+                                                   name="text_ans_{{ $q->id }}"
+                                                   value="{{ $savedTextAns }}"
+                                                   {{ $isFinalized ? 'disabled' : '' }}
+                                                   onblur="handleTextAnswer({{ $q->id }}, this.value, false)"
+                                                   placeholder="সঠিক শব্দ / উত্তরটি লিখুন..."
+                                                   class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-sm focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">
+                                            @if(!$isFinalized)
+                                                <button type="button" onclick="handleTextAnswer({{ $q->id }}, document.getElementById('text-ans-{{ $q->id }}').value, false)" class="px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-emerald-600 text-white text-xs font-bold transition-all">
+                                                    সংরক্ষণ
+                                                </button>
                                             @endif
-                                        </label>
-                                    @endforeach
-                                </div>
+                                        </div>
+                                    </div>
+
+                                <!-- TYPE 4: Creative Question (সৃজনশীল প্রশ্ন - CQ ক, খ, গ, ঘ) -->
+                                @elseif(in_array($qType, ['creative', 'cq']))
+                                    @php
+                                        $subq = !empty($q->cq_subquestions) ? (is_array($q->cq_subquestions) ? $q->cq_subquestions : json_decode($q->cq_subquestions, true)) : [];
+                                        if (empty($subq)) {
+                                            $subq = [
+                                                'ka' => ['label' => 'ক', 'text' => 'জ্ঞানমূলক প্রশ্ন', 'marks' => 1],
+                                                'kha' => ['label' => 'খ', 'text' => 'অনুধাবনমূলক প্রশ্ন', 'marks' => 2],
+                                                'ga' => ['label' => 'গ', 'text' => 'প্রয়োগমূলক প্রশ্ন', 'marks' => 3],
+                                                'gha' => ['label' => 'ঘ', 'text' => 'উচ্চতর দক্ষতামূলক প্রশ্ন', 'marks' => 4],
+                                            ];
+                                        }
+                                    @endphp
+                                    <div class="space-y-4 pt-2">
+                                        @foreach($subq as $subKey => $subData)
+                                            @php
+                                                $sLabel = isset($subData['label']) ? $subData['label'] : $subKey;
+                                                $sText = isset($subData['text']) ? $subData['text'] : '';
+                                                $sMarks = isset($subData['marks']) ? $subData['marks'] : 1;
+                                                $sVal = isset($savedCqAns[$subKey]) ? $savedCqAns[$subKey] : '';
+                                            @endphp
+                                            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                                                <div class="flex items-center justify-between text-xs font-serif font-bold">
+                                                    <span class="text-slate-900 dark:text-white">
+                                                        ({{ $sLabel }}) {{ $sText }}
+                                                    </span>
+                                                    <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                                        মান: {{ $toBng($sMarks) }}
+                                                    </span>
+                                                </div>
+                                                <textarea 
+                                                    id="cq-ans-{{ $q->id }}-{{ $subKey }}"
+                                                    name="cq_ans_{{ $q->id }}_{{ $subKey }}"
+                                                    rows="2"
+                                                    {{ $isFinalized ? 'disabled' : '' }}
+                                                    onblur="handleCqAnswer({{ $q->id }}, '{{ $subKey }}', this.value)"
+                                                    placeholder="({{ $sLabel }})-এর উত্তর লিখুন..."
+                                                    class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">{{ $sVal }}</textarea>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                <!-- TYPE 5: Short Answer / Translation / Descriptive -->
+                                @else
+                                    <div class="space-y-2 pt-1">
+                                        <textarea 
+                                            id="text-ans-{{ $q->id }}"
+                                            name="text_ans_{{ $q->id }}"
+                                            rows="3"
+                                            {{ $isFinalized ? 'disabled' : '' }}
+                                            onblur="handleTextAnswer({{ $q->id }}, this.value, false)"
+                                            placeholder="{{ $qType === 'translation' ? 'Translate into English...' : 'সংক্ষেপে আপনার সঠিক উত্তর লিখুন...' }}"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-sm leading-relaxed focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">{{ $savedTextAns }}</textarea>
+                                        @if(!$isFinalized)
+                                            <div class="flex justify-end">
+                                                <button type="button" onclick="handleTextAnswer({{ $q->id }}, document.getElementById('text-ans-{{ $q->id }}').value, false)" class="px-4 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-emerald-600 text-white text-xs font-bold transition-all">
+                                                    সংরক্ষণ
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
 
                                 <!-- Irreversible Locking Notice in All-Questions Mode -->
                                 <div id="locked-notice-{{ $q->id }}" class="{{ $isFinalized ? 'flex' : 'hidden' }} items-center gap-1.5 pt-1.5 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
@@ -343,35 +477,132 @@
                             {!! nl2br(e($q->question_text)) !!}
                         </div>
 
-                        <!-- Options List -->
-                        <div class="space-y-3 pt-2">
-                            @foreach($q->options as $optIdx => $opt)
-                                @php
-                                    $isSelected = in_array($opt->id, $savedOptionIds);
-                                    $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
-                                @endphp
+                        <!-- TYPE 1: MCQ Options -->
+                        @php
+                            $qType = isset($q->question_type) ? $q->question_type : 'mcq';
+                            $savedTextAns = $savedAns ? (string)$savedAns->text_answer : '';
+                            $savedCqAns = $savedAns && $savedAns->cq_answers ? (is_array($savedAns->cq_answers) ? $savedAns->cq_answers : json_decode($savedAns->cq_answers, true)) : [];
+                        @endphp
+                        @if(in_array($qType, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']) || ($qType === 'true_false' && count($q->options) > 0))
+                            <div class="space-y-3 pt-2">
+                                @foreach($q->options as $optIdx => $opt)
+                                    @php
+                                        $isSelected = in_array($opt->id, $savedOptionIds);
+                                        $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
+                                    @endphp
 
-                                <label id="single-opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60' : 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-slate-400 text-slate-800 dark:text-slate-200') }}">
-                                    
-                                    <input 
-                                        type="radio" 
-                                        name="single_ans_{{ $q->id }}" 
-                                        value="{{ $opt->id }}"
-                                        {{ $isSelected ? 'checked' : '' }}
+                                    <label id="single-opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60' : 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-slate-400 text-slate-800 dark:text-slate-200') }}">
+                                        
+                                        <input 
+                                            type="radio" 
+                                            name="single_ans_{{ $q->id }}" 
+                                            value="{{ $opt->id }}"
+                                            {{ $isSelected ? 'checked' : '' }}
+                                            {{ $isFinalized ? 'disabled' : '' }}
+                                            onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'one_by_one')"
+                                            class="sr-only">
+
+                                        <span id="single-bubble-{{ $q->id }}-{{ $opt->id }}" class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? ($isFinalized ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-blue-600 border-blue-600 text-white') : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
+                                            ({{ $bngLetter }})
+                                        </span>
+
+                                        <span class="text-sm pt-0.5 leading-relaxed flex-1">
+                                            {{ $opt->option_text }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                        <!-- TYPE 2: True/False -->
+                        @elseif($qType === 'true_false')
+                            @php
+                                $currentTf = mb_strtolower(trim($savedTextAns), 'UTF-8');
+                                $isTrue = in_array($currentTf, ['true', '1', 'স', 'সত্য', 't']);
+                                $isFalse = in_array($currentTf, ['false', '0', 'মি', 'মিথ্যা', 'f']);
+                            @endphp
+                            <div class="flex flex-wrap items-center gap-4 pt-3">
+                                <button type="button" 
+                                        onclick="handleTextAnswer({{ $q->id }}, 'সত্য', false)"
                                         {{ $isFinalized ? 'disabled' : '' }}
-                                        onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'one_by_one')"
-                                        class="sr-only">
+                                        class="flex-1 p-4 rounded-2xl border-2 font-bold text-sm font-serif transition-all flex items-center justify-center gap-2 {{ $isTrue ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-emerald-500' }}">
+                                    <i class="fa {{ $isTrue ? 'fa-check-circle' : 'fa-circle-o' }} text-base"></i>
+                                    <span>সত্য (স)</span>
+                                </button>
+                                <button type="button" 
+                                        onclick="handleTextAnswer({{ $q->id }}, 'মিথ্যা', false)"
+                                        {{ $isFinalized ? 'disabled' : '' }}
+                                        class="flex-1 p-4 rounded-2xl border-2 font-bold text-sm font-serif transition-all flex items-center justify-center gap-2 {{ $isFalse ? 'bg-rose-600 border-rose-600 text-white shadow-lg' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-rose-500' }}">
+                                    <i class="fa {{ $isFalse ? 'fa-times-circle' : 'fa-circle-o' }} text-base"></i>
+                                    <span>মিথ্যা (মি)</span>
+                                </button>
+                            </div>
 
-                                    <span id="single-bubble-{{ $q->id }}-{{ $opt->id }}" class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? ($isFinalized ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-blue-600 border-blue-600 text-white') : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
-                                        ({{ $bngLetter }})
-                                    </span>
+                        <!-- TYPE 3: Fill in Blanks -->
+                        @elseif(in_array($qType, ['fill_blanks', 'fill_in_the_blanks']))
+                            <div class="space-y-3 pt-2">
+                                @if(!empty($q->hints))
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-serif font-bold">
+                                        <i class="fa fa-info-circle"></i>
+                                        <span>ক্লু / সম্ভাব্য বিকল্প: <strong>{{ $q->hints }}</strong></span>
+                                    </div>
+                                @endif
+                                <input type="text" 
+                                       id="single-text-ans-{{ $q->id }}"
+                                       value="{{ $savedTextAns }}"
+                                       {{ $isFinalized ? 'disabled' : '' }}
+                                       onblur="handleTextAnswer({{ $q->id }}, this.value, false)"
+                                       placeholder="সঠিক শব্দ / উত্তরটি লিখুন..."
+                                       class="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-base focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">
+                            </div>
 
-                                    <span class="text-sm pt-0.5 leading-relaxed flex-1">
-                                        {{ $opt->option_text }}
-                                    </span>
-                                </label>
-                            @endforeach
-                        </div>
+                        <!-- TYPE 4: Creative Question (CQ) -->
+                        @elseif(in_array($qType, ['creative', 'cq']))
+                            @php
+                                $subq = !empty($q->cq_subquestions) ? (is_array($q->cq_subquestions) ? $q->cq_subquestions : json_decode($q->cq_subquestions, true)) : [];
+                                if (empty($subq)) {
+                                    $subq = [
+                                        'ka' => ['label' => 'ক', 'text' => 'জ্ঞানমূলক প্রশ্ন', 'marks' => 1],
+                                        'kha' => ['label' => 'খ', 'text' => 'অনুধাবনমূলক প্রশ্ন', 'marks' => 2],
+                                        'ga' => ['label' => 'গ', 'text' => 'প্রয়োগমূলক প্রশ্ন', 'marks' => 3],
+                                        'gha' => ['label' => 'ঘ', 'text' => 'উচ্চতর দক্ষতামূলক প্রশ্ন', 'marks' => 4],
+                                    ];
+                                }
+                            @endphp
+                            <div class="space-y-4 pt-2">
+                                @foreach($subq as $subKey => $subData)
+                                    @php
+                                        $sLabel = isset($subData['label']) ? $subData['label'] : $subKey;
+                                        $sText = isset($subData['text']) ? $subData['text'] : '';
+                                        $sMarks = isset($subData['marks']) ? $subData['marks'] : 1;
+                                        $sVal = isset($savedCqAns[$subKey]) ? $savedCqAns[$subKey] : '';
+                                    @endphp
+                                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                                        <div class="flex items-center justify-between text-xs font-serif font-bold">
+                                            <span class="text-slate-900 dark:text-white font-bold">({{ $sLabel }}) {{ $sText }}</span>
+                                            <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px]">মান: {{ $toBng($sMarks) }}</span>
+                                        </div>
+                                        <textarea 
+                                            rows="2"
+                                            {{ $isFinalized ? 'disabled' : '' }}
+                                            onblur="handleCqAnswer({{ $q->id }}, '{{ $subKey }}', this.value)"
+                                            placeholder="({{ $sLabel }})-এর উত্তর লিখুন..."
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">{{ $sVal }}</textarea>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                        <!-- TYPE 5: Short Answer / Translation / Descriptive -->
+                        @else
+                            <div class="space-y-2 pt-2">
+                                <textarea 
+                                    id="single-text-ans-{{ $q->id }}"
+                                    rows="4"
+                                    {{ $isFinalized ? 'disabled' : '' }}
+                                    onblur="handleTextAnswer({{ $q->id }}, this.value, false)"
+                                    placeholder="{{ $qType === 'translation' ? 'Translate into English...' : 'সংক্ষেপে আপনার সঠিক উত্তর লিখুন...' }}"
+                                    class="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-serif text-sm leading-relaxed focus:ring-2 focus:ring-emerald-500 {{ $isFinalized ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed' : '' }}">{{ $savedTextAns }}</textarea>
+                            </div>
+                        @endif
 
                         <!-- Single Card Action Bar -->
                         <div class="pt-5 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
@@ -446,7 +677,7 @@
                     @foreach($questions as $idx => $q)
                         @php
                             $savedAns = isset($existingAnswers[$q->id]) ? $existingAnswers[$q->id] : null;
-                            $hasAnswer = $savedAns && !empty($savedAns->selected_option_ids_array);
+                            $hasAnswer = $savedAns && (!empty($savedAns->selected_option_ids_array) || !empty($savedAns->text_answer) || !empty($savedAns->cq_answers));
                             $isFinalized = $savedAns && $savedAns->is_finalized;
                             $isFlagged = in_array($q->id, $flaggedQuestionIds ?: []);
 
@@ -674,6 +905,95 @@
         }
 
         lockAndSaveAnswer(questionId, optId, true, 'one_by_one');
+    }
+
+    var cqAnswersState = {}; // question_id -> { subKey: textVal }
+
+    function handleTextAnswer(questionId, textVal, shouldFinalize) {
+        textVal = (textVal || '').trim();
+        var palBtn = document.getElementById('pal-btn-' + questionId);
+        if (textVal !== '') {
+            if (palBtn && !palBtn.classList.contains('bg-emerald-600')) {
+                palBtn.className = "h-9 rounded-xl flex items-center justify-center font-bold transition-all bg-blue-600 text-white shadow-sm relative";
+            }
+        }
+        updateCounters();
+
+        var autoStatus = document.getElementById('autosave-status');
+        if (autoStatus) autoStatus.innerHTML = '<i class="fa fa-spinner fa-spin text-[10px]"></i> সংরক্ষণ হচ্ছে...';
+
+        fetch(saveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                question_id: questionId,
+                text_answer: textVal,
+                action: shouldFinalize ? 'finalize' : 'save',
+                finalize: shouldFinalize,
+                view_mode: activeViewMode,
+                time_spent_seconds: secondsElapsed
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                if (autoStatus) autoStatus.innerHTML = '<i class="fa fa-lock text-[10px]"></i> উত্তর সংরক্ষিত';
+                if (data.is_finalized) {
+                    if (palBtn) palBtn.className = "h-9 rounded-xl flex items-center justify-center font-bold transition-all bg-emerald-600 text-white shadow-sm relative";
+                }
+                updateCounters();
+            }
+        })
+        .catch(function(err) {
+            console.error('Save text answer error:', err);
+        });
+    }
+
+    function handleCqAnswer(questionId, subKey, textVal) {
+        if (!cqAnswersState[questionId]) {
+            cqAnswersState[questionId] = {};
+        }
+        cqAnswersState[questionId][subKey] = textVal;
+
+        var palBtn = document.getElementById('pal-btn-' + questionId);
+        if (palBtn && !palBtn.classList.contains('bg-emerald-600')) {
+            palBtn.className = "h-9 rounded-xl flex items-center justify-center font-bold transition-all bg-blue-600 text-white shadow-sm relative";
+        }
+        updateCounters();
+
+        var autoStatus = document.getElementById('autosave-status');
+        if (autoStatus) autoStatus.innerHTML = '<i class="fa fa-spinner fa-spin text-[10px]"></i> সংরক্ষণ হচ্ছে...';
+
+        fetch(saveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                question_id: questionId,
+                cq_answers: cqAnswersState[questionId],
+                action: 'save',
+                finalize: false,
+                view_mode: activeViewMode,
+                time_spent_seconds: secondsElapsed
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                if (autoStatus) autoStatus.innerHTML = '<i class="fa fa-lock text-[10px]"></i> সৃজনশীল উত্তর সংরক্ষিত';
+                updateCounters();
+            }
+        })
+        .catch(function(err) {
+            console.error('Save CQ answer error:', err);
+        });
     }
 
     function lockAndSaveAnswer(questionId, optionId, shouldFinalize, mode) {
@@ -989,7 +1309,33 @@
     }
 
     function executeFinalSubmit() {
-        document.getElementById('final-submit-form').submit();
+        var form = document.getElementById('final-submit-form');
+        
+        // Harvest all text answers from page
+        var textInputs = document.querySelectorAll('input[id^="text-ans-"], textarea[id^="text-ans-"], input[id^="single-text-ans-"], textarea[id^="single-text-ans-"]');
+        textInputs.forEach(function(inp) {
+            var qId = inp.id.replace('single-text-ans-', '').replace('text-ans-', '');
+            if (qId && inp.value.trim() !== '') {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'text_answers[' + qId + ']';
+                hidden.value = inp.value.trim();
+                form.appendChild(hidden);
+            }
+        });
+
+        // Harvest all CQ answers
+        for (var qId in cqAnswersState) {
+            for (var subKey in cqAnswersState[qId]) {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'cq_answers[' + qId + '][' + subKey + ']';
+                hidden.value = cqAnswersState[qId][subKey];
+                form.appendChild(hidden);
+            }
+        }
+
+        form.submit();
     }
 </script>
 @endsection

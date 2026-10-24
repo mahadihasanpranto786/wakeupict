@@ -203,39 +203,40 @@ The Student Panel and LMS will support two primary educational tracks:
 - [x] Full automated test suite passing 100%: 39 tests, 176 assertions in 3.6s (`phpunit`).
 - [x] Route registration: All 35+ student endpoints, public certificate verification portal, and frontend menu builder registered and active in `routes/web.php`.
 
+### Phase 9: Multi-Type Question Bank, Exam Paper Builder & BTEB 60-Mark Exam Engine *(Completed & Verified)*
+- [x] Multi-type questions: MCQ Single/Multi, True/False, Fill in Blanks, Short Answers, Creative CQ (ক/খ/গ/ঘ), Translation, Descriptive.
+- [x] Question derivation and parent-child linking (`parent_question_id`).
+- [x] Official BTEB 60-mark 1-hour Computer Office Application exam paper (`BtebComputerOfficeApplicationPaperSeeder.php`).
+- [x] Exam Paper Builder with drag-and-drop section reorganization.
+
+### Phase 10: Concept-Based Learning & Explanation System (কনসেপ্ট-ভিত্তিক বাংলা ব্যাখ্যা ও শিখন ব্যবস্থা) *(Completed & Verified)*
+- [x] **Separation of 3 Core Entities**:
+  1. **Question Answer**: নির্দিষ্ট প্রশ্নের পরীক্ষিত ও সঠিক উত্তর (Verified Answer).
+  2. **Concept Explanation**: মূল বিষয়ের বিশদ বাংলা ব্যাখ্যা (যাতে একই বিষয় থেকে যেভাবেই প্রশ্ন আসুক, শিক্ষার্থী সমাধান করতে পারে).
+  3. **Question Variations & Practice**: একই মূল কনসেপ্ট থেকে সৃষ্ট বিভিন্ন ধরনের প্রশ্ন (MCQ, True/False, Fill in Blanks, Short, CQ) এবং তাদের পারস্পরিক লিঙ্ক।
+- [x] **Database Architecture**: Safe migration `2026_10_24_130000_add_concept_based_explanations_to_lms_questions.php` added:
+  - `concept_title`, `concept_explanation`, `step_by_step_solution`, `important_rules`, `why_other_options_wrong`, `common_mistakes`, `memory_aid`, `explanation_status`.
+- [x] **Dynamic Concept Inheritance**: Derived questions automatically inherit their root question's `concept_title`, `concept_explanation`, `common_mistakes`, and `memory_aid` without data duplication.
+- [x] **Student Result Card (`result.blade.php`)**: Collapsible Bengali Concept Learning Card with 8 structured modules:
+  1. 📌 **শিখন ক্ষেত্র ও মূল কনসেপ্ট (Concept Title & Faculty Verification Status)**
+  2. 🎯 **সঠিক উত্তর ও মূল যুক্তি (Direct Answer & Key Logic)**
+  3. 💡 **মূল কনসেপ্ট ও বিশদ শিখন (Conceptual Understanding with English Technical Terms)**
+  4. 📐 **ধাপে ধাপে সমাধান ও নিয়ম (Step-by-Step Derivation)**
+  5. ❌ **অন্যান্য অপশনগুলো কেন ভুল (Why Other Options Are Incorrect)**
+  6. ⭐️ **গুরুত্বপূর্ণ তথ্য, সূত্র ও শর্ত (Important Facts & Rules)**
+  7. ⚠️ **পরীক্ষায় সাধারণ ভুল ও ফাঁদ (Common Mistakes & Traps)**
+  8. 🧠 **মনে রাখার সহজ কৌশল বা নেমোনিক (Memory Aid & Analogy)**
+  9. 🔄 **একই কনসেপ্টের অন্যান্য প্রশ্ন ও অনুশীলন (Variations & Practice Questions)**
+- [x] **Admin & Faculty Controls (`question_book/index.blade.php`)**:
+  - Create and Edit Modals updated with full concept explanation inputs.
+  - Detail Preview Modal renders full Educational Concept Card.
+  - Faculty Verification Status management (`verified`, `pending_review`, `draft`).
+- [x] **Core ICT Seeding**: High-yield authentic Bengali explanations seeded across core ICT questions (`ConceptBasedExplanationSeeder.php`).
+- [x] **Test Suite**: `tests/Feature/ConceptBasedExplanationSystemTest.php` passing 100% (6 tests, 24 assertions). Full project test suite running **67 tests, 330 assertions passing 100%**.
+
 ---
 
 ## 5. Verification & Architectural Metrics
 - [x] **Framework & Runtime**: Laravel 5.8.38 on PHP 7.4.33 (Windows Herd / MySQL `wakeupict_main_db`).
-- [x] **Database Tables Added (Safe Migrations)**:
-  1. `student_accounts`
-  2. `student_panel_menus`
-  3. `frontend_menus`
-  4. `lms_chapters`
-  5. `lms_lessons`
-  6. `lms_enrollments`
-  7. `lms_lesson_progress`
-  8. `lms_quizzes`
-  9. `lms_questions`
-  10. `lms_question_options`
-  11. `lms_quiz_attempts`
-  12. `lms_quiz_answers`
-  13. `lms_class_schedules`
-  14. `lms_attendances`
-  15. `lms_assignments`
-  16. `lms_assignment_submissions`
-  17. `lms_payment_submissions`
-  18. `lms_fee_installments`
-  19. `lms_certificates`
-  20. `lms_notifications`
-  21. `lms_support_tickets`
-  22. `lms_ticket_replies`
-- [x] **Feature Test Coverage**:
-  - `tests/Feature/StudentAuthAndMenuTest.php` (8 tests, 33 assertions)
-  - `tests/Feature/LmsCourseAndProgressTest.php` (6 tests, 24 assertions)
-  - `tests/Feature/LmsQuizAndExamTest.php` (3 tests, 30 assertions)
-  - `tests/Feature/LmsScheduleAndAssignmentTest.php` (3 tests, 22 assertions)
-  - `tests/Feature/LmsPaymentAndCertificateTest.php` (4 tests, 26 assertions)
-  - `tests/Feature/LmsNotificationAndSupportTest.php` (8 tests, 25 assertions)
-  - `tests/Feature/FrontendMenuManagementTest.php` (7 tests, 16 assertions)
-  - **Total**: 39 tests, 176 assertions (100% Passing).
+- [x] **Total Question Bank Assets**: 423 questions (347 original MCQs 100% intact + BTEB official paper questions + multi-type derived variants).
+- [x] **Full PHPUnit Test Suite**: 67 tests, 330 assertions — 100% GREEN (Zero Failures).

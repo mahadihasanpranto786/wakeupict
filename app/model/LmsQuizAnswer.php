@@ -46,6 +46,19 @@ class LmsQuizAnswer extends Model
     }
 
     /**
+     * Decode CQ answers array (subquestions a, b, c, d)
+     */
+    public function getCqAnswersDecodedAttribute()
+    {
+        if (empty($this->cq_answers)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->cq_answers, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
      * Check if answer is locked
      */
     public function isLocked()
