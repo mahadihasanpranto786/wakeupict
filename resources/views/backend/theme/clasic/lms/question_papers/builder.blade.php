@@ -12,10 +12,14 @@
         .builder-layout {
             display: flex;
             gap: 1rem;
-            min-height: calc(100vh - 140px);
+            height: calc(100vh - 165px);
+            max-height: calc(100vh - 165px);
+            min-height: 550px;
         }
         .builder-left-panel {
             width: 380px;
+            height: 100%;
+            max-height: 100%;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -25,27 +29,74 @@
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
+        #libraryScrollContainer {
+            flex: 1 1 0;
+            overflow-y: auto;
+            min-height: 0;
+        }
         .builder-canvas-panel {
             flex-grow: 1;
+            height: 100%;
+            max-height: 100%;
             background: #f8fafc;
             border-radius: 0.75rem;
             border: 1px solid #e2e8f0;
             padding: 1.25rem;
             overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: auto;
         }
         .builder-right-panel {
             width: 340px;
+            height: 100%;
+            max-height: 100%;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        /* Custom slim scrollbars */
+        .builder-canvas-panel::-webkit-scrollbar,
+        #libraryScrollContainer::-webkit-scrollbar,
+        .builder-right-panel::-webkit-scrollbar {
+            width: 7px;
+        }
+        .builder-canvas-panel::-webkit-scrollbar-thumb,
+        #libraryScrollContainer::-webkit-scrollbar-thumb,
+        .builder-right-panel::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        .builder-canvas-panel::-webkit-scrollbar-thumb:hover,
+        #libraryScrollContainer::-webkit-scrollbar-thumb:hover,
+        .builder-right-panel::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
         }
         @media (max-width: 1200px) {
             .builder-layout {
                 flex-direction: column;
+                height: auto;
+                max-height: none;
             }
-            .builder-left-panel, .builder-right-panel {
+            .builder-left-panel {
                 width: 100%;
+                height: auto;
+                max-height: 520px;
+                position: sticky;
+                top: 10px;
+                z-index: 50;
+            }
+            .builder-canvas-panel {
+                height: auto;
+                max-height: none;
+            }
+            .builder-right-panel {
+                width: 100%;
+                height: auto;
+                max-height: none;
             }
         }
         .draggable-library-card {
@@ -250,7 +301,7 @@
             </div>
 
             <!-- Library Items List -->
-            <div class="p-2 overflow-auto flex-grow-1" style="max-height: calc(100vh - 270px);" id="libraryScrollContainer">
+            <div class="p-2 overflow-auto flex-grow-1" id="libraryScrollContainer">
                 @forelse($libraryQuestions as $lq)
                     <div class="draggable-library-card p-2 mb-2" 
                          draggable="true" 
@@ -761,10 +812,158 @@
             }).join('');
         }
 
+        // =========================================================================
+        // HIGH-PERFORMANCE DRAG-AND-DROP AUTO-SCROLLER (Canvas, Library & Window)
+        // =========================================================================
+        var isDraggingActive = false;
+        var autoScrollRafId = null;
+        var canvasScrollSpeedY = 0;
+        var libraryScrollSpeedY = 0;
+        var windowScrollSpeedY = 0;
+
+        var SCROLL_ZONE_CANVAS = 120;  // Trigger zone in px from canvas edges
+        var SCROLL_ZONE_WINDOW = 80;   // Trigger zone in px from window edges
+        var SCROLL_ZONE_LIB = 60;      // Trigger zone in px from library edges
+        var MAX_SCROLL_SPEED = 32;     // Maximum pixels per frame (fast & smooth)
+
+        function getCanvasPanel() {
+            return document.querySelector('.builder-canvas-panel');
+        }
+
+        function getLibraryContainer() {
+            return document.getElementById('libraryScrollContainer');
+        }
+
+        function startDragAutoScroll() {
+            isDraggingActive = true;
+            if (!autoScrollRafId) {
+                autoScrollRafId = requestAnimationFrame(autoScrollLoop);
+            }
+        }
+
+        function stopDragAutoScroll() {
+            isDraggingActive = false;
+            canvasScrollSpeedY = 0;
+            libraryScrollSpeedY = 0;
+            windowScrollSpeedY = 0;
+            if (autoScrollRafId) {
+                cancelAnimationFrame(autoScrollRafId);
+                autoScrollRafId = null;
+            }
+        }
+
+        function autoScrollLoop() {
+            if (!isDraggingActive) {
+                autoScrollRafId = null;
+                return;
+            }
+
+            var canvas = getCanvasPanel();
+            if (canvas && canvasScrollSpeedY !== 0) {
+                canvas.scrollTop += canvasScrollSpeedY;
+            }
+
+            var library = getLibraryContainer();
+            if (library && libraryScrollSpeedY !== 0) {
+                library.scrollTop += libraryScrollSpeedY;
+            }
+
+            if (windowScrollSpeedY !== 0) {
+                window.scrollBy(0, windowScrollSpeedY);
+            }
+
+            autoScrollRafId = requestAnimationFrame(autoScrollLoop);
+        }
+
+        function calculateDragScrollSpeed(e) {
+            if (!isDraggingActive) return;
+
+            var clientY = e.clientY;
+            var clientX = e.clientX;
+
+            // 1. Check Canvas Panel
+            var canvas = getCanvasPanel();
+            if (canvas) {
+                var cRect = canvas.getBoundingClientRect();
+                // Check if cursor is horizontally aligned with the canvas area (with generous padding)
+                if (clientX >= cRect.left - 60 && clientX <= cRect.right + 60) {
+                    if (clientY >= cRect.top && clientY <= cRect.top + SCROLL_ZONE_CANVAS) {
+                        // Near TOP of canvas
+                        var ratio = (cRect.top + SCROLL_ZONE_CANVAS - clientY) / SCROLL_ZONE_CANVAS;
+                        canvasScrollSpeedY = -Math.round(Math.max(4, ratio * MAX_SCROLL_SPEED));
+                    } else if (clientY <= cRect.bottom && clientY >= cRect.bottom - SCROLL_ZONE_CANVAS) {
+                        // Near BOTTOM of canvas
+                        var ratio = (clientY - (cRect.bottom - SCROLL_ZONE_CANVAS)) / SCROLL_ZONE_CANVAS;
+                        canvasScrollSpeedY = Math.round(Math.max(4, ratio * MAX_SCROLL_SPEED));
+                    } else {
+                        canvasScrollSpeedY = 0;
+                    }
+                } else {
+                    canvasScrollSpeedY = 0;
+                }
+            }
+
+            // 2. Check Library Container
+            var library = getLibraryContainer();
+            if (library) {
+                var lRect = library.getBoundingClientRect();
+                if (clientX >= lRect.left && clientX <= lRect.right) {
+                    if (clientY >= lRect.top && clientY <= lRect.top + SCROLL_ZONE_LIB) {
+                        var ratio = (lRect.top + SCROLL_ZONE_LIB - clientY) / SCROLL_ZONE_LIB;
+                        libraryScrollSpeedY = -Math.round(Math.max(3, ratio * 20));
+                    } else if (clientY <= lRect.bottom && clientY >= lRect.bottom - SCROLL_ZONE_LIB) {
+                        var ratio = (clientY - (lRect.bottom - SCROLL_ZONE_LIB)) / SCROLL_ZONE_LIB;
+                        libraryScrollSpeedY = Math.round(Math.max(3, ratio * 20));
+                    } else {
+                        libraryScrollSpeedY = 0;
+                    }
+                } else {
+                    libraryScrollSpeedY = 0;
+                }
+            }
+
+            // 3. Check Window Boundaries (Fallback if window has scrollbar)
+            var winH = window.innerHeight;
+            if (clientY <= SCROLL_ZONE_WINDOW) {
+                var ratio = (SCROLL_ZONE_WINDOW - clientY) / SCROLL_ZONE_WINDOW;
+                windowScrollSpeedY = -Math.round(Math.max(4, ratio * 25));
+            } else if (clientY >= winH - SCROLL_ZONE_WINDOW) {
+                var ratio = (clientY - (winH - SCROLL_ZONE_WINDOW)) / SCROLL_ZONE_WINDOW;
+                windowScrollSpeedY = Math.round(Math.max(4, ratio * 25));
+            } else {
+                windowScrollSpeedY = 0;
+            }
+        }
+
+        // Global listeners for drag events
+        document.addEventListener('dragover', function(e) {
+            if (isDraggingActive) {
+                calculateDragScrollSpeed(e);
+            }
+        }, true);
+
+        document.addEventListener('dragend', function() {
+            stopDragAutoScroll();
+        }, true);
+
+        document.addEventListener('drop', function() {
+            stopDragAutoScroll();
+        }, true);
+
+        // Support mouse wheel while dragging
+        window.addEventListener('wheel', function(e) {
+            if (!isDraggingActive) return;
+            var canvas = getCanvasPanel();
+            if (canvas) {
+                canvas.scrollTop += e.deltaY;
+            }
+        }, { passive: true });
+
         // 1. Drag from Left Library Panel
         function onDragStartLibrary(e, questionId) {
             activeDraggedQuestionId = questionId;
             activeDraggedCardItemId = null;
+            startDragAutoScroll();
             e.dataTransfer.setData('text/plain', 'library:' + questionId);
             e.dataTransfer.effectAllowed = 'copy';
         }
@@ -773,12 +972,14 @@
         function onDragStartCard(e, itemId) {
             activeDraggedCardItemId = itemId;
             activeDraggedQuestionId = null;
+            startDragAutoScroll();
             e.dataTransfer.setData('text/plain', 'card:' + itemId);
             e.dataTransfer.effectAllowed = 'move';
         }
 
         function onDragOverZone(e) {
             e.preventDefault();
+            calculateDragScrollSpeed(e);
             e.currentTarget.classList.add('drag-over');
         }
 
@@ -788,33 +989,45 @@
 
         function onDropZone(e, sectionId) {
             e.preventDefault();
+            stopDragAutoScroll();
             e.currentTarget.classList.remove('drag-over');
             var rawData = e.dataTransfer.getData('text/plain');
 
+            // Find if dropped near another question card for precise positioning
+            var targetCard = e.target.closest('.canvas-question-card');
+
             if (rawData && rawData.startsWith('card:')) {
-                // Reordering an existing card between sections
+                // Reordering an existing card between sections or inside section
                 var itemId = rawData.replace('card:', '');
                 var card = document.getElementById('item_card_' + itemId);
                 var dropzone = document.getElementById('dropzone_' + sectionId);
                 if (card && dropzone) {
                     var emptyPlaceholder = dropzone.querySelector('.empty-drop-placeholder');
                     if (emptyPlaceholder) emptyPlaceholder.remove();
-                    dropzone.appendChild(card);
+
+                    if (targetCard && targetCard !== card && targetCard.parentElement === dropzone) {
+                        var rect = targetCard.getBoundingClientRect();
+                        var next = (e.clientY - rect.top) > (rect.height / 2);
+                        dropzone.insertBefore(card, next ? targetCard.nextSibling : targetCard);
+                    } else {
+                        dropzone.appendChild(card);
+                    }
+
                     updateQuestionNumbers();
                     savePaperDraft();
-                    showToast('প্রশ্নটি নতুন সেকশনে স্থানান্তরিত হয়েছে!', 'info');
+                    showToast('প্রশ্নটি স্থানান্তরিত হয়েছে!', 'info');
                 }
             } else {
                 // Dropping from library
                 var qId = activeDraggedQuestionId || (rawData ? rawData.replace('library:', '') : null);
                 if (qId) {
-                    addQuestionToSection(qId, sectionId);
+                    addQuestionToSection(qId, sectionId, false, targetCard);
                 }
             }
         }
 
         // 3. Add Question to section via AJAX (Zero Full Page Reload)
-        function addQuestionToSection(questionId, sectionId, allowDuplicate) {
+        function addQuestionToSection(questionId, sectionId, allowDuplicate, targetCard) {
             fetch('/admin/question-papers/' + paperId + '/add-item', {
                 method: 'POST',
                 headers: {
@@ -841,7 +1054,12 @@
                         var tempWrapper = document.createElement('div');
                         tempWrapper.innerHTML = cardHtml;
                         var newCard = tempWrapper.firstElementChild;
-                        dropzone.appendChild(newCard);
+
+                        if (targetCard && targetCard.parentElement === dropzone) {
+                            dropzone.insertBefore(newCard, targetCard.nextSibling);
+                        } else {
+                            dropzone.appendChild(newCard);
+                        }
 
                         // Trigger pulse highlight
                         newCard.classList.add('just-added');
@@ -856,7 +1074,7 @@
                     }
                 } else if (res.is_duplicate) {
                     if (confirm(res.message)) {
-                        addQuestionToSection(questionId, sectionId, true);
+                        addQuestionToSection(questionId, sectionId, true, targetCard);
                     }
                 } else {
                     showToast(res.message || 'ত্রুটি ঘটেছে', 'danger');
