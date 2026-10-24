@@ -232,11 +232,49 @@ The Student Panel and LMS will support two primary educational tracks:
   - Detail Preview Modal renders full Educational Concept Card.
   - Faculty Verification Status management (`verified`, `pending_review`, `draft`).
 - [x] **Core ICT Seeding**: High-yield authentic Bengali explanations seeded across core ICT questions (`ConceptBasedExplanationSeeder.php`).
-- [x] **Test Suite**: `tests/Feature/ConceptBasedExplanationSystemTest.php` passing 100% (6 tests, 24 assertions). Full project test suite running **67 tests, 330 assertions passing 100%**.
+- [x] **Test Suite**: `tests/Feature/ConceptBasedExplanationSystemTest.php` passing 100% (6 tests, 24 assertions). Full project test suite running **74 tests, 363 assertions passing 100%**.
 
 ---
 
-## 5. Verification & Architectural Metrics
+## 5. BTEB OMR Sheet & Dynamic Litho Code Generator (October 24, 2026)
+- [x] **Authentic BTEB OMR Sheet Architecture (`sheet_component.blade.php`)**:
+  - Exact replication of Bangladesh Technical Education Board (বিটিইবি) answer script top sheet based on official specimen.
+  - Authentic Magenta/Pink theme (`#c2185b`) with corner alignment squares (`14x14px`), top and bottom timing tracks (sensor tracks).
+  - Main OMR Fields:
+    1. **পরীক্ষা পর্ব/বর্ষ**: Box + bubbles ১ম থেকে ৮ম.
+    2. **কারিকুলাম কোড**: 2 digits + 2 columns of 0-9 circular bubbles.
+    3. **ট্রেড/পেশা-স্পেশালাইজেশন/টেকনোলজি**: 2 digits + 2 columns of 0-9 circular bubbles.
+    4. **রোল নম্বর**: 6 digits + 6 columns of 0-9 bubbles with toggle for "লেখা লাগবে না (X ক্রস)" guide mode.
+    5. **রেজিস্ট্রেশন নম্বর**: 11 digits + 11 columns of 0-9 bubbles (with instruction "শ্রেণি ৮ উত্তীর্ণের হলে বামে ২টি '০০০০' বসাতে হবে").
+    6. **সেশন**: 4 digits + 4 columns of 0-9 bubbles.
+    7. **বিষয় কোড**: 5 digits + 5 columns of 0-9 bubbles.
+    8. **অতিরিক্ত খাতার সংখ্যা**: Checkboxes (১) থেকে (৮).
+    9. **ইনভিজিলেটরের স্বাক্ষর, তারিখ ও সতর্কতা বাক্য**.
+- [x] **Dynamic Litho Code System (`OmrService.php`)**:
+  - `generateLithoCode($prefix = '20')`: Generates realistic 10-digit Litho codes (e.g. `2078873062`).
+  - `generateBatch($startCode, $count)`: Generates consecutive sequences of Litho codes for batch exam printing.
+  - `generateBarcodeSvg($code)`: Vector Code-128 SVG barcode rendered cleanly without third-party network dependencies.
+  - `generateQrSvg($payload)`: High-density SVG QR code encoding verification metadata.
+  - `toBengaliDigits($string)`: English to Bengali number transformation.
+- [x] **Student Portal Builder & Control Panel (`omr/index.blade.php`)**:
+  - Integrated into Student Portal Menu under **Quiz & Examination (`quiz_examination`)** -> **বিটিইবি ওএমআর ও লিথু কোড (`bteb_omr_sheet`)**.
+  - Interactive Mode Selector:
+    1. 📱 **নির্দেশনা / ডেমো গাইড (Demo Guide Mode)**: Shows filled bubbles, "লেখা লাগবে না" cross on roll, and top advisory banner `"এইটা সবার ফোনে সেভ করে রাখবেন... (লিথু কোড) এই কোড খাতায় লিখবেন। প্রত্যেকের কোড আলাদা হবে।"` with prominent Litho box.
+    2. ✍️ **ব্ল্যাঙ্ক প্র্যাকটিস শিট (Blank Practice Mode)**: Blank outline bubbles for offline classroom practice.
+    3. 🎓 **ব্যক্তিগত শিট (Personalized Mode)**: Automatically pre-filled with logged-in student's registration, roll, and session.
+  - **Quick Litho Controls**: 1-click Auto-Generate, custom number input, and clipboard copy.
+  - **Batch Print Modal**: Multi-sheet generator for 1 to 50 sheets with consecutive Litho codes.
+- [x] **Dedicated A4 Print Layout (`omr/print.blade.php`)**:
+  - Zero-margin, pixel-perfect A4 printing with `@media print` rules, floating print controller, and automatic page breaks (`page-break-after: always`).
+- [x] **Admin Integration**:
+  - Admin Menu item added under LMS sidebar: **BTEB OMR & Litho** (`admin.bteb-omr.index`).
+  - Question Paper Builder toolbar updated with direct **ওএমআর শিট** link.
+- [x] **Test Suite**: `tests/Feature/BtebOmrAndLithoCodeTest.php` passing 100% (6 tests, 28 assertions). Full project test suite running **74 tests, 363 assertions passing 100%**.
+
+---
+
+## 6. Verification & Architectural Metrics
 - [x] **Framework & Runtime**: Laravel 5.8.38 on PHP 7.4.33 (Windows Herd / MySQL `wakeupict_main_db`).
 - [x] **Total Question Bank Assets**: 423 questions (347 original MCQs 100% intact + BTEB official paper questions + multi-type derived variants).
-- [x] **Full PHPUnit Test Suite**: 67 tests, 330 assertions — 100% GREEN (Zero Failures).
+- [x] **Full PHPUnit Test Suite**: 74 tests, 363 assertions — 100% GREEN (Zero Failures).
+

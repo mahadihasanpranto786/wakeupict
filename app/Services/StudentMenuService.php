@@ -203,6 +203,14 @@ class StudentMenuService
                         'icon' => 'fa fa-history',
                         'order_index' => 5,
                     ],
+                    [
+                        'menu_key' => 'bteb_omr_sheet',
+                        'title_en' => 'BTEB OMR & Litho Sheet',
+                        'title_bn' => 'বিটিইবি ওএমআর ও লিথু কোড',
+                        'route_name' => 'student.omr.index',
+                        'icon' => 'fa fa-id-card-o',
+                        'order_index' => 6,
+                    ],
                 ],
             ],
             [

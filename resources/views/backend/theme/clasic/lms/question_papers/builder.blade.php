@@ -182,6 +182,9 @@
                 <a href="{{ route('admin.question-papers.print-board', $paper->id) }}" target="_blank" class="btn btn-sm btn-outline-dark mr-1">
                     <i class="fas fa-print mr-1"></i> বোর্ড প্রিন্ট
                 </a>
+                <a href="{{ route('admin.bteb-omr.index') }}?subject_code={{ $paper->subject_code }}&exam_year={{ $paper->academic_year }}" target="_blank" class="btn btn-sm btn-outline-danger mr-1" title="বিটিইবি ওএমআর টপ শিট ও লিথু কোড">
+                    <i class="fas fa-id-card mr-1"></i> ওএমআর শিট
+                </a>
                 <a href="{{ route('admin.question-papers.teacher-key', $paper->id) }}" target="_blank" class="btn btn-sm btn-outline-success mr-1">
                     <i class="fas fa-key mr-1"></i> উত্তরপত্র
                 </a>

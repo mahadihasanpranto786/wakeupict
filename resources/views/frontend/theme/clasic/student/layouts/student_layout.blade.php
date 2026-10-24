@@ -2,6 +2,24 @@
 @php
     $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'light';
     $studentUser = function_exists('student_user') ? student_user() : null;
+    if (!$studentUser) {
+        $webUser = auth()->user();
+        if ($webUser) {
+            $studentUser = (object)[
+                'id' => $webUser->id,
+                'name' => $webUser->name,
+                'student_id_code' => 'ADMIN-PORTAL',
+                'avatar_url' => "https://ui-avatars.com/api/?name=" . urlencode($webUser->name) . "&background=0b1329&color=10b981&bold=true",
+            ];
+        } else {
+            $studentUser = (object)[
+                'id' => 0,
+                'name' => 'Student Portal User',
+                'student_id_code' => 'WUICT-DEMO',
+                'avatar_url' => "https://ui-avatars.com/api/?name=Student&background=0b1329&color=10b981&bold=true",
+            ];
+        }
+    }
     $studentMenus = \App\Services\StudentMenuService::getTree();
 @endphp
 <html lang="{{ App::getLocale() }}" class="light scroll-smooth">
@@ -578,8 +596,7 @@
                 </div>
             </div>
 
-            <!-- Dynamic Navigation Links (Temporarily Commented Out as requested) -->
-            {{--
+            <!-- Dynamic Navigation Links -->
             <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
                 @foreach($studentMenus as $menu)
                     @php
@@ -624,7 +641,6 @@
                     @endif
                 @endforeach
             </nav>
-            --}}
 
             <!-- Bottom Exit Link -->
             <div class="p-4 border-t border-slate-800/80 flex items-center justify-between">
@@ -683,9 +699,12 @@
 
                     <!-- Notification Bell -->
                     @php
-                        $unreadNotifCount = \App\model\LmsNotification::where(function($q) use ($studentUser) {
-                            $q->where('student_account_id', $studentUser->id)->orWhereNull('student_account_id');
-                        })->where('is_read', false)->count();
+                        $unreadNotifCount = 0;
+                        if (!empty($studentUser->id)) {
+                            $unreadNotifCount = \App\model\LmsNotification::where(function($q) use ($studentUser) {
+                                $q->where('student_account_id', $studentUser->id)->orWhereNull('student_account_id');
+                            })->where('is_read', false)->count();
+                        }
                     @endphp
                     <a href="{{ route('student.notifications.index') }}" class="relative p-2.5 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all hover:border-brand-primary/40 focus:outline-none" title="Notifications">
                         <i class="fa fa-bell-o text-sm"></i>
@@ -763,8 +782,7 @@
                 </button>
             </div>
 
-            <!-- Mobile Dynamic Links (Temporarily Commented Out as requested) -->
-            {{--
+            <!-- Mobile Dynamic Links -->
             <nav class="flex-1 py-6 space-y-1.5">
                 @foreach($studentMenus as $menu)
                     @php $hasChildren = $menu->activeChildren->count() > 0; @endphp
@@ -788,7 +806,6 @@
                     @endif
                 @endforeach
             </nav>
-            --}}
 
             <form action="{{ route('student.logout') }}" method="POST" class="pt-4 border-t border-slate-800">
                 @csrf

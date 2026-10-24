@@ -659,6 +659,11 @@ Route::group(['prefix' => 'admin/question-papers', 'as' => 'admin.question-paper
     Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionPaperBuilderController@destroy')->name('destroy');
 });
 
+// ================================================== BTEB OMR Sheet & Litho Code Builder =========================================================//
+Route::get('admin/bteb-omr', 'frontend\theme\clasic\StudentOmrController@index')->name('admin.bteb-omr.index');
+Route::get('admin/bteb-omr/print', 'frontend\theme\clasic\StudentOmrController@print')->name('admin.bteb-omr.print');
+Route::post('admin/bteb-omr/generate', 'frontend\theme\clasic\StudentOmrController@generate')->name('admin.bteb-omr.generate');
+
 //**************************************** BACKEND ROUTES END*************************************************** */
 
 });
