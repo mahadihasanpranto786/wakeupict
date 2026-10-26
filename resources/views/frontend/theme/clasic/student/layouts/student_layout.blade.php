@@ -672,7 +672,13 @@
         <!-- =========================================================================
              2. MAIN WRAPPER & TOP HEADER
              ========================================================================= -->
-        <div class="flex-1 lg:pl-72 flex flex-col min-w-0">
+        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative">
+            
+            <!-- Global Full-Wrapper Ambient Glows (Starts immediately at sidebar border) -->
+            <div class="absolute -top-16 left-0 w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] bg-gradient-to-br from-blue-400/25 via-indigo-400/15 to-transparent rounded-full blur-[140px] pointer-events-none -z-10"></div>
+            <div class="absolute -top-10 -right-20 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] bg-gradient-to-bl from-amber-300/25 via-orange-300/15 to-transparent rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div class="absolute top-1/2 left-0 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-blue-500/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div class="absolute bottom-10 -right-10 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-orange-400/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
             
             <!-- Top Header Navigation Bar -->
             <header class="student-header sticky top-0 z-20 h-20 bg-slate-900/80 border-b border-slate-800/80 backdrop-blur-2xl px-4 sm:px-8 flex items-center justify-between">
