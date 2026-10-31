@@ -147,14 +147,21 @@
                     <span>Resume In-Progress Exam</span>
                 </a>
             @elseif($canAttempt)
-                <form action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
-                    @csrf
-                    <button type="submit" 
-                            class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
-                        <i class="fa fa-play"></i>
-                        <span>Start Assessment Now</span>
+                @if($quiz->questions->count() > 0 || ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->count() > 0))
+                    <form action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" 
+                                class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
+                            <i class="fa fa-play"></i>
+                            <span>Start Assessment Now</span>
+                        </button>
+                    </form>
+                @else
+                    <button type="button" disabled class="px-8 py-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 font-bold text-xs uppercase tracking-wider cursor-not-allowed flex items-center gap-2">
+                        <i class="fa fa-clock-o"></i>
+                        <span>প্রশ্ন প্রস্তুত হচ্ছে (No Questions Yet)</span>
                     </button>
-                </form>
+                @endif
             @else
                 <button disabled class="px-6 py-3 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-400 font-bold text-xs uppercase tracking-wider cursor-not-allowed">
                     <i class="fa fa-ban mr-1"></i> Maximum Attempts Reached

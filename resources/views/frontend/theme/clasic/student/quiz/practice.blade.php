@@ -200,11 +200,18 @@
                             <span class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                                 <i class="fa fa-infinity text-xs"></i> Unlimited Retakes
                             </span>
-                            <a href="{{ route('student.quiz.lobby', $quiz->id) }}" 
-                               class="quiz-action-btn px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm">
-                                <span>VISIT NOW</span>
-                                <i class="fa fa-arrow-right text-[10px] opacity-80 group-hover:translate-x-0.5 transition-transform"></i>
-                            </a>
+                            @if($quiz->questions->count() > 0)
+                                <a href="{{ route('student.quiz.lobby', $quiz->id) }}" 
+                                   class="quiz-action-btn px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm">
+                                    <i class="fa fa-play text-[10px]"></i>
+                                    <span>পরীক্ষায় অংশ নিন</span>
+                                    <i class="fa fa-arrow-right text-[10px] opacity-80 group-hover:translate-x-0.5 transition-transform"></i>
+                                </a>
+                            @else
+                                <span class="px-3 py-1.5 rounded-xl text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center gap-1" title="এই কুইজে এখনো কোনো প্রশ্ন যোগ করা হয়নি">
+                                    <i class="fa fa-clock-o text-[10px]"></i> প্রশ্ন প্রস্তুত হচ্ছে
+                                </span>
+                            @endif
                         </div>
                     </div>
                 @endforeach

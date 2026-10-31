@@ -168,11 +168,17 @@
                         </div>
 
                         <div class="flex items-center gap-3 self-end md:self-auto shrink-0">
-                            <a href="{{ route('student.quiz.lobby', $exam->id) }}" 
-                               class="quiz-action-btn px-7 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 hover:scale-105">
-                                <i class="fa fa-play text-[10px]"></i>
-                                <span>Enter Exam Hall</span>
-                            </a>
+                            @if($exam->questions->count() > 0)
+                                <a href="{{ route('student.quiz.lobby', $exam->id) }}" 
+                                   class="quiz-action-btn px-7 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 hover:scale-105">
+                                    <i class="fa fa-play text-[10px]"></i>
+                                    <span>পরীক্ষায় অংশ নিন (Enter Exam Hall)</span>
+                                </a>
+                            @else
+                                <span class="px-5 py-3 rounded-2xl font-bold text-xs bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-2">
+                                    <i class="fa fa-clock-o"></i> প্রশ্ন প্রস্তুত হচ্ছে
+                                </span>
+                            @endif
                         </div>
                     </div>
                 @endforeach

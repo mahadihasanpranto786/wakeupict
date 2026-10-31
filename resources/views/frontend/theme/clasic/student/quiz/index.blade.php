@@ -183,7 +183,7 @@
 
                 <!-- Descriptive Paragraph -->
                 <p class="quiz-card-desc text-xs sm:text-sm lg:text-base leading-relaxed max-w-xl">
-                    When assessing technical solutions, we make solving problems our utmost priority while also keeping an equal emphasis on comprehensive conceptual clarity and exam excellence.
+                    অনলাইন কুইজ ক্যাটালগে বিভিন্ন কোর্স ও বিষয়ের কুইজ কার্ডগুলো দেখে নিন। পরীক্ষায় অংশ নিতে অনুগ্রহ করে বাম পাশের <strong>"অনুশীলন পরীক্ষা"</strong> অথবা নির্ধারিত লাইভ পরীক্ষার জন্য <strong>"আসন্ন পরীক্ষা"</strong> মেনু ব্যবহার করুন।
                 </p>
             </div>
 
@@ -311,8 +311,8 @@
                             </div>
                         </div>
 
-                        <!-- Card Actions (Exact VISIT NOW Button from Reference) -->
-                        <div class="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                        <!-- Card Actions: View Only in Online Quiz Menu (Cannot start exam directly from here) -->
+                        <div class="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 flex-wrap">
                             <!-- Score / Attempt status -->
                             <div class="text-[11px] font-mono">
                                 @if($stat['best_score'] !== null)
@@ -323,12 +323,19 @@
                                 @endif
                             </div>
 
-                            <!-- VISIT NOW Action Button (Exact Reference Styling) -->
-                            <a href="{{ route('student.quiz.lobby', $quiz->id) }}" 
-                               class="quiz-action-btn px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm">
-                                <span>VISIT NOW</span>
-                                <i class="fa fa-arrow-right text-[10px] opacity-80 group-hover:translate-x-0.5 transition-transform"></i>
-                            </a>
+                            <!-- View Only Action Pills -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1" title="অনলাইন কুইজ মেনুতে কার্ডটি শুধু দেখার জন্য">
+                                    <i class="fa fa-eye text-[10px] text-slate-400"></i>
+                                    <span>বিবরণ (View Only)</span>
+                                </span>
+                                <a href="{{ route('student.practice.index') }}" 
+                                   class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 flex items-center gap-1 transition-all shadow-sm"
+                                   title="অনুশীলন পরীক্ষা মেনু থেকে অংশ নিন">
+                                    <span>অনুশীলন মেনু</span>
+                                    <i class="fa fa-arrow-right text-[9px]"></i>
+                                </a>
+                            </div>
                         </div>
 
                     </div>

@@ -25,9 +25,12 @@ class StudentQuizController extends Controller
     public function onlineQuiz(Request $request)
     {
         $student = Auth::guard('student')->user();
-        $query = LmsQuiz::where('is_published', true)->with(['course', 'questions']);
+        // Live exams (quiz_type = 'exam') are excluded from Online Quizzes overview and only shown in Upcoming Exams
+        $query = LmsQuiz::where('is_published', true)
+            ->where('quiz_type', '!=', 'exam')
+            ->with(['course', 'questions']);
 
-        if ($request->filled('type')) {
+        if ($request->filled('type') && $request->type !== 'exam') {
             $query->where('quiz_type', $request->type);
         }
 
@@ -152,6 +155,12 @@ class StudentQuizController extends Controller
         if (!$quiz->canAttempt($student->id)) {
             return redirect()->route('student.quiz.lobby', $quiz->id)->with([
                 'error' => 'You have reached the maximum allowed attempts for this assessment.',
+            ]);
+        }
+
+        if ($quiz->questions()->count() === 0 && (!$quiz->paper_id || !$quiz->paper || !$quiz->paper->items()->exists())) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই কুইজে এখনো কোনো প্রশ্ন যোগ করা হয়নি। অনুগ্রহ করে পরবর্তীতে চেষ্টা করুন।',
             ]);
         }
 

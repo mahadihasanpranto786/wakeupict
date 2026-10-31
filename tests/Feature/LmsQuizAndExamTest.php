@@ -435,4 +435,61 @@ class LmsQuizAndExamTest extends TestCase
         LmsQuizAnswer::where('attempt_id', $attempt->id)->delete();
         $attempt->delete();
     }
+
+    /**
+     * Test online quiz excludes live exams and handles zero-question protection
+     */
+    public function test_online_quiz_view_excludes_live_exams_and_prevents_zero_question_starts()
+    {
+        // 1. Create a live exam (quiz_type = 'exam')
+        $liveExam = LmsQuiz::create([
+            'title'            => 'Scheduled Final Board Exam ' . rand(100, 999),
+            'course_id'        => $this->quiz->course_id,
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 30,
+            'total_marks'      => 20.0,
+            'pass_marks'       => 8.0,
+            'is_published'     => true,
+        ]);
+
+        // 2. Create a practice quiz with 0 questions
+        $emptyPracticeQuiz = LmsQuiz::create([
+            'title'            => 'Empty Practice Quiz ' . rand(100, 999),
+            'course_id'        => $this->quiz->course_id,
+            'quiz_type'        => 'practice',
+            'duration_minutes' => 15,
+            'total_marks'      => 0.0,
+            'pass_marks'       => 0.0,
+            'is_published'     => true,
+        ]);
+
+        // 3. Visit online quiz page (/student/quiz)
+        $onlineQuizRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.index'));
+
+        $onlineQuizRes->assertStatus(200);
+        // Live exam must NOT be displayed on online quiz page
+        $onlineQuizRes->assertDontSee($liveExam->title);
+        // Empty practice quiz is displayed as card with View Only badge
+        $onlineQuizRes->assertSee($emptyPracticeQuiz->title);
+        $onlineQuizRes->assertSee('বিবরণ (View Only)');
+
+        // 4. Visit Upcoming Exams page (/student/exams/upcoming)
+        $upcomingRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.exams.upcoming'));
+
+        $upcomingRes->assertStatus(200);
+        $upcomingRes->assertSee($liveExam->title);
+
+        // 5. Try to start empty quiz -> redirected with warning
+        $startEmptyRes = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $emptyPracticeQuiz->id));
+
+        $startEmptyRes->assertRedirect(route('student.quiz.lobby', $emptyPracticeQuiz->id));
+        $startEmptyRes->assertSessionHas('error');
+
+        // Clean up
+        $liveExam->delete();
+        $emptyPracticeQuiz->delete();
+    }
 }
