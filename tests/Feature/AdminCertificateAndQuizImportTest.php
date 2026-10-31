@@ -554,4 +554,53 @@ class AdminCertificateAndQuizImportTest extends TestCase
             'question_text' => 'What is an IP address?',
         ]);
     }
+
+    /**
+     * Test admin can bulk delete questions from a quiz
+     */
+    public function test_admin_can_bulk_delete_questions_from_quiz()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Quiz for Bulk Question Deletion',
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 20,
+            'total_marks'      => 4.0,
+            'pass_marks'       => 2,
+            'is_published'     => true,
+        ]);
+
+        $q1 = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => $quiz->id,
+            'question_text' => 'Bulk Q1 to delete?',
+            'question_type' => 'mcq_single',
+            'marks'         => 2.0,
+            'is_active'     => true,
+        ]);
+        $q1->options()->create(['option_text' => 'Opt 1', 'is_correct' => true, 'order_index' => 1]);
+
+        $q2 = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => $quiz->id,
+            'question_text' => 'Bulk Q2 to delete?',
+            'question_type' => 'mcq_single',
+            'marks'         => 2.0,
+            'is_active'     => true,
+        ]);
+        $q2->options()->create(['option_text' => 'Opt 2', 'is_correct' => true, 'order_index' => 1]);
+
+        // Bulk delete both questions
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.questions.bulk-delete', $quiz->id), [
+                'question_ids' => [$q1->id, $q2->id],
+            ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('lms_questions', ['id' => $q1->id]);
+        $this->assertDatabaseMissing('lms_questions', ['id' => $q2->id]);
+
+        $quiz->refresh();
+        $this->assertEquals(0, (float)$quiz->total_marks);
+    }
 }
