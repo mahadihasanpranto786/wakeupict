@@ -141,7 +141,7 @@ class AdminCertificateAndQuizImportTest extends TestCase
     {
         $isolatedStudent = StudentAccount::create([
             'name' => 'Isolated Test Student ' . rand(1000, 9999),
-            'student_id_code' => 'WUICT-' . rand(1000, 9999),
+            'student_id_code' => 'WUICT-' . rand(10000, 99999) . '-' . time(),
             'phone' => '018' . rand(10000000, 99999999),
             'password' => Hash::make('password123'),
             'status' => 1,
@@ -401,5 +401,157 @@ class AdminCertificateAndQuizImportTest extends TestCase
             ->post(route('student.quiz.start', $quiz->id));
         $blockedRes->assertRedirect(route('student.quiz.lobby', $quiz->id));
         $blockedRes->assertSessionHas('error');
+    }
+
+    /**
+     * Admin can delete student quiz results individually and in bulk
+     */
+    public function test_admin_can_delete_single_and_multiple_quiz_results()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Results Deletion Test Quiz',
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 20,
+            'total_marks'      => 10,
+            'pass_marks'       => 5,
+            'is_published'     => true,
+        ]);
+
+        // Create 3 attempts
+        $att1 = \App\model\LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 1,
+            'score'              => 8,
+            'total_marks'        => 10,
+            'percentage'         => 80,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+        $att1->answers()->create([
+            'question_id'        => 1,
+            'marks_obtained'     => 1,
+            'is_correct'         => true,
+        ]);
+
+        $att2 = \App\model\LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 2,
+            'score'              => 6,
+            'total_marks'        => 10,
+            'percentage'         => 60,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+
+        $att3 = \App\model\LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 3,
+            'score'              => 4,
+            'total_marks'        => 10,
+            'percentage'         => 40,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+
+        // 1. Single delete: delete att1
+        $delRes = $this->actingAs($this->adminUser)
+            ->delete(route('admin.quizzes.attempt.destroy', $att1->id));
+        $delRes->assertRedirect();
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $att1->id]);
+        $this->assertDatabaseMissing('lms_quiz_answers', ['attempt_id' => $att1->id]);
+
+        // 2. Bulk delete: delete att2 and att3 together
+        $bulkRes = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.reports.bulk-delete'), [
+                'attempt_ids' => [$att2->id, $att3->id],
+            ]);
+        $bulkRes->assertRedirect();
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $att2->id]);
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $att3->id]);
+    }
+
+    /**
+     * Test admin can import questions by question_type and from Paper Builder into quiz
+     */
+    public function test_import_from_library_by_question_type_and_from_paper_builder()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Type & Paper Import Quiz',
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 20,
+            'total_marks'      => 0,
+            'pass_marks'       => 5,
+            'is_published'     => true,
+        ]);
+
+        // Create specific question types in library
+        $tfQ = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'RAM is non-volatile memory?',
+            'question_type' => 'true_false',
+            'marks'         => 1.0,
+            'is_active'     => true,
+        ]);
+        $tfQ->options()->create(['option_text' => 'False', 'is_correct' => true, 'order_index' => 1]);
+
+        // 1. Import by question_type = true_false
+        $resType = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.import-from-library', $quiz->id), [
+                'source_mode'   => 'type',
+                'question_type' => 'true_false',
+                'count'         => 5,
+            ]);
+        $resType->assertRedirect();
+        $this->assertDatabaseHas('lms_questions', [
+            'quiz_id'       => $quiz->id,
+            'question_type' => 'true_false',
+        ]);
+
+        // 2. Import from a Paper Builder question paper
+        $paper = \App\model\LmsQuestionPaper::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Final Exam Lab Paper 2026',
+            'paper_code'       => 'QP-2026-TEST-' . rand(1000, 9999) . '-' . time(),
+            'duration_minutes' => 30,
+            'total_marks'      => 5,
+            'pass_marks'       => 2,
+        ]);
+
+        $itemQ = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'What is an IP address?',
+            'question_type' => 'short_answer',
+            'marks'         => 2.0,
+            'is_active'     => true,
+        ]);
+
+        $paper->items()->create([
+            'question_id' => $itemQ->id,
+            'marks'       => 2.0,
+            'order_index' => 1,
+        ]);
+
+        $resPaper = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.import-from-library', $quiz->id), [
+                'source_mode' => 'paper',
+                'paper_id'    => $paper->id,
+            ]);
+        $resPaper->assertRedirect();
+        $quiz->refresh();
+        $this->assertEquals($paper->id, $quiz->paper_id);
+        $this->assertDatabaseHas('lms_questions', [
+            'quiz_id'       => $quiz->id,
+            'question_text' => 'What is an IP address?',
+        ]);
     }
 }

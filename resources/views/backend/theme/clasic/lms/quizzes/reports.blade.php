@@ -141,11 +141,36 @@
             </form>
         </div>
 
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-hover table-striped align-middle mb-0">
-                <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
-                    <tr>
-                        <th class="text-center" style="width: 50px;">#</th>
+        <!-- Bulk Action Bar for Selected Results -->
+        <div id="bulkActionBar" class="card-header bg-light border-bottom py-2" style="display: none;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center my-1">
+                    <span class="badge badge-primary px-2.5 py-1 text-sm font-weight-bold mr-2">
+                        <i class="fas fa-check-square mr-1"></i> <span id="selectedCountText">০</span> টি ফলাফল নির্বাচিত
+                    </span>
+                    <span class="text-xs text-muted">একসাথে একাধিক ফলাফল ডিলিট করতে পাশের বাটন ব্যবহার করুন।</span>
+                </div>
+                <div class="my-1">
+                    <button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="executeBulkDelete()">
+                        <i class="fas fa-trash-alt mr-1"></i> নির্বাচিত ফলাফল মুছুন (Bulk Delete)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="clearAllSelections()">
+                        বাতিল
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <form id="bulkDeleteForm" action="{{ route('admin.quizzes.reports.bulk-delete') }}" method="POST">
+            @csrf
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
+                        <tr>
+                            <th class="text-center" style="width: 40px;">
+                                <input type="checkbox" id="selectAllCheckbox" title="সবগুলো একসাথে নির্বাচন করুন" style="cursor: pointer; transform: scale(1.15);">
+                            </th>
+                            <th class="text-center" style="width: 50px;">#</th>
                         <th>শিক্ষার্থীর তথ্য</th>
                         <th>কুইজ ও কোর্স</th>
                         <th class="text-center">সেট</th>
@@ -164,6 +189,9 @@
                             $isPassed = $attempt->isPassed();
                         @endphp
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox" name="attempt_ids[]" value="{{ $attempt->id }}" class="attempt-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                            </td>
                             <td class="text-center text-muted text-sm">{{ $loop->iteration + ($attempts->currentPage() - 1) * $attempts->perPage() }}</td>
                             <td>
                                 <div class="font-weight-bold text-dark font-size-14">
@@ -224,14 +252,19 @@
                                 {{ $attempt->submitted_at ? $attempt->submitted_at->format('d M, Y h:i A') : $attempt->updated_at->format('d M, Y') }}
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('admin.quizzes.attempt-detail', $attempt->id) }}" class="btn btn-sm btn-outline-primary shadow-sm font-weight-bold" title="বিস্তারিত উত্তরপত্র ও মূল্যায়ন দেখুন">
-                                    <i class="fas fa-eye mr-1"></i> রেজাল্ট
-                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('admin.quizzes.attempt-detail', $attempt->id) }}" class="btn btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র ও মূল্যায়ন দেখুন">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" title="এই শিক্ষার্থীর ফলাফল মুছে ফেলুন" onclick="confirmSingleDelete({{ $attempt->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'শিক্ষার্থী') }}')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="text-center py-5 text-muted">
+                            <td colspan="12" class="text-center py-5 text-muted">
                                 <i class="fas fa-clipboard-list fa-3x mb-3 text-secondary d-block"></i>
                                 <h5>কোনো শিক্ষার্থীর পরীক্ষার ফলাফল পাওয়া যায়নি!</h5>
                                 <p class="text-xs text-muted">শিক্ষার্থীরা অনলাইন বা ওএমআর কুইজে অংশগ্রহণ করলে তাদের রেজাল্ট স্বয়ংক্রিয়ভাবে এখানে তালিকাভুক্ত হবে।</p>
@@ -241,6 +274,7 @@
                 </tbody>
             </table>
         </div>
+        </form>
 
         @if($attempts->hasPages())
             <div class="card-footer bg-white border-top py-3">
@@ -251,4 +285,75 @@
             </div>
         @endif
     </div>
+    <!-- Hidden Single Delete Form -->
+    <form id="singleDeleteForm" action="" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        function updateBulkBar() {
+            var checkboxes = document.querySelectorAll('.attempt-checkbox:checked');
+            var count = checkboxes.length;
+            var bar = document.getElementById('bulkActionBar');
+            var countText = document.getElementById('selectedCountText');
+            var selectAll = document.getElementById('selectAllCheckbox');
+
+            if (countText) countText.innerText = count;
+            if (bar) {
+                bar.style.display = count > 0 ? 'block' : 'none';
+            }
+
+            var allBoxes = document.querySelectorAll('.attempt-checkbox');
+            if (selectAll && allBoxes.length > 0) {
+                selectAll.checked = (checkboxes.length === allBoxes.length);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectAll = document.getElementById('selectAllCheckbox');
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    var checked = this.checked;
+                    document.querySelectorAll('.attempt-checkbox').forEach(function(cb) {
+                        cb.checked = checked;
+                    });
+                    updateBulkBar();
+                });
+            }
+
+            document.querySelectorAll('.attempt-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', updateBulkBar);
+            });
+        });
+
+        function clearAllSelections() {
+            var selectAll = document.getElementById('selectAllCheckbox');
+            if (selectAll) selectAll.checked = false;
+            document.querySelectorAll('.attempt-checkbox').forEach(function(cb) {
+                cb.checked = false;
+            });
+            updateBulkBar();
+        }
+
+        function executeBulkDelete() {
+            var checked = document.querySelectorAll('.attempt-checkbox:checked');
+            if (checked.length === 0) {
+                alert('অনুগ্রহ করে প্রথমে কমপক্ষে একটি ফলাফল নির্বাচন করুন।');
+                return;
+            }
+
+            if (confirm('আপনি কি নিশ্চিতভাবে নির্বাচিত ' + checked.length + 'টি ফলাফল মুছে ফেলতে চান? ফলাফল মুছে ফেললে শিক্ষার্থীরা পুনরায় পরীক্ষায় অংশ নিতে পারবে।')) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
+        }
+
+        function confirmSingleDelete(attemptId, studentName) {
+            if (confirm('আপনি কি নিশ্চিতভাবে ' + studentName + '-এর এই পরীক্ষার ফলাফলটি মুছে ফেলতে চান? মুছে ফেললে শিক্ষার্থী পুনরায় পরীক্ষায় অংশগ্রহণ করতে পারবে।')) {
+                var form = document.getElementById('singleDeleteForm');
+                form.action = '/admin/quizzes/reports/attempt/' + attemptId;
+                form.submit();
+            }
+        }
+    </script>
 @endsection

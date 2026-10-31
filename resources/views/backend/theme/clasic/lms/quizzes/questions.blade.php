@@ -44,10 +44,35 @@
     @endif
 
     <div class="card shadow-sm border-0">
+        <!-- Bulk Action Bar -->
+        <div id="bulkActionBar" class="card-header bg-light border-bottom py-2" style="display: none;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center my-1">
+                    <span class="badge badge-primary px-2.5 py-1 text-sm font-weight-bold mr-2">
+                        <i class="fas fa-check-square mr-1"></i> <span id="selectedCountText">০</span> টি প্রশ্ন নির্বাচিত
+                    </span>
+                    <span class="text-xs text-muted">একসাথে একাধিক প্রশ্ন কুইজ থেকে মুছে ফেলতে পাশের বাটনে ক্লিক করুন।</span>
+                </div>
+                <div class="my-1">
+                    <button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="executeBulkDeleteQuestions()">
+                        <i class="fas fa-trash-alt mr-1"></i> নির্বাচিত প্রশ্নসমূহ মুছুন (Bulk Delete)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="clearAllQuestionSelections()">
+                        বাতিল
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <form id="bulkDeleteQuestionsForm" action="{{ route('admin.quizzes.questions.bulk-delete', $quiz->id) }}" method="POST">
+        @csrf
         <div class="card-body p-0 table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                     <tr>
+                        <th class="text-center" style="width: 40px;">
+                            <input type="checkbox" id="selectAllCheckbox" style="cursor: pointer; transform: scale(1.15);" title="সবগুলো প্রশ্ন একসাথে নির্বাচন করুন">
+                        </th>
                         <th class="text-center" style="width: 50px;">#</th>
                         <th>প্রশ্ন ও অপশনসমূহ</th>
                         <th class="text-center">ধরণ</th>
@@ -59,6 +84,9 @@
                 <tbody>
                     @forelse($questions as $index => $q)
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox" name="question_ids[]" value="{{ $q->id }}" class="question-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                            </td>
                             <td class="text-center text-muted font-weight-bold">
                                 {{ $loop->iteration + ($questions->currentPage() - 1) * $questions->perPage() }}
                             </td>
@@ -111,7 +139,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 text-secondary d-block"></i>
                                 <h5>এই কুইজে এখনও কোনো প্রশ্ন যোগ করা হয়নি!</h5>
                                 <p class="text-xs text-muted">প্রশ্ন লাইব্রেরি থেকে বা এক্সেল থেকে প্রশ্ন যুক্ত করতে পারেন।</p>
@@ -121,6 +149,7 @@
                 </tbody>
             </table>
         </div>
+        </form>
 
         @if($questions->hasPages())
             <div class="card-footer bg-white border-top py-3">
@@ -131,5 +160,62 @@
             </div>
         @endif
     </div>
-@endsection
 
+    <script>
+        function updateBulkQuestionBar() {
+            var checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            var count = checkboxes.length;
+            var bar = document.getElementById('bulkActionBar');
+            var countText = document.getElementById('selectedCountText');
+            var selectAll = document.getElementById('selectAllCheckbox');
+
+            if (countText) countText.innerText = count;
+            if (bar) {
+                bar.style.display = count > 0 ? 'block' : 'none';
+            }
+
+            var allBoxes = document.querySelectorAll('.question-checkbox');
+            if (selectAll && allBoxes.length > 0) {
+                selectAll.checked = (checkboxes.length === allBoxes.length);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectAll = document.getElementById('selectAllCheckbox');
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    var checked = this.checked;
+                    document.querySelectorAll('.question-checkbox').forEach(function(cb) {
+                        cb.checked = checked;
+                    });
+                    updateBulkQuestionBar();
+                });
+            }
+
+            document.querySelectorAll('.question-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', updateBulkQuestionBar);
+            });
+        });
+
+        function clearAllQuestionSelections() {
+            var selectAll = document.getElementById('selectAllCheckbox');
+            if (selectAll) selectAll.checked = false;
+            document.querySelectorAll('.question-checkbox').forEach(function(cb) {
+                cb.checked = false;
+            });
+            updateBulkQuestionBar();
+        }
+
+        function executeBulkDeleteQuestions() {
+            var checked = document.querySelectorAll('.question-checkbox:checked');
+            if (checked.length === 0) {
+                alert('অনুগ্রহ করে প্রথমে কমপক্ষে একটি প্রশ্ন নির্বাচন করুন।');
+                return;
+            }
+
+            if (confirm('আপনি কি নিশ্চিতভাবে নির্বাচিত ' + checked.length + 'টি প্রশ্ন এই কুইজ থেকে মুছে ফেলতে চান? মুছে ফেললে কুইজের মোট নম্বর স্বয়ংক্রিয়ভাবে সমন্বয় করা হবে।')) {
+                document.getElementById('bulkDeleteQuestionsForm').submit();
+            }
+        }
+    </script>
+@endsection

@@ -605,30 +605,63 @@
                             </select>
                         </div>
 
-                        <div class="form-group mb-3">
+                                                <div class="form-group mb-3">
                             <label class="font-weight-bold text-sm">প্রশ্ন নির্বাচনের পদ্ধতি: <span class="text-danger">*</span></label>
                             <div class="row">
-                                <div class="col-md-4 mb-2 mb-md-0">
+                                <div class="col-md-4 mb-2">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-white shadow-sm" for="srcCategory" style="cursor: pointer;">
                                         <input type="radio" id="srcCategory" name="source_mode" value="category" class="mr-2" checked onchange="toggleLibSourceMode()">
-                                        <span class="font-weight-bold text-sm text-dark">ক্যাটাগরি ভিত্তিক</span>
+                                        <span class="font-weight-bold text-sm text-dark"><i class="fas fa-folder text-warning mr-1"></i> ক্যাটাগরি ভিত্তিক</span>
                                     </label>
                                 </div>
-                                <div class="col-md-4 mb-2 mb-md-0">
+                                <div class="col-md-4 mb-2">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcType" style="cursor: pointer;">
+                                        <input type="radio" id="srcType" name="source_mode" value="type" class="mr-2" onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-dark"><i class="fas fa-filter text-primary mr-1"></i> প্রশ্নের ধরন ভিত্তিক</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light border-primary" for="srcPaper" style="cursor: pointer;">
+                                        <input type="radio" id="srcPaper" name="source_mode" value="paper" class="mr-2" onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-primary"><i class="fas fa-scroll text-danger mr-1"></i> পেপার বিল্ডার থেকে</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-6 mb-2 mb-md-0">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcRandom" style="cursor: pointer;">
                                         <input type="radio" id="srcRandom" name="source_mode" value="random" class="mr-2" onchange="toggleLibSourceMode()">
-                                        <span class="font-weight-bold text-sm text-dark">র‍্যান্ডম লটারি ভিত্তিক</span>
+                                        <span class="font-weight-bold text-sm text-dark"><i class="fas fa-dice text-success mr-1"></i> র‍্যান্ডম লটারি ভিত্তিক</span>
                                     </label>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcAll" style="cursor: pointer;">
                                         <input type="radio" id="srcAll" name="source_mode" value="all" class="mr-2" onchange="toggleLibSourceMode()">
-                                        <span class="font-weight-bold text-sm text-dark">সব প্রশ্ন থেকে</span>
+                                        <span class="font-weight-bold text-sm text-dark"><i class="fas fa-layer-group text-info mr-1"></i> সব প্রশ্ন থেকে</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Paper Builder Selector (Active when srcPaper is chosen) -->
+                        <div id="libPaperBlock" class="form-group mb-3 p-3 rounded border border-danger shadow-xs" style="display: none; background-color: #FEF2F2;">
+                            <label class="font-weight-bold text-sm text-danger">
+                                <i class="fas fa-file-alt mr-1"></i> পেপার বিল্ডারের প্রশ্নপত্র (Question Paper) বেছে নিন: <span class="text-danger">*</span>
+                            </label>
+                            <select name="paper_id" id="libPaperSelect" class="form-control">
+                                <option value="">-- পেপার বিল্ডার থেকে তৈরি প্রশ্নপত্র বেছে নিন --</option>
+                                @if(isset($questionPapers) && count($questionPapers) > 0)
+                                    @foreach($questionPapers as $paper)
+                                        <option value="{{ $paper->id }}">
+                                            {{ $paper->title }} (কোড: {{ $paper->paper_code }} | প্রশ্ন: {{ $paper->items_count }}টি | মোট নম্বর: {{ $paper->total_marks }})
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="" disabled>এখনো কোনো প্রশ্নপত্র তৈরি করা হয়নি (পেপার বিল্ডারে যান)</option>
+                                @endif
+                            </select>
+                            <small class="text-muted d-block mt-1">নির্বাচিত প্রশ্নপত্রের সকল প্রশ্ন, সেকশন মার্কস ও অপশনসমূহ স্বয়ংক্রিয়ভাবে এই কুইজে যুক্ত হয়ে যাবে।</small>
+                        </div>
+
+                        <!-- Category Selector -->
                         <div id="libCategoryBlock" class="form-group mb-3">
                             <label class="font-weight-bold text-sm">প্রশ্ন লাইব্রেরির ক্যাটাগরি বেছে নিন:</label>
                             <select name="category" class="form-control">
@@ -639,7 +672,26 @@
                             </select>
                         </div>
 
-                        <div class="form-group mb-0">
+                        <!-- Question Type Selector (As requested by user) -->
+                        <div id="libTypeBlock" class="form-group mb-3">
+                            <label class="font-weight-bold text-sm">প্রশ্নের ধরন (Question Type):</label>
+                            <select name="question_type" class="form-control">
+                                <option value="">-- যেকোনো ধরনের প্রশ্ন (All Types) --</option>
+                                <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                                <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                                <option value="mcq_single">MCQ (বহুনির্বাচনি)</option>
+                                <option value="mcq_multi">বহুপদী সমাপ্তিসূচক (Multiple Select)</option>
+                                <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short Question)</option>
+                                <option value="creative">সৃজনশীল (Creative CQ)</option>
+                                <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                                <option value="descriptive">রচনামূলক (Descriptive)</option>
+                                <option value="matching">বাম-ডান মিলকরণ (Matching)</option>
+                            </select>
+                            <small class="text-muted">নির্দিষ্ট ধরনের প্রশ্ন বাছাই করতে চাইলে এটি নির্বাচন করুন।</small>
+                        </div>
+
+                        <!-- Question Count -->
+                        <div id="libCountBlock" class="form-group mb-0">
                             <label class="font-weight-bold text-sm">কতটি প্রশ্ন যুক্ত করতে চান? (সংখ্যা লিখুন)</label>
                             <input type="number" name="count" class="form-control" value="25" min="1" max="200" placeholder="যেমন: 25">
                             <small class="text-muted">ডিফল্টভাবে ২৫টি প্রশ্ন যুক্ত হবে। চাইলে সংখ্যা বাড়াতে বা কমাতে পারেন।</small>
@@ -958,8 +1010,21 @@ function updateLibFormAction(quizId) {
 function toggleLibSourceMode() {
     var mode = document.querySelector('input[name="source_mode"]:checked').value;
     var catBlock = document.getElementById('libCategoryBlock');
+    var typeBlock = document.getElementById('libTypeBlock');
+    var paperBlock = document.getElementById('libPaperBlock');
+    var countBlock = document.getElementById('libCountBlock');
+
     if (catBlock) {
         catBlock.style.display = (mode === 'category') ? 'block' : 'none';
+    }
+    if (paperBlock) {
+        paperBlock.style.display = (mode === 'paper') ? 'block' : 'none';
+    }
+    if (countBlock) {
+        countBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    }
+    if (typeBlock) {
+        typeBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
     }
 }
 

@@ -72,6 +72,13 @@
                     <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-outline-secondary shadow-sm mr-1">
                         <i class="fas fa-arrow-left mr-1"></i> সকল রেজাল্ট তালিকায় ফিরুন
                     </a>
+                    <form action="{{ route('admin.quizzes.attempt.destroy', $attempt->id) }}" method="POST" class="d-inline" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর পরীক্ষার ফলাফলটি মুছে ফেলতে চান? মুছে ফেললে শিক্ষার্থী পুনরায় এই পরীক্ষায় অংশগ্রহণ করতে পারবে।');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger shadow-sm mr-1" title="এই ফলাফলটি মুছে ফেলুন">
+                            <i class="fas fa-trash-alt mr-1"></i> ফলাফল মুছুন
+                        </button>
+                    </form>
                     <button type="button" class="btn btn-primary shadow-sm" onclick="window.print()">
                         <i class="fas fa-print mr-1"></i> উত্তরপত্র প্রিন্ট করুন
                     </button>
