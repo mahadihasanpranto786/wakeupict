@@ -621,13 +621,13 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
     Route::get('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@attemptDetail')->name('attempt-detail');
     Route::delete('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroyAttempt')->name('attempt.destroy');
-    Route::post('/reports/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyAttempts')->name('reports.bulk-delete');
+    Route::match(['GET', 'POST'], '/reports/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyAttempts')->name('reports.bulk-delete');
     Route::post('/{id}/generate-sets', 'backend\theme\clasic\lms\AdminQuizController@generateSets')->name('generate-sets');
     Route::put('/{id}', 'backend\theme\clasic\lms\AdminQuizController@update')->name('update');
     Route::post('/{id}/import-from-library', 'backend\theme\clasic\lms\AdminQuizController@importFromLibrary')->name('import-from-library');
     Route::get('/{id}/questions', 'backend\theme\clasic\lms\AdminQuizController@manageQuestions')->name('questions');
     Route::delete('/{id}/questions/{questionId}', 'backend\theme\clasic\lms\AdminQuizController@deleteQuestion')->name('delete-question');
-    Route::post('/{id}/questions/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDeleteQuestions')->name('questions.bulk-delete');
+    Route::match(['GET', 'POST'], '/{id}/questions/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDeleteQuestions')->name('questions.bulk-delete');
     Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');
     Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
 });

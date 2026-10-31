@@ -422,6 +422,10 @@ class AdminQuizController extends Controller
     {
         $quiz = LmsQuiz::findOrFail($quizId);
 
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.questions', $quiz->id);
+        }
+
         $request->validate([
             'question_ids' => 'required|array|min:1',
             'question_ids.*' => 'integer|exists:lms_questions,id',
@@ -654,6 +658,10 @@ class AdminQuizController extends Controller
      */
     public function bulkDestroyAttempts(Request $request)
     {
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.reports');
+        }
+
         $request->validate([
             'attempt_ids' => 'required|array|min:1',
             'attempt_ids.*' => 'integer|exists:lms_quiz_attempts,id',

@@ -674,5 +674,45 @@ class QuestionBookAndPaperBuilderTest extends TestCase
         $fillBlankQ2->delete();
         $mcqQ1->delete();
     }
+
+    /**
+     * Test adding section with Bengali UTF-8 section_code and Bengali numerals in marks
+     */
+    public function test_admin_can_add_section_with_bengali_characters_and_numerals()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'    => 'QP-BN-TEST-' . rand(1000, 9999) . '-' . time(),
+            'title'         => 'Bengali Section Test Paper',
+            'course_id'     => $this->course->id,
+            'total_marks'   => 10.00,
+            'status'        => 'draft',
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.question-papers.add-section', $paper->id), [
+                'section_code'       => 'বহুনির্বাচনী (MCQ)',
+                'title'              => 'সংক্ষিপ্ত প্রশ্ন',
+                'marks_per_question' => '১.৫',
+                'instructions'       => 'যেকোনো ১০টি প্রশ্নের উত্তর দাও',
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $json = $response->json();
+        $this->assertTrue(mb_check_encoding($json['section']['section_code'], 'UTF-8'));
+        $this->assertEquals('বহুনির্বাচনী (MCQ)', $json['section']['section_code']);
+
+        $section = LmsQuestionPaperSection::where('paper_id', $paper->id)->first();
+        $this->assertNotNull($section);
+        $this->assertEquals('বহুনির্বাচনী (MCQ)', $section->section_code);
+        $this->assertEquals(1.5, (float)$section->marks_per_question);
+
+        // Clean up
+        $paper->sections()->delete();
+        $paper->delete();
+    }
 }
 

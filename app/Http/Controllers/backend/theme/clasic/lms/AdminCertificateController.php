@@ -92,7 +92,7 @@ class AdminCertificateController extends Controller
         if ($existing) {
             $existing->update([
                 'title'            => $title,
-                'grade'            => strtoupper(trim($request->grade)),
+                'grade'            => mb_strtoupper(trim((string)$request->grade), 'UTF-8'),
                 'score_percentage' => (float) $request->score_percentage,
                 'issue_date'       => Carbon::parse($request->issue_date),
                 'status'           => $request->status,
@@ -106,7 +106,7 @@ class AdminCertificateController extends Controller
             'course_id'          => $request->course_id,
             'certificate_code'   => LmsCertificate::generateCertificateCode(),
             'title'              => $title,
-            'grade'              => strtoupper(trim($request->grade)),
+            'grade'              => mb_strtoupper(trim((string)$request->grade), 'UTF-8'),
             'score_percentage'   => (float) $request->score_percentage,
             'issue_date'         => Carbon::parse($request->issue_date),
             'status'             => $request->status,
@@ -148,7 +148,7 @@ class AdminCertificateController extends Controller
         $cert = LmsCertificate::findOrFail($id);
         $cert->update([
             'title'            => $request->title,
-            'grade'            => strtoupper(trim($request->grade)),
+            'grade'            => mb_strtoupper(trim((string)$request->grade), 'UTF-8'),
             'score_percentage' => (float) $request->score_percentage,
             'issue_date'       => Carbon::parse($request->issue_date),
             'status'           => $request->status,

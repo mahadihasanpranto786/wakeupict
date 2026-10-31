@@ -418,11 +418,19 @@ class QuestionPaperBuilderController extends Controller
     {
         $paper = LmsQuestionPaper::findOrFail($id);
 
+        // Normalize Bengali numerals in marks_per_question if entered (e.g. '১' => '1')
+        if ($request->filled('marks_per_question')) {
+            $bngToEng = ['০'=>'0','১'=>'1','২'=>'2','৩'=>'3','৪'=>'4','৫'=>'5','৬'=>'6','৭'=>'7','৮'=>'8','৯'=>'9'];
+            $request->merge([
+                'marks_per_question' => strtr((string)$request->marks_per_question, $bngToEng)
+            ]);
+        }
+
         $request->validate([
             'title'              => 'required|string|max:150',
             'instructions'       => 'nullable|string',
-            'section_code'       => 'required|string|max:20',
-            'marks_per_question' => 'nullable|numeric|min:0.5',
+            'section_code'       => 'required|string|max:100',
+            'marks_per_question' => 'nullable|numeric|min:0.1',
         ]);
 
         $nextOrder = ($paper->sections()->max('order_index') ?: 0) + 1;
@@ -431,7 +439,7 @@ class QuestionPaperBuilderController extends Controller
             'paper_id'           => $paper->id,
             'title'              => $request->title,
             'instructions'       => $request->instructions,
-            'section_code'       => strtoupper(trim($request->section_code)),
+            'section_code'       => mb_strtoupper(trim((string)$request->section_code), 'UTF-8'),
             'order_index'        => $nextOrder,
             'marks_per_question' => $request->marks_per_question ? (float)$request->marks_per_question : 1.00,
             'total_marks'        => 0.00,
@@ -448,7 +456,7 @@ class QuestionPaperBuilderController extends Controller
                     'instructions' => $section->instructions,
                     'order_index'  => $section->order_index,
                 ]
-            ]);
+            ], 200, [], JSON_UNESCAPED_UNICODE);
         }
 
         return redirect()->back()->with('success', "নতুন সেকশন '{$section->title}' তৈরি হয়েছে!");

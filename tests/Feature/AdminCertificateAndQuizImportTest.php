@@ -602,5 +602,10 @@ class AdminCertificateAndQuizImportTest extends TestCase
 
         $quiz->refresh();
         $this->assertEquals(0, (float)$quiz->total_marks);
+
+        // Verify GET request also redirects gracefully without 404
+        $getRes = $this->actingAs($this->adminUser)
+            ->get(route('admin.quizzes.questions.bulk-delete', $quiz->id));
+        $getRes->assertRedirect(route('admin.quizzes.questions', $quiz->id));
     }
 }

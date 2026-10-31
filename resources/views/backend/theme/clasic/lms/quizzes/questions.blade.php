@@ -128,13 +128,9 @@
                                 {{ (float)$q->marks }}
                             </td>
                             <td class="text-center">
-                                <form action="{{ route('admin.quizzes.delete-question', [$quiz->id, $q->id]) }}" method="POST" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই প্রশ্নটি এই কুইজ থেকে মুছে ফেলতে চান?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="কুইজ থেকে বাদ দিন">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="কুইজ থেকে বাদ দিন" onclick="confirmSingleQuestionDelete({{ $q->id }})">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -161,7 +157,13 @@
         @endif
     </div>
 
-    <script>
+        <!-- Hidden Single Delete Form -->
+    <form id="singleQuestionDeleteForm" action="" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+<script>
         function updateBulkQuestionBar() {
             var checkboxes = document.querySelectorAll('.question-checkbox:checked');
             var count = checkboxes.length;
@@ -206,7 +208,15 @@
             updateBulkQuestionBar();
         }
 
-        function executeBulkDeleteQuestions() {
+                function confirmSingleQuestionDelete(questionId) {
+            if (confirm('আপনি কি নিশ্চিতভাবে এই প্রশ্নটি এই কুইজ থেকে মুছে ফেলতে চান?')) {
+                var form = document.getElementById('singleQuestionDeleteForm');
+                form.action = '/admin/quizzes/{{ $quiz->id }}/questions/' + questionId;
+                form.submit();
+            }
+        }
+
+function executeBulkDeleteQuestions() {
             var checked = document.querySelectorAll('.question-checkbox:checked');
             if (checked.length === 0) {
                 alert('অনুগ্রহ করে প্রথমে কমপক্ষে একটি প্রশ্ন নির্বাচন করুন।');
