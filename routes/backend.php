@@ -619,7 +619,12 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::post('/import', 'backend\theme\clasic\lms\AdminQuizController@importExcel')->name('import');
     Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
     Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
+    Route::get('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@attemptDetail')->name('attempt-detail');
     Route::post('/{id}/generate-sets', 'backend\theme\clasic\lms\AdminQuizController@generateSets')->name('generate-sets');
+    Route::put('/{id}', 'backend\theme\clasic\lms\AdminQuizController@update')->name('update');
+    Route::post('/{id}/import-from-library', 'backend\theme\clasic\lms\AdminQuizController@importFromLibrary')->name('import-from-library');
+    Route::get('/{id}/questions', 'backend\theme\clasic\lms\AdminQuizController@manageQuestions')->name('questions');
+    Route::delete('/{id}/questions/{questionId}', 'backend\theme\clasic\lms\AdminQuizController@deleteQuestion')->name('delete-question');
     Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');
     Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
 });
@@ -636,6 +641,7 @@ Route::group(['prefix' => 'admin/question-book', 'as' => 'admin.question-book.']
     Route::post('/{id}/duplicate', 'backend\theme\clasic\lms\QuestionBookController@duplicate')->name('duplicate');
     Route::post('/{id}/archive-toggle', 'backend\theme\clasic\lms\QuestionBookController@archiveToggle')->name('archive-toggle');
     Route::post('/bulk-action', 'backend\theme\clasic\lms\QuestionBookController@bulkAction')->name('bulk-action');
+    Route::post('/assign-to-quiz', 'backend\theme\clasic\lms\QuestionBookController@assignToQuiz')->name('assign-to-quiz');
     Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionBookController@destroy')->name('destroy');
 });
 

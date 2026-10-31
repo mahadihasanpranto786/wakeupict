@@ -26,6 +26,9 @@
                     <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-outline-info shadow-sm mr-1">
                         <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ডাউনলোড
                     </a>
+                    <button type="button" class="btn btn-warning shadow-sm mr-1 font-weight-bold" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important;">
+                        <i class="fas fa-book-open mr-1"></i> লাইব্রেরি থেকে প্রশ্ন যোগ (No File)
+                    </button>
                     <button type="button" class="btn btn-success shadow-sm mr-1" data-toggle="modal" data-target="#excelImportModal">
                         <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
                     </button>
@@ -155,7 +158,15 @@
                         <tr>
                             <td class="text-center text-muted text-sm">{{ $loop->iteration + ($quizzes->currentPage() - 1) * $quizzes->perPage() }}</td>
                             <td>
-                                <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ $quiz->title }}</div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ $quiz->title }}</span>
+                                    <button type="button" class="btn btn-link btn-xs text-primary p-0 ml-1" title="কোর্স ও কুইজ শিরোনাম এডিট করুন" onclick="openEditQuizModal({{ json_encode($quiz) }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                                <a href="{{ route('admin.quizzes.questions', $quiz->id) }}" class="text-xs text-info font-weight-semibold d-inline-block mt-0.5" title="প্রশ্ন তালিকা দেখুন">
+                                    <i class="fas fa-tasks mr-1"></i> প্রশ্ন তালিকা দেখুন ({{ $quiz->questions_count }}টি প্রশ্ন)
+                                </a>
                                 <div class="text-xs text-primary font-weight-semibold">
                                     <i class="fas fa-graduation-cap mr-1"></i> {{ $quiz->course ? $quiz->course->course_title : 'General / All' }}
                                     @if($quiz->subject_code)
@@ -187,6 +198,29 @@
                                 <div class="text-xs text-muted mt-1">
                                     <i class="far fa-clock mr-1"></i> {{ $quiz->duration_minutes }} মিনিট
                                 </div>
+                                <div class="mt-1">
+                                    @if($quiz->max_attempts > 0)
+                                        <span class="badge badge-warning text-xs font-weight-bold" style="color: #000000 !important;" title="সর্বোচ্চ {{ $quiz->max_attempts }} বার পরীক্ষা দিতে পারবে">
+                                            <i class="fas fa-redo-alt mr-1"></i> রিটেক: {{ $quiz->max_attempts }} বার
+                                        </span>
+                                    @else
+                                        <span class="badge badge-light border text-xs text-muted" title="যত খুশি ততবার রিটেক দেওয়া যাবে">
+                                            <i class="fas fa-infinity mr-1"></i> আনলিমিটেড রিটেক
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="mt-0.5">
+                                    @if($quiz->shuffle_questions)
+                                        <span class="badge badge-light border text-xs text-primary" title="প্রতি রিটেকে প্রশ্নের সিরিয়াল নম্বর এলোমেলো হবে">
+                                            <i class="fas fa-random mr-0.5"></i> প্রশ্ন শাফলিং
+                                        </span>
+                                    @endif
+                                    @if($quiz->shuffle_options)
+                                        <span class="badge badge-light border text-xs text-success" title="প্রতি রিটেকে উত্তরের অপশন (ক, খ, গ, ঘ) শাফলিং হবে">
+                                            <i class="fas fa-dice mr-0.5"></i> অপশন শাফলিং
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="text-center">
                                 <span class="badge badge-pill badge-info px-2.5 py-1 text-sm">
@@ -213,6 +247,18 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <!-- View/Manage Questions in Quiz -->
+                                    <a href="{{ route('admin.quizzes.questions', $quiz->id) }}" class="btn btn-outline-info" title="কুইজের প্রশ্ন তালিকা ও ডিলিট/ম্যানেজ করুন">
+                                        <i class="fas fa-tasks"></i>
+                                    </a>
+                                    <!-- Edit Quiz Info (Title, Course, Duration, etc.) -->
+                                    <button type="button" class="btn btn-outline-secondary" title="কোর্স ও কুইজ শিরোনাম সম্পাদনা করুন" onclick="openEditQuizModal({{ json_encode($quiz) }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <!-- Quick Import from Question Library (No File Required) -->
+                                    <button type="button" class="btn btn-outline-success" title="ফাইল ছাড়া লাইব্রেরি থেকে সরাসরি প্রশ্ন যুক্ত করুন" onclick="openLibraryImportForQuiz({{ $quiz->id }}, '{{ addslashes($quiz->title) }}')">
+                                        <i class="fas fa-book-open"></i>
+                                    </button>
                                     <!-- Toggle Publish -->
                                     <form action="{{ route('admin.quizzes.toggle', $quiz->id) }}" method="POST" class="d-inline">
                                         @csrf
@@ -279,6 +325,15 @@
                     </button>
                 </div>
                 <div class="modal-body p-4">
+                    <!-- Library Import Notice (No File) -->
+                    <div class="alert alert-warning border-0 d-flex align-items-center justify-content-between p-2.5 mb-3 rounded shadow-sm" style="background-color: #FEF3C7; color: #92400E;">
+                        <div class="text-xs font-weight-bold">
+                            <i class="fas fa-lightbulb text-warning mr-1"></i> এক্সেল ফাইল নেই? প্রশ্ন ব্যাংক ও লাইব্রেরি থেকে ফাইল ছাড়াই প্রশ্ন যোগ করতে চান?
+                        </div>
+                        <button type="button" class="btn btn-xs btn-warning font-weight-bold shadow-xs text-nowrap ml-2" style="color: #000000 !important;" data-dismiss="modal" data-toggle="modal" data-target="#libraryImportModal">
+                            <i class="fas fa-book-open mr-1"></i> লাইব্রেরি থেকে যোগ করুন
+                        </button>
+                    </div>
                     <!-- Instruction alert with sample download -->
                     <div class="alert alert-light border border-success/30 p-3 mb-4 rounded">
                         <div class="d-flex justify-content-between align-items-center">
@@ -397,7 +452,211 @@
     </div>
 </div>
 
-<!-- Modal: Create New Quiz Manually -->
+    <!-- Modal: Edit Quiz Info -->
+    <div class="modal fade" id="editQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <form id="editQuizForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title font-weight-bold">
+                            <i class="fas fa-edit mr-1"></i> কোর্স ও কুইজ শিরোনাম সম্পাদনা
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">কোর্স নির্বাচন করুন <span class="text-danger">*</span></label>
+                                    <select name="course_id" id="editQuizCourseId" class="form-control" required>
+                                        @foreach($courses as $c)
+                                            <option value="{{ $c->id }}">{{ $c->course_title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">কুইজ শিরোনাম <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" id="editQuizTitle" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">কুইজের ধরণ</label>
+                                    <select name="quiz_type" id="editQuizType" class="form-control">
+                                        <option value="practice">অনুশীলন (Practice)</option>
+                                        <option value="exam">চূড়ান্ত পরীক্ষা (Live Exam)</option>
+                                        <option value="class_test">ক্লাস টেস্ট (Class Test)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">সময়সীমা (মিনিট) <span class="text-danger">*</span></label>
+                                    <input type="number" name="duration_minutes" id="editQuizDuration" class="form-control" min="1" max="300" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">পাস মার্কস</label>
+                                    <input type="number" step="0.5" name="pass_marks" id="editQuizPassMarks" class="form-control" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">প্রশ্ন সেট কোড</label>
+                                    <input type="text" name="question_set" id="editQuizSet" class="form-control" placeholder="যেমন: Set A">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">নেগেটিভ মার্ক প্রতি ভুল উত্তরে</label>
+                                    <input type="number" step="0.05" name="negative_marks" id="editQuizNegativeMarks" class="form-control" min="0" value="0.00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">সর্বোচ্চ রিটেক সংখ্যা (Max Attempts)</label>
+                                    <input type="number" name="max_attempts" id="editQuizMaxAttempts" class="form-control" min="0" max="50" value="0">
+                                    <small class="text-muted d-block mt-0.5">০ = আনলিমিটেড বার রিটেক; ১ = কোনো রিটেক নেই; ২ বা ৩ = সর্বোচ্চ ততবার।</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm">প্রতি রিটেকে শাফলিং সেটিংস</label>
+                                    <div class="custom-control custom-checkbox mt-1">
+                                        <input type="checkbox" class="custom-control-input" id="editQuizShuffleQuestions" name="shuffle_questions" value="1">
+                                        <label class="custom-control-label text-sm font-weight-normal text-dark" for="editQuizShuffleQuestions">
+                                            <i class="fas fa-random text-primary mr-1"></i> প্রশ্নের সিরিয়াল নম্বর এলোমেলো (Shuffle)
+                                        </label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox mt-1">
+                                        <input type="checkbox" class="custom-control-input" id="editQuizShuffleOptions" name="shuffle_options" value="1">
+                                        <label class="custom-control-label text-sm font-weight-normal text-dark" for="editQuizShuffleOptions">
+                                            <i class="fas fa-dice text-success mr-1"></i> উত্তরের অপশন (ক, খ, গ, ঘ) এলোমেলো (Shuffle)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-sm">বর্ণনা / নির্দেশাবলী</label>
+                            <textarea name="description" id="editQuizDescription" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold">
+                            <i class="fas fa-save mr-1"></i> আপডেট সংরক্ষণ করুন
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Library Import to Quiz (No File Required) -->
+    <div class="modal fade" id="libraryImportModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <form id="libraryImportForm" method="POST">
+                    @csrf
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title font-weight-bold" style="color: #000000 !important;">
+                            <i class="fas fa-book-open mr-1"></i> প্রশ্ন লাইব্রেরি থেকে সরাসরি কুইজে প্রশ্ন যোগ করুন (ফাইল লাগবে না)
+                        </h5>
+                        <button type="button" class="close text-dark" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-light border border-warning p-3 mb-4 rounded" style="background-color: #FFFBEB;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle text-warning fa-2x mr-3"></i>
+                                <div>
+                                    <div class="font-weight-bold text-dark">কোনো এক্সেল ফাইল আপলোড ছাড়াই প্রশ্ন যোগ করুন</div>
+                                    <div class="text-xs text-muted">আপনার কেন্দ্রীয় প্রশ্ন ব্যাংকের (৪২২+ প্রশ্ন) যেকোনো ক্যাটাগরি বা সেট থেকে সরাসরি এই কুইজে প্রশ্ন যুক্ত করতে পারবেন।</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-sm">টার্গেট কুইজ নির্বাচন করুন: <span class="text-danger">*</span></label>
+                            <select name="quiz_id" id="libTargetQuizSelect" class="form-control" onchange="updateLibFormAction(this.value)" required>
+                                <option value="">-- কুইজ নির্বাচন করুন --</option>
+                                @foreach($quizzes as $qz)
+                                    <option value="{{ $qz->id }}">{{ $qz->title }} ({{ $qz->course ? $qz->course->course_title : 'General' }} | বর্তমানে {{ $qz->questions_count }}টি প্রশ্ন)</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-sm">প্রশ্ন নির্বাচনের পদ্ধতি: <span class="text-danger">*</span></label>
+                            <div class="row">
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-white shadow-sm" for="srcCategory" style="cursor: pointer;">
+                                        <input type="radio" id="srcCategory" name="source_mode" value="category" class="mr-2" checked onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-dark">ক্যাটাগরি ভিত্তিক</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcRandom" style="cursor: pointer;">
+                                        <input type="radio" id="srcRandom" name="source_mode" value="random" class="mr-2" onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-dark">র‍্যান্ডম লটারি ভিত্তিক</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcAll" style="cursor: pointer;">
+                                        <input type="radio" id="srcAll" name="source_mode" value="all" class="mr-2" onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-dark">সব প্রশ্ন থেকে</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="libCategoryBlock" class="form-group mb-3">
+                            <label class="font-weight-bold text-sm">প্রশ্ন লাইব্রেরির ক্যাটাগরি বেছে নিন:</label>
+                            <select name="category" class="form-control">
+                                <option value="">-- যেকোনো ক্যাটাগরি --</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-sm">কতটি প্রশ্ন যুক্ত করতে চান? (সংখ্যা লিখুন)</label>
+                            <input type="number" name="count" class="form-control" value="25" min="1" max="200" placeholder="যেমন: 25">
+                            <small class="text-muted">ডিফল্টভাবে ২৫টি প্রশ্ন যুক্ত হবে। চাইলে সংখ্যা বাড়াতে বা কমাতে পারেন।</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="submit" class="btn btn-warning font-weight-bold" style="color: #000000 !important;">
+                            <i class="fas fa-plus-circle mr-1"></i> কুইজে প্রশ্নসমূহ যুক্ত করুন
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create New Quiz Manually -->
 <div class="modal fade" id="createQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content shadow-lg border-0">
@@ -500,6 +759,33 @@
                             <div class="form-group">
                                 <label class="font-weight-bold text-sm">পাস মার্কস</label>
                                 <input type="number" step="0.5" name="pass_marks" class="form-control" value="5.0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">সর্বোচ্চ রিটেক সংখ্যা (Max Attempts)</label>
+                                <input type="number" name="max_attempts" class="form-control" value="0" min="0" max="50">
+                                <small class="text-muted d-block mt-0.5">০ = আনলিমিটেড বার রিটেক; ১ = কোনো রিটেক নেই (১ বারই দেওয়া যাবে); ২ বা ৩ = সর্বোচ্চ ততবার।</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-sm">প্রতি রিটেকে শাফলিং সেটিংস</label>
+                                <div class="custom-control custom-checkbox mt-1">
+                                    <input type="checkbox" class="custom-control-input" id="createShuffleQ" name="shuffle_questions" value="1" checked>
+                                    <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleQ">
+                                        <i class="fas fa-random text-primary mr-1"></i> প্রশ্নের সিরিয়াল নম্বর এলোমেলো (Shuffle)
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-checkbox mt-1">
+                                    <input type="checkbox" class="custom-control-input" id="createShuffleOpt" name="shuffle_options" value="1" checked>
+                                    <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleOpt">
+                                        <i class="fas fa-dice text-success mr-1"></i> উত্তরের অপশন (ক, খ, গ, ঘ) এলোমেলো (Shuffle)
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -634,6 +920,46 @@ function toggleImportMode() {
             cardNew.classList.remove('shadow-sm');
             cardNew.classList.add('bg-light');
         }
+    }
+}
+
+function openEditQuizModal(quiz) {
+    document.getElementById('editQuizForm').action = "/admin/quizzes/" + quiz.id;
+    document.getElementById('editQuizCourseId').value = quiz.course_id;
+    document.getElementById('editQuizTitle').value = quiz.title;
+    document.getElementById('editQuizType').value = quiz.quiz_type || 'practice';
+    document.getElementById('editQuizDuration').value = quiz.duration_minutes || 20;
+    document.getElementById('editQuizPassMarks').value = quiz.pass_marks || 5.0;
+    document.getElementById('editQuizSet').value = quiz.question_set || 'Set A';
+    document.getElementById('editQuizNegativeMarks').value = quiz.negative_marks || 0.00;
+    document.getElementById('editQuizDescription').value = quiz.description || '';
+    document.getElementById('editQuizMaxAttempts').value = (quiz.max_attempts !== undefined && quiz.max_attempts !== null) ? quiz.max_attempts : 0;
+    document.getElementById('editQuizShuffleQuestions').checked = (quiz.shuffle_questions !== false && quiz.shuffle_questions !== 0);
+    document.getElementById('editQuizShuffleOptions').checked = (quiz.shuffle_options !== false && quiz.shuffle_options !== 0);
+    $('#editQuizModal').modal('show');
+}
+
+function openLibraryImportForQuiz(quizId, quizTitle) {
+    var select = document.getElementById('libTargetQuizSelect');
+    if (select) {
+        select.value = quizId;
+    }
+    updateLibFormAction(quizId);
+    $('#libraryImportModal').modal('show');
+}
+
+function updateLibFormAction(quizId) {
+    var form = document.getElementById('libraryImportForm');
+    if (form && quizId) {
+        form.action = "/admin/quizzes/" + quizId + "/import-from-library";
+    }
+}
+
+function toggleLibSourceMode() {
+    var mode = document.querySelector('input[name="source_mode"]:checked').value;
+    var catBlock = document.getElementById('libCategoryBlock');
+    if (catBlock) {
+        catBlock.style.display = (mode === 'category') ? 'block' : 'none';
     }
 }
 

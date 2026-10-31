@@ -172,21 +172,26 @@ class StudentQuizController extends Controller
                 ->orderBy('order_index', 'asc')
                 ->get();
 
+            if ($quiz->shuffle_questions) {
+                $paperItems = $paperItems->shuffle()->values();
+            }
+
             foreach ($paperItems as $it) {
                 $q = $it->masterQuestion;
                 if (!$q) continue;
 
                 $opts = $q->options;
                 if ($quiz->shuffle_options) {
-                    $opts = $opts->shuffle();
+                    $opts = $opts->shuffle()->values();
                 }
 
                 $optsArray = [];
+                $optIdx = 0;
                 foreach ($opts as $o) {
                     $optsArray[] = [
                         'id' => $o->id,
                         'text' => $o->option_text,
-                        'order' => $o->order_index,
+                        'order' => $optIdx++,
                     ];
                 }
 
@@ -217,8 +222,9 @@ class StudentQuizController extends Controller
             $questionsQuery = $quiz->activeQuestions()->with('options');
             $availableSets = $quiz->getAvailableSets();
             if (count($availableSets) > 1 && $assignedSet) {
-                $questionsQuery->where(function($q) use ($assignedSet) {
-                    $q->where('set_code', $assignedSet)
+                $equivalents = \App\model\LmsQuiz::getEquivalentSetCodes($assignedSet);
+                $questionsQuery->where(function($q) use ($equivalents) {
+                    $q->whereIn('set_code', $equivalents)
                       ->orWhereNull('set_code')
                       ->orWhere('set_code', '');
                 });
@@ -229,21 +235,22 @@ class StudentQuizController extends Controller
             }
 
             if ($quiz->shuffle_questions) {
-                $rawQuestions = $rawQuestions->shuffle();
+                $rawQuestions = $rawQuestions->shuffle()->values();
             }
 
             foreach ($rawQuestions as $q) {
                 $opts = $q->options;
                 if ($quiz->shuffle_options) {
-                    $opts = $opts->shuffle();
+                    $opts = $opts->shuffle()->values();
                 }
 
                 $optsArray = [];
+                $optIdx = 0;
                 foreach ($opts as $o) {
                     $optsArray[] = [
                         'id' => $o->id,
                         'text' => $o->option_text,
-                        'order' => $o->order_index,
+                        'order' => $optIdx++,
                     ];
                 }
 
@@ -637,6 +644,14 @@ class StudentQuizController extends Controller
                     }
                     if (isset($snap['section_instructions'])) {
                         $q->section_instructions = $snap['section_instructions'];
+                    }
+                    if (!empty($snap['options']) && is_array($snap['options'])) {
+                        $optOrderIds = array_column($snap['options'], 'id');
+                        $sortedOpts = $q->options->sortBy(function($opt) use ($optOrderIds) {
+                            $idx = array_search($opt->id, $optOrderIds);
+                            return $idx !== false ? $idx : 999;
+                        })->values();
+                        $q->setRelation('options', $sortedOpts);
                     }
                 }
             }

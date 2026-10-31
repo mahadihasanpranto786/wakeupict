@@ -648,6 +648,43 @@ class QuestionBookController extends Controller
             return redirect()->back()->withErrors(['error' => 'অনুগ্রহ করে অন্তত একটি প্রশ্ন নির্বাচন করুন।']);
         }
 
+        if ($action === 'add_to_quiz') {
+            $quizId = $request->input('target_quiz_id');
+            $quiz = LmsQuiz::findOrFail($quizId);
+            $order = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
+            $added = 0;
+
+            foreach ($selectedIds as $qId) {
+                $q = LmsQuestion::with('options')->find($qId);
+                if ($q) {
+                    $order++;
+                    // Duplicate or attach question directly to this quiz
+                    $newQ = $q->replicate();
+                    $newQ->quiz_id = $quiz->id;
+                    $newQ->course_id = $quiz->course_id;
+                    $newQ->parent_question_id = $q->id; // Link to master question in library
+                    $newQ->order_index = $order;
+                    $newQ->is_active = true;
+                    $newQ->is_archived = false;
+                    $newQ->save();
+
+                    foreach ($q->options as $opt) {
+                        $newOpt = $opt->replicate();
+                        $newOpt->question_id = $newQ->id;
+                        $newOpt->save();
+                    }
+                    $added++;
+                }
+            }
+
+            // Recalculate quiz total marks
+            $totalMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+            $quiz->update(['total_marks' => $totalMarks]);
+
+            return redirect()->route('admin.quizzes.index')
+                ->with('success', "নির্বাচিত {$added}টি প্রশ্ন সফলভাবে কুইজ '{$quiz->title}' এ সেট করা হয়েছে!");
+        }
+
         if ($action === 'add_to_paper') {
             $paperId = $request->input('target_paper_id');
             $paper = LmsQuestionPaper::findOrFail($paperId);
@@ -824,5 +861,47 @@ class QuestionBookController extends Controller
         }
 
         return redirect()->route('admin.question-book.index')->with('success', $msg);
+    }
+
+    /**
+     * AJAX Single Question Assign to Quiz
+     */
+    public function assignToQuiz(Request $request)
+    {
+        $request->validate([
+            'question_id' => 'required|exists:lms_questions,id',
+            'quiz_id'     => 'required|exists:lms_quizzes,id',
+        ]);
+
+        $q = LmsQuestion::with('options')->findOrFail($request->question_id);
+        $quiz = LmsQuiz::findOrFail($request->quiz_id);
+
+        $order = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
+        $order++;
+
+        $newQ = $q->replicate();
+        $newQ->quiz_id = $quiz->id;
+        $newQ->course_id = $quiz->course_id;
+        $newQ->parent_question_id = $q->id;
+        $newQ->order_index = $order;
+        $newQ->is_active = true;
+        $newQ->is_archived = false;
+        $newQ->save();
+
+        foreach ($q->options as $opt) {
+            $newOpt = $opt->replicate();
+            $newOpt->question_id = $newQ->id;
+            $newOpt->save();
+        }
+
+        $totalMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+        $quiz->update(['total_marks' => $totalMarks]);
+        $newCount = LmsQuestion::where('quiz_id', $quiz->id)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => "প্রশ্নটি সফলভাবে কুইজ '{$quiz->title}' এ যুক্ত হয়েছে!",
+            'total_questions' => $newCount,
+        ]);
     }
 }

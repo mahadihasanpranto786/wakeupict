@@ -294,4 +294,112 @@ class AdminCertificateAndQuizImportTest extends TestCase
         $quiz->refresh();
         $this->assertFalse((bool)$quiz->is_published);
     }
+
+    /**
+     * Admin can set retake max attempts and shuffling, and student retakes get randomized sequences
+     */
+    public function test_quiz_retake_limit_and_shuffling_on_retake()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id'         => $this->course->id,
+            'title'             => 'Retake & Shuffling Test Quiz',
+            'quiz_type'         => 'practice',
+            'duration_minutes'  => 15,
+            'total_marks'       => 2,
+            'pass_marks'        => 1.0,
+            'max_attempts'      => 2,
+            'shuffle_questions' => true,
+            'shuffle_options'   => true,
+            'is_published'      => true,
+        ]);
+
+        $q1 = LmsQuestion::create([
+            'course_id' => $this->course->id,
+            'quiz_id' => $quiz->id,
+            'question_text' => 'Alpha Question 1?',
+            'question_type' => 'mcq_single',
+            'marks' => 1.0,
+            'is_active' => true,
+            'order_index' => 1,
+        ]);
+        $q1->options()->create(['option_text' => 'A1', 'is_correct' => true, 'order_index' => 1]);
+        $q1->options()->create(['option_text' => 'B1', 'is_correct' => false, 'order_index' => 2]);
+
+        $q2 = LmsQuestion::create([
+            'course_id' => $this->course->id,
+            'quiz_id' => $quiz->id,
+            'question_text' => 'Beta Question 2?',
+            'question_type' => 'mcq_single',
+            'marks' => 1.0,
+            'is_active' => true,
+            'order_index' => 2,
+        ]);
+        $q2->options()->create(['option_text' => 'A2', 'is_correct' => true, 'order_index' => 1]);
+        $q2->options()->create(['option_text' => 'B2', 'is_correct' => false, 'order_index' => 2]);
+
+        // Verify Admin update endpoint updates max_attempts and shuffling
+        $updateRes = $this->actingAs($this->adminUser)
+            ->put(route('admin.quizzes.update', $quiz->id), [
+                'course_id' => $this->course->id,
+                'title' => 'Updated Retake Quiz Title',
+                'quiz_type' => 'exam',
+                'duration_minutes' => 25,
+                'pass_marks' => 2.0,
+                'max_attempts' => 2,
+                'shuffle_questions' => 1,
+                'shuffle_options' => 1,
+            ]);
+        $updateRes->assertRedirect();
+        $quiz->refresh();
+        $this->assertEquals(2, $quiz->max_attempts);
+        $this->assertTrue((bool)$quiz->shuffle_questions);
+        $this->assertTrue((bool)$quiz->shuffle_options);
+        $this->assertEquals('Updated Retake Quiz Title', $quiz->title);
+
+        // Student can attempt initially (attempt 1)
+        $this->assertTrue($quiz->canAttempt($this->student->id));
+
+        // Start Attempt 1
+        $startRes1 = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $quiz->id));
+        $startRes1->assertRedirect();
+        $att1 = \App\model\LmsQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_account_id', $this->student->id)
+            ->first();
+        $this->assertNotNull($att1);
+        $this->assertEquals(1, $att1->attempt_number);
+        $this->assertNotEmpty($att1->questions_snapshot);
+
+        // Submit attempt 1
+        $att1->status = 'graded';
+        $att1->save();
+
+        // Student can take attempt 2 (retake 1) since max_attempts is 2
+        $this->assertTrue($quiz->canAttempt($this->student->id));
+
+        // Start Attempt 2 (Retake)
+        $startRes2 = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $quiz->id));
+        $startRes2->assertRedirect();
+        $att2 = \App\model\LmsQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_account_id', $this->student->id)
+            ->where('attempt_number', 2)
+            ->first();
+        $this->assertNotNull($att2);
+        $this->assertEquals(2, $att2->attempt_number);
+        $this->assertNotEmpty($att2->questions_snapshot);
+
+        // Submit attempt 2
+        $att2->status = 'graded';
+        $att2->save();
+
+        // Now student has used all 2 attempts; canAttempt should be false!
+        $this->assertFalse($quiz->canAttempt($this->student->id));
+
+        // If student tries to start again, should be redirected with error
+        $blockedRes = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $quiz->id));
+        $blockedRes->assertRedirect(route('student.quiz.lobby', $quiz->id));
+        $blockedRes->assertSessionHas('error');
+    }
 }

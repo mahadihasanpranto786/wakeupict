@@ -844,6 +844,12 @@
                                 <p>Quizzes & Excel Import</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.quizzes.reports') }}" class="nav-link @yield('lms_reports_active')">
+                                <i class="fas fa-chart-line nav-icon text-warning"></i>
+                                <p>Exam Results & Reports</p>
+                            </a>
+                        </li>
                         @if(Auth::check() && (Auth::user()->type == 'Admin' || Auth::user()->excess_type == 'admin' || Auth::user()->excess_type == 3))
                         <li class="nav-item">
                             <a href="{{ route('admin.bteb-omr.index') }}" class="nav-link @yield('lms_bteb_omr_active')">

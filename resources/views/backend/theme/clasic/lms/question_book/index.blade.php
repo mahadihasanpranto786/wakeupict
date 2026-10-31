@@ -259,19 +259,34 @@
                 <div class="d-flex flex-wrap align-items-center">
                     <select name="action" id="bulkActionSelect" class="form-control form-control-sm mr-2 custom-select" style="width: 170px;">
                         <option value="">-- একশন বেছে নিন --</option>
+                        <option value="add_to_quiz">কুইজ / পরীক্ষায় যুক্ত করুন</option>
                         <option value="add_to_paper">প্রশ্নপত্রে যুক্ত করুন</option>
                         <option value="categorize">ক্যাটাগরি পরিবর্তন</option>
                         <option value="export_csv">সিএসভি (CSV) এক্সপোর্ট</option>
                         <option value="archive">আর্কাইভে সরান</option>
                     </select>
 
-                    <!-- Target Paper Selector (shown when add_to_paper selected) -->
-                    <div id="targetPaperWrapper" class="mr-2" style="display: none;">
-                        <select name="target_paper_id" class="form-control form-control-sm custom-select" style="width: 220px;">
-                            @foreach($papers as $p)
-                                <option value="{{ $p->id }}">{{ $p->title }} ({{ $p->paper_set }})</option>
+                                        <!-- Target Quiz Selector (shown when add_to_quiz selected) -->
+                    <div id="targetQuizWrapper" class="mr-2" style="display: none;">
+                        <select name="target_quiz_id" class="form-control form-control-sm custom-select" style="width: 250px;">
+                            @foreach($quizzes as $qz)
+                                <option value="{{ $qz->id }}">{{ $qz->title }} ({{ $qz->course ? $qz->course->course_title : 'General' }} | {{ $qz->questions_count }}টি প্রশ্ন)</option>
                             @endforeach
                         </select>
+                    </div>
+                    <!-- Target Paper Selector (shown when add_to_paper selected) -->
+                    <div id="targetPaperWrapper" class="mr-2" style="display: none;">
+                        @if($papers->isEmpty())
+                            <a href="{{ route('admin.question-papers.index') }}" class="btn btn-sm btn-outline-warning text-nowrap">
+                                <i class="fas fa-plus-circle mr-1"></i> আগে প্রশ্নপত্র তৈরি করুন
+                            </a>
+                        @else
+                            <select name="target_paper_id" class="form-control form-control-sm custom-select" style="width: 220px;">
+                                @foreach($papers as $p)
+                                    <option value="{{ $p->id }}">{{ $p->title }} ({{ $p->paper_set }})</option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
 
                     <!-- New Category Input (shown when categorize selected) -->
@@ -347,6 +362,7 @@
                                             <button type="button" class="dropdown-item" onclick="openEditModal({{ $q->id }})">
                                                 <i class="fas fa-edit text-warning mr-2"></i> সম্পাদনা করুন
                                             </button>
+                                            <button type="button" class="dropdown-item" onclick="quickAddToQuiz({{ $q->id }})"><i class="fas fa-file-excel text-info mr-2"></i> কুইজ / পরীক্ষায় যুক্ত করুন</button>
                                             <button type="button" class="dropdown-item" onclick="quickAddToPaper({{ $q->id }})">
                                                 <i class="fas fa-file-export text-success mr-2"></i> প্রশ্নপত্রে যোগ করুন
                                             </button>
@@ -553,6 +569,7 @@
                                             <button type="button" class="btn btn-outline-secondary" onclick="openEditModal({{ $q->id }})" title="সম্পাদনা">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+                                            <button type="button" class="btn btn-outline-info mr-1" onclick="quickAddToQuiz({{ $q->id }})" title="কুইজ / পরীক্ষায় যোগ করুন"><i class="fas fa-file-excel"></i></button>
                                             <button type="button" class="btn btn-outline-primary" onclick="quickAddToPaper({{ $q->id }})" title="প্রশ্নপত্রে যোগ করুন">
                                                 <i class="fas fa-plus"></i>
                                             </button>
@@ -1053,6 +1070,44 @@
         </div>
     </div>
 
+        <!-- Modal: Quick Add to Quiz Modal -->
+    <div class="modal fade" id="quickAddQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content shadow border-0">
+                <form id="quickAddQuizForm" method="POST">
+                    @csrf
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title font-weight-bold">
+                            <i class="fas fa-file-excel mr-1"></i> কুইজ / পরীক্ষায় যুক্ত করুন
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="question_id" id="quickAddQuizQuestionId">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-xs">লক্ষ্যবর্তী কুইজ নির্বাচন করুন:</label>
+                            <select name="target_quiz_id" id="quickAddQuizSelect" class="form-control custom-select" required>
+                                @foreach($quizzes as $qz)
+                                    <option value="{{ $qz->id }}">{{ $qz->title }} ({{ $qz->course ? $qz->course->course_title : 'General' }} | {{ $qz->questions_count }}টি প্রশ্ন)</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <p class="text-muted text-xs mb-0">
+                            * নির্বাচিত প্রশ্নটি স্বয়ংক্রিয়ভাবে উক্ত কুইজের লাইভ পরীক্ষা ও প্রশ্ন তালিকায় অন্তর্ভুক্ত হয়ে যাবে।
+                        </p>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="button" class="btn btn-info font-weight-bold text-white" onclick="submitQuickAddQuiz()">
+                            <i class="fas fa-plus mr-1"></i> কুইজে যুক্ত করুন
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Modal 5: Quick Add to Paper Modal -->
     <div class="modal fade" id="quickAddModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -1071,11 +1126,20 @@
                         <input type="hidden" name="question_id" id="quickAddQuestionId">
                         <div class="form-group">
                             <label class="font-weight-bold text-xs">লক্ষ্যবর্তী প্রশ্নপত্র নির্বাচন করুন:</label>
-                            <select name="target_paper_id" id="quickAddPaperSelect" class="form-control custom-select" required>
-                                @foreach($papers as $p)
-                                    <option value="{{ $p->id }}">{{ $p->title }} ({{ $p->paper_set }})</option>
-                                @endforeach
-                            </select>
+                            @if($papers->isEmpty())
+                                <div class="alert alert-warning py-2 px-3 text-xs mb-2">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> এখনো কোনো প্রশ্নপত্র তৈরি করা হয়নি।
+                                </div>
+                                <a href="{{ route('admin.question-papers.index') }}" class="btn btn-sm btn-warning font-weight-bold btn-block">
+                                    <i class="fas fa-plus-circle mr-1"></i> নতুন প্রশ্নপত্র তৈরি করতে পেপার বিল্ডারে যান
+                                </a>
+                            @else
+                                <select name="target_paper_id" id="quickAddPaperSelect" class="form-control custom-select" required>
+                                    @foreach($papers as $p)
+                                        <option value="{{ $p->id }}">{{ $p->title }} ({{ $p->paper_set }})</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                         <p class="text-muted text-xs mb-0">
                             * নির্বাচিত প্রশ্নটি প্রশ্নপত্রের সর্বশেষ ক্রমে যুক্ত হবে এবং স্বয়ংক্রিয়ভাবে নম্বর হিসাব হালনাগাদ হবে।
@@ -1314,7 +1378,13 @@
 
             if (bulkActionSelect) {
                 bulkActionSelect.addEventListener('change', function () {
-                    if (this.value === 'add_to_paper') {
+                    var targetQuizWrapper = document.getElementById('targetQuizWrapper');
+                    if (this.value === 'add_to_quiz') {
+                        if (targetQuizWrapper) targetQuizWrapper.style.display = 'block';
+                        if (targetPaperWrapper) targetPaperWrapper.style.display = 'none';
+                        if (bulkCategoryWrapper) bulkCategoryWrapper.style.display = 'none';
+                    } else if (this.value === 'add_to_paper') {
+                        if (targetQuizWrapper) targetQuizWrapper.style.display = 'none';
                         targetPaperWrapper.style.display = 'block';
                         bulkCategoryWrapper.style.display = 'none';
                     } else if (this.value === 'categorize') {
@@ -1328,6 +1398,38 @@
                 });
             }
         });
+
+                // Quick Add to Quiz helper
+        function quickAddToQuiz(questionId) {
+            document.getElementById('quickAddQuizQuestionId').value = questionId;
+            $('#quickAddQuizModal').modal('show');
+        }
+
+        function submitQuickAddQuiz() {
+            var qId = document.getElementById('quickAddQuizQuestionId').value;
+            var quizId = document.getElementById('quickAddQuizSelect').value;
+
+            fetch('{{ route('admin.question-book.assign-to-quiz') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ question_id: qId, quiz_id: quizId })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                $('#quickAddQuizModal').modal('hide');
+                if (res.success) {
+                    alert(res.message);
+                } else {
+                    alert(res.message || 'ত্রুটি ঘটেছে');
+                }
+            })
+            .catch(function(err) {
+                alert('যুক্ত করতে সমস্যা হয়েছে');
+            });
+        }
 
         // Quick Add to Paper helper
         function quickAddToPaper(questionId) {

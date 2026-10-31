@@ -135,6 +135,41 @@ class LmsQuiz extends Model
     /**
      * Convert English Set (A/B/C/D) to Bengali (ক/খ/গ/ঘ)
      */
+    /**
+     * Normalize Set Code to canonical letter (e.g. 'Set A' -> 'A', 'SET B' -> 'B', 'ক' -> 'A')
+     */
+    public static function normalizeSetCode($setCode)
+    {
+        $clean = strtoupper(trim((string)$setCode));
+        $clean = str_replace('SET ', '', $clean);
+        $clean = str_replace('SET', '', $clean);
+        $clean = trim($clean);
+
+        $bngToEng = [
+            'ক' => 'A',
+            'খ' => 'B',
+            'গ' => 'C',
+            'ঘ' => 'D',
+        ];
+
+        return isset($bngToEng[$clean]) ? $bngToEng[$clean] : ($clean ?: 'A');
+    }
+
+    /**
+     * Get all database alias representations of a set code
+     */
+    public static function getEquivalentSetCodes($setCode)
+    {
+        $norm = self::normalizeSetCode($setCode);
+        return [
+            $norm,
+            'Set ' . $norm,
+            'SET ' . $norm,
+            'set ' . strtolower($norm),
+            self::getBengaliSetCode($norm),
+        ];
+    }
+
     public static function getBengaliSetCode($setCode)
     {
         $map = [
@@ -151,13 +186,21 @@ class LmsQuiz extends Model
      */
     public function getAvailableSets()
     {
-        $sets = LmsQuestion::where('quiz_id', $this->id)
+        $rawSets = LmsQuestion::where('quiz_id', $this->id)
             ->whereNotNull('set_code')
             ->where('set_code', '!=', '')
             ->distinct()
             ->pluck('set_code')
             ->toArray();
 
-        return !empty($sets) ? $sets : ['Set A'];
+        $normalized = [];
+        foreach ($rawSets as $s) {
+            $norm = self::normalizeSetCode($s);
+            if (!in_array($norm, $normalized)) {
+                $normalized[] = $norm;
+            }
+        }
+
+        return !empty($normalized) ? $normalized : ['A'];
     }
 }
