@@ -138,11 +138,34 @@
             </form>
         </div>
 
+        <!-- Bulk Action Bar for Selected Quizzes -->
+        <div id="bulkActionBar" class="card-header bg-light border-bottom py-2" style="display: none;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center my-1">
+                    <span class="badge badge-primary px-3 py-1.5 mr-2 font-weight-bold" style="font-size: 0.9rem;">
+                        <span id="selectedCountBadge">০</span> টি কুইজ নির্বাচিত
+                    </span>
+                    <span class="text-xs text-muted">নির্বাচিত কুইজগুলো একবারে মুছে ফেলতে চান?</span>
+                </div>
+                <div class="my-1">
+                    <button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="executeBulkDeleteQuizzes()">
+                        <i class="fas fa-trash-alt mr-1"></i> নির্বাচিত কুইজগুলো মুছুন (Bulk Delete)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="clearAllQuizSelections()">
+                        বাতিল
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="card-body p-0 table-responsive">
             <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                     <tr>
-                        <th class="text-center" style="width: 50px;">#</th>
+                        <th class="text-center" style="width: 40px;">
+                            <input type="checkbox" id="selectAllQuizzesCheckbox" title="সকল কুইজ নির্বাচন করুন" style="cursor: pointer; transform: scale(1.15);">
+                        </th>
+                        <th class="text-center" style="width: 45px;">#</th>
                         <th>কোর্স ও কুইজ শিরোনাম</th>
                         <th>মোড ও সেট</th>
                         <th>ধরণ ও সময়</th>
@@ -156,6 +179,9 @@
                 <tbody>
                     @forelse($quizzes as $quiz)
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox" name="quiz_ids[]" value="{{ $quiz->id }}" class="quiz-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                            </td>
                             <td class="text-center text-muted text-sm">{{ $loop->iteration + ($quizzes->currentPage() - 1) * $quizzes->perPage() }}</td>
                             <td>
                                 <div class="d-flex align-items-center justify-content-between">
@@ -290,7 +316,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="10" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 text-secondary d-block"></i>
                                 কোন কুইজ পাওয়া যায়নি। এক্সেল শিট থেকে বা ম্যানুয়ালি কুইজ তৈরি করতে উপরের বোতামগুলো ব্যবহার করুন।
                             </td>
@@ -309,6 +335,12 @@
             </div>
         @endif
     </div>
+
+    <!-- Dedicated Bulk Delete Quizzes Form -->
+    <form id="bulkDeleteQuizzesForm" action="{{ route('admin.quizzes.bulk-delete') }}" method="POST" style="display: none;">
+        @csrf
+        <div id="bulkDeleteHiddenInputs"></div>
+    </form>
 
 <!-- Modal: Excel Import -->
 <div class="modal fade" id="excelImportModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -1045,6 +1077,82 @@ function openGenerateSetsModal(quizId, quizTitle) {
 function updateFileName(input) {
     var fileName = input.files[0] ? input.files[0].name : 'ফাইল বেছে নিন (.xlsx বা .csv)';
     document.getElementById('excelFileLabel').innerText = fileName;
+}
+
+// Bulk Selection & Deletion for Quizzes
+function updateQuizBulkBar() {
+    var checkedBoxes = document.querySelectorAll('.quiz-checkbox:checked');
+    var count = checkedBoxes.length;
+    var bar = document.getElementById('bulkActionBar');
+    var countBadge = document.getElementById('selectedCountBadge');
+    var selectAll = document.getElementById('selectAllQuizzesCheckbox');
+
+    if (countBadge) {
+        var bngDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+        var countBn = String(count).split('').map(function(d) {
+            return bngDigits[parseInt(d)] !== undefined ? bngDigits[parseInt(d)] : d;
+        }).join('');
+        countBadge.innerText = countBn;
+    }
+
+    if (bar) {
+        bar.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    var allBoxes = document.querySelectorAll('.quiz-checkbox');
+    if (selectAll && allBoxes.length > 0) {
+        selectAll.checked = (checkedBoxes.length === allBoxes.length);
+    }
+}
+
+function clearAllQuizSelections() {
+    var selectAll = document.getElementById('selectAllQuizzesCheckbox');
+    if (selectAll) selectAll.checked = false;
+    document.querySelectorAll('.quiz-checkbox').forEach(function(cb) {
+        cb.checked = false;
+    });
+    updateQuizBulkBar();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var selectAll = document.getElementById('selectAllQuizzesCheckbox');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            var isChecked = this.checked;
+            document.querySelectorAll('.quiz-checkbox').forEach(function(cb) {
+                cb.checked = isChecked;
+            });
+            updateQuizBulkBar();
+        });
+    }
+
+    document.querySelectorAll('.quiz-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', updateQuizBulkBar);
+    });
+
+    clearAllQuizSelections();
+});
+
+function executeBulkDeleteQuizzes() {
+    var checked = document.querySelectorAll('.quiz-checkbox:checked');
+    if (checked.length === 0) {
+        alert('অনুগ্রহ করে অন্তত একটি কুইজ সিলেক্ট করুন।');
+        return;
+    }
+
+    if (confirm('আপনি কি নিশ্চিতভাবে নির্বাচিত ' + checked.length + 'টি কুইজ এবং সংশ্লিষ্ট সকল প্রশ্ন ও ফলাফল স্থায়ীভাবে মুছে ফেলতে চান? এই অ্যাকশনটি আনডু করা যাবে না!')) {
+        var form = document.getElementById('bulkDeleteQuizzesForm');
+        var container = document.getElementById('bulkDeleteHiddenInputs');
+        container.innerHTML = '';
+        checked.forEach(function(cb) {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'quiz_ids[]';
+            hidden.value = cb.value;
+            container.appendChild(hidden);
+        });
+        form.submit();
+    }
 }
 </script>
 @endsection

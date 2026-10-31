@@ -608,4 +608,63 @@ class AdminCertificateAndQuizImportTest extends TestCase
             ->get(route('admin.quizzes.questions.bulk-delete', $quiz->id));
         $getRes->assertRedirect(route('admin.quizzes.questions', $quiz->id));
     }
+
+    /**
+     * Test admin can bulk delete quizzes via checkboxes and bulk-delete action
+     */
+    public function test_admin_can_bulk_delete_quizzes()
+    {
+        // 1. Create two test quizzes
+        $quiz1 = LmsQuiz::create([
+            'title'            => 'Bulk Delete Test Quiz 1 ' . rand(100, 999),
+            'course_id'        => $this->course->id,
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 20,
+            'total_marks'      => 5.0,
+            'pass_marks'       => 2.0,
+            'is_published'     => true,
+        ]);
+        $q1 = LmsQuestion::create([
+            'quiz_id'       => $quiz1->id,
+            'question_text' => 'Quiz 1 question text',
+            'question_type' => 'mcq_single',
+            'marks'         => 5.0,
+            'is_active'     => true,
+        ]);
+        $q1->options()->create(['option_text' => 'Opt 1', 'is_correct' => true, 'order_index' => 1]);
+
+        $quiz2 = LmsQuiz::create([
+            'title'            => 'Bulk Delete Test Quiz 2 ' . rand(100, 999),
+            'course_id'        => $this->course->id,
+            'quiz_type'        => 'practice',
+            'duration_minutes' => 15,
+            'total_marks'      => 10.0,
+            'pass_marks'       => 4.0,
+            'is_published'     => false,
+        ]);
+
+        // Verify index page contains bulk action bar and checkboxes
+        $indexRes = $this->actingAs($this->adminUser)->get(route('admin.quizzes.index'));
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('id="bulkActionBar"', false);
+        $indexRes->assertSee('id="selectAllQuizzesCheckbox"', false);
+        $indexRes->assertSee('class="quiz-checkbox"', false);
+
+        // Verify GET request to bulk-delete redirects cleanly
+        $getRes = $this->actingAs($this->adminUser)->get(route('admin.quizzes.bulk-delete'));
+        $getRes->assertRedirect(route('admin.quizzes.index'));
+
+        // Bulk delete both quizzes
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.bulk-delete'), [
+                'quiz_ids' => [$quiz1->id, $quiz2->id],
+            ]);
+
+        $response->assertRedirect(route('admin.quizzes.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('lms_quizzes', ['id' => $quiz1->id]);
+        $this->assertDatabaseMissing('lms_quizzes', ['id' => $quiz2->id]);
+        $this->assertDatabaseMissing('lms_questions', ['id' => $q1->id]);
+    }
 }

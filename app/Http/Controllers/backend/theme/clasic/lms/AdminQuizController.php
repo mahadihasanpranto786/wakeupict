@@ -452,6 +452,13 @@ class AdminQuizController extends Controller
         $title = $quiz->title;
 
         DB::transaction(function () use ($quiz) {
+            // Delete child attempts & answers if any
+            $attemptIds = \App\model\LmsQuizAttempt::where('quiz_id', $quiz->id)->pluck('id')->toArray();
+            if (!empty($attemptIds)) {
+                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+            }
+
             // Delete child questions options & questions
             $questions = LmsQuestion::where('quiz_id', $quiz->id)->get();
             foreach ($questions as $q) {
@@ -676,5 +683,47 @@ class AdminQuizController extends Controller
         });
 
         return redirect()->back()->with('success', "নির্বাচিত {$count}টি পরীক্ষার ফলাফল সফলভাবে মুছে ফেলা হয়েছে!");
+    }
+
+    /**
+     * Bulk delete multiple quizzes and all associated questions & attempts
+     */
+    public function bulkDestroyQuizzes(Request $request)
+    {
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.index');
+        }
+
+        $request->validate([
+            'quiz_ids'   => 'required|array|min:1',
+            'quiz_ids.*' => 'integer|exists:lms_quizzes,id',
+        ]);
+
+        $ids = $request->input('quiz_ids', []);
+        $count = count($ids);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
+            // 1. Delete quiz attempts and student answers
+            $attempts = \App\model\LmsQuizAttempt::whereIn('quiz_id', $ids)->get();
+            $attemptIds = $attempts->pluck('id')->toArray();
+            if (!empty($attemptIds)) {
+                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+            }
+
+            // 2. Delete questions, options & student answers
+            $questions = LmsQuestion::whereIn('quiz_id', $ids)->get();
+            $questionIds = $questions->pluck('id')->toArray();
+            if (!empty($questionIds)) {
+                \App\model\LmsQuestionOption::whereIn('question_id', $questionIds)->delete();
+                \App\model\LmsQuizAnswer::whereIn('question_id', $questionIds)->delete();
+                LmsQuestion::whereIn('id', $questionIds)->delete();
+            }
+
+            // 3. Delete quizzes
+            LmsQuiz::whereIn('id', $ids)->delete();
+        });
+
+        return redirect()->route('admin.quizzes.index')->with('success', "নির্বাচিত {$count}টি কুইজ এবং সংশ্লিষ্ট সকল প্রশ্ন সফলভাবে মুছে ফেলা হয়েছে!");
     }
 }
