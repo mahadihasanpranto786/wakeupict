@@ -429,6 +429,64 @@
             box-shadow: 0 0 0 2px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
         }
 
+        /* =========================================================================
+           HIGH-CONTRAST MODERN CHECKBOX & RADIO DESIGN SYSTEM (FRONTEND)
+           Ensures checkboxes in course apply forms, quizzes & registration
+           are crystal-clear, high-contrast and prominent in both Light & Dark modes
+           ========================================================================= */
+        input[type="checkbox"]:not(.sr-only) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            min-width: 1.25rem !important;
+            min-height: 1.25rem !important;
+            border: 2px solid #475569 !important;
+            border-radius: 0.375rem !important;
+            background-color: #ffffff !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            vertical-align: middle !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+            flex-shrink: 0 !important;
+        }
+
+        html.dark input[type="checkbox"]:not(.sr-only) {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):checked {
+            background-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 2px 5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.3) !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):checked::after {
+            content: "" !important;
+            display: block !important;
+            width: 5px !important;
+            height: 10px !important;
+            border: solid #ffffff !important;
+            border-width: 0 2.5px 2.5px 0 !important;
+            transform: rotate(45deg) translate(-0.5px, -1px) !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):focus-visible {
+            outline: 2px solid var(--brand-primary, #10b981) !important;
+            outline-offset: 2px !important;
+        }
+
         /* Breadcrumbs in Light Mode */
         html.light nav[aria-label="Breadcrumb"] a {
             color: #334155 !important;

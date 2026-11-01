@@ -267,7 +267,7 @@
                                                 $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
                                             @endphp
 
-                                            <label id="opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 border-emerald-400 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60' : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800/80 hover:border-slate-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200') }}">
+                                            <label id="opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-2.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-slate-900 dark:text-emerald-200 font-bold shadow-sm' : 'bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-500 text-slate-950 dark:text-white font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800/80 hover:border-emerald-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200') }}">
                                                 
                                                 <input 
                                                     type="radio" 
@@ -278,11 +278,17 @@
                                                     onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'all_questions')"
                                                     class="sr-only">
 
-                                                <span id="bubble-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? 'bg-slate-900 border-slate-900 dark:bg-emerald-500 dark:border-emerald-500 text-white dark:text-slate-950 ring-2 ring-emerald-500/40' : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
-                                                    ({{ $bngLetter }})
+                                                <!-- High-Contrast Checkbox / Selection Box Indicator -->
+                                                <span id="check-icon-{{ $q->id }}-{{ $opt->id }}" class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 {{ $isSelected ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30' : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-emerald-500' }}">
+                                                    <i class="fa fa-check text-[10px] font-bold"></i>
                                                 </span>
 
-                                                <span class="text-xs sm:text-sm pt-0.5 leading-snug flex-1">
+                                                <!-- Bengali Option Letter Bubble -->
+                                                <span id="bubble-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
+                                                    {{ $bngLetter }}
+                                                </span>
+
+                                                <span class="text-xs sm:text-sm pt-0.5 leading-snug flex-1 text-slate-900 dark:text-slate-100">
                                                     {{ $opt->option_text }}
                                                 </span>
 
@@ -491,7 +497,7 @@
                                         $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
                                     @endphp
 
-                                    <label id="single-opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60' : 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-slate-400 text-slate-800 dark:text-slate-200') }}">
+                                    <label id="single-opt-label-{{ $q->id }}-{{ $opt->id }}" class="flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-pointer select-none group {{ $isSelected ? ($isFinalized ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold') : ($isFinalized ? 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-slate-700 text-slate-800 dark:text-slate-200') }}">
                                         
                                         <input 
                                             type="radio" 
@@ -502,11 +508,17 @@
                                             onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'one_by_one')"
                                             class="sr-only">
 
-                                        <span id="single-bubble-{{ $q->id }}-{{ $opt->id }}" class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? ($isFinalized ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-blue-600 border-blue-600 text-white') : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
-                                            ({{ $bngLetter }})
+                                        <!-- High-Contrast Checkbox / Selection Box Indicator -->
+                                        <span id="single-check-icon-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 {{ $isSelected ? ($isFinalized ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30' : 'bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-500/30') : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-blue-500' }}">
+                                            <i class="fa fa-check text-xs font-bold"></i>
                                         </span>
 
-                                        <span class="text-sm pt-0.5 leading-relaxed flex-1">
+                                        <!-- Bengali Option Letter Bubble -->
+                                        <span id="single-bubble-{{ $q->id }}-{{ $opt->id }}" class="w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? ($isFinalized ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500 text-emerald-900 dark:text-emerald-200' : 'bg-blue-100 dark:bg-blue-900/50 border-blue-500 text-blue-900 dark:text-blue-200') : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-blue-500' }}">
+                                            {{ $bngLetter }}
+                                        </span>
+
+                                        <span class="text-sm pt-0.5 leading-relaxed flex-1 text-slate-900 dark:text-slate-100">
                                             {{ $opt->option_text }}
                                         </span>
                                     </label>
@@ -1050,20 +1062,27 @@
     }
 
     function applyLockToQuestion(questionId, selectedOptionId) {
-        // 1. In ALL QUESTIONS VIEW: Lock inputs & update OMR bubble
+        // 1. In ALL QUESTIONS VIEW: Lock inputs & update OMR bubble & check-icon
         var allInputs = document.querySelectorAll('input[name="q_ans_' + questionId + '"]');
         allInputs.forEach(function(inp) {
             inp.disabled = true;
             var lbl = document.getElementById('opt-label-' + questionId + '-' + inp.value);
+            var chk = document.getElementById('check-icon-' + questionId + '-' + inp.value);
+            var bubble = document.getElementById('bubble-' + questionId + '-' + inp.value);
             if (lbl) {
                 if (parseInt(inp.value) === parseInt(selectedOptionId)) {
-                    lbl.className = "flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-not-allowed select-none bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-bold shadow-sm";
-                    var bubble = document.getElementById('bubble-' + questionId + '-' + inp.value);
+                    lbl.className = "flex items-start gap-2.5 p-2.5 rounded-xl border-2 transition-all cursor-not-allowed select-none bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-slate-900 dark:text-emerald-200 font-bold shadow-sm";
+                    if (chk) {
+                        chk.className = "w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30";
+                    }
                     if (bubble) {
-                        bubble.className = "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold bg-slate-900 border-slate-900 dark:bg-emerald-500 dark:border-emerald-500 text-white dark:text-slate-950 ring-2 ring-emerald-500/40";
+                        bubble.className = "w-6 h-6 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold border-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200";
                     }
                 } else {
-                    lbl.className = "flex items-start gap-2.5 p-2.5 rounded-xl border transition-all select-none bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60";
+                    lbl.className = "flex items-start gap-2.5 p-2.5 rounded-xl border-2 transition-all select-none bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60";
+                    if (chk) {
+                        chk.className = "w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-transparent";
+                    }
                 }
             }
         });
@@ -1075,20 +1094,27 @@
             lockedNotice.classList.add('flex');
         }
 
-        // 2. In ONE-BY-ONE VIEW: Lock inputs
+        // 2. In ONE-BY-ONE VIEW: Lock inputs & check-icon
         var singleInputs = document.querySelectorAll('input[name="single_ans_' + questionId + '"]');
         singleInputs.forEach(function(inp) {
             inp.disabled = true;
             var lbl = document.getElementById('single-opt-label-' + questionId + '-' + inp.value);
+            var chk = document.getElementById('single-check-icon-' + questionId + '-' + inp.value);
+            var b = document.getElementById('single-bubble-' + questionId + '-' + inp.value);
             if (lbl) {
                 if (parseInt(inp.value) === parseInt(selectedOptionId)) {
-                    lbl.className = "flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-not-allowed select-none bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold";
-                    var b = document.getElementById('single-bubble-' + questionId + '-' + inp.value);
+                    lbl.className = "flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-not-allowed select-none bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 font-bold";
+                    if (chk) {
+                        chk.className = "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30";
+                    }
                     if (b) {
-                        b.className = "w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold bg-emerald-600 border-emerald-600 text-white";
+                        b.className = "w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500 text-emerald-900 dark:text-emerald-200";
                     }
                 } else {
-                    lbl.className = "flex items-start gap-3 p-3.5 rounded-2xl border transition-all select-none bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60";
+                    lbl.className = "flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all select-none bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 text-slate-400 cursor-not-allowed opacity-60";
+                    if (chk) {
+                        chk.className = "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-transparent";
+                    }
                 }
             }
         });
@@ -1132,14 +1158,17 @@
         var singleInputs = document.querySelectorAll('input[name="single_ans_' + questionId + '"]');
         singleInputs.forEach(function(inp) {
             var lbl = document.getElementById('single-opt-label-' + questionId + '-' + inp.value);
+            var chk = document.getElementById('single-check-icon-' + questionId + '-' + inp.value);
             var b = document.getElementById('single-bubble-' + questionId + '-' + inp.value);
             if (lbl && b) {
                 if (parseInt(inp.value) === parseInt(selectedOptionId)) {
-                    lbl.className = "flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold";
-                    b.className = "w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold bg-blue-600 border-blue-600 text-white";
+                    lbl.className = "flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-pointer select-none bg-blue-50 dark:bg-blue-950/40 border-blue-500 font-bold";
+                    if (chk) chk.className = "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-500/30";
+                    if (b) b.className = "w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold bg-blue-100 dark:bg-blue-900/50 border-blue-500 text-blue-900 dark:text-blue-200";
                 } else {
-                    lbl.className = "flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-slate-400 text-slate-800 dark:text-slate-200";
-                    b.className = "w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 font-serif text-xs font-bold border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300";
+                    lbl.className = "flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-pointer select-none bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-400 text-slate-800 dark:text-slate-200";
+                    if (chk) chk.className = "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent";
+                    if (b) b.className = "w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
                 }
             }
         });

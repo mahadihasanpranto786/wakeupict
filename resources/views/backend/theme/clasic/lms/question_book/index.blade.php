@@ -6,27 +6,153 @@
 @section('menu_active_student_portal', 'active')
 @section('lms_question_book_active', 'active')
 
+@push('css')
+<style>
+    /* Question Book Library Compact & Serialized Design */
+    .qb-stat-card {
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .qb-stat-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+    }
+    .qb-stat-card .card-body {
+        padding: 5px 4px !important;
+    }
+    .qb-stat-label {
+        font-size: 0.68rem;
+        line-height: 1.1;
+        margin-bottom: 2px;
+        opacity: 0.85;
+    }
+    .qb-stat-val {
+        font-size: 1.15rem;
+        line-height: 1.1;
+    }
+    .qb-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 7px;
+        background: #ffffff;
+        transition: all 0.15s ease-in-out;
+        overflow: hidden;
+    }
+    .qb-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+    .qb-card.border-left-primary { border-left: 3.5px solid #2563eb !important; }
+    .qb-card.border-left-info    { border-left: 3.5px solid #0284c7 !important; }
+    .qb-card.border-left-warning { border-left: 3.5px solid #d97706 !important; }
+    .qb-card.border-left-indigo  { border-left: 3.5px solid #7c3aed !important; }
+    .qb-card.border-left-danger  { border-left: 3.5px solid #dc2626 !important; }
+
+    .qb-card .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 5px 9px;
+    }
+    .qb-card .card-body {
+        padding: 7px 9px;
+    }
+    .qb-card .card-footer {
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        padding: 4px 9px;
+        font-size: 0.74rem;
+    }
+    .qb-serial-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 19px;
+        padding: 0 5px;
+        border-radius: 4px;
+        background: #0f172a;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 0.74rem;
+        letter-spacing: 0.2px;
+    }
+    .qb-question-title {
+        color: #0f172a !important;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+    .qb-opt-box {
+        padding: 3px 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        font-size: 0.80rem;
+        line-height: 1.25;
+        min-height: 27px;
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        transition: background 0.15s ease;
+    }
+    .qb-opt-box.is-correct {
+        background: #f0fdf4 !important;
+        border: 1.5px solid #059669 !important;
+        color: #0f172a !important;
+        font-weight: 700;
+    }
+    .qb-opt-letter {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin-right: 6px;
+        flex-shrink: 0;
+    }
+    .qb-opt-box.is-correct .qb-opt-letter {
+        background: #059669;
+        color: #ffffff;
+    }
+    .qb-opt-box:not(.is-correct) .qb-opt-letter {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+    }
+    .qb-badge-sm {
+        font-size: 0.70rem !important;
+        padding: 2px 5px !important;
+        font-weight: 600 !important;
+        border-radius: 4px !important;
+    }
+    .qb-filter-card .form-control-sm,
+    .qb-filter-card .custom-select-sm {
+        height: 29px !important;
+        font-size: 0.78rem !important;
+        padding: 2px 7px !important;
+    }
+</style>
+@endpush
+
 @section('maincontant')
     <!-- Content Header -->
-    <div class="content-header p-0 mb-3">
+    <div class="content-header p-0 mb-2">
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-sm-7">
-                    <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.5rem;">
-                        <i class="fas fa-book-open text-primary mr-2"></i> প্রশ্ন ব্যাংক — ডিজিটাল প্রশ্ন বই ও প্রশ্ন লাইব্রেরি (Question Bank)
+                    <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.25rem;">
+                        <i class="fas fa-book-open text-primary mr-1.5"></i> প্রশ্ন ব্যাংক — ডিজিটাল প্রশ্ন বই ও প্রশ্ন লাইব্রেরি (Question Bank)
                     </h1>
-                    <p class="text-muted text-sm mb-0">
+                    <p class="text-muted mb-0" style="font-size: 0.78rem;">
                         ৩৪৭টি মূল MCQ সহ বহুনির্বাচনি, সত্য/মিথ্যা, শূন্যস্থান পূরণ, অতি সংক্ষেপ, সৃজনশীল ও অনুবাদ প্রশ্ন তৈরি, সম্পর্কিত সংস্করণ ও প্রশ্নপত্রে ব্যবহার।
                     </p>
                 </div>
                 <div class="col-sm-5 text-sm-right mt-2 mt-sm-0">
-                    <a href="{{ route('admin.question-papers.index') }}" class="btn btn-outline-warning shadow-sm mr-1">
+                    <a href="{{ route('admin.question-papers.index') }}" class="btn btn-sm btn-outline-warning shadow-sm mr-1 py-1">
                         <i class="fas fa-layer-group mr-1"></i> পেপার বিল্ডার
                     </a>
-                    <button type="button" class="btn btn-outline-info shadow-sm mr-1" data-toggle="modal" data-target="#excelImportModal">
+                    <button type="button" class="btn btn-sm btn-outline-info shadow-sm mr-1 py-1" data-toggle="modal" data-target="#excelImportModal">
                         <i class="fas fa-file-excel mr-1"></i> এক্সেল ইমপোর্ট
                     </button>
-                    <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#createQuestionModal">
+                    <button type="button" class="btn btn-sm btn-primary shadow-sm py-1" data-toggle="modal" data-target="#createQuestionModal">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন প্রশ্ন তৈরি
                     </button>
                 </div>
@@ -59,63 +185,63 @@
     @endif
 
     <!-- Question Types Strip / Stat Cards -->
-    <div class="row g-2 mb-3">
-        <div class="col-6 col-md-3 col-lg-2">
+    <div class="row g-1.5 mb-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index') }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ !request('question_type') && !request('relation_status') ? 'bg-primary text-white' : 'bg-white text-dark' }} transition-hover">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">মোট প্রশ্ন</div>
-                        <div class="h4 font-weight-bold mb-0">{{ \App\model\LmsQuiz::toBengaliNumber($stats['total']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ !request('question_type') && !request('relation_status') ? 'bg-primary text-white' : 'bg-white text-dark' }} transition-hover qb-stat-card">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">মোট প্রশ্ন</div>
+                        <div class="qb-stat-val font-weight-bold">{{ \App\model\LmsQuiz::toBengaliNumber($stats['total']) }}</div>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index', ['question_type' => 'mcq']) }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ request('question_type') == 'mcq' ? 'bg-success text-white' : 'bg-white text-dark' }} transition-hover">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">বহুনির্বাচনি (MCQ)</div>
-                        <div class="h4 font-weight-bold mb-0 text-success {{ request('question_type') == 'mcq' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['mcq']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ request('question_type') == 'mcq' ? 'bg-success text-white' : 'bg-white text-dark' }} transition-hover qb-stat-card">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">MCQ</div>
+                        <div class="qb-stat-val font-weight-bold text-success {{ request('question_type') == 'mcq' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['mcq']) }}</div>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index', ['question_type' => 'true_false']) }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ request('question_type') == 'true_false' ? 'bg-info text-white' : 'bg-white text-dark' }} transition-hover">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">সত্য / মিথ্যা</div>
-                        <div class="h4 font-weight-bold mb-0 text-info {{ request('question_type') == 'true_false' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['true_false']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ request('question_type') == 'true_false' ? 'bg-info text-white' : 'bg-white text-dark' }} transition-hover qb-stat-card">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">সত্য / মিথ্যা</div>
+                        <div class="qb-stat-val font-weight-bold text-info {{ request('question_type') == 'true_false' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['true_false']) }}</div>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index', ['question_type' => 'fill_blanks']) }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ request('question_type') == 'fill_blanks' ? 'bg-warning text-dark' : 'bg-white text-dark' }} transition-hover">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">শূন্যস্থান পূরণ</div>
-                        <div class="h4 font-weight-bold mb-0 text-warning {{ request('question_type') == 'fill_blanks' ? 'text-dark' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['fill_blanks']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ request('question_type') == 'fill_blanks' ? 'bg-warning text-dark' : 'bg-white text-dark' }} transition-hover qb-stat-card">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">শূন্যস্থান</div>
+                        <div class="qb-stat-val font-weight-bold text-warning {{ request('question_type') == 'fill_blanks' ? 'text-dark' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['fill_blanks']) }}</div>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index', ['question_type' => 'short_answer']) }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ request('question_type') == 'short_answer' ? 'bg-indigo text-white' : 'bg-white text-dark' }} transition-hover" style="{{ request('question_type') == 'short_answer' ? 'background:#6610f2;color:#fff;' : '' }}">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">অতি সংক্ষেপে উত্তর</div>
-                        <div class="h4 font-weight-bold mb-0" style="color: #6610f2; {{ request('question_type') == 'short_answer' ? 'color:#fff !important;' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['short_answer']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ request('question_type') == 'short_answer' ? 'bg-indigo text-white' : 'bg-white text-dark' }} transition-hover qb-stat-card" style="{{ request('question_type') == 'short_answer' ? 'background:#6610f2;color:#fff;' : '' }}">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">সংক্ষিপ্ত</div>
+                        <div class="qb-stat-val font-weight-bold" style="color: #6610f2; {{ request('question_type') == 'short_answer' ? 'color:#fff !important;' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['short_answer']) }}</div>
                     </div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-4 col-sm-4 col-md-2 mb-1">
             <a href="{{ route('admin.question-book.index', ['question_type' => 'creative']) }}" class="text-decoration-none">
-                <div class="card shadow-sm border-0 mb-2 {{ request('question_type') == 'creative' ? 'bg-danger text-white' : 'bg-white text-dark' }} transition-hover">
-                    <div class="card-body p-2.5 text-center">
-                        <div class="text-xs font-weight-bold text-uppercase opacity-75">সৃজনশীল (CQ)</div>
-                        <div class="h4 font-weight-bold mb-0 text-danger {{ request('question_type') == 'creative' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['creative']) }}</div>
+                <div class="card shadow-sm border-0 mb-0 {{ request('question_type') == 'creative' ? 'bg-danger text-white' : 'bg-white text-dark' }} transition-hover qb-stat-card">
+                    <div class="card-body text-center">
+                        <div class="qb-stat-label text-uppercase font-weight-bold">সৃজনশীল (CQ)</div>
+                        <div class="qb-stat-val font-weight-bold text-danger {{ request('question_type') == 'creative' ? 'text-white' : '' }}">{{ \App\model\LmsQuiz::toBengaliNumber($stats['creative']) }}</div>
                     </div>
                 </div>
             </a>
@@ -123,35 +249,35 @@
     </div>
 
     <!-- Quick Relation Pills (Original vs Derived) -->
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-        <span class="text-xs font-weight-bold text-muted mr-1"><i class="fas fa-filter text-primary"></i> সম্পর্ক ফিল্টার:</span>
-        <a href="{{ request()->fullUrlWithQuery(['relation_status' => null]) }}" class="badge badge-pill {{ !request('relation_status') ? 'badge-dark' : 'badge-light border' }} px-3 py-2 text-xs">
-            সকল প্রশ্ন ({{ \App\model\LmsQuiz::toBengaliNumber($stats['total']) }})
+    <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2">
+        <span class="text-xs font-weight-bold text-muted mr-1"><i class="fas fa-filter text-primary"></i> সম্পর্ক:</span>
+        <a href="{{ request()->fullUrlWithQuery(['relation_status' => null]) }}" class="badge badge-pill {{ !request('relation_status') ? 'badge-dark' : 'badge-light border' }} px-2.5 py-1 text-xs">
+            সকল ({{ \App\model\LmsQuiz::toBengaliNumber($stats['total']) }})
         </a>
-        <a href="{{ request()->fullUrlWithQuery(['relation_status' => 'original']) }}" class="badge badge-pill {{ request('relation_status') == 'original' ? 'badge-primary' : 'badge-light border' }} px-3 py-2 text-xs">
-            <i class="fas fa-star mr-1"></i> মূল প্রশ্ন / ৩৪৭টি MCQ ({{ \App\model\LmsQuiz::toBengaliNumber($stats['original_count']) }})
+        <a href="{{ request()->fullUrlWithQuery(['relation_status' => 'original']) }}" class="badge badge-pill {{ request('relation_status') == 'original' ? 'badge-primary' : 'badge-light border' }} px-2.5 py-1 text-xs">
+            <i class="fas fa-star mr-1"></i> মূল MCQ ({{ \App\model\LmsQuiz::toBengaliNumber($stats['original_count']) }})
         </a>
-        <a href="{{ request()->fullUrlWithQuery(['relation_status' => 'derived']) }}" class="badge badge-pill {{ request('relation_status') == 'derived' ? 'badge-info' : 'badge-light border' }} px-3 py-2 text-xs">
-            <i class="fas fa-code-branch mr-1"></i> সম্পর্কিত উদ্ভূত সংস্করণ ({{ \App\model\LmsQuiz::toBengaliNumber($stats['derived_count']) }})
+        <a href="{{ request()->fullUrlWithQuery(['relation_status' => 'derived']) }}" class="badge badge-pill {{ request('relation_status') == 'derived' ? 'badge-info' : 'badge-light border' }} px-2.5 py-1 text-xs">
+            <i class="fas fa-code-branch mr-1"></i> সংস্করণ ({{ \App\model\LmsQuiz::toBengaliNumber($stats['derived_count']) }})
         </a>
         @if($stats['archived'] > 0)
-            <a href="{{ request()->fullUrlWithQuery(['archived' => 1]) }}" class="badge badge-pill {{ request('archived') ? 'badge-secondary' : 'badge-light border' }} px-3 py-2 text-xs ml-auto">
-                <i class="fas fa-archive mr-1"></i> আর্কাইভকৃত ({{ \App\model\LmsQuiz::toBengaliNumber($stats['archived']) }})
+            <a href="{{ request()->fullUrlWithQuery(['archived' => 1]) }}" class="badge badge-pill {{ request('archived') ? 'badge-secondary' : 'badge-light border' }} px-2.5 py-1 text-xs ml-auto">
+                <i class="fas fa-archive mr-1"></i> আর্কাইভ ({{ \App\model\LmsQuiz::toBengaliNumber($stats['archived']) }})
             </a>
         @endif
     </div>
 
     <!-- Search & Filter Controls -->
-    <div class="card shadow-sm mb-3">
-        <div class="card-body p-3">
+    <div class="card shadow-sm mb-2 qb-filter-card">
+        <div class="card-body py-2 px-3">
             <form action="{{ route('admin.question-book.index') }}" method="GET" id="filterForm">
                 <div class="row align-items-center">
                     <!-- Search Input -->
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-3 mb-1.5">
                         <div class="input-group input-group-sm">
-                            <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="প্রশ্ন, উত্তর বা #ID খুঁজুন...">
+                            <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm" placeholder="প্রশ্ন, উত্তর বা #ID খুঁজুন...">
                             <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
+                                <button class="btn btn-primary btn-sm" type="submit">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
@@ -159,8 +285,8 @@
                     </div>
 
                     <!-- Course Filter -->
-                    <div class="col-md-2 col-6 mb-2">
-                        <select name="course_id" class="form-control form-control-sm custom-select" onchange="this.form.submit()">
+                    <div class="col-md-2 col-6 mb-1.5">
+                        <select name="course_id" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
                             <option value="">-- সকল কোর্স/বিষয় --</option>
                             @foreach($courses as $c)
                                 <option value="{{ $c->id }}" {{ request('course_id') == $c->id ? 'selected' : '' }}>
@@ -171,8 +297,8 @@
                     </div>
 
                     <!-- Category Filter -->
-                    <div class="col-md-2 col-6 mb-2">
-                        <select name="category" class="form-control form-control-sm custom-select" onchange="this.form.submit()">
+                    <div class="col-md-2 col-6 mb-1.5">
+                        <select name="category" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
                             <option value="">-- সকল ক্যাটাগরি --</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
@@ -183,8 +309,8 @@
                     </div>
 
                     <!-- Question Type -->
-                    <div class="col-md-2 col-6 mb-2">
-                        <select name="question_type" class="form-control form-control-sm custom-select" onchange="this.form.submit()">
+                    <div class="col-md-2 col-6 mb-1.5">
+                        <select name="question_type" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
                             <option value="">-- প্রশ্নের ধরন --</option>
                             <option value="mcq" {{ request('question_type') == 'mcq' ? 'selected' : '' }}>MCQ (সকল)</option>
                             <option value="mcq_single" {{ request('question_type') == 'mcq_single' ? 'selected' : '' }}>MCQ (একক নির্বাচন)</option>
@@ -199,8 +325,8 @@
                     </div>
 
                     <!-- Difficulty -->
-                    <div class="col-md-1 col-6 mb-2">
-                        <select name="difficulty" class="form-control form-control-sm custom-select" onchange="this.form.submit()">
+                    <div class="col-md-1 col-6 mb-1.5">
+                        <select name="difficulty" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
                             <option value="">-- কঠিন্যতা --</option>
                             <option value="easy" {{ request('difficulty') == 'easy' ? 'selected' : '' }}>সহজ</option>
                             <option value="medium" {{ request('difficulty') == 'medium' ? 'selected' : '' }}>মাঝারি</option>
@@ -209,8 +335,8 @@
                     </div>
 
                     <!-- Sort -->
-                    <div class="col-md-2 col-6 mb-2">
-                        <select name="sort" class="form-control form-control-sm custom-select" onchange="this.form.submit()">
+                    <div class="col-md-2 col-6 mb-1.5">
+                        <select name="sort" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
                             <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>সর্বশেষ আগে</option>
                             <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>প্রাচীনতম আগে</option>
                             <option value="marks_high" {{ request('sort') == 'marks_high' ? 'selected' : '' }}>সর্বোচ্চ নম্বর</option>
@@ -219,22 +345,22 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                <div class="d-flex justify-content-between align-items-center mt-1 pt-1.5 border-top">
                     <div class="text-muted text-xs">
                         মোট প্রদর্শিত: <strong>{{ \App\model\LmsQuiz::toBengaliNumber($questions->total()) }}</strong> টি প্রশ্ন
                     </div>
                     <div class="d-flex align-items-center">
                         <label class="mr-2 mb-0 text-xs font-weight-bold">ভিউ মোড:</label>
                         <div class="btn-group btn-group-sm mr-2" role="group">
-                            <a href="{{ request()->fullUrlWithQuery(['view' => 'book']) }}" class="btn {{ $viewStyle === 'book' ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            <a href="{{ request()->fullUrlWithQuery(['view' => 'book']) }}" class="btn btn-xs {{ $viewStyle === 'book' ? 'btn-primary' : 'btn-outline-secondary' }}">
                                 <i class="fas fa-book-open mr-1"></i> বুক রিডিং মোড
                             </a>
-                            <a href="{{ request()->fullUrlWithQuery(['view' => 'list']) }}" class="btn {{ $viewStyle === 'list' ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            <a href="{{ request()->fullUrlWithQuery(['view' => 'list']) }}" class="btn btn-xs {{ $viewStyle === 'list' ? 'btn-primary' : 'btn-outline-secondary' }}">
                                 <i class="fas fa-list mr-1"></i> কমপ্যাক্ট তালিকা
                             </a>
                         </div>
                         @if(request()->anyFilled(['search', 'course_id', 'category', 'question_type', 'difficulty', 'relation_status', 'archived']))
-                            <a href="{{ route('admin.question-book.index') }}" class="btn btn-sm btn-outline-danger">
+                            <a href="{{ route('admin.question-book.index') }}" class="btn btn-xs btn-outline-danger">
                                 <i class="fas fa-times mr-1"></i> ফিল্টার মুছুন
                             </a>
                         @endif
@@ -247,17 +373,17 @@
     <!-- Bulk Action Form Wrapper -->
     <form action="{{ route('admin.question-book.bulk-action') }}" method="POST" id="bulkActionForm">
         @csrf
-        <div class="card shadow-sm mb-3 bg-light border">
-            <div class="card-body p-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="card shadow-sm mb-2 bg-light border">
+            <div class="card-body py-1.5 px-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="custom-control custom-checkbox mr-3">
+                    <div class="custom-control custom-checkbox mr-2">
                         <input type="checkbox" class="custom-control-input" id="selectAllCheckbox">
                         <label class="custom-control-label font-weight-bold text-xs" for="selectAllCheckbox">সবগুলো সিলেক্ট করুন</label>
                     </div>
                     <span id="selectedCountBadge" class="badge badge-info mr-2">০টি নির্বাচিত</span>
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
-                    <select name="action" id="bulkActionSelect" class="form-control form-control-sm mr-2 custom-select" style="width: 170px;">
+                    <select name="action" id="bulkActionSelect" class="form-control form-control-sm mr-2 custom-select custom-select-sm" style="width: 170px; height: 29px; font-size: 0.78rem;">
                         <option value="">-- একশন বেছে নিন --</option>
                         <option value="add_to_quiz">কুইজ / পরীক্ষায় যুক্ত করুন</option>
                         <option value="add_to_paper">প্রশ্নপত্রে যুক্ত করুন</option>
@@ -313,41 +439,54 @@
                 </div>
             </div>
         @elseif($viewStyle === 'book')
-            <!-- Book Reading Grid View -->
-            <div class="row">
+            <!-- Book Reading Grid View (Compact & Serialized) -->
+            <div class="row g-2">
                 @foreach($questions as $index => $q)
-                    <div class="col-lg-6 mb-3">
-                        <div class="card shadow-sm h-100 border-left-{{ $q->question_type === 'mcq_single' ? 'primary' : ($q->question_type === 'true_false' ? 'info' : ($q->question_type === 'fill_blanks' ? 'warning' : 'danger')) }} transition-hover">
-                            <div class="card-header bg-white py-2 px-3 d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center flex-wrap gap-1">
-                                    <div class="custom-control custom-checkbox mr-2">
+                    @php
+                        $serialNum = $questions->firstItem() ? ($questions->firstItem() + $index) : ($index + 1);
+                    @endphp
+                    <div class="col-lg-6 mb-2">
+                        <div class="card qb-card shadow-sm h-100 border-left-{{ $q->question_type === 'mcq_single' ? 'primary' : ($q->question_type === 'true_false' ? 'info' : ($q->question_type === 'fill_blanks' ? 'warning' : ($q->question_type === 'short_answer' ? 'indigo' : 'danger'))) }}">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                    <div class="custom-control custom-checkbox mr-1">
                                         <input type="checkbox" name="selected_ids[]" value="{{ $q->id }}" class="custom-control-input question-checkbox" id="q_check_{{ $q->id }}">
                                         <label class="custom-control-label" for="q_check_{{ $q->id }}"></label>
                                     </div>
-                                    <span class="badge badge-secondary mr-1">#{{ $q->id }}</span>
-                                    <span class="badge badge-info mr-1">{{ $q->getTypeLabel() }}</span>
+                                    <!-- Serial Badge -->
+                                    <span class="qb-serial-badge" title="ধারাবাহিক ক্রমিক নম্বর">
+                                        {{ \App\model\LmsQuiz::toBengaliNumber($serialNum) }}
+                                    </span>
+                                    <!-- ID Badge -->
+                                    <span class="badge badge-light border text-muted qb-badge-sm" title="প্রশ্ন আইডি: #{{ $q->id }}">
+                                        #{{ $q->id }}
+                                    </span>
+                                    <!-- Type Badge -->
+                                    <span class="badge badge-info qb-badge-sm">
+                                        {{ $q->getTypeLabel() }}
+                                    </span>
                                     {!! $q->getDifficultyBadge() !!}
 
                                     <!-- Relationship Indicators -->
                                     @if($q->isDerived())
-                                        <span class="badge badge-light border text-primary ml-1" title="মূল প্রশ্ন #{{ $q->parent_question_id }} থেকে প্রাপ্ত">
-                                            <i class="fas fa-link mr-1"></i> Derived (#{{ $q->parent_question_id }})
+                                        <span class="badge badge-light border text-primary qb-badge-sm" title="মূল প্রশ্ন #{{ $q->parent_question_id }} থেকে প্রাপ্ত">
+                                            <i class="fas fa-link mr-0.5"></i> Derived (#{{ $q->parent_question_id }})
                                         </span>
                                     @elseif($q->derivedQuestions->count() > 0)
-                                        <button type="button" class="badge badge-primary border-0 ml-1 cursor-pointer" onclick="openRelatedModal({{ $q->id }})" title="সম্পর্কিত সকল সংস্করণ দেখুন">
-                                            <i class="fas fa-sitemap mr-1"></i> {{ $q->derivedQuestions->count() }}টি ভ্যারিয়েন্ট
+                                        <button type="button" class="badge badge-primary border-0 qb-badge-sm cursor-pointer" onclick="openRelatedModal({{ $q->id }})" title="সম্পর্কিত সকল সংস্করণ দেখুন">
+                                            <i class="fas fa-sitemap mr-0.5"></i> {{ $q->derivedQuestions->count() }}টি ভ্যারিয়েন্ট
                                         </button>
                                     @endif
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <span class="badge badge-pill badge-light border text-muted mr-2 font-weight-bold">
+                                    <span class="badge badge-pill badge-light border text-dark mr-1.5 px-2 py-0.5 font-weight-bold" style="background:#F1F5F9; font-size: 0.72rem;">
                                         মান: {{ \App\model\LmsQuiz::toBengaliNumber($q->marks) }}
                                     </span>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-muted p-0" type="button" data-toggle="dropdown">
+                                        <button class="btn btn-xs btn-link text-muted p-0 px-1" type="button" data-toggle="dropdown" title="মেনু">
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
-                                        <div class="dropdown-menu dropdown-menu-right shadow-sm">
+                                        <div class="dropdown-menu dropdown-menu-right shadow-sm text-xs">
                                             <a class="dropdown-item" href="javascript:void(0)" onclick="openPreviewModal({{ $q->id }})">
                                                 <i class="fas fa-eye text-primary mr-2"></i> বিস্তারিত প্রিভিউ
                                             </a>
@@ -380,32 +519,39 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body p-3">
+                            <div class="card-body">
                                 <!-- Stimulus Context if available -->
                                 @if($q->stimulus)
-                                    <div class="alert alert-light border p-2 mb-2 text-xs text-muted font-italic bg-light rounded">
+                                    <div class="alert alert-light border py-1 px-2 mb-1.5 text-muted font-italic bg-light rounded" style="font-size: 0.75rem;">
                                         <strong><i class="fas fa-align-left text-info mr-1"></i> উদ্দীপক:</strong> {{ $q->stimulus }}
                                     </div>
                                 @endif
 
-                                <!-- Main Question Text with clean styling -->
-                                <h5 class="card-title font-weight-bold text-dark mb-3" style="font-size: 1.05rem; line-height: 1.4;">
-                                    {{ \App\model\LmsQuiz::toBengaliNumber($index + 1) }}. {!! nl2br(e($q->question_text)) !!}
-                                </h5>
+                                <!-- Main Question Text Serialized -->
+                                <div class="d-flex align-items-start mb-1.5">
+                                    <span class="font-weight-bold text-primary mr-1 text-sm" style="line-height: 1.35; flex-shrink: 0;">
+                                        {{ \App\model\LmsQuiz::toBengaliNumber($serialNum) }}.
+                                    </span>
+                                    <div class="qb-question-title flex-grow-1">
+                                        {!! nl2br(e($q->question_text)) !!}
+                                    </div>
+                                </div>
 
                                 <!-- TYPE-SPECIFIC CONTENT DISPLAY -->
                                 <!-- 1. MCQ Options Grid -->
                                 @if(in_array($q->question_type, ['mcq_single', 'mcq_multi']) && $q->options->isNotEmpty())
-                                    <div class="row row-cols-1 row-cols-sm-2 mb-2 g-2">
+                                    <div class="row row-cols-1 row-cols-sm-2 g-1 mb-1">
                                         @foreach($q->options as $optIdx => $opt)
-                                            <div class="col mb-2">
-                                                <div class="p-2 border rounded option-box d-flex align-items-center {{ $opt->is_correct ? 'border-success bg-light-success text-dark font-weight-bold' : 'bg-white' }}" style="font-size: 0.9rem;">
-                                                    <span class="badge {{ $opt->is_correct ? 'badge-success' : 'badge-light border' }} mr-2">
+                                            <div class="col mb-1">
+                                                <div class="qb-opt-box {{ $opt->is_correct ? 'is-correct' : '' }}">
+                                                    <span class="qb-opt-letter">
                                                         {{ \App\model\LmsQuestion::getBengaliOptionLetter($optIdx) }}
                                                     </span>
-                                                    <span class="flex-grow-1">{{ $opt->option_text }}</span>
+                                                    <span class="flex-grow-1 text-truncate" title="{{ $opt->option_text }}">
+                                                        {{ $opt->option_text }}
+                                                    </span>
                                                     @if($opt->is_correct)
-                                                        <i class="fas fa-check-circle text-success ml-2" title="সঠিক উত্তর"></i>
+                                                        <i class="fas fa-check-circle text-success ml-1" style="font-size: 0.78rem;" title="সঠিক উত্তর"></i>
                                                     @endif
                                                 </div>
                                             </div>
@@ -415,9 +561,9 @@
 
                                 <!-- 2. True / False Display -->
                                 @if($q->question_type === 'true_false')
-                                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border mb-2">
-                                        <span class="text-xs font-weight-bold text-muted mr-2">সঠিক বিবৃতি:</span>
-                                        <span class="badge badge-success px-3 py-1 font-weight-bold">
+                                    <div class="d-flex align-items-center py-1 px-2 bg-light rounded border mb-1" style="font-size: 0.78rem;">
+                                        <span class="font-weight-bold text-muted mr-2">সঠিক বিবৃতি:</span>
+                                        <span class="badge badge-success px-2 py-0.5 font-weight-bold" style="font-size: 0.74rem;">
                                             <i class="fas fa-check mr-1"></i> {{ ($q->correct_answer_text === 'true' || ($q->options->where('is_correct', true)->first() && $q->options->where('is_correct', true)->first()->option_text == 'সত্য')) ? 'সত্য (True)' : 'মিথ্যা (False)' }}
                                         </span>
                                     </div>
@@ -425,9 +571,9 @@
 
                                 <!-- 3. Fill in the Blanks Display -->
                                 @if($q->question_type === 'fill_blanks')
-                                    <div class="p-2 bg-light rounded border mb-2 text-xs">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <span><strong>প্রত্যাশিত শব্দ / উত্তর:</strong> <span class="badge badge-success font-mono font-weight-bold text-sm px-2 py-1">{{ $q->correct_answer_text ?: 'N/A' }}</span></span>
+                                    <div class="py-1 px-2 bg-light rounded border mb-1" style="font-size: 0.78rem;">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                            <span><strong>প্রত্যাশিত শব্দ / উত্তর:</strong> <span class="badge badge-success font-mono font-weight-bold px-1.5 py-0.5 ml-1">{{ $q->correct_answer_text ?: 'N/A' }}</span></span>
                                             @if($q->hints)
                                                 <span class="text-muted"><i class="fas fa-info-circle text-info mr-1"></i> ক্লু: <code>{{ $q->hints }}</code></span>
                                             @endif
@@ -437,12 +583,12 @@
 
                                 <!-- 4. Creative Question (CQ) Subquestions -->
                                 @if($q->question_type === 'creative' && !empty($q->cq_subquestions_decoded))
-                                    <div class="p-2 bg-light rounded border mb-2">
-                                        <div class="text-xs font-weight-bold text-muted mb-1">উপ-প্রশ্নাবলি:</div>
+                                    <div class="py-1 px-2 bg-light rounded border mb-1" style="font-size: 0.78rem;">
+                                        <div class="font-weight-bold text-muted mb-0.5" style="font-size: 0.72rem;">উপ-প্রশ্নাবলি:</div>
                                         <div class="row g-1">
                                             @foreach($q->cq_subquestions_decoded as $sub)
-                                                <div class="col-12 col-sm-6 text-xs mb-1">
-                                                    <span class="badge badge-dark mr-1">{{ isset($sub['label']) ? $sub['label'] : 'উপ' }}</span>
+                                                <div class="col-12 col-sm-6 mb-0.5" style="font-size: 0.76rem;">
+                                                    <span class="badge badge-dark mr-1" style="font-size: 0.68rem; padding: 1px 4px;">{{ isset($sub['label']) ? $sub['label'] : 'উপ' }}</span>
                                                     <span class="text-dark">{{ isset($sub['text']) ? $sub['text'] : '' }}</span>
                                                     <span class="text-muted">[{{ isset($sub['marks']) ? \App\model\LmsQuiz::toBengaliNumber($sub['marks']) : '১' }} নম্বর]</span>
                                                 </div>
@@ -453,39 +599,41 @@
 
                                 <!-- 5. Short Question / Translation / Descriptive -->
                                 @if(in_array($q->question_type, ['short_answer', 'translation', 'descriptive']) && $q->correct_answer_text)
-                                    <div class="p-2 bg-light rounded border mb-2 text-xs">
-                                        <strong>নমুনা উত্তর / গাইডলাইন:</strong>
-                                        <p class="mb-0 text-success font-italic mt-0.5">{{ $q->correct_answer_text }}</p>
+                                    <div class="py-1 px-2 bg-light rounded border mb-1" style="font-size: 0.78rem;">
+                                        <strong class="text-dark">নমুনা উত্তর / গাইডলাইন:</strong>
+                                        <span class="text-success font-italic ml-1">{{ $q->correct_answer_text }}</span>
                                     </div>
                                 @endif
 
                                 <!-- Admin Explanation Drawer -->
                                 @if($q->explanation)
-                                    <div class="mt-2 pt-2 border-top">
-                                        <button type="button" class="btn btn-xs btn-link text-muted p-0" data-toggle="collapse" data-target="#exp_{{ $q->id }}">
+                                    <div class="mt-1 pt-1 border-top">
+                                        <button type="button" class="btn btn-xs btn-link text-muted p-0" data-toggle="collapse" data-target="#exp_{{ $q->id }}" style="font-size: 0.72rem;">
                                             <i class="fas fa-lightbulb text-warning mr-1"></i> ব্যাখ্যা ও রেফারেন্স দেখুন
                                         </button>
                                         <div class="collapse mt-1" id="exp_{{ $q->id }}">
-                                            <div class="p-2 rounded bg-light border text-xs text-muted">
+                                            <div class="p-1.5 rounded bg-light border text-muted" style="font-size: 0.75rem;">
                                                 {!! nl2br(e($q->explanation)) !!}
                                             </div>
                                         </div>
                                     </div>
                                 @endif
                             </div>
-                            <div class="card-footer bg-light py-2 px-3 text-xs text-muted d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="mr-2"><i class="fas fa-folder text-warning"></i> {{ $q->category ?: 'জেনারেল' }}</span>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <div class="text-truncate mr-2" style="max-width: 65%;">
+                                    <span class="mr-2 text-dark font-weight-bold" style="color: #334155 !important;">
+                                        <i class="fas fa-folder text-warning mr-0.5"></i> {{ $q->category ?: 'জেনারেল' }}
+                                    </span>
                                     @if($q->chapter)
-                                        <span class="mr-2"><i class="fas fa-bookmark text-info"></i> {{ $q->chapter }}</span>
+                                        <span class="text-muted"><i class="fas fa-bookmark text-info mr-0.5"></i> {{ $q->chapter }}</span>
                                     @endif
                                 </div>
-                                <div class="d-flex align-items-center gap-1">
-                                    <button type="button" class="btn btn-xs btn-outline-success mr-1" onclick="openDeriveModal({{ $q->id }})" title="এই মূল প্রশ্ন থেকে অন্য ফরম্যাট বানান">
-                                        <i class="fas fa-code-branch mr-1"></i> সম্পর্কিত প্রশ্ন
+                                <div class="d-flex align-items-center flex-nowrap" style="gap: 4px;">
+                                    <button type="button" class="btn btn-xs btn-outline-success py-0 px-1.5" onclick="openDeriveModal({{ $q->id }})" title="সম্পর্কিত সংস্করণ তৈরি" style="font-size: 0.72rem; height: 21px; line-height: 19px;">
+                                        <i class="fas fa-code-branch mr-0.5"></i> সংস্করণ
                                     </button>
-                                    <button type="button" class="btn btn-xs btn-outline-primary" onclick="quickAddToPaper({{ $q->id }})">
-                                        <i class="fas fa-plus mr-1"></i> পেপারে যোগ
+                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-1.5" onclick="quickAddToPaper({{ $q->id }})" title="প্রশ্নপত্রে যোগ" style="font-size: 0.72rem; height: 21px; line-height: 19px;">
+                                        <i class="fas fa-plus mr-0.5"></i> পেপারে যোগ
                                     </button>
                                 </div>
                             </div>
@@ -513,9 +661,13 @@
                         </thead>
                         <tbody>
                             @foreach($questions as $index => $q)
+                                @php
+                                    $serialNum = $questions->firstItem() ? ($questions->firstItem() + $index) : ($index + 1);
+                                @endphp
                                 <tr>
-                                    <td class="text-center font-weight-bold text-muted text-xs">
-                                        #{{ $q->id }}
+                                    <td class="text-center font-weight-bold text-xs py-1.5">
+                                        <span class="badge badge-dark" style="font-size: 0.72rem; padding: 2px 5px;">{{ \App\model\LmsQuiz::toBengaliNumber($serialNum) }}</span>
+                                        <div class="text-muted" style="font-size: 0.68rem;">#{{ $q->id }}</div>
                                     </td>
                                     <td>
                                         <div class="custom-control custom-checkbox">
@@ -558,20 +710,22 @@
                                     <td class="text-xs text-muted">
                                         {{ $q->category ?: 'জেনারেল' }}
                                     </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-xs">
-                                            <button type="button" class="btn btn-outline-info" onclick="openPreviewModal({{ $q->id }})" title="প্রিভিউ">
-                                                <i class="fas fa-eye"></i>
+                                    <td class="text-center align-middle">
+                                        <div class="d-inline-flex align-items-center" style="gap: 4px;">
+                                            <button type="button" class="btn btn-xs btn-outline-info" onclick="openPreviewModal({{ $q->id }})" title="বিস্তারিত প্রিভিউ" style="border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+                                                <i class="fas fa-eye" style="pointer-events: none;"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-success" onclick="openDeriveModal({{ $q->id }})" title="সম্পর্কিত প্রশ্ন বানান">
-                                                <i class="fas fa-code-branch"></i>
+                                            <button type="button" class="btn btn-xs btn-outline-success" onclick="openDeriveModal({{ $q->id }})" title="সম্পর্কিত প্রশ্ন তৈরি (Derive)" style="border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+                                                <i class="fas fa-code-branch" style="pointer-events: none;"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-secondary" onclick="openEditModal({{ $q->id }})" title="সম্পাদনা">
-                                                <i class="fas fa-edit"></i>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary text-dark" onclick="openEditModal({{ $q->id }})" title="সম্পাদনা করুন" style="border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+                                                <i class="fas fa-edit" style="pointer-events: none;"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-info mr-1" onclick="quickAddToQuiz({{ $q->id }})" title="কুইজ / পরীক্ষায় যোগ করুন"><i class="fas fa-file-excel"></i></button>
-                                            <button type="button" class="btn btn-outline-primary" onclick="quickAddToPaper({{ $q->id }})" title="প্রশ্নপত্রে যোগ করুন">
-                                                <i class="fas fa-plus"></i>
+                                            <button type="button" class="btn btn-xs btn-outline-info" onclick="quickAddToQuiz({{ $q->id }})" title="কুইজ / পরীক্ষায় যোগ করুন" style="border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+                                                <i class="fas fa-file-excel" style="pointer-events: none;"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-primary" onclick="quickAddToPaper({{ $q->id }})" title="প্রশ্নপত্রে যোগ করুন" style="border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+                                                <i class="fas fa-plus" style="pointer-events: none;"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -1005,6 +1159,7 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
                         <button type="submit" class="btn btn-success font-weight-bold">
@@ -1343,10 +1498,40 @@
             <option value="{{ $chap }}">
         @endforeach
     </datalist>
+@endsection
 
-    <script>
-        // Checkbox management for Bulk Actions
-        document.addEventListener('DOMContentLoaded', function () {
+@section('script')
+<script>
+    function showModal(modalId) {
+        if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+            window.jQuery('#' + modalId).modal('show');
+        } else {
+            var el = document.getElementById(modalId);
+            if (el) {
+                el.classList.add('show');
+                el.style.display = 'block';
+                el.removeAttribute('aria-hidden');
+            }
+        }
+    }
+
+    function hideModal(modalId) {
+        if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+            window.jQuery('#' + modalId).modal('hide');
+        } else {
+            var el = document.getElementById(modalId);
+            if (el) {
+                el.classList.remove('show');
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+            }
+        }
+    }
+    window.showModal = showModal;
+    window.hideModal = hideModal;
+
+    // Checkbox management for Bulk Actions
+    document.addEventListener('DOMContentLoaded', function () {
             var selectAll = document.getElementById('selectAllCheckbox');
             var checkboxes = document.querySelectorAll('.question-checkbox');
             var countBadge = document.getElementById('selectedCountBadge');
@@ -1402,7 +1587,7 @@
                 // Quick Add to Quiz helper
         function quickAddToQuiz(questionId) {
             document.getElementById('quickAddQuizQuestionId').value = questionId;
-            $('#quickAddQuizModal').modal('show');
+            showModal('quickAddQuizModal');
         }
 
         function submitQuickAddQuiz() {
@@ -1419,7 +1604,7 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(res) {
-                $('#quickAddQuizModal').modal('hide');
+                hideModal('quickAddQuizModal');
                 if (res.success) {
                     alert(res.message);
                 } else {
@@ -1434,7 +1619,7 @@
         // Quick Add to Paper helper
         function quickAddToPaper(questionId) {
             document.getElementById('quickAddQuestionId').value = questionId;
-            $('#quickAddModal').modal('show');
+            showModal('quickAddModal');
         }
 
         function submitQuickAdd() {
@@ -1451,7 +1636,7 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(res) {
-                $('#quickAddModal').modal('hide');
+                hideModal('quickAddModal');
                 if (res.success) {
                     alert('সফলভাবে প্রশ্নপত্রে যুক্ত হয়েছে! মোট প্রশ্ন: ' + res.total_questions);
                 } else {
@@ -1523,14 +1708,14 @@
                         document.getElementById('derive_concept_explanation').value = q.concept_explanation || '';
                         document.getElementById('deriveForm').action = '/admin/question-book/' + q.id + '/derive';
                         toggleQuestionTypeFields('derive');
-                        $('#deriveModal').modal('show');
+                        showModal('deriveModal');
                     }
                 });
         }
 
         // Open Related Questions Visual Modal
         function openRelatedModal(questionId) {
-            $('#relatedModal').modal('show');
+            showModal('relatedModal');
             var body = document.getElementById('relatedModalBody');
             body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="text-muted mt-2">লোড হচ্ছে...</p></div>';
 
@@ -1596,7 +1781,7 @@
 
         // Open Edit Modal
         function openEditModal(questionId) {
-            $('#editQuestionModal').modal('show');
+            showModal('editQuestionModal');
             document.getElementById('edit_modal_id').textContent = questionId;
             var body = document.getElementById('editModalBody');
             body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="text-muted mt-2">লোড হচ্ছে...</p></div>';
@@ -1729,7 +1914,7 @@
 
         // Detail Preview Modal AJAX
         function openPreviewModal(questionId) {
-            $('#previewModal').modal('show');
+            showModal('previewModal');
             var body = document.getElementById('previewModalBody');
             body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="text-muted mt-2">লোড হচ্ছে...</p></div>';
 
@@ -1964,5 +2149,18 @@
                 label.textContent = fileName;
             }
         }
+
+        // Explicit Global Window Bindings
+        window.quickAddToQuiz = quickAddToQuiz;
+        window.submitQuickAddQuiz = submitQuickAddQuiz;
+        window.quickAddToPaper = quickAddToPaper;
+        window.submitQuickAdd = submitQuickAdd;
+        window.openDeriveModal = openDeriveModal;
+        window.openRelatedModal = openRelatedModal;
+        window.openEditModal = openEditModal;
+        window.openPreviewModal = openPreviewModal;
+        window.toggleQuestionTypeFields = toggleQuestionTypeFields;
+        window.toggleQbImportMode = toggleQbImportMode;
+        window.updateQbFileName = updateQbFileName;
     </script>
 @endsection

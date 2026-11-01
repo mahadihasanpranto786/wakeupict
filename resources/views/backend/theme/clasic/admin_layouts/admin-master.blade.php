@@ -150,6 +150,174 @@
             background-color: #e2e8f0 !important;
         }
 
+        /* =========================================================================
+           ENTERPRISE HIGH-CONTRAST CHECKBOX & RADIO DESIGN SYSTEM
+           Ensures checkboxes & radios across backend quizzes, questions, tables & modals
+           are prominent, crisp, beautiful, and crystal-clear in both Light & Dark modes
+           ========================================================================= */
+        .adm-checkbox,
+        .quiz-checkbox,
+        .question-checkbox,
+        #selectAllCheckbox,
+        #selectAllQuizzesCheckbox,
+        table input[type="checkbox"],
+        .custom-control-input[type="checkbox"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 19px !important;
+            height: 19px !important;
+            min-width: 19px !important;
+            min-height: 19px !important;
+            border: 2px solid #475569 !important;
+            border-radius: 5px !important;
+            background-color: #ffffff !important;
+            outline: none !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            vertical-align: middle !important;
+            margin: 0 !important;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        html.dark .adm-checkbox,
+        html.dark .quiz-checkbox,
+        html.dark .question-checkbox,
+        html.dark #selectAllCheckbox,
+        html.dark #selectAllQuizzesCheckbox,
+        html.dark table input[type="checkbox"],
+        html.dark .custom-control-input[type="checkbox"] {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+
+        .adm-checkbox:hover,
+        .quiz-checkbox:hover,
+        .question-checkbox:hover,
+        #selectAllCheckbox:hover,
+        #selectAllQuizzesCheckbox:hover,
+        table input[type="checkbox"]:hover {
+            border-color: #059669 !important;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+        }
+
+        .adm-checkbox:checked,
+        .quiz-checkbox:checked,
+        .question-checkbox:checked,
+        #selectAllCheckbox:checked,
+        #selectAllQuizzesCheckbox:checked,
+        table input[type="checkbox"]:checked,
+        .custom-control-input[type="checkbox"]:checked {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25) !important;
+        }
+
+        .adm-checkbox:checked::after,
+        .quiz-checkbox:checked::after,
+        .question-checkbox:checked::after,
+        #selectAllCheckbox:checked::after,
+        #selectAllQuizzesCheckbox:checked::after,
+        table input[type="checkbox"]:checked::after {
+            content: "" !important;
+            display: block !important;
+            width: 5px !important;
+            height: 10px !important;
+            border: solid #ffffff !important;
+            border-width: 0 2.5px 2.5px 0 !important;
+            transform: rotate(45deg) translate(-0.5px, -1px) !important;
+        }
+
+        /* Checkbox row highlighted state */
+        tr.selected-row,
+        tr.table-active-selected {
+            background-color: rgba(16, 185, 129, 0.08) !important;
+        }
+
+        /* Radio buttons in backend modals / option lists */
+        .adm-radio,
+        .modal input[type="radio"],
+        .input-group-text input[type="radio"],
+        .custom-control-input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 19px !important;
+            height: 19px !important;
+            min-width: 19px !important;
+            min-height: 19px !important;
+            border: 2px solid #475569 !important;
+            border-radius: 50% !important;
+            background-color: #ffffff !important;
+            outline: none !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            vertical-align: middle !important;
+            margin: 0 !important;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+        }
+
+        html.dark .adm-radio,
+        html.dark .modal input[type="radio"],
+        html.dark .input-group-text input[type="radio"],
+        html.dark .custom-control-input[type="radio"] {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+
+        .adm-radio:checked,
+        .modal input[type="radio"]:checked,
+        .input-group-text input[type="radio"]:checked,
+        .custom-control-input[type="radio"]:checked {
+            border-color: #059669 !important;
+            border-width: 5px !important;
+            background-color: #ffffff !important;
+        }
+        html.dark .adm-radio:checked,
+        html.dark .modal input[type="radio"]:checked,
+        html.dark .input-group-text input[type="radio"]:checked,
+        html.dark .custom-control-input[type="radio"]:checked {
+            background-color: #0f172a !important;
+        }
+
+        /* Bootstrap Custom Control Checkboxes in AdminLTE */
+        .custom-control-label {
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.875rem;
+            padding-left: 0.35rem;
+        }
+        .custom-checkbox .custom-control-label::before {
+            border: 2px solid #475569 !important;
+            border-radius: 5px !important;
+            width: 1.18rem !important;
+            height: 1.18rem !important;
+            top: 0.12rem !important;
+            background-color: #ffffff !important;
+        }
+        html.dark .custom-checkbox .custom-control-label::before {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+        .custom-control-input:checked ~ .custom-control-label::before {
+            border-color: #059669 !important;
+            background-color: #059669 !important;
+            box-shadow: 0 0 0 1px #059669, 0 2px 4px rgba(5, 150, 105, 0.2) !important;
+        }
+        .custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+            top: 0.12rem !important;
+            width: 1.18rem !important;
+            height: 1.18rem !important;
+        }
+
         @keyframes adm-spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }

@@ -667,4 +667,47 @@ class AdminCertificateAndQuizImportTest extends TestCase
         $this->assertDatabaseMissing('lms_quizzes', ['id' => $quiz2->id]);
         $this->assertDatabaseMissing('lms_questions', ['id' => $q1->id]);
     }
+
+    /**
+     * Test admin can view attempt detail even if the parent quiz was deleted or null
+     */
+    public function test_admin_can_view_attempt_detail_even_if_quiz_was_deleted()
+    {
+        $studentAccount = \App\model\StudentAccount::first() ?: \App\model\StudentAccount::create([
+            'name' => 'Demo Student',
+            'phone' => '01711999888',
+            'password' => bcrypt('12345678'),
+            'status' => 'active',
+        ]);
+
+        $attempt = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => 999999, // non-existent/deleted quiz
+            'student_account_id' => $studentAccount->id,
+            'question_set' => 'Set A',
+            'status' => 'graded',
+            'score' => 10.0,
+            'percentage' => 100.0,
+            'total_marks' => 10.0,
+            'started_at' => now()->subMinutes(10),
+            'submitted_at' => now(),
+            'time_spent_seconds' => 300,
+            'questions_snapshot' => [
+                [
+                    'id' => 999991,
+                    'question_text' => 'What is computer RAM?',
+                    'question_type' => 'mcq_single',
+                    'marks' => 10,
+                    'options' => [
+                        ['id' => 1, 'text' => 'Random Access Memory', 'is_correct' => true],
+                        ['id' => 2, 'text' => 'Read Only Memory', 'is_correct' => false],
+                    ],
+                ]
+            ],
+        ]);
+
+        $res = $this->actingAs($this->adminUser)->get(route('admin.quizzes.attempt-detail', $attempt->id));
+        $res->assertStatus(200);
+        $res->assertSee('What is computer RAM?');
+        $res->assertSee('Random Access Memory');
+    }
 }

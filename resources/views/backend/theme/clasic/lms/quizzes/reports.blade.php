@@ -167,8 +167,8 @@
                 <table class="table table-hover table-striped align-middle mb-0">
                     <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                         <tr>
-                            <th class="text-center" style="width: 40px;">
-                                <input type="checkbox" id="selectAllCheckbox" title="সবগুলো একসাথে নির্বাচন করুন" style="cursor: pointer; transform: scale(1.15);">
+                            <th class="text-center" style="width: 48px;">
+                                <input type="checkbox" id="selectAllCheckbox" class="adm-checkbox" title="সবগুলো একসাথে নির্বাচন করুন">
                             </th>
                             <th class="text-center" style="width: 50px;">#</th>
                         <th>শিক্ষার্থীর তথ্য</th>
@@ -190,7 +190,7 @@
                         @endphp
                         <tr>
                             <td class="text-center">
-                                <input type="checkbox" name="attempt_ids[]" value="{{ $attempt->id }}" class="attempt-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                                <input type="checkbox" name="attempt_ids[]" value="{{ $attempt->id }}" class="attempt-checkbox adm-checkbox" title="অ্যাটেম্পট #{{ $attempt->id }} নির্বাচন করুন">
                             </td>
                             <td class="text-center text-muted text-sm">{{ $loop->iteration + ($attempts->currentPage() - 1) * $attempts->perPage() }}</td>
                             <td>

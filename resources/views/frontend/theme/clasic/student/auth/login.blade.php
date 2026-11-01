@@ -1,107 +1,296 @@
 @extends('frontend.theme.clasic.frontend_layouts.master_layout')
 
-@section('title', 'Student Login — Wake Up ICT Portal')
+@php
+    $activeTab = (isset($initialTab) && $initialTab === 'register')
+        || request('tab') === 'register'
+        || $errors->has('name')
+        || $errors->has('password_confirmation')
+        ? 'register'
+        : 'login';
+@endphp
+
+@section('title', ($activeTab === 'register' ? 'Student Registration' : 'Student Login') . ' — Wake Up ICT Portal')
 
 @section('maincontent')
-<div class="relative w-full min-h-screen pt-36 pb-24 flex items-center justify-center px-4">
+<div class="relative w-full min-h-screen pt-20 sm:pt-24 pb-12 flex items-center justify-center px-4">
     <!-- Ambient Lights -->
     <div class="absolute inset-0 bg-grid-mesh opacity-20 pointer-events-none"></div>
     <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
 
     <div class="max-w-md w-full relative z-10">
-        <div class="rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl">
+        <div class="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 backdrop-blur-2xl p-5 sm:p-7 shadow-2xl transition-all">
             
             <!-- Logo & Badge -->
-            <div class="text-center mb-8">
-                <a href="{{ url('/') }}" class="inline-flex items-center gap-2 mb-4 group">
-                    <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform">
+            <div class="text-center mb-4">
+                <a href="{{ url('/') }}" class="inline-flex items-center gap-2 mb-2 group">
+                    <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT" class="w-10 h-10 object-contain group-hover:scale-105 transition-transform">
                 </a>
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-mono uppercase tracking-widest font-semibold mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse"></span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/15 border border-brand-primary/30 text-emerald-700 dark:text-brand-primary text-xs font-mono uppercase tracking-widest font-bold mb-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-brand-primary animate-pulse"></span>
                     <span>Student Portal Access</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Student Login</h1>
-                <p class="text-xs sm:text-sm text-slate-400 mt-1.5">Enter your Student ID, Email, or Phone to access your courses.</p>
+                <h1 id="authMainHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    {{ $activeTab === 'register' ? 'Create Student Account' : 'Student Login' }}
+                </h1>
+                <p id="authSubHeading" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5">
+                    {{ $activeTab === 'register' ? 'Activate your student portal access using your admission phone number.' : 'Enter your Student ID, Email, or Phone to access your courses.' }}
+                </p>
+            </div>
+
+            <!-- Interactive 2-Tab Navigation Switcher -->
+            <div class="p-1 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 grid grid-cols-2 gap-1 mb-4 select-none shadow-inner">
+                <button type="button" onclick="switchAuthTab('login')" id="tabBtn-login"
+                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'login' ? 'bg-brand-primary text-slate-950 shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                    <i class="fa fa-sign-in"></i>
+                    <span>লগইন (Sign In)</span>
+                </button>
+                <button type="button" onclick="switchAuthTab('register')" id="tabBtn-register"
+                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'register' ? 'bg-brand-primary text-slate-950 shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                    <i class="fa fa-user-plus"></i>
+                    <span>রেজিস্ট্রেশন (Register)</span>
+                </button>
             </div>
 
             <!-- Error Alerts -->
             @if($errors->any())
-                <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs mb-6 space-y-1">
+                <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs mb-6 space-y-1">
                     @foreach($errors->all() as $error)
-                        <p class="flex items-center gap-2">
-                            <i class="fa fa-exclamation-circle text-rose-400"></i>
+                        <p class="flex items-center gap-2 font-medium">
+                            <i class="fa fa-exclamation-circle text-rose-500 flex-shrink-0"></i>
                             <span>{{ $error }}</span>
                         </p>
                     @endforeach
                 </div>
             @endif
 
-            <!-- Default Password Tip for Online Admitted Students -->
-            <div class="mb-6 p-3.5 rounded-2xl bg-brand-primary/10 border border-brand-primary/30 text-xs text-slate-300 space-y-1">
-                <div class="flex items-center gap-1.5 font-bold text-brand-primary">
-                    <i class="fa fa-info-circle text-sm"></i>
-                    <span>অনলাইন ভর্তি হওয়া শিক্ষার্থীদের জন্য:</span>
+            <!-- Success Alert -->
+            @if(session('success'))
+                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs mb-6 flex items-center gap-2 font-semibold">
+                    <i class="fa fa-check-circle text-emerald-600 flex-shrink-0"></i>
+                    <span>{{ session('success') }}</span>
                 </div>
-                <p class="text-[11px] text-slate-300 leading-relaxed font-sans">
-                    ইউজারনেম হিসেবে আপনার <strong>Student ID</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
-                </p>
+            @endif
+
+            <!-- ========================================================================= -->
+            <!-- TAB PANE 1: STUDENT LOGIN -->
+            <!-- ========================================================================= -->
+            <div id="authPaneLogin" class="{{ $activeTab === 'login' ? 'block' : 'hidden' }}">
+                <!-- Default Password Tip for Online Admitted Students -->
+                <div class="mb-3.5 p-2.5 px-3 rounded-2xl bg-emerald-50/80 dark:bg-brand-primary/10 border border-emerald-300 dark:border-brand-primary/30 text-xs text-slate-800 dark:text-slate-300 space-y-1">
+                    <div class="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-brand-primary">
+                        <i class="fa fa-info-circle text-sm"></i>
+                        <span>অনলাইন ভর্তি হওয়া শিক্ষার্থীদের জন্য:</span>
+                    </div>
+                    <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+                        ইউজারনেম হিসেবে আপনার <strong>Student ID</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
+                    </p>
+                </div>
+
+                <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label for="login_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
+                            Student ID / Email / Phone <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" required
+                                   placeholder="যেমন: WUICT-2026-0001 বা 017XXXXXXXX"
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="password" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                                Password <span class="text-rose-500">*</span>
+                            </label>
+                        </div>
+                        <div class="relative">
+                            <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="password" id="password" name="password" required
+                                   placeholder="••••••••"
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer select-none text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 font-medium">
+                            <input type="checkbox" name="remember" class="w-4 h-4 rounded cursor-pointer">
+                            <span>Remember Me</span>
+                        </label>
+                        <a href="tel:01791612121" class="text-emerald-700 dark:text-brand-primary hover:underline font-semibold flex items-center gap-1">
+                            <i class="fa fa-phone"></i>
+                            <span>Helpline 01791612121</span>
+                        </a>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa fa-sign-in"></i>
+                            <span>Sign In to Dashboard</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Switcher to Register -->
+                <div class="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 text-center">
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        নতুন শিক্ষার্থী বা একাউন্ট নেই?
+                        <button type="button" onclick="switchAuthTab('register')" class="font-bold text-emerald-700 dark:text-brand-primary hover:underline ml-1 cursor-pointer">
+                            একাউন্ট খুলুন (Create / Claim Account)
+                        </button>
+                    </p>
+                </div>
             </div>
 
-            <!-- Form -->
-            <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-5">
-                @csrf
-
-                <div>
-                    <label for="login_id" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                        Student ID / Email / Phone
-                    </label>
-                    <div class="relative">
-                        <i class="fa fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                        <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" required autofocus
-                               placeholder="e.g. WUICT-2026-0001 or 017XXXXXXXX"
-                               class="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
+            <!-- ========================================================================= -->
+            <!-- TAB PANE 2: STUDENT REGISTRATION / ACCOUNT ACTIVATION -->
+            <!-- ========================================================================= -->
+            <div id="authPaneRegister" class="{{ $activeTab === 'register' ? 'block' : 'hidden' }}">
+                <div class="mb-3.5 p-2.5 px-3 rounded-2xl bg-cyan-50/80 dark:bg-cyan-950/20 border border-cyan-300 dark:border-cyan-800 text-xs text-slate-800 dark:text-slate-300 space-y-1">
+                    <div class="flex items-center gap-1.5 font-bold text-cyan-800 dark:text-cyan-400">
+                        <i class="fa fa-shield text-sm"></i>
+                        <span>অটো-কোর্স লিংকিং সুবিধা:</span>
                     </div>
+                    <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+                        ভর্তির সময় ব্যবহৃত মোবাইল নম্বরটি লিখলে আপনার কোর্স, ব্যাচ ও ম্যাটেরিয়ালস স্বয়ংক্রিয়ভাবে প্রোফাইলে যুক্ত হবে।
+                    </p>
                 </div>
 
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                            Password
+                <form action="{{ route('student.register.submit') }}" method="POST" class="space-y-3.5">
+                    @csrf
+
+                    <div>
+                        <label for="reg_name" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Full Name <span class="text-rose-500">*</span>
                         </label>
+                        <div class="relative">
+                            <i class="fa fa-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="text" id="reg_name" name="name" value="{{ old('name') }}" required
+                                   placeholder="যেমন: MD. RAHIM MIAH"
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                        </div>
                     </div>
-                    <div class="relative">
-                        <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                        <input type="password" id="password" name="password" required
-                               placeholder="••••••••"
-                               class="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+
+                    <div>
+                        <label for="reg_phone" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Mobile Phone Number <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="text" id="reg_phone" name="phone" value="{{ old('phone') }}" required
+                                   placeholder="017XXXXXXXX"
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
+                        </div>
                     </div>
+
+                    <div>
+                        <label for="reg_email" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Email Address <span class="text-slate-500 font-normal lowercase">(ঐচ্ছিক)</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="email" id="reg_email" name="email" value="{{ old('email') }}"
+                                   placeholder="student@example.com"
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label for="reg_password" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                                Password <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fa fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                <input type="password" id="reg_password" name="password" required minlength="6"
+                                       placeholder="কমপক্ষে ৬ ডিজিট"
+                                       class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="reg_password_confirmation" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                                Confirm <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fa fa-check-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                <input type="password" id="reg_password_confirmation" name="password_confirmation" required minlength="6"
+                                       placeholder="পুনরায় পাসওয়ার্ড দিন"
+                                       class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Activate &amp; Enter Dashboard</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Switcher to Login -->
+                <div class="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 text-center">
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        ইতিমধ্যে একাউন্ট তৈরি করেছেন?
+                        <button type="button" onclick="switchAuthTab('login')" class="font-bold text-emerald-700 dark:text-brand-primary hover:underline ml-1 cursor-pointer">
+                            সরাসরি লগইন করুন (Sign In)
+                        </button>
+                    </p>
                 </div>
-
-                <div class="flex items-center justify-between text-xs">
-                    <label class="flex items-center gap-2 cursor-pointer select-none text-slate-400 hover:text-slate-300">
-                        <input type="checkbox" name="remember" class="w-4 h-4 rounded bg-slate-950 border-slate-800 text-brand-primary focus:ring-brand-primary focus:ring-offset-0">
-                        <span>Remember Me</span>
-                    </label>
-                    <span class="text-slate-500">Need help? Call admission</span>
-                </div>
-
-                <button type="submit" class="w-full py-4 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    <i class="fa fa-sign-in"></i>
-                    <span>Sign In to Dashboard</span>
-                </button>
-            </form>
-
-            <!-- Registration Link -->
-            <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
-                <p class="text-xs text-slate-400">
-                    New student or admitted recently?
-                    <a href="{{ route('student.register') }}" class="font-bold text-brand-primary hover:underline ml-1">
-                        Create / Claim Account
-                    </a>
-                </p>
             </div>
 
         </div>
     </div>
 </div>
+
+<script>
+    function switchAuthTab(tab) {
+        var paneLogin = document.getElementById('authPaneLogin');
+        var paneRegister = document.getElementById('authPaneRegister');
+        var btnLogin = document.getElementById('tabBtn-login');
+        var btnRegister = document.getElementById('tabBtn-register');
+        var heading = document.getElementById('authMainHeading');
+        var subheading = document.getElementById('authSubHeading');
+
+        if (tab === 'register') {
+            paneLogin.classList.add('hidden');
+            paneRegister.classList.remove('hidden');
+
+            btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+            btnRegister.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-slate-950 shadow-md font-extrabold';
+
+            heading.innerText = 'Create Student Account';
+            subheading.innerText = 'Activate your student portal access using your admission phone number.';
+            document.title = 'Student Registration — Wake Up ICT Portal';
+
+            if (window.history.replaceState) {
+                window.history.replaceState(null, '', '{{ route("student.register") }}');
+            }
+        } else {
+            paneRegister.classList.add('hidden');
+            paneLogin.classList.remove('hidden');
+
+            btnRegister.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+            btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-slate-950 shadow-md font-extrabold';
+
+            heading.innerText = 'Student Login';
+            subheading.innerText = 'Enter your Student ID, Email, or Phone to access your courses.';
+            document.title = 'Student Login — Wake Up ICT Portal';
+
+            if (window.history.replaceState) {
+                window.history.replaceState(null, '', '{{ route("student.login") }}');
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash === '#register' || window.location.search.indexOf('tab=register') !== -1) {
+            switchAuthTab('register');
+        }
+    });
+</script>
 @endsection

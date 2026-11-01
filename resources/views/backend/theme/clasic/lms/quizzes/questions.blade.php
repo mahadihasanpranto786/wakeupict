@@ -70,8 +70,8 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                     <tr>
-                        <th class="text-center" style="width: 40px;">
-                            <input type="checkbox" id="selectAllCheckbox" style="cursor: pointer; transform: scale(1.15);" title="সবগুলো প্রশ্ন একসাথে নির্বাচন করুন">
+                        <th class="text-center" style="width: 48px;">
+                            <input type="checkbox" id="selectAllCheckbox" class="adm-checkbox" title="সবগুলো প্রশ্ন একসাথে নির্বাচন করুন">
                         </th>
                         <th class="text-center" style="width: 50px;">#</th>
                         <th>প্রশ্ন ও অপশনসমূহ</th>
@@ -83,9 +83,9 @@
                 </thead>
                 <tbody>
                     @forelse($questions as $index => $q)
-                        <tr>
+                        <tr id="q-row-{{ $q->id }}">
                             <td class="text-center">
-                                <input type="checkbox" name="question_ids[]" value="{{ $q->id }}" class="question-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                                <input type="checkbox" name="question_ids[]" value="{{ $q->id }}" class="question-checkbox" title="প্রশ্ন #{{ $q->id }} নির্বাচন করুন">
                             </td>
                             <td class="text-center text-muted font-weight-bold">
                                 {{ $loop->iteration + ($questions->currentPage() - 1) * $questions->perPage() }}
@@ -180,6 +180,18 @@
             if (selectAll && allBoxes.length > 0) {
                 selectAll.checked = (checkboxes.length === allBoxes.length);
             }
+
+            // Highlight selected rows
+            document.querySelectorAll('.question-checkbox').forEach(function(cb) {
+                var row = cb.closest('tr');
+                if (row) {
+                    if (cb.checked) {
+                        row.classList.add('selected-row');
+                    } else {
+                        row.classList.remove('selected-row');
+                    }
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {

@@ -11,28 +11,28 @@
     <div class="content-header p-0 mb-3">
         <div class="container-fluid">
             <div class="row align-items-center">
-                <div class="col-sm-6">
-                    <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.5rem;">
+                <div class="col-xl-4 col-lg-3 col-md-12 mb-2 mb-lg-0">
+                    <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.4rem;">
                         <i class="fas fa-file-excel text-success mr-2"></i> কুইজ ও এক্সেল ডাটা আপলোড
                     </h1>
-                    <p class="text-muted text-sm mb-0">
-                        কোর্স ক্যাটাগরি ভিত্তিক কুইজ ব্যবস্থাপনা এবং এক্সেল/সিএসভি শিটের মাধ্যমে একসাথে শত শত MCQ প্রশ্ন আপলোড করুন।
+                    <p class="text-muted text-xs mb-0">
+                        কোর্স ক্যাটাগরি ভিত্তিক কুইজ ব্যবস্থাপনা এবং এক্সেল শিটের মাধ্যমে বাল্ক MCQ প্রশ্ন আপলোড।
                     </p>
                 </div>
-                <div class="col-sm-6 text-sm-right mt-2 mt-sm-0">
-                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-outline-primary shadow-sm mr-1">
+                <div class="col-xl-8 col-lg-9 col-md-12 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 6px;">
+                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-primary shadow-sm">
                         <i class="fas fa-chart-line mr-1"></i> পরীক্ষার রিপোর্ট
                     </a>
-                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-outline-info shadow-sm mr-1">
+                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-info shadow-sm">
                         <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ডাউনলোড
                     </a>
-                    <button type="button" class="btn btn-warning shadow-sm mr-1 font-weight-bold" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important;">
+                    <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important;">
                         <i class="fas fa-book-open mr-1"></i> লাইব্রেরি থেকে প্রশ্ন যোগ (No File)
                     </button>
-                    <button type="button" class="btn btn-success shadow-sm mr-1" data-toggle="modal" data-target="#excelImportModal">
+                    <button type="button" class="btn btn-sm btn-success shadow-sm" data-toggle="modal" data-target="#excelImportModal">
                         <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
                     </button>
-                    <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#createQuizModal">
+                    <button type="button" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#createQuizModal">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ
                     </button>
                 </div>
@@ -162,8 +162,8 @@
             <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                     <tr>
-                        <th class="text-center" style="width: 40px;">
-                            <input type="checkbox" id="selectAllQuizzesCheckbox" title="সকল কুইজ নির্বাচন করুন" style="cursor: pointer; transform: scale(1.15);">
+                        <th class="text-center" style="width: 48px;">
+                            <input type="checkbox" id="selectAllQuizzesCheckbox" class="adm-checkbox" title="সকল কুইজ নির্বাচন করুন">
                         </th>
                         <th class="text-center" style="width: 45px;">#</th>
                         <th>কোর্স ও কুইজ শিরোনাম</th>
@@ -180,7 +180,7 @@
                     @forelse($quizzes as $quiz)
                         <tr>
                             <td class="text-center">
-                                <input type="checkbox" name="quiz_ids[]" value="{{ $quiz->id }}" class="quiz-checkbox" style="cursor: pointer; transform: scale(1.15);">
+                                <input type="checkbox" name="quiz_ids[]" value="{{ $quiz->id }}" class="quiz-checkbox" title="কুইজ #{{ $quiz->id }} নির্বাচন করুন">
                             </td>
                             <td class="text-center text-muted text-sm">{{ $loop->iteration + ($quizzes->currentPage() - 1) * $quizzes->perPage() }}</td>
                             <td>
@@ -486,7 +486,7 @@
 
     <!-- Modal: Edit Quiz Info -->
     <div class="modal fade" id="editQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content shadow-lg border-0">
                 <form id="editQuizForm" method="POST">
                     @csrf
@@ -742,11 +742,11 @@
 
     <!-- Modal: Create New Quiz Manually -->
 <div class="modal fade" id="createQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content shadow-lg border-0">
             <form action="{{ route('admin.quizzes.store') }}" method="POST">
                 @csrf
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-primary text-white py-3">
                     <h5 class="modal-title font-weight-bold">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ তৈরি করুন
                     </h5>
@@ -754,151 +754,128 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body p-4 space-y-3">
-                    <div class="form-group">
-                        <label class="font-weight-bold text-sm">কোর্স নির্বাচন করুন <span class="text-danger">*</span></label>
-                        <select name="course_id" class="form-control" required>
-                            <option value="">-- কোর্স নির্বাচন করুন --</option>
-                            @foreach($courses as $c)
-                                <option value="{{ $c->id }}">{{ $c->course_title }}</option>
-                            @endforeach
-                        </select>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">কোর্স নির্বাচন করুন <span class="text-danger">*</span></label>
+                            <select name="course_id" class="form-control select2" required>
+                                <option value="">-- কোর্স নির্বাচন করুন --</option>
+                                @foreach($courses as $c)
+                                    <option value="{{ $c->id }}">{{ $c->course_title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">কুইজ শিরোনাম <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" placeholder="যেমন: Web Development Fundamental Assessment" required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="font-weight-bold text-sm">কুইজ শিরোনাম <span class="text-danger">*</span></label>
-                        <input type="text" name="title" class="form-control" placeholder="যেমন: Web Development Fundamental Assessment" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="font-weight-bold text-sm">সংক্ষিপ্ত বিবরণ</label>
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-sm text-dark">সংক্ষিপ্ত বিবরণ</label>
                         <textarea name="description" class="form-control" rows="2" placeholder="কুইজের নিয়মাবলি বা বর্ণনা..."></textarea>
                     </div>
 
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">প্রশ্ন প্রদর্শন মোড <span class="text-danger">*</span></label>
-                                <select name="view_mode" class="form-control" required>
-                                    <option value="all_questions">সকল প্রশ্ন একসাথে (বোর্ড পরীক্ষার পেপার)</option>
-                                    <option value="one_by_one">১টি করে প্রশ্ন (One-by-One)</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">প্রশ্ন প্রদর্শন মোড <span class="text-danger">*</span></label>
+                            <select name="view_mode" class="form-control" required>
+                                <option value="all_questions">সকল প্রশ্ন একসাথে (বোর্ড পরীক্ষার পেপার)</option>
+                                <option value="one_by_one">১টি করে প্রশ্ন (One-by-One)</option>
+                            </select>
                         </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">প্রশ্ন সেট <span class="text-danger">*</span></label>
-                                <select name="question_set" class="form-control" required>
-                                    <option value="Set A">সেট ক (Set A)</option>
-                                    <option value="Set B">সেট খ (Set B)</option>
-                                    <option value="Set C">সেট গ (Set C)</option>
-                                    <option value="Set D">সেট ঘ (Set D)</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">প্রশ্ন সেট <span class="text-danger">*</span></label>
+                            <select name="question_set" class="form-control" required>
+                                <option value="Set A">সেট ক (Set A)</option>
+                                <option value="Set B">সেট খ (Set B)</option>
+                                <option value="Set C">সেট গ (Set C)</option>
+                                <option value="Set D">সেট ঘ (Set D)</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">বিষয় কোড</label>
-                                <input type="text" name="subject_code" class="form-control" value="101" placeholder="যেমন: 101 বা 154">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">শিক্ষা বোর্ড / প্রতিষ্ঠান নাম</label>
-                                <input type="text" name="board_name" class="form-control" value="ঢাকা শিক্ষা বোর্ড" placeholder="যেমন: ঢাকা বোর্ড / Wake Up ICT">
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">বিষয় কোড</label>
+                            <input type="text" name="subject_code" class="form-control" value="101" placeholder="যেমন: 101 বা 154">
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">ধরণ <span class="text-danger">*</span></label>
-                                <select name="quiz_type" class="form-control" required>
-                                    <option value="practice">অনুশীলন (Practice)</option>
-                                    <option value="exam">পরীক্ষা (Live Exam)</option>
-                                    <option value="class_test">ক্লাস টেস্ট (Class Test)</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">শিক্ষা বোর্ড / প্রতিষ্ঠান নাম</label>
+                            <input type="text" name="board_name" class="form-control" value="ঢাকা শিক্ষা বোর্ড" placeholder="যেমন: ঢাকা বোর্ড / Wake Up ICT">
                         </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">সময়সীমা (মিনিট) <span class="text-danger">*</span></label>
-                                <input type="number" name="duration_minutes" class="form-control" value="20" min="1" max="300" required>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">ধরণ <span class="text-danger">*</span></label>
+                            <select name="quiz_type" class="form-control" required>
+                                <option value="practice">অনুশীলন (Practice)</option>
+                                <option value="exam">পরীক্ষা (Live Exam)</option>
+                                <option value="class_test">ক্লাস টেস্ট (Class Test)</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">ভুল উত্তরের নেগেটিভ মার্ক</label>
-                                <input type="number" step="0.05" name="negative_marks" class="form-control" value="0.00" min="0" placeholder="যেমন: 0.25 বা 0.50">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">পাস মার্কস</label>
-                                <input type="number" step="0.5" name="pass_marks" class="form-control" value="5.0" min="0">
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">সময়সীমা (মিনিট) <span class="text-danger">*</span></label>
+                            <input type="number" name="duration_minutes" class="form-control" value="20" min="1" max="300" required>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">সর্বোচ্চ রিটেক সংখ্যা (Max Attempts)</label>
+                        <div class="col-md-3 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">ভুল উত্তরের নেগেটিভ মার্ক</label>
+                            <input type="number" step="0.05" name="negative_marks" class="form-control" value="0.00" min="0" placeholder="যেমন: 0.25 বা 0.50">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">পাস মার্কস</label>
+                            <input type="number" step="0.5" name="pass_marks" class="form-control" value="5.0" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">ফলাফল প্রকাশের নীতি</label>
+                            <select name="result_release_policy" class="form-control">
+                                <option value="immediate">পরীক্ষা শেষে তাৎক্ষণিক প্রকাশ</option>
+                                <option value="after_deadline">নির্ধারিত সময়সীমা শেষ হলে</option>
+                                <option value="admin_publish">অ্যাডমিন কর্তৃক প্রকাশ সাপেক্ষে</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">স্ট্যাটাস</label>
+                            <select name="is_published" class="form-control">
+                                <option value="1">সরাসরি প্রকাশ (Live)</option>
+                                <option value="0">ড্রাফট (Draft)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <label class="font-weight-bold text-sm text-dark mb-1">সর্বোচ্চ রিটেক সংখ্যা (Max Attempts)</label>
                                 <input type="number" name="max_attempts" class="form-control" value="0" min="0" max="50">
-                                <small class="text-muted d-block mt-0.5">০ = আনলিমিটেড বার রিটেক; ১ = কোনো রিটেক নেই (১ বারই দেওয়া যাবে); ২ বা ৩ = সর্বোচ্চ ততবার।</small>
+                                <small class="text-muted d-block mt-0.5">০ = আনলিমিটেড বার রিটেক; ১ = কোনো রিটেক নেই (১ বারই দেওয়া যাবে)।</small>
                             </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="font-weight-bold text-sm">প্রতি রিটেকে শাফলিং সেটিংস</label>
-                                <div class="custom-control custom-checkbox mt-1">
-                                    <input type="checkbox" class="custom-control-input" id="createShuffleQ" name="shuffle_questions" value="1" checked>
-                                    <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleQ">
-                                        <i class="fas fa-random text-primary mr-1"></i> প্রশ্নের সিরিয়াল নম্বর এলোমেলো (Shuffle)
-                                    </label>
+                            <div class="col-md-6">
+                                <label class="font-weight-bold text-sm text-dark mb-1">প্রতি রিটেকে শাফলিং সেটিংস</label>
+                                <div class="d-flex flex-wrap gap-3 mt-1">
+                                    <div class="custom-control custom-checkbox mr-3">
+                                        <input type="checkbox" class="custom-control-input" id="createShuffleQ" name="shuffle_questions" value="1" checked>
+                                        <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleQ">
+                                            <i class="fas fa-random text-primary mr-1"></i> প্রশ্নের সিরিয়াল নম্বর এলোমেলো (Shuffle)
+                                        </label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="createShuffleOpt" name="shuffle_options" value="1" checked>
+                                        <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleOpt">
+                                            <i class="fas fa-dice text-success mr-1"></i> উত্তরের অপশন (ক, খ, গ, ঘ) এলোমেলো (Shuffle)
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="custom-control custom-checkbox mt-1">
-                                    <input type="checkbox" class="custom-control-input" id="createShuffleOpt" name="shuffle_options" value="1" checked>
-                                    <label class="custom-control-label text-sm font-weight-normal text-dark" for="createShuffleOpt">
-                                        <i class="fas fa-dice text-success mr-1"></i> উত্তরের অপশন (ক, খ, গ, ঘ) এলোমেলো (Shuffle)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold text-sm">ফলাফল প্রকাশের নীতি</label>
-                                <select name="result_release_policy" class="form-control">
-                                    <option value="immediate">পরীক্ষা শেষে তাৎক্ষণিক প্রকাশ</option>
-                                    <option value="after_deadline">নির্ধারিত সময়সীমা শেষ হলে</option>
-                                    <option value="admin_publish">অ্যাডমিন কর্তৃক প্রকাশ সাপেক্ষে</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold text-sm">স্ট্যাটাস</label>
-                                <select name="is_published" class="form-control">
-                                    <option value="1">সরাসরি প্রকাশ (Live)</option>
-                                    <option value="0">ড্রাফট (Draft)</option>
-                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
+                <div class="modal-footer bg-light py-3">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
-                    <button type="submit" class="btn btn-primary font-weight-bold">কুইজ সংরক্ষণ করুন</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fas fa-save mr-1"></i> কুইজ সংরক্ষণ করুন
+                    </button>
                 </div>
             </form>
         </div>

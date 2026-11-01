@@ -611,6 +611,8 @@ class AdminQuizController extends Controller
 
         $quiz = $attempt->quiz;
 
+        $questions = collect();
+
         if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
             $snapshotQIds = collect($attempt->questions_snapshot)->pluck('id')->toArray();
             $snapshotMap = collect($attempt->questions_snapshot)->keyBy('id');
@@ -634,10 +636,39 @@ class AdminQuizController extends Controller
             }
 
             if ($questions->isEmpty()) {
-                $questions = $quiz->getExamQuestions();
+                if ($quiz) {
+                    $questions = $quiz->getExamQuestions();
+                } else {
+                    // Reconstruct from attempt questions snapshot
+                    $questions = collect($attempt->questions_snapshot)->map(function ($snap) {
+                        $q = new LmsQuestion();
+                        $q->id = isset($snap['id']) ? $snap['id'] : 0;
+                        $q->question_text = isset($snap['question_text']) ? $snap['question_text'] : '';
+                        $q->question_type = isset($snap['question_type']) ? $snap['question_type'] : 'mcq';
+                        $q->marks = isset($snap['marks']) ? $snap['marks'] : 1;
+                        $q->negative_marks = isset($snap['negative_marks']) ? $snap['negative_marks'] : 0;
+                        $q->explanation = isset($snap['explanation']) ? $snap['explanation'] : null;
+                        $q->correct_answer_text = isset($snap['correct_answer_text']) ? $snap['correct_answer_text'] : null;
+
+                        $optionsList = collect(isset($snap['options']) ? $snap['options'] : [])->map(function ($opt) {
+                            $o = new \App\model\LmsQuestionOption();
+                            $o->id = isset($opt['id']) ? $opt['id'] : 0;
+                            $o->option_text = isset($opt['text']) ? $opt['text'] : (isset($opt['option_text']) ? $opt['option_text'] : '');
+                            $o->is_correct = !empty($opt['is_correct']);
+                            return $o;
+                        });
+                        $q->setRelation('options', $optionsList);
+                        return $q;
+                    });
+                }
             }
-        } else {
+        } elseif ($quiz) {
             $questions = $quiz->getExamQuestions();
+        } else {
+            // Quiz was deleted and no snapshot: load question models through answers relation
+            $questions = $attempt->answers->map(function ($ans) {
+                return $ans->question;
+            })->filter()->values();
         }
 
         $answers = $attempt->answers->keyBy('question_id');
