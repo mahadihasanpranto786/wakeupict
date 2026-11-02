@@ -2,6 +2,24 @@
 @php
     $initialTheme = isset($_COOKIE['theme_mode']) ? $_COOKIE['theme_mode'] : 'light';
     $studentUser = function_exists('student_user') ? student_user() : null;
+    if (!$studentUser) {
+        $webUser = auth()->user();
+        if ($webUser) {
+            $studentUser = (object)[
+                'id' => $webUser->id,
+                'name' => $webUser->name,
+                'student_id_code' => 'ADMIN-PORTAL',
+                'avatar_url' => "https://ui-avatars.com/api/?name=" . urlencode($webUser->name) . "&background=0b1329&color=10b981&bold=true",
+            ];
+        } else {
+            $studentUser = (object)[
+                'id' => 0,
+                'name' => 'Student Portal User',
+                'student_id_code' => 'WUICT-DEMO',
+                'avatar_url' => "https://ui-avatars.com/api/?name=Student&background=0b1329&color=10b981&bold=true",
+            ];
+        }
+    }
     $studentMenus = \App\Services\StudentMenuService::getTree();
 @endphp
 <html lang="{{ App::getLocale() }}" class="light scroll-smooth">
@@ -194,6 +212,98 @@
         html.light .option-label:hover {
             background-color: #f1f5f9 !important;
             border-color: #cbd5e1 !important;
+        }
+
+        /* =========================================================================
+           HIGH-CONTRAST MODERN CHECKBOX & RADIO DESIGN SYSTEM (STUDENT PORTAL)
+           Guarantees crystal-clear, high-contrast, prominent checkboxes & radios
+           ========================================================================= */
+        input[type="checkbox"]:not(.sr-only) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            min-width: 1.25rem !important;
+            min-height: 1.25rem !important;
+            border: 2px solid #475569 !important;
+            border-radius: 0.375rem !important;
+            background-color: #ffffff !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            vertical-align: middle !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+            flex-shrink: 0 !important;
+        }
+
+        html.dark input[type="checkbox"]:not(.sr-only) {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):checked {
+            background-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 2px 5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.3) !important;
+        }
+
+        input[type="checkbox"]:not(.sr-only):checked::after {
+            content: "" !important;
+            display: block !important;
+            width: 5px !important;
+            height: 10px !important;
+            border: solid #ffffff !important;
+            border-width: 0 2.5px 2.5px 0 !important;
+            transform: rotate(45deg) translate(-0.5px, -1px) !important;
+        }
+
+        input[type="radio"]:not(.sr-only) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            min-width: 1.25rem !important;
+            min-height: 1.25rem !important;
+            border: 2px solid #475569 !important;
+            border-radius: 50% !important;
+            background-color: #ffffff !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            vertical-align: middle !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            flex-shrink: 0 !important;
+        }
+
+        html.dark input[type="radio"]:not(.sr-only) {
+            border-color: #64748b !important;
+            background-color: #0f172a !important;
+        }
+
+        input[type="radio"]:not(.sr-only):hover {
+            border-color: var(--brand-primary, #10b981) !important;
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+        }
+
+        input[type="radio"]:not(.sr-only):checked {
+            border-color: var(--brand-primary, #10b981) !important;
+            border-width: 5px !important;
+            background-color: #ffffff !important;
+        }
+        html.dark input[type="radio"]:not(.sr-only):checked {
+            background-color: #0f172a !important;
         }
         html.light [id*="palette-btn-"] {
             background-color: #f1f5f9 !important;
@@ -578,33 +688,43 @@
                 </div>
             </div>
 
-            <!-- Dynamic Navigation Links (Temporarily Commented Out as requested) -->
-            {{--
+            <!-- Dynamic Navigation Links -->
+            <!-- Dynamic Navigation Links -->
             <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
                 @foreach($studentMenus as $menu)
+                    {{-- Only show quiz_examination menu open, hide everything else as requested --}}
+                    @if($menu->menu_key !== 'quiz_examination')
+                        @continue
+                    @endif
+
                     @php
                         $hasChildren = $menu->activeChildren->count() > 0;
                         $isCurrent = $menu->isCurrent();
                         $isChildCurrent = $menu->isChildCurrent();
-                        $isOpen = $isCurrent || $isChildCurrent;
+                        $isOpen = true; // Kept open by default
                     @endphp
 
                     @if($hasChildren)
-                        <!-- Parent with Submenus (Collapsible) -->
-                        <div class="menu-group" x-data="{ open: {{ $isOpen ? 'true' : 'false' }} }">
+                        <!-- Parent with Submenus (Collapsible & Open by default) -->
+                        <div class="menu-group" x-data="{ open: true }">
                             <button type="button" 
                                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow-icon').classList.toggle('rotate-90');"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isOpen ? 'bg-slate-800/60 text-white border border-slate-700/50' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 bg-slate-800/60 text-white border border-slate-700/50">
                                 <div class="flex items-center gap-3 truncate">
-                                    <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isOpen ? 'text-brand-primary' : 'text-slate-400' }}"></i>
+                                    <i class="{{ $menu->icon }} text-sm w-4 text-center text-brand-primary"></i>
                                     <span class="truncate">{{ $menu->getTitle() }}</span>
                                 </div>
-                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 {{ $isOpen ? 'rotate-90 text-brand-primary' : 'text-slate-500' }}"></i>
+                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 rotate-90 text-brand-primary"></i>
                             </button>
 
-                            <!-- Submenu Items -->
-                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1 {{ $isOpen ? '' : 'hidden' }}">
+                            <!-- Submenu Items (Always open by default) -->
+                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1">
                                 @foreach($menu->activeChildren as $child)
+                                    {{-- BTEB OMR & Litho is purely an Admin tool - never show in student portal --}}
+                                    @if($child->menu_key === 'bteb_omr_sheet')
+                                        @continue
+                                    @endif
+
                                     @php $childCurrent = $child->isCurrent(); @endphp
                                     <a href="{{ $child->resolveUrl() }}" 
                                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {{ $childCurrent ? 'bg-brand-primary/10 text-brand-primary font-semibold border border-brand-primary/20' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
@@ -624,7 +744,6 @@
                     @endif
                 @endforeach
             </nav>
-            --}}
 
             <!-- Bottom Exit Link -->
             <div class="p-4 border-t border-slate-800/80 flex items-center justify-between">
@@ -645,7 +764,13 @@
         <!-- =========================================================================
              2. MAIN WRAPPER & TOP HEADER
              ========================================================================= -->
-        <div class="flex-1 lg:pl-72 flex flex-col min-w-0">
+        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative">
+            
+            <!-- Global Full-Wrapper Ambient Glows (Starts immediately at sidebar border) -->
+            <div class="absolute -top-16 left-0 w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] bg-gradient-to-br from-blue-400/25 via-indigo-400/15 to-transparent rounded-full blur-[140px] pointer-events-none -z-10"></div>
+            <div class="absolute -top-10 -right-20 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] bg-gradient-to-bl from-amber-300/25 via-orange-300/15 to-transparent rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div class="absolute top-1/2 left-0 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-blue-500/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div class="absolute bottom-10 -right-10 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-orange-400/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
             
             <!-- Top Header Navigation Bar -->
             <header class="student-header sticky top-0 z-20 h-20 bg-slate-900/80 border-b border-slate-800/80 backdrop-blur-2xl px-4 sm:px-8 flex items-center justify-between">
@@ -666,26 +791,24 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Right: Theme Toggle, Notifications & Profile Dropdown -->
-                <div class="flex items-center gap-3">
-                    
-                    <!-- Theme Mode Toggle -->
+ 
+                <div class="flex items-center gap-3"> 
                     <button id="theme-toggle" type="button" class="p-2.5 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all hover:border-brand-primary/40 focus:outline-none" title="Toggle Theme">
                         <i class="fa fa-sun-o hidden dark:inline text-amber-400"></i>
                         <i class="fa fa-moon-o inline dark:hidden text-indigo-400"></i>
                     </button>
-
-                    <!-- Language Switcher -->
+ 
                     <a href="{{ url('locale/' . (App::getLocale() == 'bn' ? 'en' : 'bn')) }}" class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-brand-primary transition-colors">
                         {{ App::getLocale() == 'bn' ? 'English' : 'বাংলা' }}
                     </a>
-
-                    <!-- Notification Bell -->
+ 
                     @php
-                        $unreadNotifCount = \App\model\LmsNotification::where(function($q) use ($studentUser) {
-                            $q->where('student_account_id', $studentUser->id)->orWhereNull('student_account_id');
-                        })->where('is_read', false)->count();
+                        $unreadNotifCount = 0;
+                        if (!empty($studentUser->id)) {
+                            $unreadNotifCount = \App\model\LmsNotification::where(function($q) use ($studentUser) {
+                                $q->where('student_account_id', $studentUser->id)->orWhereNull('student_account_id');
+                            })->where('is_read', false)->count();
+                        }
                     @endphp
                     <a href="{{ route('student.notifications.index') }}" class="relative p-2.5 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all hover:border-brand-primary/40 focus:outline-none" title="Notifications">
                         <i class="fa fa-bell-o text-sm"></i>
@@ -694,17 +817,14 @@
                                 {{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}
                             </span>
                         @endif
-                    </a>
-
-                    <!-- Profile Dropdown Trigger -->
+                    </a> 
                     <div class="relative" id="profile-dropdown-wrapper">
                         <button id="profile-dropdown-btn" type="button" class="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 transition-all focus:outline-none">
                             <img src="{{ $studentUser->avatar_url }}" alt="{{ $studentUser->name }}" class="w-8 h-8 rounded-xl object-cover border border-slate-700">
                             <span class="hidden md:inline text-xs font-bold text-white max-w-[120px] truncate">{{ $studentUser->name }}</span>
                             <i class="fa fa-angle-down text-slate-400 text-xs"></i>
                         </button>
-
-                        <!-- Dropdown Menu -->
+ 
                         <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-2 z-50">
                             <div class="px-3 py-2.5 border-b border-slate-800 mb-1">
                                 <p class="text-xs font-bold text-white">{{ $studentUser->name }}</p>
@@ -763,16 +883,22 @@
                 </button>
             </div>
 
-            <!-- Mobile Dynamic Links (Temporarily Commented Out as requested) -->
-            {{--
+            <!-- Mobile Dynamic Links -->
             <nav class="flex-1 py-6 space-y-1.5">
                 @foreach($studentMenus as $menu)
+                    @if($menu->menu_key !== 'quiz_examination')
+                        @continue
+                    @endif
                     @php $hasChildren = $menu->activeChildren->count() > 0; @endphp
                     @if($hasChildren)
                         <div class="pt-2 pb-1">
                             <p class="px-3 text-[10px] font-mono tracking-wider text-slate-400 uppercase font-bold">{{ $menu->getTitle() }}</p>
                             <div class="mt-1 space-y-1">
                                 @foreach($menu->activeChildren as $child)
+                                    {{-- BTEB OMR & Litho is purely an Admin tool - never show in student portal --}}
+                                    @if($child->menu_key === 'bteb_omr_sheet')
+                                        @continue
+                                    @endif
                                     <a href="{{ $child->resolveUrl() }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800">
                                         <i class="{{ $child->icon }} text-xs w-4 text-center text-brand-primary"></i>
                                         <span>{{ $child->getTitle() }}</span>
@@ -788,7 +914,6 @@
                     @endif
                 @endforeach
             </nav>
-            --}}
 
             <form action="{{ route('student.logout') }}" method="POST" class="pt-4 border-t border-slate-800">
                 @csrf

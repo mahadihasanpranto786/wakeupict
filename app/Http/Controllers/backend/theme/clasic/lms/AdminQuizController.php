@@ -56,8 +56,13 @@ class AdminQuizController extends Controller
         // Dropdown Courses
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
+        // Question Library Categories
+        $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
+        $totalLibraryQuestions = LmsQuestion::whereNull('quiz_id')->orWhere('quiz_id', 0)->count();
+        $questionPapers = \App\model\LmsQuestionPaper::withCount('items')->latest()->get();
+
         return view('backend.theme.clasic.lms.quizzes.index', compact(
-            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes'
+            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'questionPapers'
         ));
     }
 
@@ -79,6 +84,9 @@ class AdminQuizController extends Controller
             'board_name'       => 'nullable|string|max:100',
             'question_set'     => 'nullable|string|max:20',
             'negative_marks'   => 'nullable|numeric|min:0',
+            'max_attempts'     => 'nullable|integer|min:0|max:100',
+            'shuffle_questions'=> 'nullable|boolean',
+            'shuffle_options'  => 'nullable|boolean',
             'result_release_policy' => 'nullable|in:immediate,after_deadline,admin_publish',
             'locking_policy'   => 'nullable|in:mode_default,instant_lock,confirm_lock',
         ]);
@@ -91,9 +99,9 @@ class AdminQuizController extends Controller
             'duration_minutes'      => (int)$request->duration_minutes,
             'total_marks'           => 0, // auto-calculated from questions
             'pass_marks'            => $request->pass_marks ?: 5.0,
-            'shuffle_questions'     => true,
-            'shuffle_options'       => true,
-            'max_attempts'          => 0, // unlimited
+            'shuffle_questions'     => $request->has('shuffle_questions') ? (bool)$request->shuffle_questions : true,
+            'shuffle_options'       => $request->has('shuffle_options') ? (bool)$request->shuffle_options : true,
+            'max_attempts'          => (int)$request->input('max_attempts', 0), // 0 = unlimited
             'is_published'          => $request->has('is_published') ? (bool)$request->is_published : true,
             'view_mode'             => $request->input('view_mode', 'all_questions'),
             'subject_code'          => $request->input('subject_code', '101'),
@@ -196,12 +204,261 @@ class AdminQuizController extends Controller
     /**
      * Delete Quiz and all its questions
      */
+    /**
+     * Update an existing Quiz (Title, Course, Duration, Pass Marks, etc.)
+     */
+    public function update(Request $request, $id)
+    {
+        $quiz = LmsQuiz::findOrFail($id);
+
+        $request->validate([
+            'course_id'        => 'required|exists:courses,id',
+            'title'            => 'required|string|max:191',
+            'description'      => 'nullable|string',
+            'quiz_type'        => 'required|in:practice,exam,class_test',
+            'duration_minutes' => 'required|integer|min:1|max:300',
+            'pass_marks'       => 'nullable|numeric|min:0',
+            'negative_marks'   => 'nullable|numeric|min:0',
+            'question_set'     => 'nullable|string|max:20',
+            'view_mode'        => 'nullable|in:all_questions,one_by_one',
+            'max_attempts'     => 'nullable|integer|min:0|max:100',
+            'shuffle_questions'=> 'nullable|boolean',
+            'shuffle_options'  => 'nullable|boolean',
+        ]);
+
+        $quiz->update([
+            'course_id'        => $request->course_id,
+            'title'            => $request->title,
+            'description'      => $request->description,
+            'quiz_type'        => $request->quiz_type,
+            'duration_minutes' => (int)$request->duration_minutes,
+            'pass_marks'       => $request->pass_marks ?: 5.0,
+            'negative_marks'   => $request->input('negative_marks', 0.0),
+            'question_set'     => $request->input('question_set', 'Set A'),
+            'view_mode'        => $request->input('view_mode', 'all_questions'),
+            'max_attempts'     => (int)$request->input('max_attempts', 0),
+            'shuffle_questions'=> $request->has('shuffle_questions') ? (bool)$request->shuffle_questions : false,
+            'shuffle_options'  => $request->has('shuffle_options') ? (bool)$request->shuffle_options : false,
+        ]);
+
+        return redirect()->back()->with('success', "কুইজ '{$quiz->title}' এর তথ্য সফলভাবে হালনাগাদ করা হয়েছে!");
+    }
+
+    /**
+     * Import / Attach Questions to Quiz directly from Library (No file required)
+     */
+        public function importFromLibrary(Request $request, $id)
+    {
+        $quiz = LmsQuiz::findOrFail($id);
+
+        $request->validate([
+            'source_mode'   => 'required|in:all,category,random,type,paper',
+            'count'         => 'nullable|integer|min:1|max:200',
+            'category'      => 'nullable|string',
+            'question_type' => 'nullable|string',
+            'paper_id'      => 'nullable|integer',
+        ]);
+
+        $order = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
+        $added = 0;
+        $targetSet = $quiz->question_set ?: 'Set A';
+
+        DB::beginTransaction();
+        try {
+            // MODE 1: Paper Builder Import
+            if ($request->source_mode === 'paper' && $request->filled('paper_id')) {
+                $paper = \App\model\LmsQuestionPaper::with(['items.masterQuestion.options'])->findOrFail($request->paper_id);
+
+                foreach ($paper->items as $item) {
+                    $sq = $item->masterQuestion;
+                    if (!$sq) continue;
+
+                    $order++;
+                    $newQ = $sq->replicate();
+                    $newQ->quiz_id = $quiz->id;
+                    $newQ->course_id = $quiz->course_id;
+                    $newQ->parent_question_id = $sq->id;
+                    $newQ->set_code = $targetSet;
+                    $newQ->order_index = $order;
+                    $newQ->marks = $item->marks ?: ($sq->marks ?: 1.0);
+                    $newQ->negative_marks = $item->negative_marks !== null ? $item->negative_marks : ($sq->negative_marks ?: 0.0);
+                    $newQ->question_text = $item->getQuestionText();
+                    $newQ->question_type = $item->getQuestionType();
+                    $newQ->is_active = true;
+                    $newQ->is_archived = false;
+                    $newQ->save();
+
+                    $options = $item->getQuestionOptions();
+                    if (!empty($options)) {
+                        foreach ($options as $opt) {
+                            $optText = is_array($opt) ? $opt['option_text'] : (isset($opt->option_text) ? $opt->option_text : '');
+                            $isCorrect = is_array($opt) ? (!empty($opt['is_correct'])) : (!empty($opt->is_correct));
+                            $optOrder = is_array($opt) ? (isset($opt['order_index']) ? $opt['order_index'] : 0) : (isset($opt->order_index) ? $opt->order_index : 0);
+                            $newQ->options()->create([
+                                'option_text' => $optText,
+                                'is_correct'  => $isCorrect,
+                                'order_index' => $optOrder,
+                            ]);
+                        }
+                    } elseif ($sq->options->count() > 0) {
+                        foreach ($sq->options as $opt) {
+                            $newOpt = $opt->replicate();
+                            $newOpt->question_id = $newQ->id;
+                            $newOpt->save();
+                        }
+                    }
+
+                    $added++;
+                }
+
+                // Also associate quiz with this paper
+                $quiz->update(['paper_id' => $paper->id]);
+            } else {
+                // MODE 2: Question Library (Category, Type, Random, All)
+                $query = LmsQuestion::with('options')->where('is_archived', false);
+
+                if ($request->filled('category')) {
+                    $query->where('category', $request->category);
+                }
+
+                if ($request->filled('question_type')) {
+                    $qType = trim($request->question_type);
+                    if ($qType === 'mcq' || $qType === 'mcq_single') {
+                        $query->whereIn('question_type', ['mcq', 'mcq_single']);
+                    } elseif ($qType === 'fill_blank' || $qType === 'fill_blanks') {
+                        $query->whereIn('question_type', ['fill_blank', 'fill_blanks']);
+                    } elseif ($qType === 'creative' || $qType === 'creative_cq' || $qType === 'cq') {
+                        $query->whereIn('question_type', ['creative', 'creative_cq', 'cq']);
+                    } elseif ($qType === 'short_answer' || $qType === 'short_question') {
+                        $query->whereIn('question_type', ['short_answer', 'short_question']);
+                    } else {
+                        $query->where('question_type', $qType);
+                    }
+                }
+
+                if ($request->source_mode === 'random' && $request->filled('count')) {
+                    $query->inRandomOrder()->take((int)$request->count);
+                } elseif ($request->filled('count')) {
+                    $query->take((int)$request->count);
+                }
+
+                $sourceQuestions = $query->get();
+
+                if ($sourceQuestions->isEmpty()) {
+                    DB::rollBack();
+                    return redirect()->back()->withErrors(['error' => 'লাইব্রেরিতে এই ফিল্টার অনুযায়ী কোনো প্রশ্ন পাওয়া যায়নি।']);
+                }
+
+                foreach ($sourceQuestions as $sq) {
+                    $order++;
+                    $newQ = $sq->replicate();
+                    $newQ->quiz_id = $quiz->id;
+                    $newQ->course_id = $quiz->course_id;
+                    $newQ->parent_question_id = $sq->id;
+                    $newQ->set_code = $targetSet;
+                    $newQ->order_index = $order;
+                    $newQ->is_active = true;
+                    $newQ->is_archived = false;
+                    $newQ->save();
+
+                    foreach ($sq->options as $opt) {
+                        $newOpt = $opt->replicate();
+                        $newOpt->question_id = $newQ->id;
+                        $newOpt->save();
+                    }
+                    $added++;
+                }
+            }
+
+            // Recalculate quiz total marks
+            $totalMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+            $quiz->update(['total_marks' => $totalMarks]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', "সফলভাবে {$added}টি প্রশ্ন '{$quiz->title}' কুইজে যুক্ত করা হয়েছে!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'প্রশ্ন যুক্ত করতে সমস্যা হয়েছে: ' . $e->getMessage()]);
+        }
+    }
+
+    public function manageQuestions($id)
+    {
+        $quiz = LmsQuiz::with(['course'])->findOrFail($id);
+        $questions = LmsQuestion::with('options')
+            ->where('quiz_id', $quiz->id)
+            ->orderBy('order_index', 'asc')
+            ->paginate(30);
+
+        return view('backend.theme.clasic.lms.quizzes.questions', compact('quiz', 'questions'));
+    }
+
+    /**
+     * Delete an individual question from a Quiz
+     */
+    public function deleteQuestion($quizId, $questionId)
+    {
+        $quiz = LmsQuiz::findOrFail($quizId);
+        $question = LmsQuestion::where('quiz_id', $quiz->id)->findOrFail($questionId);
+
+        DB::transaction(function () use ($quiz, $question) {
+            $question->options()->delete();
+            $question->answers()->delete();
+            $question->delete();
+
+            // Recalculate quiz total marks
+            $totalMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+            $quiz->update(['total_marks' => $totalMarks]);
+        });
+
+        return redirect()->back()->with('success', 'প্রশ্নটি কুইজ থেকে মুছে ফেলা হয়েছে এবং মোট নম্বর হালনাগাদ করা হয়েছে!');
+    }
+
+        /**
+     * Bulk delete multiple questions from a Quiz
+     */
+    public function bulkDeleteQuestions(Request $request, $quizId)
+    {
+        $quiz = LmsQuiz::findOrFail($quizId);
+
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.questions', $quiz->id);
+        }
+
+        $request->validate([
+            'question_ids' => 'required|array|min:1',
+            'question_ids.*' => 'integer|exists:lms_questions,id',
+        ]);
+
+        $ids = $request->input('question_ids', []);
+        $count = count($ids);
+
+        DB::transaction(function () use ($quiz, $ids) {
+            \App\model\LmsQuestionOption::whereIn('question_id', $ids)->delete();
+            \App\model\LmsQuizAnswer::whereIn('question_id', $ids)->delete();
+            LmsQuestion::where('quiz_id', $quiz->id)->whereIn('id', $ids)->delete();
+
+            // Recalculate marks
+            $totalMarks = LmsQuestion::where('quiz_id', $quiz->id)->sum('marks');
+            $quiz->update(['total_marks' => $totalMarks]);
+        });
+
+        return redirect()->back()->with('success', "নির্বাচিত {$count}টি প্রশ্ন কুইজ থেকে সফলভাবে মুছে ফেলা হয়েছে!");
+    }
     public function destroy($id)
     {
         $quiz = LmsQuiz::findOrFail($id);
         $title = $quiz->title;
 
         DB::transaction(function () use ($quiz) {
+            // Delete child attempts & answers if any
+            $attemptIds = \App\model\LmsQuizAttempt::where('quiz_id', $quiz->id)->pluck('id')->toArray();
+            if (!empty($attemptIds)) {
+                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+            }
+
             // Delete child questions options & questions
             $questions = LmsQuestion::where('quiz_id', $quiz->id)->get();
             foreach ($questions as $q) {
@@ -302,6 +559,12 @@ class AdminQuizController extends Controller
             $query->where('quiz_id', $request->quiz_id);
         }
 
+        if ($request->filled('course_id')) {
+            $query->whereHas('quiz', function ($q) use ($request) {
+                $q->where('course_id', $request->course_id);
+            });
+        }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -310,9 +573,188 @@ class AdminQuizController extends Controller
             $query->where('question_set', $request->set);
         }
 
-        $attempts = $query->paginate(25)->appends($request->all());
-        $quizzes = LmsQuiz::orderBy('title', 'asc')->get();
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->whereHas('student', function ($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('phone', 'like', "%{$search}%")
+                   ->orWhere('student_id_code', 'like', "%{$search}%");
+            });
+        }
 
-        return view('backend.theme.clasic.lms.quizzes.reports', compact('attempts', 'quizzes'));
+        $attempts = $query->paginate(25)->appends($request->all());
+        $quizzes = LmsQuiz::with('course')->orderBy('title', 'asc')->get();
+        $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
+
+        // High-level KPI Stats for quick glance
+        $totalAttempts = \App\model\LmsQuizAttempt::count();
+        $passedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
+            ->whereRaw('score >= (SELECT pass_marks FROM lms_quizzes WHERE lms_quizzes.id = lms_quiz_attempts.quiz_id)')
+            ->count();
+        $failedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
+            ->whereRaw('score < (SELECT pass_marks FROM lms_quizzes WHERE lms_quizzes.id = lms_quiz_attempts.quiz_id)')
+            ->count();
+        $avgScore = round(\App\model\LmsQuizAttempt::where('status', 'graded')->avg('percentage') ?: 0, 1);
+
+        return view('backend.theme.clasic.lms.quizzes.reports', compact(
+            'attempts', 'quizzes', 'courses', 'totalAttempts', 'passedAttempts', 'failedAttempts', 'avgScore'
+        ));
+    }
+
+    /**
+     * Admin View of a Single Student's Complete Answer Sheet & Educational Breakdown
+     */
+    public function attemptDetail($id)
+    {
+        $attempt = \App\model\LmsQuizAttempt::with(['quiz.course', 'student', 'answers.question.options'])
+            ->findOrFail($id);
+
+        $quiz = $attempt->quiz;
+
+        $questions = collect();
+
+        if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
+            $snapshotQIds = collect($attempt->questions_snapshot)->pluck('id')->toArray();
+            $snapshotMap = collect($attempt->questions_snapshot)->keyBy('id');
+            $questions = LmsQuestion::with(['options', 'parentQuestion', 'derivedQuestions'])
+                ->whereIn('id', $snapshotQIds)
+                ->get()
+                ->sortBy(function ($q) use ($snapshotQIds) {
+                    return array_search($q->id, $snapshotQIds);
+                })->values();
+
+            foreach ($questions as $q) {
+                if (isset($snapshotMap[$q->id])) {
+                    $snap = $snapshotMap[$q->id];
+                    if (isset($snap['section_title'])) {
+                        $q->section_title = $snap['section_title'];
+                    }
+                    if (isset($snap['section_instructions'])) {
+                        $q->section_instructions = $snap['section_instructions'];
+                    }
+                }
+            }
+
+            if ($questions->isEmpty()) {
+                if ($quiz) {
+                    $questions = $quiz->getExamQuestions();
+                } else {
+                    // Reconstruct from attempt questions snapshot
+                    $questions = collect($attempt->questions_snapshot)->map(function ($snap) {
+                        $q = new LmsQuestion();
+                        $q->id = isset($snap['id']) ? $snap['id'] : 0;
+                        $q->question_text = isset($snap['question_text']) ? $snap['question_text'] : '';
+                        $q->question_type = isset($snap['question_type']) ? $snap['question_type'] : 'mcq';
+                        $q->marks = isset($snap['marks']) ? $snap['marks'] : 1;
+                        $q->negative_marks = isset($snap['negative_marks']) ? $snap['negative_marks'] : 0;
+                        $q->explanation = isset($snap['explanation']) ? $snap['explanation'] : null;
+                        $q->correct_answer_text = isset($snap['correct_answer_text']) ? $snap['correct_answer_text'] : null;
+
+                        $optionsList = collect(isset($snap['options']) ? $snap['options'] : [])->map(function ($opt) {
+                            $o = new \App\model\LmsQuestionOption();
+                            $o->id = isset($opt['id']) ? $opt['id'] : 0;
+                            $o->option_text = isset($opt['text']) ? $opt['text'] : (isset($opt['option_text']) ? $opt['option_text'] : '');
+                            $o->is_correct = !empty($opt['is_correct']);
+                            return $o;
+                        });
+                        $q->setRelation('options', $optionsList);
+                        return $q;
+                    });
+                }
+            }
+        } elseif ($quiz) {
+            $questions = $quiz->getExamQuestions();
+        } else {
+            // Quiz was deleted and no snapshot: load question models through answers relation
+            $questions = $attempt->answers->map(function ($ans) {
+                return $ans->question;
+            })->filter()->values();
+        }
+
+        $answers = $attempt->answers->keyBy('question_id');
+
+        return view('backend.theme.clasic.lms.quizzes.attempt_detail', compact('attempt', 'quiz', 'questions', 'answers'));
+    }
+
+    /**
+     * Delete a single quiz attempt/result
+     */
+    public function destroyAttempt($id)
+    {
+        $attempt = \App\model\LmsQuizAttempt::findOrFail($id);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($attempt) {
+            $attempt->answers()->delete();
+            $attempt->delete();
+        });
+
+        return redirect()->back()->with('success', 'পরীক্ষার ফলাফলটি সফলভাবে মুছে ফেলা হয়েছে!');
+    }
+
+    /**
+     * Bulk delete multiple quiz attempts/results
+     */
+    public function bulkDestroyAttempts(Request $request)
+    {
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.reports');
+        }
+
+        $request->validate([
+            'attempt_ids' => 'required|array|min:1',
+            'attempt_ids.*' => 'integer|exists:lms_quiz_attempts,id',
+        ]);
+
+        $ids = $request->input('attempt_ids', []);
+        $count = count($ids);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
+            \App\model\LmsQuizAnswer::whereIn('attempt_id', $ids)->delete();
+            \App\model\LmsQuizAttempt::whereIn('id', $ids)->delete();
+        });
+
+        return redirect()->back()->with('success', "নির্বাচিত {$count}টি পরীক্ষার ফলাফল সফলভাবে মুছে ফেলা হয়েছে!");
+    }
+
+    /**
+     * Bulk delete multiple quizzes and all associated questions & attempts
+     */
+    public function bulkDestroyQuizzes(Request $request)
+    {
+        if ($request->isMethod('get')) {
+            return redirect()->route('admin.quizzes.index');
+        }
+
+        $request->validate([
+            'quiz_ids'   => 'required|array|min:1',
+            'quiz_ids.*' => 'integer|exists:lms_quizzes,id',
+        ]);
+
+        $ids = $request->input('quiz_ids', []);
+        $count = count($ids);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
+            // 1. Delete quiz attempts and student answers
+            $attempts = \App\model\LmsQuizAttempt::whereIn('quiz_id', $ids)->get();
+            $attemptIds = $attempts->pluck('id')->toArray();
+            if (!empty($attemptIds)) {
+                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+            }
+
+            // 2. Delete questions, options & student answers
+            $questions = LmsQuestion::whereIn('quiz_id', $ids)->get();
+            $questionIds = $questions->pluck('id')->toArray();
+            if (!empty($questionIds)) {
+                \App\model\LmsQuestionOption::whereIn('question_id', $questionIds)->delete();
+                \App\model\LmsQuizAnswer::whereIn('question_id', $questionIds)->delete();
+                LmsQuestion::whereIn('id', $questionIds)->delete();
+            }
+
+            // 3. Delete quizzes
+            LmsQuiz::whereIn('id', $ids)->delete();
+        });
+
+        return redirect()->route('admin.quizzes.index')->with('success', "নির্বাচিত {$count}টি কুইজ এবং সংশ্লিষ্ট সকল প্রশ্ন সফলভাবে মুছে ফেলা হয়েছে!");
     }
 }

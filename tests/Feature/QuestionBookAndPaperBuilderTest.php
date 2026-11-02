@@ -591,4 +591,128 @@ class QuestionBookAndPaperBuilderTest extends TestCase
         }
         $quiz->delete();
     }
+
+    /**
+     * Test Auto-Pick Rule-Based Generator filtered by Question Type (e.g. fill_blanks)
+     */
+    public function test_auto_pick_questions_filtered_by_question_type()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'       => 'QP-AUTOPICK-' . uniqid(),
+            'title'            => 'Auto-Pick Filter Test',
+            'course_id'        => $this->course->id,
+            'exam_name'        => 'Auto-Pick Test',
+            'subject_name'     => 'ICT',
+            'subject_code'     => '154',
+            'academic_year'    => '2026',
+            'duration_minutes' => 30,
+            'total_marks'      => 10.0,
+            'status'           => 'draft',
+        ]);
+
+        $section = LmsQuestionPaperSection::create([
+            'paper_id'     => $paper->id,
+            'title'        => 'Fill in the blanks Section',
+            'section_code' => 'B',
+            'order_index'  => 1,
+        ]);
+
+        // Create 2 Fill in the Blanks questions and 2 MCQ questions
+        $fillBlankQ1 = LmsQuestion::create([
+            'course_id'      => $this->course->id,
+            'question_text'  => '৮ বিট সমান ______ বাইট।',
+            'question_type'  => 'fill_blanks',
+            'marks'          => 1.0,
+            'difficulty'     => 'easy',
+            'is_active'      => true,
+        ]);
+        $fillBlankQ2 = LmsQuestion::create([
+            'course_id'      => $this->course->id,
+            'question_text'  => 'কম্পিউটারের জনক হলেন ______।',
+            'question_type'  => 'fill_blanks',
+            'marks'          => 1.0,
+            'difficulty'     => 'medium',
+            'is_active'      => true,
+        ]);
+        $mcqQ1 = LmsQuestion::create([
+            'course_id'      => $this->course->id,
+            'question_text'  => 'র‍্যাম কোন ধরনের মেমরি?',
+            'question_type'  => 'mcq_single',
+            'marks'          => 1.0,
+            'difficulty'     => 'easy',
+            'is_active'      => true,
+        ]);
+
+        // Request auto-pick with question_type = 'fill_blanks'
+        $response = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.question-papers.auto-select', $paper->id), [
+                'section_id'    => $section->id,
+                'question_type' => 'fill_blanks',
+                'count'         => 2,
+            ]);
+
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $json = $response->json();
+        $this->assertEquals(2, $json['added_count']);
+
+        // Verify that only the fill_blanks questions were added
+        $items = LmsQuestionPaperItem::where('paper_id', $paper->id)->where('section_id', $section->id)->get();
+        $this->assertCount(2, $items);
+        foreach ($items as $item) {
+            $this->assertEquals('fill_blanks', $item->masterQuestion->question_type);
+        }
+
+        // Clean up
+        $paper->items()->delete();
+        $paper->sections()->delete();
+        $paper->delete();
+
+        $fillBlankQ1->delete();
+        $fillBlankQ2->delete();
+        $mcqQ1->delete();
+    }
+
+    /**
+     * Test adding section with Bengali UTF-8 section_code and Bengali numerals in marks
+     */
+    public function test_admin_can_add_section_with_bengali_characters_and_numerals()
+    {
+        $paper = LmsQuestionPaper::create([
+            'paper_code'    => 'QP-BN-TEST-' . rand(1000, 9999) . '-' . time(),
+            'title'         => 'Bengali Section Test Paper',
+            'course_id'     => $this->course->id,
+            'total_marks'   => 10.00,
+            'status'        => 'draft',
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+            ->postJson(route('admin.question-papers.add-section', $paper->id), [
+                'section_code'       => 'বহুনির্বাচনী (MCQ)',
+                'title'              => 'সংক্ষিপ্ত প্রশ্ন',
+                'marks_per_question' => '১.৫',
+                'instructions'       => 'যেকোনো ১০টি প্রশ্নের উত্তর দাও',
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $json = $response->json();
+        $this->assertTrue(mb_check_encoding($json['section']['section_code'], 'UTF-8'));
+        $this->assertEquals('বহুনির্বাচনী (MCQ)', $json['section']['section_code']);
+
+        $section = LmsQuestionPaperSection::where('paper_id', $paper->id)->first();
+        $this->assertNotNull($section);
+        $this->assertEquals('বহুনির্বাচনী (MCQ)', $section->section_code);
+        $this->assertEquals(1.5, (float)$section->marks_per_question);
+
+        // Clean up
+        $paper->sections()->delete();
+        $paper->delete();
+    }
 }
+

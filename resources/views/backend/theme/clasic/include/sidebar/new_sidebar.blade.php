@@ -843,7 +843,21 @@
                                 <i class="fas fa-file-excel nav-icon text-info"></i>
                                 <p>Quizzes & Excel Import</p>
                             </a>
-                        </li> 
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.quizzes.reports') }}" class="nav-link @yield('lms_reports_active')">
+                                <i class="fas fa-chart-line nav-icon text-warning"></i>
+                                <p>Exam Results & Reports</p>
+                            </a>
+                        </li>
+                        @if(Auth::check() && (Auth::user()->type == 'Admin' || Auth::user()->excess_type == 'admin' || Auth::user()->excess_type == 3))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.bteb-omr.index') }}" class="nav-link @yield('lms_bteb_omr_active')">
+                                <i class="fas fa-id-card nav-icon text-danger"></i>
+                                <p>BTEB OMR & Litho <span class="badge badge-danger ml-1" style="font-size: 9px;">Print</span></p>
+                            </a>
+                        </li>
+                        @endif
                       <li class="nav-item">
                             <a href="{{ url('/student/dashboard') }}" target="_blank" class="nav-link">
                                 <i class="fas fa-arrow-up-right-from-square nav-icon text-cyan"></i>

@@ -257,7 +257,7 @@
                                             value="{{ old('student_name') }}"
                                             required
                                             autocomplete="name"
-                                            placeholder="e.g. MOHAMMED RAHIM UDDIN"
+                                            placeholder="যেমন: MD. RAHIM MIAH (BLOCK LETTERS)"
                                             oninput="this.value = this.value.toUpperCase(); updateSidebarSummary();"
                                             style="text-transform: uppercase;"
                                             class="w-full pl-10 pr-4 py-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all text-sm @error('student_name') border-rose-500 @enderror">
@@ -275,25 +275,25 @@
                                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
                                             2. Gender <span class="text-rose-400 font-bold">*</span>
                                         </label>
-                                        <div class="grid grid-cols-3 gap-2.5">
-                                            <label class="relative flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-brand-primary has-[:checked]:bg-brand-primary/10">
-                                                <input type="radio" name="gander" value="male" class="text-brand-primary focus:ring-brand-primary w-4 h-4" {{ old('gander', 'male') === 'male' ? 'checked' : '' }} required>
-                                                <span class="text-xs font-semibold text-slate-200 group-hover:text-white">
-                                                    <i class="fa fa-mars text-brand-primary"></i> Male
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <label class="relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-emerald-500 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 dark:has-[:checked]:bg-brand-primary/10 has-[:checked]:text-emerald-700 dark:has-[:checked]:text-white shadow-sm">
+                                                <input type="radio" name="gander" value="male" class="text-brand-primary focus:ring-brand-primary w-3.5 h-3.5" {{ old('gander', 'male') === 'male' ? 'checked' : '' }} required>
+                                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                                    <i class="fa fa-male text-sm text-emerald-600 dark:text-brand-primary"></i> Male
                                                 </span>
                                             </label>
 
-                                            <label class="relative flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-pink-500 has-[:checked]:bg-pink-500/10">
-                                                <input type="radio" name="gander" value="female" class="text-brand-primary focus:ring-brand-primary w-4 h-4" {{ old('gander') === 'female' ? 'checked' : '' }}>
-                                                <span class="text-xs font-semibold text-slate-200 group-hover:text-white">
-                                                    <i class="fa fa-venus text-pink-400"></i> Female
+                                            <label class="relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-pink-500 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50 dark:has-[:checked]:bg-pink-500/10 has-[:checked]:text-pink-700 dark:has-[:checked]:text-white shadow-sm">
+                                                <input type="radio" name="gander" value="female" class="text-pink-500 focus:ring-pink-500 w-3.5 h-3.5" {{ old('gander') === 'female' ? 'checked' : '' }}>
+                                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                                    <i class="fa fa-female text-sm text-pink-500"></i> Female
                                                 </span>
                                             </label>
 
-                                            <label class="relative flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-500/10">
-                                                <input type="radio" name="gander" value="other" class="text-brand-primary focus:ring-brand-primary w-4 h-4" {{ old('gander') === 'other' ? 'checked' : '' }}>
-                                                <span class="text-xs font-semibold text-slate-200 group-hover:text-white">
-                                                    <i class="fa fa-genderless text-indigo-400"></i> Other
+                                            <label class="relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-indigo-500 cursor-pointer transition-all gender-card text-center group has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-500/10 has-[:checked]:text-indigo-700 dark:has-[:checked]:text-white shadow-sm">
+                                                <input type="radio" name="gander" value="other" class="text-indigo-500 focus:ring-indigo-500 w-3.5 h-3.5" {{ old('gander') === 'other' ? 'checked' : '' }}>
+                                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                                    <i class="fa fa-circle-o text-xs text-indigo-500"></i> Other
                                                 </span>
                                             </label>
                                         </div>
@@ -487,8 +487,8 @@
                                                     Permanent Address <span class="text-rose-400 font-bold">*</span>
                                                 </label>
                                                 <!-- Present to Permanent copy checkbox as annotated in mockup -->
-                                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-brand-primary font-medium hover:text-brand-accent transition-colors">
-                                                    <input type="checkbox" id="sameAddressCheck" class="rounded border-slate-700 text-brand-primary focus:ring-brand-primary w-4 h-4 bg-slate-900">
+                                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors select-none">
+                                                    <input type="checkbox" id="sameAddressCheck" class="cursor-pointer">
                                                     <span>Same as Present Address</span>
                                                 </label>
                                             </div>
@@ -619,7 +619,27 @@
                                                         </select>
                                                     </td>
                                                     <td class="p-2">
-                                                        <input type="text" name="boards[]" placeholder="e.g. Dhaka Board / NU" required class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
+                                                        <select name="boards[]" class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary text-xs" required>
+    <option value="">-- Board / University --</option>
+    <option value="Dhaka Board" selected>Dhaka Board</option>
+    <option value="Rajshahi Board">Rajshahi Board</option>
+    <option value="Comilla Board">Comilla Board</option>
+    <option value="Jessore Board">Jessore Board</option>
+    <option value="Chittagong Board">Chittagong Board</option>
+    <option value="Barisal Board">Barisal Board</option>
+    <option value="Sylhet Board">Sylhet Board</option>
+    <option value="Dinajpur Board">Dinajpur Board</option>
+    <option value="Mymensingh Board">Mymensingh Board</option>
+    <option value="Madrasah Board (BMEB)">Madrasah Board (BMEB)</option>
+    <option value="Technical Board (BTEB)">Technical Board (BTEB)</option>
+    <option value="National University (NU)">National University (NU)</option>
+    <option value="Open University (BOU)">Open University (BOU)</option>
+    <option value="Dhaka University (DU)">Dhaka University (DU)</option>
+    <option value="Rajshahi University (RU)">Rajshahi University (RU)</option>
+    <option value="Public University">Public University</option>
+    <option value="Private University">Private University</option>
+    <option value="Other Board / Institution">Other Board / Institution</option>
+</select>
                                                     </td>
                                                     <td class="p-2">
                                                         <input type="text" name="results[]" placeholder="e.g. GPA 4.80" required class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
@@ -639,7 +659,7 @@
                                                     <td class="p-2">
                                                         <select name="degrees[]" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
                                                             <option value="">-- Optional Additional Degree --</option>
-                                                            <option value="H.S.C / Alim / A-Level" selected>H.S.C / Alim / A-Level</option>
+                                                            <option value="H.S.C / Alim / A-Level">H.S.C / Alim / A-Level</option>
                                                             <option value="Honors / Bachelor / Degree">Honors / Bachelor / Degree</option>
                                                             <option value="Masters / Post Graduate">Masters / Post Graduate</option>
                                                             <option value="Diploma in Engineering">Diploma in Engineering</option>
@@ -647,7 +667,27 @@
                                                         </select>
                                                     </td>
                                                     <td class="p-2">
-                                                        <input type="text" name="boards[]" placeholder="Board / University" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
+                                                        <select name="boards[]" class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary text-xs">
+    <option value="">-- Board / University --</option>
+    <option value="Dhaka Board">Dhaka Board</option>
+    <option value="Rajshahi Board">Rajshahi Board</option>
+    <option value="Comilla Board">Comilla Board</option>
+    <option value="Jessore Board">Jessore Board</option>
+    <option value="Chittagong Board">Chittagong Board</option>
+    <option value="Barisal Board">Barisal Board</option>
+    <option value="Sylhet Board">Sylhet Board</option>
+    <option value="Dinajpur Board">Dinajpur Board</option>
+    <option value="Mymensingh Board">Mymensingh Board</option>
+    <option value="Madrasah Board (BMEB)">Madrasah Board (BMEB)</option>
+    <option value="Technical Board (BTEB)">Technical Board (BTEB)</option>
+    <option value="National University (NU)">National University (NU)</option>
+    <option value="Open University (BOU)">Open University (BOU)</option>
+    <option value="Dhaka University (DU)">Dhaka University (DU)</option>
+    <option value="Rajshahi University (RU)">Rajshahi University (RU)</option>
+    <option value="Public University">Public University</option>
+    <option value="Private University">Private University</option>
+    <option value="Other Board / Institution">Other Board / Institution</option>
+</select>
                                                     </td>
                                                     <td class="p-2">
                                                         <input type="text" name="results[]" placeholder="Result / GPA" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
@@ -686,21 +726,23 @@
                                                 $isPreSelected = ($cItem->id == $course->id);
                                                 $cleanItemPrice = is_numeric($cItem->price) ? (float)$cItem->price : (float)preg_replace('/[^\d.]/', '', (string)$cItem->price);
                                             @endphp
-                                            <label class="relative flex items-start gap-3 p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800/60 cursor-pointer transition-all course-selection-label {{ $isPreSelected ? 'border-brand-primary bg-brand-primary/10 shadow-glow-emerald/20' : '' }}" data-price="{{ $cleanItemPrice }}">
-                                                <input type="checkbox" name="selected_courses[]" value="{{ $cItem->id }}" class="mt-1 rounded border-slate-700 text-brand-primary focus:ring-brand-primary w-4 h-4 bg-slate-950 course-checkbox" {{ $isPreSelected ? 'checked' : '' }}>
-                                                <div class="flex-1">
+                                            <label class="relative flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-pointer select-none course-selection-label {{ $isPreSelected ? 'border-brand-primary bg-emerald-50/80 dark:bg-brand-primary/10 shadow-md shadow-emerald-500/10' : 'border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-emerald-400 dark:hover:border-slate-700' }}" data-price="{{ $cleanItemPrice }}">
+                                                <div class="mt-0.5 relative flex items-center justify-center shrink-0">
+                                                    <input type="checkbox" name="selected_courses[]" value="{{ $cItem->id }}" class="course-checkbox course-check-input" {{ $isPreSelected ? 'checked' : '' }}>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
                                                     <div class="flex items-center justify-between gap-2">
-                                                        <span class="text-xs sm:text-sm font-bold text-white leading-tight">
+                                                        <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
                                                             {{ $cItem->course_title }}
                                                         </span>
-                                                        <span class="text-xs font-mono font-bold text-emerald-400 flex-shrink-0">
+                                                        <span class="text-xs sm:text-sm font-mono font-extrabold text-emerald-700 dark:text-emerald-400 flex-shrink-0">
                                                             ৳ {{ $formatPrice($cItem->price) }}
                                                         </span>
                                                     </div>
-                                                    <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
-                                                        <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">{{ $cItem->time_line ?? 'Batch Coaching' }}</span>
+                                                    <div class="flex items-center gap-2 text-[10px] text-slate-600 dark:text-slate-400 mt-1.5">
+                                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">{{ $cItem->time_line ?? 'Batch Coaching' }}</span>
                                                         @if(strpos($cItem->course_title, 'BTEB') !== false)
-                                                            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-semibold">Govt. BTEB</span>
+                                                            <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-mono font-semibold">Govt. BTEB</span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -810,15 +852,15 @@
                                     </ol>
 
                                     <!-- Mandatory Acceptance Checkbox as marked in mockup -->
-                                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40">
-                                        <label class="flex items-start gap-3 cursor-pointer">
-                                            <input type="checkbox" id="rulesAgreedCheckbox" name="rules_agreed" value="1" required class="mt-1 rounded border-amber-500 text-brand-primary focus:ring-brand-primary w-5 h-5 bg-slate-900">
-                                            <span class="text-xs sm:text-sm font-semibold text-amber-200 leading-snug">
-                                                I have carefully read, understood, and accept all the above 9 Rules &amp; Regulations of Wake Up ICT Institute. <span class="text-rose-400 font-bold">*</span>
+                                    <div class="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-300 dark:border-amber-500/40 transition-all">
+                                        <label class="flex items-start gap-3.5 cursor-pointer select-none">
+                                            <input type="checkbox" id="rulesAgreedCheckbox" name="rules_agreed" value="1" required class="mt-0.5 cursor-pointer">
+                                            <span class="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200 leading-snug">
+                                                I have carefully read, understood, and accept all the above 9 Rules &amp; Regulations of Wake Up ICT Institute. <span class="text-rose-500 font-extrabold">*</span>
                                             </span>
                                         </label>
                                         @error('rules_agreed')
-                                            <p class="text-xs text-rose-400 mt-2 font-medium"><i class="fa fa-exclamation-circle"></i> {{ $message }}</p>
+                                            <p class="text-xs text-rose-500 mt-2 font-medium"><i class="fa fa-exclamation-circle"></i> {{ $message }}</p>
                                         @enderror
                                     </div>
                                 </div>
@@ -863,9 +905,9 @@
                             <!-- ================= WIZARD BOTTOM NAVIGATION TOOLBAR ================= -->
                             <div class="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <!-- Previous Step Button -->
-                                <button type="button" id="wizardPrevBtn" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer invisible">
-                                    <i class="fa fa-arrow-left"></i>
-                                    <span>Previous Step</span>
+                                <button type="button" id="wizardPrevBtn" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer select-none invisible">
+                                    <i class="fa fa-arrow-left pointer-events-none"></i>
+                                    <span class="pointer-events-none">Previous Step</span>
                                 </button>
 
                                 <!-- Step Status Chip -->
@@ -876,9 +918,9 @@
                                 <!-- Next Step / Final Submit Button Container -->
                                 <div class="w-full sm:w-auto">
                                     <!-- Next Step Button (Shown on Steps 1, 2, 3) -->
-                                    <button type="button" id="wizardNextBtn" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2.5 cursor-pointer">
-                                        <span>Continue to Next Step</span>
-                                        <i class="fa fa-arrow-right"></i>
+                                    <button type="button" id="wizardNextBtn" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2.5 cursor-pointer select-none">
+                                        <span class="pointer-events-none">Continue to Next Step</span>
+                                        <i class="fa fa-arrow-right pointer-events-none"></i>
                                     </button>
 
                                     <!-- Final Submit Button (Shown on Step 4) -->
@@ -1087,6 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        if (step === 2) { updateCalculatedAge(); }
         // Bottom Controls Visibility
         if (prevBtn) {
             if (currentStep === 1) {
@@ -1122,39 +1165,213 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Step Validation Engine
+    // Toast Notification Dispatcher (Toastr integration)
+    function notifyAlert(type, message) {
+        if (typeof toastr !== 'undefined') {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "4000",
+                "extendedTimeOut": "1500",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+            if (type === 'error') toastr.error(message);
+            else if (type === 'warning') toastr.warning(message);
+            else if (type === 'info') toastr.info(message);
+            else toastr.success(message);
+        } else {
+            alert(message);
+        }
+    }
+
+    // Step Validation Engine with Friendly Toast Alerts
     function validateStep(step) {
         const pane = document.querySelector(`.wizard-step-pane[data-step="${step}"]`);
         if (!pane) return true;
 
+        // Custom validation per step for clear, actionable feedback
+        if (step === 1) {
+            const studentName = document.getElementById('student_name');
+            if (!studentName || !studentName.value.trim()) {
+                studentName.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => studentName.classList.remove('field-error-shake'), 450);
+                studentName.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে শিক্ষার্থীর পুরো নাম (Full Name) লিখুন');
+                return false;
+            }
+
+            const genderChecked = pane.querySelector('input[name="gander"]:checked');
+            if (!genderChecked) {
+                notifyAlert('warning', 'অনুগ্রহ করে জেন্ডার (Gender) নির্বাচন করুন');
+                return false;
+            }
+
+            const dob = document.getElementById('date_of_birth');
+            if (!dob || !dob.value) {
+                dob.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => dob.classList.remove('field-error-shake'), 450);
+                dob.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে জন্ম তারিখ (Date of Birth) প্রদান করুন');
+                return false;
+            }
+
+            const fatherName = document.getElementById('fathers_name');
+            if (!fatherName || !fatherName.value.trim()) {
+                fatherName.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => fatherName.classList.remove('field-error-shake'), 450);
+                fatherName.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে পিতার নাম (Father\'s Name) লিখুন');
+                return false;
+            }
+
+            const motherName = document.getElementById('mothers_name');
+            if (!motherName || !motherName.value.trim()) {
+                motherName.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => motherName.classList.remove('field-error-shake'), 450);
+                motherName.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে মাতার নাম (Mother\'s Name) লিখুন');
+                return false;
+            }
+
+            // Sync age before leaving Step 1
+            updateCalculatedAge();
+        }
+
+        if (step === 2) {
+            const nid = document.getElementById('national_id_no');
+            if (!nid || !nid.value.trim()) {
+                nid.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => nid.classList.remove('field-error-shake'), 450);
+                nid.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে NID বা জন্ম নিবন্ধন নম্বরটি প্রদান করুন');
+                return false;
+            }
+
+            const occ = document.getElementById('occupation');
+            if (!occ || !occ.value.trim()) {
+                occ.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => occ.classList.remove('field-error-shake'), 450);
+                occ.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে পেশা (Occupation) উল্লেখ করুন');
+                return false;
+            }
+
+            const ageField = document.getElementById('age');
+            if (!ageField || !ageField.value.trim()) {
+                updateCalculatedAge();
+            }
+
+            const presentAddr = document.getElementById('present_address');
+            if (!presentAddr || !presentAddr.value.trim()) {
+                presentAddr.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => presentAddr.classList.remove('field-error-shake'), 450);
+                presentAddr.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে বর্তমান ঠিকানা (Present Address) লিখুন');
+                return false;
+            }
+
+            const phone = document.getElementById('student_phone');
+            if (!phone || !phone.value.trim()) {
+                phone.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => phone.classList.remove('field-error-shake'), 450);
+                phone.focus();
+                notifyAlert('warning', 'অনুগ্রহ করে শিক্ষার্থীর ১১ ডিজিটের মোবাইল নম্বর লিখুন');
+                return false;
+            }
+
+            const cleanPhone = phone.value.replace(/[^0-9]/g, '');
+            if (cleanPhone.length < 11) {
+                phone.classList.add('field-error-shake', 'border-rose-500');
+                setTimeout(() => phone.classList.remove('field-error-shake'), 450);
+                phone.focus();
+                notifyAlert('warning', 'সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)');
+                return false;
+            }
+        }
+
+        if (step === 3) {
+            // Validate Primary Educational Qualification (Row 1)
+            const firstRow = document.querySelector('#qualificationsTbody .qualification-row');
+            if (firstRow) {
+                const boardSel = firstRow.querySelector('select[name="boards[]"], input[name="boards[]"]');
+                const resultInput = firstRow.querySelector('input[name="results[]"]');
+                const yearInput = firstRow.querySelector('input[name="passing_years[]"]');
+
+                if (boardSel && !boardSel.value.trim()) {
+                    boardSel.classList.add('field-error-shake', 'border-rose-500');
+                    setTimeout(() => boardSel.classList.remove('field-error-shake'), 450);
+                    boardSel.focus();
+                    notifyAlert('warning', 'অনুগ্রহ করে ১ম শিক্ষাগত যোগ্যতার বোর্ড বা বিশ্ববিদ্যালয় নির্বাচন করুন');
+                    return false;
+                }
+
+                if (resultInput && !resultInput.value.trim()) {
+                    resultInput.classList.add('field-error-shake', 'border-rose-500');
+                    setTimeout(() => resultInput.classList.remove('field-error-shake'), 450);
+                    resultInput.focus();
+                    notifyAlert('warning', 'অনুগ্রহ করে রেজাল্ট বা জিপিএ (GPA) লিখুন');
+                    return false;
+                }
+
+                if (yearInput && !yearInput.value.trim()) {
+                    yearInput.classList.add('field-error-shake', 'border-rose-500');
+                    setTimeout(() => yearInput.classList.remove('field-error-shake'), 450);
+                    yearInput.focus();
+                    notifyAlert('warning', 'অনুগ্রহ করে পাশের সন (Passing Year) লিখুন');
+                    return false;
+                }
+            }
+
+            // Validate Course Selection (at least 1 must be checked)
+            const checkedCourses = pane.querySelectorAll('input[name="selected_courses[]"]:checked');
+            if (checkedCourses.length === 0) {
+                notifyAlert('error', 'অনুগ্রহ করে কমপক্ষে একটি কোর্স সিলেক্ট করুন');
+                const container = document.getElementById('coursesCheckboxContainer');
+                if (container) {
+                    container.classList.add('field-error-shake');
+                    setTimeout(() => container.classList.remove('field-error-shake'), 450);
+                }
+                return false;
+            }
+        }
+
+        if (step === 4) {
+            const rulesAgree = document.getElementById('agree_rules');
+            if (rulesAgree && !rulesAgree.checked) {
+                rulesAgree.focus();
+                notifyAlert('error', 'অ্যাকাডেমির নিয়ম ও শর্তাবলীতে সম্মত হতে চেকবক্সে টিক দিন');
+                return false;
+            }
+        }
+
+        // Generic fallback check for any remaining required fields
         const requiredInputs = pane.querySelectorAll('input[required], select[required], textarea[required]');
         let isValid = true;
         let firstInvalid = null;
 
         requiredInputs.forEach(input => {
-            // For radio groups, check if any in the group is checked
             if (input.type === 'radio') {
                 const groupName = input.name;
                 const anyChecked = pane.querySelector(`input[name="${groupName}"]:checked`);
                 if (!anyChecked) {
                     isValid = false;
-                    const card = input.closest('.gender-card') || input.parentElement;
-                    card.classList.add('field-error-shake', 'border-rose-500');
-                    setTimeout(() => card.classList.remove('field-error-shake'), 450);
                     if (!firstInvalid) firstInvalid = input;
                 }
             } else if (!input.value || input.value.trim() === '') {
                 isValid = false;
-                input.classList.add('field-error-shake', 'border-rose-500', 'bg-rose-500/10');
+                input.classList.add('field-error-shake', 'border-rose-500');
                 setTimeout(() => input.classList.remove('field-error-shake'), 450);
                 if (!firstInvalid) firstInvalid = input;
             } else {
-                input.classList.remove('border-rose-500', 'bg-rose-500/10');
+                input.classList.remove('border-rose-500');
             }
         });
 
         if (!isValid && firstInvalid) {
             firstInvalid.focus();
+            notifyAlert('warning', 'অনুগ্রহ করে চিহ্নিত আবশ্যকীয় তথ্যগুলো সঠিকভাবে পূরণ করুন');
             return false;
         }
 
@@ -1237,20 +1454,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
             years--;
         }
-        return years > 0 ? years : 0;
+        return (years >= 0 && years < 120) ? years : '';
+    }
+
+    function updateCalculatedAge() {
+        if (!dobInput || !ageInput) return;
+        if (dobInput.value) {
+            const computed = calculateAge(dobInput.value);
+            if (computed !== '') {
+                ageInput.value = computed;
+                const badge = document.getElementById('ageCalculatedBadge');
+                if (badge) {
+                    badge.textContent = `Auto-calculated: ${computed} years`;
+                }
+            }
+        }
     }
 
     if (dobInput && ageInput) {
-        dobInput.addEventListener('change', function() {
-            const computedAge = calculateAge(this.value);
-            if (computedAge !== '') {
-                ageInput.value = computedAge;
-            }
-        });
-
-        if (dobInput.value && !ageInput.value) {
-            ageInput.value = calculateAge(dobInput.value);
-        }
+        dobInput.addEventListener('change', updateCalculatedAge);
+        dobInput.addEventListener('input', updateCalculatedAge);
+        // Compute immediately if DOB already present
+        updateCalculatedAge();
     }
 
     // 3. Present Address -> Permanent Address Sync Checkbox
@@ -1297,7 +1522,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     </select>
                 </td>
                 <td class="p-2">
-                    <input type="text" name="boards[]" placeholder="Board / University" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
+                    <select name="boards[]" class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary text-xs">
+    <option value="">-- Board / University --</option>
+    <option value="Dhaka Board">Dhaka Board</option>
+    <option value="Rajshahi Board">Rajshahi Board</option>
+    <option value="Comilla Board">Comilla Board</option>
+    <option value="Jessore Board">Jessore Board</option>
+    <option value="Chittagong Board">Chittagong Board</option>
+    <option value="Barisal Board">Barisal Board</option>
+    <option value="Sylhet Board">Sylhet Board</option>
+    <option value="Dinajpur Board">Dinajpur Board</option>
+    <option value="Mymensingh Board">Mymensingh Board</option>
+    <option value="Madrasah Board (BMEB)">Madrasah Board (BMEB)</option>
+    <option value="Technical Board (BTEB)">Technical Board (BTEB)</option>
+    <option value="National University (NU)">National University (NU)</option>
+    <option value="Open University (BOU)">Open University (BOU)</option>
+    <option value="Dhaka University (DU)">Dhaka University (DU)</option>
+    <option value="Rajshahi University (RU)">Rajshahi University (RU)</option>
+    <option value="Public University">Public University</option>
+    <option value="Private University">Private University</option>
+    <option value="Other Board / Institution">Other Board / Institution</option>
+</select>
                 </td>
                 <td class="p-2">
                     <input type="text" name="results[]" placeholder="Result / GPA" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-brand-primary text-xs">
@@ -1379,11 +1624,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (cb.checked) {
                 count++;
                 total += price;
-                label.classList.add('border-brand-primary', 'bg-brand-primary/10');
-                label.classList.remove('border-slate-800');
+                label.classList.add('border-brand-primary', 'bg-emerald-50/80', 'dark:bg-brand-primary/10', 'shadow-md');
+                label.classList.remove('border-slate-300', 'dark:border-slate-800', 'bg-white', 'dark:bg-slate-900/90');
             } else {
-                label.classList.remove('border-brand-primary', 'bg-brand-primary/10');
-                label.classList.add('border-slate-800');
+                label.classList.remove('border-brand-primary', 'bg-emerald-50/80', 'dark:bg-brand-primary/10', 'shadow-md');
+                label.classList.add('border-slate-300', 'dark:border-slate-800', 'bg-white', 'dark:bg-slate-900/90');
             }
         });
 

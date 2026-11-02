@@ -763,6 +763,7 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
         Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
 
+
         // Assignments & Projects (Coursework, File Uploads, Capstones & Rubric Feedback)
         Route::get('/assignments', 'frontend\theme\clasic\StudentAssignmentController@assignments')->name('assignments.index')->middleware('student.feature:my_assignments');
         Route::get('/assignments/submit', 'frontend\theme\clasic\StudentAssignmentController@showSubmit')->name('assignments.submit')->middleware('student.feature:submit_assignment');
@@ -820,3 +821,17 @@ Route::get('/system-sync-deploy', function () {
     ]);
 })->name('system.sync-deploy');
 
+// Redirect legacy student OMR routes to Admin OMR Builder (Admin only feature)
+Route::get('/student/bteb-omr', function () {
+    return redirect()->route('admin.bteb-omr.index', request()->query());
+})->name('student.omr.index');
+
+Route::get('/student/bteb-omr/print', function () {
+    return redirect()->route('admin.bteb-omr.print', request()->query());
+})->name('student.omr.print');
+
+Route::post('/student/bteb-omr/generate', 'frontend\theme\clasic\StudentOmrController@generate')->name('student.omr.generate');
+
+Route::get('/bteb-omr', function () {
+    return redirect()->route('admin.bteb-omr.index', request()->query());
+});

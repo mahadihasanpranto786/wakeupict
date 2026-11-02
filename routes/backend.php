@@ -618,8 +618,17 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::post('/', 'backend\theme\clasic\lms\AdminQuizController@store')->name('store');
     Route::post('/import', 'backend\theme\clasic\lms\AdminQuizController@importExcel')->name('import');
     Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
+    Route::match(['GET', 'POST'], '/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyQuizzes')->name('bulk-delete');
     Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
+    Route::get('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@attemptDetail')->name('attempt-detail');
+    Route::delete('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroyAttempt')->name('attempt.destroy');
+    Route::match(['GET', 'POST'], '/reports/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyAttempts')->name('reports.bulk-delete');
     Route::post('/{id}/generate-sets', 'backend\theme\clasic\lms\AdminQuizController@generateSets')->name('generate-sets');
+    Route::put('/{id}', 'backend\theme\clasic\lms\AdminQuizController@update')->name('update');
+    Route::post('/{id}/import-from-library', 'backend\theme\clasic\lms\AdminQuizController@importFromLibrary')->name('import-from-library');
+    Route::get('/{id}/questions', 'backend\theme\clasic\lms\AdminQuizController@manageQuestions')->name('questions');
+    Route::delete('/{id}/questions/{questionId}', 'backend\theme\clasic\lms\AdminQuizController@deleteQuestion')->name('delete-question');
+    Route::match(['GET', 'POST'], '/{id}/questions/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDeleteQuestions')->name('questions.bulk-delete');
     Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');
     Route::delete('/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroy')->name('destroy');
 });
@@ -628,11 +637,15 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
 Route::group(['prefix' => 'admin/question-book', 'as' => 'admin.question-book.'], function () {
     Route::get('/', 'backend\theme\clasic\lms\QuestionBookController@index')->name('index');
     Route::post('/', 'backend\theme\clasic\lms\QuestionBookController@store')->name('store');
+    Route::put('/{id}', 'backend\theme\clasic\lms\QuestionBookController@update')->name('update');
+    Route::post('/{id}/derive', 'backend\theme\clasic\lms\QuestionBookController@derive')->name('derive');
+    Route::get('/{id}/related', 'backend\theme\clasic\lms\QuestionBookController@related')->name('related');
     Route::post('/import', 'backend\theme\clasic\lms\QuestionBookController@importExcel')->name('import');
     Route::get('/{id}/preview', 'backend\theme\clasic\lms\QuestionBookController@preview')->name('preview');
     Route::post('/{id}/duplicate', 'backend\theme\clasic\lms\QuestionBookController@duplicate')->name('duplicate');
     Route::post('/{id}/archive-toggle', 'backend\theme\clasic\lms\QuestionBookController@archiveToggle')->name('archive-toggle');
     Route::post('/bulk-action', 'backend\theme\clasic\lms\QuestionBookController@bulkAction')->name('bulk-action');
+    Route::post('/assign-to-quiz', 'backend\theme\clasic\lms\QuestionBookController@assignToQuiz')->name('assign-to-quiz');
     Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionBookController@destroy')->name('destroy');
 });
 
@@ -655,6 +668,11 @@ Route::group(['prefix' => 'admin/question-papers', 'as' => 'admin.question-paper
     Route::put('/{id}/settings', 'backend\theme\clasic\lms\QuestionPaperBuilderController@updateSettings')->name('update-settings');
     Route::delete('/{id}', 'backend\theme\clasic\lms\QuestionPaperBuilderController@destroy')->name('destroy');
 });
+
+// ================================================== BTEB OMR Sheet & Litho Code Builder =========================================================//
+Route::get('admin/bteb-omr', 'frontend\theme\clasic\StudentOmrController@index')->name('admin.bteb-omr.index');
+Route::get('admin/bteb-omr/print', 'frontend\theme\clasic\StudentOmrController@print')->name('admin.bteb-omr.print');
+Route::post('admin/bteb-omr/generate', 'frontend\theme\clasic\StudentOmrController@generate')->name('admin.bteb-omr.generate');
 
 //**************************************** BACKEND ROUTES END*************************************************** */
 

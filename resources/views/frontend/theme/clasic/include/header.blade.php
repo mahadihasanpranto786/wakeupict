@@ -11,7 +11,7 @@
         </div>
 
         <!-- Center: Dynamic Continuous Running Newsfeed Ticker -->
-        <div class="newsfeed-container flex-1 overflow-hidden relative mx-2 cursor-pointer" title="মাউস হোভার করে থামান">
+        <div class="newsfeed-container flex-1 min-w-0 overflow-hidden relative mx-2 cursor-pointer" title="মাউস হোভার করে থামান">
             <div class="newsfeed-track flex items-center whitespace-nowrap text-white font-medium text-[11px] sm:text-xs">
                 @for ($seg = 0; $seg < 4; $seg++)
                 <div class="newsfeed-segment inline-flex items-center gap-4 shrink-0 pr-6" {!! $seg > 0 ? 'aria-hidden="true"' : '' !!}>
@@ -30,16 +30,56 @@
             </div>
         </div>
 
-        <!-- Right: Pinned Helpline & Campus Info -->
-        <div class="hidden sm:flex items-center gap-3 shrink-0 text-[11px] font-mono z-10">
-            <a href="tel:01791612121" class="hover:text-amber-200 transition-colors flex items-center gap-1.5 font-bold bg-white/15 hover:bg-white/25 px-2.5 py-0.5 rounded-lg border border-white/25 shadow-xs">
+        <!-- Right: Daraz-style Utility Strip (Helpline, Student Sign Up, Login, Language) -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0 text-[11px] font-sans font-semibold tracking-wide z-10 text-white/95">
+            
+            <!-- Hotline Helpline -->
+            <a href="tel:01791612121" class="hidden md:inline-flex hover:text-amber-300 transition-colors items-center gap-1.5 font-mono text-[11px] font-bold">
                 <i class="fa fa-phone text-amber-300"></i>
                 <span>01791-612121</span>
             </a>
-            <span class="text-white/40">|</span>
-            <span class="text-emerald-100 flex items-center gap-1">
-                <i class="fa fa-map-marker text-amber-300"></i> মেইন ক্যাম্পাস ল্যাব
-            </span>
+
+            <span class="hidden md:inline text-white/30">|</span>
+
+            @if(function_exists('is_student_logged_in') && is_student_logged_in())
+                <!-- Logged In Student Links -->
+                <a href="{{ route('student.dashboard') }}" class="hover:text-amber-300 transition-colors inline-flex items-center gap-1.5 text-amber-300 font-bold text-[11px]">
+                    <i class="fa fa-graduation-cap"></i>
+                    <span>ড্যাশবোর্ড</span>
+                </a>
+                <span class="text-white/30">|</span>
+                <form action="{{ route('student.logout') }}" method="POST" class="inline m-0 p-0">
+                    @csrf
+                    <button type="submit" class="hover:text-rose-300 transition-colors inline-flex items-center gap-1 cursor-pointer bg-transparent border-0 text-white/90 hover:text-white p-0 text-[11px] font-semibold">
+                        <i class="fa fa-sign-out"></i>
+                        <span>লগআউট</span>
+                    </button>
+                </form>
+            @else
+                <!-- Guest Student: Login & Sign Up (Daraz Style) -->
+                <a href="{{ route('student.login') }}" class="hover:text-amber-300 transition-colors inline-flex items-center gap-1 uppercase font-bold text-[11px]">
+                    <i class="fa fa-user-circle text-amber-300"></i>
+                    <span>LOGIN</span>
+                </a>
+
+                <span class="text-white/30">|</span>
+
+                <a href="{{ route('student.register') }}" class="hover:text-amber-300 transition-colors inline-flex items-center gap-1 uppercase font-bold text-[11px]">
+                    <i class="fa fa-user-plus text-amber-300"></i>
+                    <span>SIGN UP</span>
+                </a>
+            @endif
+
+            <span class="text-white/30">|</span>
+
+            <!-- Language Switcher (Daraz Style: ভাষা / Language) -->
+            <div class="inline-flex items-center gap-1 text-[11px] font-bold">
+                <i class="fa fa-globe text-amber-300 text-xs"></i>
+                <a href="{{ route('language.switch', 'en') }}" class="px-1.5 py-0.5 rounded text-[10px] uppercase transition-colors {{ App::getLocale() == 'en' ? 'bg-amber-300 text-slate-950 font-black shadow-xs' : 'text-white/80 hover:text-white' }}">EN</a>
+                <span class="text-white/30 text-[10px]">|</span>
+                <a href="{{ route('language.switch', 'bn') }}" class="px-1.5 py-0.5 rounded text-[10px] transition-colors {{ App::getLocale() == 'bn' ? 'bg-amber-300 text-slate-950 font-black shadow-xs' : 'text-white/80 hover:text-white' }}">বাং</a>
+            </div>
+
         </div>
 
     </div>
@@ -125,49 +165,16 @@
                 @endforeach
             </nav>
 
-            <!-- CTA Action & Language Switcher (Desktop) -->
-            <div class="hidden lg:flex items-center gap-1.5 2xl:gap-2 shrink-0">
-
-                <!-- Global Language Switcher Pill -->
-                <div class="flex items-center rounded-xl bg-slate-900 border border-slate-700/80 p-0.5 text-xs font-mono font-medium shrink-0">
-                    <a href="{{ route('language.switch', 'en') }}" class="px-2 py-1 rounded-lg transition-colors {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
-                        EN
-                    </a>
-                    <span class="text-slate-600 px-0.5">|</span>
-                    <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-1 rounded-lg transition-colors {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-white' }}">
-                        বাং
-                    </a>
-                </div>
-
-                <!-- 10 Minute School Style Student Portal Pill -->
-                @if(function_exists('is_student_logged_in') && is_student_logged_in())
-                    <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-brand-primary to-emerald-400 hover:to-brand-accent shadow-glow-emerald transition-all hover:-translate-y-0.5 shrink-0 whitespace-nowrap">
-                        <i class="fa fa-graduation-cap"></i>
-                        <span>ড্যাশবোর্ড</span>
-                    </a>
-                @else
-                    <a href="{{ route('student.login') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white bg-slate-900 border border-slate-700/80 hover:border-brand-primary/50 transition-all shrink-0 whitespace-nowrap">
-                        <i class="fa fa-user-circle text-brand-primary"></i>
-                        <span>স্টুডেন্ট লগইন</span>
-                    </a>
-                @endif
-
-                <!-- 10MS Hotline CTA Button -->
-                <a href="tel:01791612121" class="header-hotline-btn inline-flex items-center gap-1.5 px-3 py-1.5 2xl:px-3.5 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500/10 dark:border dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-500 dark:hover:text-slate-950 transition-all duration-300 shrink-0 whitespace-nowrap shadow-sm">
-                    <i class="fa fa-phone"></i>
-                    <span>হটলাইন</span>
+            <!-- Right CTA (Desktop Hotline) - Student Login, Sign Up & Language are in the Top Utility Strip -->
+            <div class="hidden lg:flex items-center shrink-0">
+                <a href="tel:01791612121" class="header-hotline-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 2xl:px-4 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap">
+                    <i class="fa fa-phone text-amber-300"></i>
+                    <span>01791-612121</span>
                 </a>
             </div>
 
             <!-- Mobile Controls -->
             <div class="flex lg:hidden items-center gap-2">
-                <!-- Mobile Language Pill -->
-                <div class="flex items-center rounded-lg bg-slate-900 border border-slate-700 p-0.5 text-xs font-mono">
-                    <a href="{{ route('language.switch', 'en') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950 font-bold' : 'text-slate-400' }}">EN</a>
-                    <span class="text-slate-600 px-0.5">|</span>
-                    <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950 font-bold' : 'text-slate-400' }}">বাং</a>
-                </div>
-
                 <!-- Hamburger Button -->
                 <button id="mobile-menu-btn" type="button" class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 focus:outline-none" aria-label="Toggle navigation">
                     <i id="hamburger-icon" class="fa fa-bars text-lg"></i>
@@ -223,21 +230,35 @@
                 @endif
             @endforeach
 
-            <div class="pt-4 mt-2 border-t border-slate-800 space-y-2">
+            <div class="pt-4 mt-2 border-t border-slate-800 space-y-2.5">
                 @if(function_exists('is_student_logged_in') && is_student_logged_in())
-                    <a href="{{ route('student.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-brand-primary text-slate-950">
+                    <a href="{{ route('student.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-brand-primary text-slate-950">
                         <i class="fa fa-graduation-cap"></i>
                         <span>Student Dashboard</span>
                     </a>
                 @else
-                    <a href="{{ route('student.login') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wider uppercase bg-slate-900 border border-slate-700 text-white hover:border-brand-primary">
-                        <i class="fa fa-user-circle text-brand-primary"></i>
-                        <span>Student Portal Login</span>
-                    </a>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="{{ route('student.login') }}" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-bold text-xs tracking-wider uppercase bg-slate-900 border border-slate-700 text-white hover:border-brand-primary">
+                            <i class="fa fa-user-circle text-brand-primary"></i>
+                            <span>LOGIN</span>
+                        </a>
+                        <a href="{{ route('student.register') }}" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <i class="fa fa-user-plus"></i>
+                            <span>SIGN UP</span>
+                        </a>
+                    </div>
                 @endif
-                <a href="{{ route('contact-us-page') }}" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald">
-                    <span>{{ __('frontend.nav.contact') }}</span>
-                    <i class="fa fa-arrow-right text-xs"></i>
+                <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                    <span class="text-slate-400 font-medium">ভাষা / Language:</span>
+                    <div class="flex items-center gap-1 font-mono font-bold">
+                        <a href="{{ route('language.switch', 'en') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950' : 'text-slate-400 hover:text-white' }}">EN</a>
+                        <span class="text-slate-600">|</span>
+                        <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950' : 'text-slate-400 hover:text-white' }}">বাং</a>
+                    </div>
+                </div>
+                <a href="tel:01791612121" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600/20 border border-emerald-500/30 text-emerald-400">
+                    <i class="fa fa-phone"></i>
+                    <span>হটলাইন: 01791-612121</span>
                 </a>
             </div>
         </nav>

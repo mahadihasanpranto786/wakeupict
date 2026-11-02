@@ -12,10 +12,14 @@
         .builder-layout {
             display: flex;
             gap: 1rem;
-            min-height: calc(100vh - 140px);
+            height: calc(100vh - 165px);
+            max-height: calc(100vh - 165px);
+            min-height: 550px;
         }
         .builder-left-panel {
             width: 380px;
+            height: 100%;
+            max-height: 100%;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -25,27 +29,74 @@
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
+        #libraryScrollContainer {
+            flex: 1 1 0;
+            overflow-y: auto;
+            min-height: 0;
+        }
         .builder-canvas-panel {
             flex-grow: 1;
+            height: 100%;
+            max-height: 100%;
             background: #f8fafc;
             border-radius: 0.75rem;
             border: 1px solid #e2e8f0;
             padding: 1.25rem;
             overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: auto;
         }
         .builder-right-panel {
             width: 340px;
+            height: 100%;
+            max-height: 100%;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        /* Custom slim scrollbars */
+        .builder-canvas-panel::-webkit-scrollbar,
+        #libraryScrollContainer::-webkit-scrollbar,
+        .builder-right-panel::-webkit-scrollbar {
+            width: 7px;
+        }
+        .builder-canvas-panel::-webkit-scrollbar-thumb,
+        #libraryScrollContainer::-webkit-scrollbar-thumb,
+        .builder-right-panel::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        .builder-canvas-panel::-webkit-scrollbar-thumb:hover,
+        #libraryScrollContainer::-webkit-scrollbar-thumb:hover,
+        .builder-right-panel::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
         }
         @media (max-width: 1200px) {
             .builder-layout {
                 flex-direction: column;
+                height: auto;
+                max-height: none;
             }
-            .builder-left-panel, .builder-right-panel {
+            .builder-left-panel {
                 width: 100%;
+                height: auto;
+                max-height: 520px;
+                position: sticky;
+                top: 10px;
+                z-index: 50;
+            }
+            .builder-canvas-panel {
+                height: auto;
+                max-height: none;
+            }
+            .builder-right-panel {
+                width: 100%;
+                height: auto;
+                max-height: none;
             }
         }
         .draggable-library-card {
@@ -176,11 +227,14 @@
                 <span id="autosaveIndicator" class="badge badge-light border text-muted mr-2">
                     <i class="fas fa-check-circle text-success mr-1"></i> ড্রাফট সক্রিয়
                 </span>
-                <button type="button" class="btn btn-sm btn-outline-info mr-1" data-toggle="modal" data-target="#autoPickModal">
+                <button type="button" class="btn btn-sm btn-outline-info mr-1" data-toggle="modal" data-target="#autoPickModal" onclick="prepareAutoPickModal()">
                     <i class="fas fa-magic mr-1"></i> অটো প্রশ্ন বাছাই
                 </button>
                 <a href="{{ route('admin.question-papers.print-board', $paper->id) }}" target="_blank" class="btn btn-sm btn-outline-dark mr-1">
                     <i class="fas fa-print mr-1"></i> বোর্ড প্রিন্ট
+                </a>
+                <a href="{{ route('admin.bteb-omr.index') }}?subject_code={{ $paper->subject_code }}&exam_year={{ $paper->academic_year }}" target="_blank" class="btn btn-sm btn-outline-danger mr-1" title="বিটিইবি ওএমআর টপ শিট ও লিথু কোড">
+                    <i class="fas fa-id-card mr-1"></i> ওএমআর শিট
                 </a>
                 <a href="{{ route('admin.question-papers.teacher-key', $paper->id) }}" target="_blank" class="btn btn-sm btn-outline-success mr-1">
                     <i class="fas fa-key mr-1"></i> উত্তরপত্র
@@ -214,7 +268,7 @@
                     </div>
                 </div>
                 <!-- Library Filter Dropdowns -->
-                <div class="row g-1">
+                <div class="row g-1 mb-2">
                     <div class="col-6">
                         <select id="libCategoryFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
                             <option value="">-- ক্যাটাগরি --</option>
@@ -232,10 +286,22 @@
                         </select>
                     </div>
                 </div>
+                <div class="mb-1">
+                    <select id="libTypeFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
+                        <option value="">-- সকল প্রশ্নের ধরন (All Types) --</option>
+                        <option value="mcq">MCQ (বহুনির্বাচনি)</option>
+                        <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                        <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                        <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short)</option>
+                        <option value="creative">সৃজনশীল (CQ)</option>
+                        <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                        <option value="descriptive">রচনামূলক (Descriptive)</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Library Items List -->
-            <div class="p-2 overflow-auto flex-grow-1" style="max-height: calc(100vh - 270px);" id="libraryScrollContainer">
+            <div class="p-2 overflow-auto flex-grow-1" id="libraryScrollContainer">
                 @forelse($libraryQuestions as $lq)
                     <div class="draggable-library-card p-2 mb-2" 
                          draggable="true" 
@@ -398,11 +464,15 @@
                                             {{ $item->getQuestionText() }}
                                         </div>
 
-                                        <!-- Options Preview -->
+                                        <!-- Multi-Type Options & Details Preview -->
                                         @php
                                             $opts = $item->getQuestionOptions();
+                                            $itemType = $item->getQuestionType();
+                                            $correctAnswerText = $item->getCorrectAnswerText();
+                                            $hints = $item->getHints();
+                                            $cqSubs = $item->getCqSubquestions();
                                         @endphp
-                                        @if(!empty($opts))
+                                        @if(!empty($opts) && count($opts) > 0)
                                             <div class="row row-cols-1 row-cols-sm-2 g-2">
                                                 @foreach($opts as $optIdx => $o)
                                                     @php
@@ -416,6 +486,34 @@
                                                         <span class="{{ $isCorrect ? 'text-success font-weight-bold' : 'text-dark' }}">{{ $optText }}</span>
                                                     </div>
                                                 @endforeach
+                                            </div>
+                                        @elseif($itemType === 'true_false')
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-warning text-dark mr-1">সত্য / মিথ্যা</span>
+                                                সঠিক উত্তর: <strong class="text-success">{{ $correctAnswerText ?: 'সত্য' }}</strong>
+                                            </div>
+                                        @elseif(in_array($itemType, ['fill_blanks', 'fill_in_the_blanks']))
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-info mr-1">শূন্যস্থান পূরণ</span>
+                                                প্রত্যাশিত শব্দ: <strong class="text-success">{{ $correctAnswerText }}</strong>
+                                                @if($hints)
+                                                    <span class="badge badge-light border ml-1">ক্লু: {{ $hints }}</span>
+                                                @endif
+                                            </div>
+                                        @elseif(!empty($cqSubs) && is_array($cqSubs))
+                                            <div class="p-2 rounded bg-light border text-xs">
+                                                <div class="font-weight-bold text-dark mb-1">উপপ্রশ্নসমূহ:</div>
+                                                @foreach($cqSubs as $subKey => $sub)
+                                                    <div class="mb-0.5 text-muted">
+                                                        <strong>({{ isset($sub['label']) ? $sub['label'] : $subKey }})</strong> {{ isset($sub['text']) ? $sub['text'] : '' }}
+                                                        <span class="badge badge-secondary ml-1">{{ isset($sub['marks']) ? $sub['marks'] : 1 }} নম্বর</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif(!empty($correctAnswerText))
+                                            <div class="text-xs text-muted">
+                                                <span class="badge badge-secondary mr-1">মডেল উত্তর</span>
+                                                <span class="text-dark font-italic">{{ $correctAnswerText }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -614,10 +712,24 @@
                     <div class="modal-body">
                         <div class="form-group mb-2">
                             <label class="text-xs font-weight-bold">কোন সেকশনে যুক্ত হবে: <span class="text-danger">*</span></label>
-                            <select id="autoPickSectionSelect" class="form-control custom-select" required>
+                            <select id="autoPickSectionSelect" class="form-control custom-select" onchange="syncSectionTypeToModal()" required>
                                 @foreach($paper->sections as $sec)
-                                    <option value="{{ $sec->id }}">{{ $sec->title }}</option>
+                                    <option value="{{ $sec->id }}" data-type="{{ $sec->question_type }}">{{ $sec->title }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="text-xs font-weight-bold">প্রশ্নের ধরন (Question Type):</label>
+                            <select id="autoPickQuestionType" class="form-control custom-select font-weight-bold text-dark">
+                                <option value="">-- যেকোনো ধরনের প্রশ্ন (All Types) --</option>
+                                <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                                <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                                <option value="mcq">MCQ (বহুনির্বাচনি)</option>
+                                <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short Question)</option>
+                                <option value="creative">সৃজনশীল (Creative CQ)</option>
+                                <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                                <option value="descriptive">রচনামূলক (Descriptive)</option>
+                                <option value="matching">বাম-ডান মিলকরণ (Matching)</option>
                             </select>
                         </div>
                         <div class="row">
@@ -700,10 +812,158 @@
             }).join('');
         }
 
+        // =========================================================================
+        // HIGH-PERFORMANCE DRAG-AND-DROP AUTO-SCROLLER (Canvas, Library & Window)
+        // =========================================================================
+        var isDraggingActive = false;
+        var autoScrollRafId = null;
+        var canvasScrollSpeedY = 0;
+        var libraryScrollSpeedY = 0;
+        var windowScrollSpeedY = 0;
+
+        var SCROLL_ZONE_CANVAS = 120;  // Trigger zone in px from canvas edges
+        var SCROLL_ZONE_WINDOW = 80;   // Trigger zone in px from window edges
+        var SCROLL_ZONE_LIB = 60;      // Trigger zone in px from library edges
+        var MAX_SCROLL_SPEED = 32;     // Maximum pixels per frame (fast & smooth)
+
+        function getCanvasPanel() {
+            return document.querySelector('.builder-canvas-panel');
+        }
+
+        function getLibraryContainer() {
+            return document.getElementById('libraryScrollContainer');
+        }
+
+        function startDragAutoScroll() {
+            isDraggingActive = true;
+            if (!autoScrollRafId) {
+                autoScrollRafId = requestAnimationFrame(autoScrollLoop);
+            }
+        }
+
+        function stopDragAutoScroll() {
+            isDraggingActive = false;
+            canvasScrollSpeedY = 0;
+            libraryScrollSpeedY = 0;
+            windowScrollSpeedY = 0;
+            if (autoScrollRafId) {
+                cancelAnimationFrame(autoScrollRafId);
+                autoScrollRafId = null;
+            }
+        }
+
+        function autoScrollLoop() {
+            if (!isDraggingActive) {
+                autoScrollRafId = null;
+                return;
+            }
+
+            var canvas = getCanvasPanel();
+            if (canvas && canvasScrollSpeedY !== 0) {
+                canvas.scrollTop += canvasScrollSpeedY;
+            }
+
+            var library = getLibraryContainer();
+            if (library && libraryScrollSpeedY !== 0) {
+                library.scrollTop += libraryScrollSpeedY;
+            }
+
+            if (windowScrollSpeedY !== 0) {
+                window.scrollBy(0, windowScrollSpeedY);
+            }
+
+            autoScrollRafId = requestAnimationFrame(autoScrollLoop);
+        }
+
+        function calculateDragScrollSpeed(e) {
+            if (!isDraggingActive) return;
+
+            var clientY = e.clientY;
+            var clientX = e.clientX;
+
+            // 1. Check Canvas Panel
+            var canvas = getCanvasPanel();
+            if (canvas) {
+                var cRect = canvas.getBoundingClientRect();
+                // Check if cursor is horizontally aligned with the canvas area (with generous padding)
+                if (clientX >= cRect.left - 60 && clientX <= cRect.right + 60) {
+                    if (clientY >= cRect.top && clientY <= cRect.top + SCROLL_ZONE_CANVAS) {
+                        // Near TOP of canvas
+                        var ratio = (cRect.top + SCROLL_ZONE_CANVAS - clientY) / SCROLL_ZONE_CANVAS;
+                        canvasScrollSpeedY = -Math.round(Math.max(4, ratio * MAX_SCROLL_SPEED));
+                    } else if (clientY <= cRect.bottom && clientY >= cRect.bottom - SCROLL_ZONE_CANVAS) {
+                        // Near BOTTOM of canvas
+                        var ratio = (clientY - (cRect.bottom - SCROLL_ZONE_CANVAS)) / SCROLL_ZONE_CANVAS;
+                        canvasScrollSpeedY = Math.round(Math.max(4, ratio * MAX_SCROLL_SPEED));
+                    } else {
+                        canvasScrollSpeedY = 0;
+                    }
+                } else {
+                    canvasScrollSpeedY = 0;
+                }
+            }
+
+            // 2. Check Library Container
+            var library = getLibraryContainer();
+            if (library) {
+                var lRect = library.getBoundingClientRect();
+                if (clientX >= lRect.left && clientX <= lRect.right) {
+                    if (clientY >= lRect.top && clientY <= lRect.top + SCROLL_ZONE_LIB) {
+                        var ratio = (lRect.top + SCROLL_ZONE_LIB - clientY) / SCROLL_ZONE_LIB;
+                        libraryScrollSpeedY = -Math.round(Math.max(3, ratio * 20));
+                    } else if (clientY <= lRect.bottom && clientY >= lRect.bottom - SCROLL_ZONE_LIB) {
+                        var ratio = (clientY - (lRect.bottom - SCROLL_ZONE_LIB)) / SCROLL_ZONE_LIB;
+                        libraryScrollSpeedY = Math.round(Math.max(3, ratio * 20));
+                    } else {
+                        libraryScrollSpeedY = 0;
+                    }
+                } else {
+                    libraryScrollSpeedY = 0;
+                }
+            }
+
+            // 3. Check Window Boundaries (Fallback if window has scrollbar)
+            var winH = window.innerHeight;
+            if (clientY <= SCROLL_ZONE_WINDOW) {
+                var ratio = (SCROLL_ZONE_WINDOW - clientY) / SCROLL_ZONE_WINDOW;
+                windowScrollSpeedY = -Math.round(Math.max(4, ratio * 25));
+            } else if (clientY >= winH - SCROLL_ZONE_WINDOW) {
+                var ratio = (clientY - (winH - SCROLL_ZONE_WINDOW)) / SCROLL_ZONE_WINDOW;
+                windowScrollSpeedY = Math.round(Math.max(4, ratio * 25));
+            } else {
+                windowScrollSpeedY = 0;
+            }
+        }
+
+        // Global listeners for drag events
+        document.addEventListener('dragover', function(e) {
+            if (isDraggingActive) {
+                calculateDragScrollSpeed(e);
+            }
+        }, true);
+
+        document.addEventListener('dragend', function() {
+            stopDragAutoScroll();
+        }, true);
+
+        document.addEventListener('drop', function() {
+            stopDragAutoScroll();
+        }, true);
+
+        // Support mouse wheel while dragging
+        window.addEventListener('wheel', function(e) {
+            if (!isDraggingActive) return;
+            var canvas = getCanvasPanel();
+            if (canvas) {
+                canvas.scrollTop += e.deltaY;
+            }
+        }, { passive: true });
+
         // 1. Drag from Left Library Panel
         function onDragStartLibrary(e, questionId) {
             activeDraggedQuestionId = questionId;
             activeDraggedCardItemId = null;
+            startDragAutoScroll();
             e.dataTransfer.setData('text/plain', 'library:' + questionId);
             e.dataTransfer.effectAllowed = 'copy';
         }
@@ -712,12 +972,14 @@
         function onDragStartCard(e, itemId) {
             activeDraggedCardItemId = itemId;
             activeDraggedQuestionId = null;
+            startDragAutoScroll();
             e.dataTransfer.setData('text/plain', 'card:' + itemId);
             e.dataTransfer.effectAllowed = 'move';
         }
 
         function onDragOverZone(e) {
             e.preventDefault();
+            calculateDragScrollSpeed(e);
             e.currentTarget.classList.add('drag-over');
         }
 
@@ -727,33 +989,45 @@
 
         function onDropZone(e, sectionId) {
             e.preventDefault();
+            stopDragAutoScroll();
             e.currentTarget.classList.remove('drag-over');
             var rawData = e.dataTransfer.getData('text/plain');
 
+            // Find if dropped near another question card for precise positioning
+            var targetCard = e.target.closest('.canvas-question-card');
+
             if (rawData && rawData.startsWith('card:')) {
-                // Reordering an existing card between sections
+                // Reordering an existing card between sections or inside section
                 var itemId = rawData.replace('card:', '');
                 var card = document.getElementById('item_card_' + itemId);
                 var dropzone = document.getElementById('dropzone_' + sectionId);
                 if (card && dropzone) {
                     var emptyPlaceholder = dropzone.querySelector('.empty-drop-placeholder');
                     if (emptyPlaceholder) emptyPlaceholder.remove();
-                    dropzone.appendChild(card);
+
+                    if (targetCard && targetCard !== card && targetCard.parentElement === dropzone) {
+                        var rect = targetCard.getBoundingClientRect();
+                        var next = (e.clientY - rect.top) > (rect.height / 2);
+                        dropzone.insertBefore(card, next ? targetCard.nextSibling : targetCard);
+                    } else {
+                        dropzone.appendChild(card);
+                    }
+
                     updateQuestionNumbers();
                     savePaperDraft();
-                    showToast('প্রশ্নটি নতুন সেকশনে স্থানান্তরিত হয়েছে!', 'info');
+                    showToast('প্রশ্নটি স্থানান্তরিত হয়েছে!', 'info');
                 }
             } else {
                 // Dropping from library
                 var qId = activeDraggedQuestionId || (rawData ? rawData.replace('library:', '') : null);
                 if (qId) {
-                    addQuestionToSection(qId, sectionId);
+                    addQuestionToSection(qId, sectionId, false, targetCard);
                 }
             }
         }
 
         // 3. Add Question to section via AJAX (Zero Full Page Reload)
-        function addQuestionToSection(questionId, sectionId, allowDuplicate) {
+        function addQuestionToSection(questionId, sectionId, allowDuplicate, targetCard) {
             fetch('/admin/question-papers/' + paperId + '/add-item', {
                 method: 'POST',
                 headers: {
@@ -780,7 +1054,12 @@
                         var tempWrapper = document.createElement('div');
                         tempWrapper.innerHTML = cardHtml;
                         var newCard = tempWrapper.firstElementChild;
-                        dropzone.appendChild(newCard);
+
+                        if (targetCard && targetCard.parentElement === dropzone) {
+                            dropzone.insertBefore(newCard, targetCard.nextSibling);
+                        } else {
+                            dropzone.appendChild(newCard);
+                        }
 
                         // Trigger pulse highlight
                         newCard.classList.add('just-added');
@@ -795,7 +1074,7 @@
                     }
                 } else if (res.is_duplicate) {
                     if (confirm(res.message)) {
-                        addQuestionToSection(questionId, sectionId, true);
+                        addQuestionToSection(questionId, sectionId, true, targetCard);
                     }
                 } else {
                     showToast(res.message || 'ত্রুটি ঘটেছে', 'danger');
@@ -829,6 +1108,8 @@
                     optionsHtml += '<div class="col mb-1 text-xs"><span class="badge ' + badgeCls + ' mr-1">' + o.letter + '</span><span class="' + cls + '">' + escapeHtml(o.text) + '</span></div>';
                 });
                 optionsHtml += '</div>';
+            } else if (item.correct_answer_text) {
+                optionsHtml = '<div class="text-xs text-muted mb-1"><span class="badge badge-light border mr-1">সঠিক উত্তর/শব্দ:</span> <strong class="text-success">' + escapeHtml(item.correct_answer_text) + '</strong></div>';
             }
 
             return `
@@ -1047,11 +1328,13 @@
             var search = document.getElementById('libSearchInput').value;
             var cat = document.getElementById('libCategoryFilter').value;
             var diff = document.getElementById('libDiffFilter').value;
+            var type = document.getElementById('libTypeFilter') ? document.getElementById('libTypeFilter').value : '';
 
             var params = new URLSearchParams();
             if (search) params.append('search', search);
             if (cat) params.append('category', cat);
             if (diff) params.append('difficulty', diff);
+            if (type) params.append('type', type);
 
             var container = document.getElementById('libraryScrollContainer');
             container.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="text-xs mt-2">লোড হচ্ছে...</p></div>';
@@ -1247,9 +1530,47 @@
             });
         }
 
+        // Sync modal fields when opening Auto-Pick modal
+        function prepareAutoPickModal() {
+            var libType = document.getElementById('libTypeFilter');
+            var modalType = document.getElementById('autoPickQuestionType');
+            if (libType && modalType && libType.value) {
+                modalType.value = libType.value;
+            } else {
+                syncSectionTypeToModal();
+            }
+
+            var libCat = document.getElementById('libCategoryFilter');
+            var modalCat = document.getElementById('autoPickCategory');
+            if (libCat && modalCat && libCat.value) {
+                modalCat.value = libCat.value;
+            }
+
+            var libDiff = document.getElementById('libDiffFilter');
+            var modalDiff = document.getElementById('autoPickDifficulty');
+            if (libDiff && modalDiff && libDiff.value) {
+                modalDiff.value = libDiff.value;
+            }
+        }
+
+        // Sync question type from section data-type attribute
+        function syncSectionTypeToModal() {
+            var secSelect = document.getElementById('autoPickSectionSelect');
+            var modalType = document.getElementById('autoPickQuestionType');
+            if (!secSelect || !modalType) return;
+            var selectedOption = secSelect.options[secSelect.selectedIndex];
+            if (selectedOption && selectedOption.getAttribute('data-type')) {
+                var secType = selectedOption.getAttribute('data-type');
+                if (secType) {
+                    modalType.value = secType;
+                }
+            }
+        }
+
         // 13. Auto-Pick / Random Questions via AJAX (Zero Full Page Reload)
         function submitAutoPickAJAX() {
             var sectionId = document.getElementById('autoPickSectionSelect').value;
+            var qType = document.getElementById('autoPickQuestionType').value;
             var category = document.getElementById('autoPickCategory').value;
             var chapter = document.getElementById('autoPickChapter').value;
             var diff = document.getElementById('autoPickDifficulty').value;
@@ -1264,6 +1585,7 @@
                 },
                 body: JSON.stringify({
                     section_id: sectionId,
+                    question_type: qType,
                     category: category,
                     chapter: chapter,
                     difficulty: diff,

@@ -66,22 +66,63 @@ class LmsQuestionPaperItem extends Model
         }
 
         $data = [
-            'id'             => $q->id,
-            'question_text'  => $q->question_text,
-            'question_type'  => $q->question_type,
-            'stimulus'       => $q->stimulus,
-            'explanation'    => $q->explanation,
-            'category'       => $q->category,
-            'chapter'        => $q->chapter,
-            'topic'          => $q->topic,
-            'difficulty'     => $q->difficulty,
-            'marks'          => $this->marks ?: $q->marks,
-            'negative_marks' => $this->negative_marks ?: $q->negative_marks,
-            'options'        => $options,
-            'frozen_at'      => now()->toDateTimeString(),
+            'id'                  => $q->id,
+            'question_text'       => $q->question_text,
+            'question_type'       => $q->question_type,
+            'correct_answer_text' => $q->correct_answer_text,
+            'cq_subquestions'     => $q->cq_subquestions_decoded,
+            'matching_pairs'      => $q->matching_pairs_decoded,
+            'hints'               => $q->hints,
+            'source_reference'    => $q->source_reference,
+            'stimulus'            => $q->stimulus,
+            'explanation'         => $q->explanation,
+            'category'            => $q->category,
+            'chapter'             => $q->chapter,
+            'topic'               => $q->topic,
+            'difficulty'          => $q->difficulty,
+            'marks'               => $this->marks ?: $q->marks,
+            'negative_marks'      => $this->negative_marks ?: $q->negative_marks,
+            'options'             => $options,
+            'frozen_at'           => now()->toDateTimeString(),
         ];
 
         $this->update(['snapshot_data' => json_encode($data, JSON_UNESCAPED_UNICODE)]);
+    }
+
+    public function getCorrectAnswerText()
+    {
+        $snapshot = $this->snapshot;
+        if ($snapshot && isset($snapshot['correct_answer_text'])) {
+            return $snapshot['correct_answer_text'];
+        }
+        return $this->masterQuestion ? $this->masterQuestion->correct_answer_text : null;
+    }
+
+    public function getCqSubquestions()
+    {
+        $snapshot = $this->snapshot;
+        if ($snapshot && isset($snapshot['cq_subquestions'])) {
+            return is_array($snapshot['cq_subquestions']) ? $snapshot['cq_subquestions'] : [];
+        }
+        return $this->masterQuestion ? $this->masterQuestion->cq_subquestions_decoded : [];
+    }
+
+    public function getHints()
+    {
+        $snapshot = $this->snapshot;
+        if ($snapshot && isset($snapshot['hints'])) {
+            return $snapshot['hints'];
+        }
+        return $this->masterQuestion ? $this->masterQuestion->hints : null;
+    }
+
+    public function getMatchingPairs()
+    {
+        $snapshot = $this->snapshot;
+        if ($snapshot && isset($snapshot['matching_pairs'])) {
+            return is_array($snapshot['matching_pairs']) ? $snapshot['matching_pairs'] : [];
+        }
+        return $this->masterQuestion ? $this->masterQuestion->matching_pairs_decoded : [];
     }
 
     /**

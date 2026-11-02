@@ -1143,6 +1143,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('admin.quizzes.reports') }}" class="nav-link @yield('lms_reports_active')">
+                                <i class="fas fa-chart-line nav-icon text-warning"></i>
+                                <p>Exam Results & Reports</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ url('/student/dashboard') }}" target="_blank" class="nav-link">
                                 <i class="fas fa-arrow-up-right-from-square nav-icon text-cyan"></i>
                                 <p>Live Student Portal <span class="badge badge-info ml-1" style="font-size: 9px;">View</span></p>
