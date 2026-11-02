@@ -616,6 +616,7 @@ Route::group(['prefix' => 'admin/certificates', 'as' => 'admin.certificates.'], 
 Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function () {
     Route::get('/', 'backend\theme\clasic\lms\AdminQuizController@index')->name('index');
     Route::post('/', 'backend\theme\clasic\lms\AdminQuizController@store')->name('store');
+    Route::post('/practice-settings', 'backend\theme\clasic\lms\AdminQuizController@updatePracticeSettings')->name('practice-settings.update');
     Route::post('/import', 'backend\theme\clasic\lms\AdminQuizController@importExcel')->name('import');
     Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
     Route::match(['GET', 'POST'], '/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyQuizzes')->name('bulk-delete');
@@ -652,6 +653,7 @@ Route::group(['prefix' => 'admin/question-book', 'as' => 'admin.question-book.']
 // ================================================== Drag-and-Drop Question Paper Builder =========================================================//
 Route::group(['prefix' => 'admin/question-papers', 'as' => 'admin.question-papers.'], function () {
     Route::get('/', 'backend\theme\clasic\lms\QuestionPaperBuilderController@index')->name('index');
+    Route::post('/bulk-delete', 'backend\theme\clasic\lms\QuestionPaperBuilderController@bulkDelete')->name('bulk-delete');
     Route::post('/', 'backend\theme\clasic\lms\QuestionPaperBuilderController@store')->name('store');
     Route::get('/{id}/builder', 'backend\theme\clasic\lms\QuestionPaperBuilderController@builder')->name('builder');
     Route::get('/{id}/library-questions', 'backend\theme\clasic\lms\QuestionPaperBuilderController@libraryQuestions')->name('library-questions');

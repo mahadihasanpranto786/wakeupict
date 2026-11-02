@@ -85,7 +85,16 @@
                 <span>ফলাফল আর্কাইভ</span>
             </a>
 
-            @if($quiz->canAttempt($student->id))
+            @if(!empty($practiceProgress))
+                <form action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
+                    @csrf
+                    <input type="hidden" name="question_count" value="{{ min(20, $totalQ > 0 ? $totalQ : 20) }}">
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5">
+                        <i class="fa fa-refresh"></i>
+                        <span>পরবর্তী ফ্রেশ প্রশ্নে প্র্যাকটিস শুরু</span>
+                    </button>
+                </form>
+            @elseif($quiz->canAttempt($student->id))
                 <form action="{{ route('student.quiz.start', $quiz->id) }}" method="POST" class="inline-block">
                     @csrf
                     <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5">
@@ -96,6 +105,51 @@
             @endif
         </div>
     </div>
+
+    @if(!empty($practiceProgress))
+    <!-- Question Bank Smart Rotation Progress Card (Hidden in Print) -->
+    <div class="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white p-5 sm:p-6 shadow-xl relative overflow-hidden print:hidden">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div class="space-y-1.5 max-w-xl">
+                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-black uppercase tracking-wider">
+                    <i class="fa fa-refresh"></i>
+                    <span>স্মার্ট প্রশ্ন ব্যাংক প্র্যাকটিস অগ্রগতি</span>
+                    <span class="bg-amber-400 text-slate-950 px-2 py-0.2 rounded-full font-black">Cycle #{{ $practiceProgress['current_cycle'] }}</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black">
+                    প্রশ্ন ব্যাংক কভারেজ: {{ $practiceProgress['coverage_pct'] }}% সম্পন্ন
+                </h3>
+                <p class="text-blue-100 text-xs sm:text-sm">
+                    মোট {{ number_format($practiceProgress['total_questions']) }}টি প্রশ্নের মধ্যে {{ number_format($practiceProgress['attempted_questions']) }}টি প্রশ্ন সমাধান করেছেন। বাকি রয়েছে {{ number_format($practiceProgress['remaining_questions']) }}টি আনসিন প্রশ্ন।
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <form action="{{ route('student.practice.start') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="question_count" value="20">
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-transform hover:scale-105">
+                        <i class="fa fa-play-circle text-base"></i>
+                        <span>পরবর্তী ২০টি ফ্রেশ প্রশ্ন দিন</span>
+                        <i class="fa fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <a href="{{ route('student.practice.index') }}" class="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs transition-colors">
+                    <i class="fa fa-dashboard"></i>
+                    <span>ড্যাশবোর্ড</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="relative z-10 mt-4 pt-4 border-t border-white/20">
+            <div class="w-full h-3 bg-black/25 rounded-full overflow-hidden p-0.5 border border-white/20">
+                <div class="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 rounded-full transition-all duration-700 shadow-md"
+                     style="width: {{ max(3, min(100, $practiceProgress['coverage_pct'])) }}%"></div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- ========================================================================= -->
     <!-- OFFICIAL BANGLADESHI BOARD EXAMINATION RESULT & OMR EVALUATION TRANSCRIPT -->
@@ -169,6 +223,10 @@
                     <span class="text-slate-500 dark:text-slate-400 text-[11px] block">ব্যয়িত সময় :</span>
                     <strong class="font-mono">{{ $attempt->formatted_time_spent }} মিনিট</strong>
                 </div>
+                <div class="col-span-2 sm:col-span-4 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <span>পূর্ণমান (Total Marks): <strong class="text-blue-600 dark:text-blue-400 font-mono">{{ $toBng($attemptTotalMarks) }}</strong> (প্রতি প্রশ্নে {{ $toBng($markPerQuestion) }} নম্বর)</span>
+                    <span>পাস মার্ক (Pass Mark): <strong class="text-emerald-600 dark:text-emerald-400 font-mono">{{ $toBng($attemptPassMarks) }}</strong></span>
+                </div>
             </div>
         </div>
 
@@ -179,7 +237,7 @@
             <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span class="text-[10px] uppercase text-slate-500 dark:text-slate-400 block mb-0.5">মোট প্রশ্ন</span>
                 <span class="text-base sm:text-lg font-black text-slate-900 dark:text-white">{{ $toBng($totalQ) }}</span>
-                <span class="text-[10px] text-slate-400 block">পূর্ণমান: {{ $toBng((int)$quiz->total_marks) }}</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">পূর্ণমান: {{ $toBng($attemptTotalMarks) }}</span>
             </div>
 
             <!-- 2. Correct -->
@@ -227,6 +285,7 @@
                 <span class="text-[10px] font-bold uppercase {{ $isPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }} block">
                     {{ $isPassed ? 'উত্তীর্ণ (Assessment Passed)' : 'অনুত্তীর্ণ (Assessment Not Passed)' }}
                 </span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 font-medium">পাস মার্ক: {{ $toBng($attemptPassMarks) }}</span>
             </div>
 
         </div>
@@ -444,6 +503,9 @@
                             </span>
                             <span class="font-bold text-[11px] uppercase tracking-wider {{ $isPending ? 'text-amber-700 dark:text-amber-400' : ($isAnswered && $isCorrect ? 'text-emerald-700 dark:text-emerald-400' : ($isAnswered && !$isCorrect ? 'text-rose-700 dark:text-rose-400' : 'text-slate-500')) }}">
                                 {{ $statusBadgeText }}
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                মান: {{ $toBng((float)$q->marks) }}
                             </span>
                         </div>
 

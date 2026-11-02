@@ -791,4 +791,35 @@ class QuestionPaperBuilderController extends Controller
         return redirect()->route('admin.question-papers.index')
             ->with('success', 'প্রশ্নপত্রটি সফলভাবে মুছে ফেলা হয়েছে!');
     }
+
+    /**
+     * Bulk Delete multiple Question Papers
+     */
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('paper_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_filter(array_map('intval', (array)$ids));
+
+        if (empty($ids)) {
+            return redirect()->route('admin.question-papers.index')
+                ->with('error', 'মুছে ফেলার জন্য কোনো প্রশ্নপত্র নির্বাচিত করা হয়নি।');
+        }
+
+        $papers = LmsQuestionPaper::whereIn('id', $ids)->get();
+        $deletedCount = 0;
+
+        foreach ($papers as $paper) {
+            \App\model\LmsQuiz::where('paper_id', $paper->id)->update(['paper_id' => null]);
+            $paper->items()->delete();
+            $paper->sections()->delete();
+            $paper->delete();
+            $deletedCount++;
+        }
+
+        return redirect()->route('admin.question-papers.index')
+            ->with('success', "সফলভাবে {$deletedCount}টি প্রশ্নপত্র মুছে ফেলা হয়েছে।");
+    }
 }

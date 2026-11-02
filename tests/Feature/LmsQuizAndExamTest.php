@@ -78,12 +78,13 @@ class LmsQuizAndExamTest extends TestCase
             'quiz_id' => $this->quiz->id,
             'question_text' => 'RAM is volatile memory. True or False?',
         ], [
-            'question_type' => 'true_false',
+            'question_type' => 'mcq_single',
             'marks' => 10.00,
             'explanation' => 'RAM requires power to maintain its state.',
             'order_index' => 2,
             'is_active' => true,
         ]);
+        $this->q2->update(['question_type' => 'mcq_single']);
 
         $this->q2CorrectOpt = LmsQuestionOption::firstOrCreate([
             'question_id' => $this->q2->id,
@@ -91,6 +92,14 @@ class LmsQuizAndExamTest extends TestCase
         ], [
             'is_correct' => true,
             'order_index' => 1,
+        ]);
+
+        LmsQuestionOption::firstOrCreate([
+            'question_id' => $this->q2->id,
+            'option_text' => 'False',
+        ], [
+            'is_correct' => false,
+            'order_index' => 2,
         ]);
     }
 

@@ -8,6 +8,7 @@ use App\model\LmsQuiz;
 use App\model\LmsQuestion;
 use App\model\Course;
 use App\Services\QuizExcelImportService;
+use App\Services\PracticeQuestionRotationService;
 use Illuminate\Support\Facades\DB;
 
 class AdminQuizController extends Controller
@@ -60,15 +61,108 @@ class AdminQuizController extends Controller
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
         $totalLibraryQuestions = LmsQuestion::whereNull('quiz_id')->orWhere('quiz_id', 0)->count();
         $questionPapers = \App\model\LmsQuestionPaper::withCount('items')->latest()->get();
+        $practiceSettings = PracticeQuestionRotationService::getSettings();
 
         return view('backend.theme.clasic.lms.quizzes.index', compact(
-            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'questionPapers'
+            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'questionPapers', 'practiceSettings'
         ));
     }
 
     /**
      * Create a new Quiz
      */
+    public function updatePracticeSettings(Request $request)
+    {
+        // 1. Sanitize all incoming numbers from Bengali numerals to pure English ASCII digits
+        $inputs = $request->all();
+        foreach (['tier_questions', 'tier_durations', 'tier_pass_marks', 'question_count', 'duration_minutes', 'max_attempts', 'mark_per_question', 'pass_percentage'] as $numKey) {
+            if (isset($inputs[$numKey])) {
+                $inputs[$numKey] = PracticeQuestionRotationService::toEnglishDigits($inputs[$numKey]);
+            }
+        }
+        $request->merge($inputs);
+
+        $request->validate([
+            'question_count'        => 'nullable|integer|min:1|max:100',
+            'duration_minutes'      => 'nullable|integer|min:1|max:300',
+            'tier_questions'        => 'nullable|array',
+            'tier_questions.*'      => 'nullable|integer|min:1|max:200',
+            'tier_durations'        => 'nullable|array',
+            'tier_durations.*'      => 'nullable|integer|min:1|max:300',
+            'tier_pass_marks'       => 'nullable|array',
+            'tier_pass_marks.*'     => 'nullable|numeric|min:0|max:200',
+            'tier_labels'           => 'nullable|array',
+            'view_mode'             => 'required|in:all_questions,one_by_one,student_choice',
+            'attempt_limit_type'    => 'required|in:unlimited,single,custom',
+            'max_attempts'          => 'nullable|integer|min:1|max:100',
+            'allow_category_choice' => 'nullable|boolean',
+            'mark_per_question'     => 'nullable|numeric|min:0.1|max:50',
+            'pass_percentage'       => 'nullable|numeric|min:1|max:100',
+        ]);
+
+        $attemptLimitType = $request->input('attempt_limit_type', 'unlimited');
+        $maxAttempts = 0;
+        if ($attemptLimitType === 'single') {
+            $maxAttempts = 1;
+        } elseif ($attemptLimitType === 'custom') {
+            $maxAttempts = max(1, (int) $request->input('max_attempts', 1));
+        }
+
+        $tiers = [];
+        if ($request->has('tier_questions') && is_array($request->tier_questions)) {
+            foreach ($request->tier_questions as $idx => $qVal) {
+                $q = (int)PracticeQuestionRotationService::toEnglishDigits($qVal);
+                $d = isset($request->tier_durations[$idx]) ? (int)PracticeQuestionRotationService::toEnglishDigits($request->tier_durations[$idx]) : max(5, $q);
+                $p = isset($request->tier_pass_marks[$idx]) ? (float)PracticeQuestionRotationService::toEnglishDigits($request->tier_pass_marks[$idx]) : round($q * 0.4, 1);
+                $lbl = isset($request->tier_labels[$idx]) && trim($request->tier_labels[$idx]) !== ''
+                    ? trim($request->tier_labels[$idx])
+                    : "{$q} টি প্রশ্ন ({$d} মিনিট — পাস: {$p})";
+                $lbl = PracticeQuestionRotationService::toEnglishDigits($lbl);
+                if ($q > 0 && $d > 0) {
+                    $tiers[] = [
+                        'questions'  => $q,
+                        'duration'   => $d,
+                        'pass_marks' => $p,
+                        'label'      => $lbl,
+                    ];
+                }
+            }
+        }
+
+        // Fallback for single inputs or tests
+        if (empty($tiers) && $request->filled('question_count')) {
+            $q = (int)$request->input('question_count', 20);
+            $d = (int)$request->input('duration_minutes', 20);
+            $tiers[] = [
+                'questions' => $q,
+                'duration'  => $d,
+                'label'     => "{$q} টি প্রশ্ন ({$d} মিনিট)",
+            ];
+        }
+
+        $dataToSave = [
+            'view_mode'             => $request->input('view_mode', 'all_questions'),
+            'attempt_limit_type'    => $attemptLimitType,
+            'max_attempts'          => $maxAttempts,
+            'allow_category_choice' => $request->has('allow_category_choice') ? 1 : 0,
+            'mark_per_question'     => $request->filled('mark_per_question') ? (float)$request->input('mark_per_question') : 1.0,
+            'pass_percentage'       => $request->filled('pass_percentage') ? (float)$request->input('pass_percentage') : 40.0,
+        ];
+
+        if (!empty($tiers)) {
+            $dataToSave['tiers'] = $tiers;
+            $dataToSave['question_count'] = $tiers[0]['questions'];
+            $dataToSave['duration_minutes'] = $tiers[0]['duration'];
+        } elseif ($request->filled('question_count')) {
+            $dataToSave['question_count'] = (int) $request->input('question_count', 20);
+            $dataToSave['duration_minutes'] = (int) $request->input('duration_minutes', 20);
+        }
+
+        PracticeQuestionRotationService::saveSettings($dataToSave);
+
+        return redirect()->back()->with('success', 'অনুশীলন পরীক্ষা সেটিংস সফলভাবে সংরক্ষিত ও আপডেট হয়েছে।');
+    }
+
     public function store(Request $request)
     {
         $request->validate([

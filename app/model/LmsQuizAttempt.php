@@ -38,13 +38,21 @@ class LmsQuizAttempt extends Model
         return $this->hasMany(LmsQuizAnswer::class, 'attempt_id');
     }
 
-    public function isPassed()
+    public function getPassMarksAttribute()
     {
         $quiz = $this->quiz;
         if (!$quiz) {
-            return false;
+            return 0.0;
         }
-        return $this->score >= $quiz->pass_marks;
+        if ($this->total_marks > 0 && $quiz->total_marks > 0 && $quiz->pass_marks > 0) {
+            return round($this->total_marks * ($quiz->pass_marks / $quiz->total_marks), 2);
+        }
+        return (float)($quiz->pass_marks ?: 0.0);
+    }
+
+    public function isPassed()
+    {
+        return $this->score >= $this->pass_marks;
     }
 
     public function getFormattedTimeSpentAttribute()
@@ -70,5 +78,16 @@ class LmsQuizAttempt extends Model
     public function isQuestionFlagged($questionId)
     {
         return in_array($questionId, $this->flagged_ids_array);
+    }
+
+    public function getTotalQuestionsAttribute()
+    {
+        if (isset($this->attributes['total_questions']) && $this->attributes['total_questions'] !== null) {
+            return (int)$this->attributes['total_questions'];
+        }
+        if (!empty($this->questions_snapshot) && is_array($this->questions_snapshot)) {
+            return count($this->questions_snapshot);
+        }
+        return $this->quiz ? (int)$this->quiz->total_questions : 0;
     }
 }

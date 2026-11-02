@@ -714,5 +714,34 @@ class QuestionBookAndPaperBuilderTest extends TestCase
         $paper->sections()->delete();
         $paper->delete();
     }
-}
 
+    /**
+     * Test Admin can bulk delete multiple Question Papers with checkboxes
+     */
+    public function test_admin_can_bulk_delete_question_papers()
+    {
+        $paper1 = LmsQuestionPaper::create([
+            'paper_code'    => 'QP-BULK-1-' . uniqid(),
+            'title'         => 'Bulk Delete Test Paper 1',
+            'status'        => 'draft',
+            'academic_year' => '2026',
+        ]);
+        $paper2 = LmsQuestionPaper::create([
+            'paper_code'    => 'QP-BULK-2-' . uniqid(),
+            'title'         => 'Bulk Delete Test Paper 2',
+            'status'        => 'draft',
+            'academic_year' => '2026',
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.question-papers.bulk-delete'), [
+                'paper_ids' => [$paper1->id, $paper2->id],
+            ]);
+
+        $response->assertRedirect(route('admin.question-papers.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('lms_question_papers', ['id' => $paper1->id]);
+        $this->assertDatabaseMissing('lms_question_papers', ['id' => $paper2->id]);
+    }
+}

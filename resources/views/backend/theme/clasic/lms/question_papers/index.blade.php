@@ -160,10 +160,32 @@
 
     <!-- Paper Cards Table -->
     <div class="card shadow-sm border-0">
+        <!-- Bulk Action Bar for Selected Question Papers -->
+        <div id="bulkActionBar" class="card-header bg-light border-bottom py-2" style="display: none;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center my-1">
+                    <span class="badge badge-primary px-3 py-1.5 mr-2 font-weight-bold" style="font-size: 0.9rem;">
+                        <span id="selectedCountBadge">০</span> টি প্রশ্নপত্র নির্বাচিত
+                    </span>
+                    <span class="text-xs text-muted">নির্বাচিত প্রশ্নপত্রগুলো একবারে মুছে ফেলতে চান?</span>
+                </div>
+                <div class="my-1">
+                    <button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="executeBulkDeletePapers()">
+                        <i class="fas fa-trash-alt mr-1"></i> নির্বাচিত প্রশ্নপত্রগুলো মুছুন (Bulk Delete)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="clearAllPaperSelections()">
+                        বাতিল
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover table-striped mb-0 text-sm align-middle">
                 <thead class="thead-dark">
                     <tr>
+                        <th class="text-center" style="width: 45px;">
+                            <input type="checkbox" id="selectAllPapersCheckbox" class="adm-checkbox" onchange="toggleSelectAllPapers(this)" title="সবগুলো সিলেক্ট করুন">
+                        </th>
                         <th style="width: 140px;">কোড ও সেট</th>
                         <th>প্রশ্নপত্রের শিরোনাম ও বিষয়</th>
                         <th style="width: 120px;" class="text-center">সময় ও পূর্ণমান</th>
@@ -174,7 +196,10 @@
                 </thead>
                 <tbody>
                     @forelse($papers as $p)
-                        <tr>
+                        <tr id="paper-row-{{ $p->id }}">
+                            <td class="text-center">
+                                <input type="checkbox" name="paper_ids[]" value="{{ $p->id }}" class="paper-item-checkbox adm-checkbox" onchange="updatePaperBulkBar()">
+                            </td>
                             <td>
                                 <div class="font-weight-bold text-dark">{{ $p->paper_code }}</div>
                                 <span class="badge badge-warning text-dark font-weight-bold">
@@ -279,7 +304,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
                                 <h5>কোনো প্রশ্নপত্র তৈরি করা হয়নি!</h5>
                                 <p class="text-sm">উপরের "নতুন প্রশ্নপত্র তৈরি করুন" বাটনে ক্লিক করে বোর্ড পরীক্ষার প্রশ্নপত্র সাজান।</p>
@@ -399,4 +424,87 @@
             </div>
         </div>
     </div>
+    <!-- Dedicated Bulk Delete Question Papers Form -->
+    <form id="bulkDeletePapersForm" action="{{ route('admin.question-papers.bulk-delete') }}" method="POST" style="display: none;">
+        @csrf
+        <div id="bulkDeleteHiddenInputs"></div>
+    </form>
+
+    <script>
+        var toBengaliNumber = function (num) {
+            var bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return String(num).replace(/[0-9]/g, function (d) {
+                return bengaliDigits[parseInt(d, 10)];
+            });
+        };
+
+        function toggleSelectAllPapers(master) {
+            var checked = master.checked;
+            var checkboxes = document.querySelectorAll('.paper-item-checkbox');
+            checkboxes.forEach(function (cb) {
+                cb.checked = checked;
+            });
+            updatePaperBulkBar();
+        }
+
+        function updatePaperBulkBar() {
+            var checkboxes = document.querySelectorAll('.paper-item-checkbox:checked');
+            var count = checkboxes.length;
+            var bar = document.getElementById('bulkActionBar');
+            var badge = document.getElementById('selectedCountBadge');
+            var selectAll = document.getElementById('selectAllPapersCheckbox');
+
+            if (badge) {
+                badge.innerText = toBengaliNumber(count);
+            }
+
+            if (bar) {
+                bar.style.display = count > 0 ? 'block' : 'none';
+            }
+
+            var allBoxes = document.querySelectorAll('.paper-item-checkbox');
+            if (selectAll && allBoxes.length > 0) {
+                selectAll.checked = (count === allBoxes.length);
+                selectAll.indeterminate = (count > 0 && count < allBoxes.length);
+            }
+        }
+
+        function clearAllPaperSelections() {
+            document.querySelectorAll('.paper-item-checkbox').forEach(function (cb) {
+                cb.checked = false;
+            });
+            var selectAll = document.getElementById('selectAllPapersCheckbox');
+            if (selectAll) selectAll.checked = false;
+            updatePaperBulkBar();
+        }
+
+        function executeBulkDeletePapers() {
+            var checkedBoxes = document.querySelectorAll('.paper-item-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                alert('অনুগ্রহ করে অন্তত একটি প্রশ্নপত্র নির্বাচন করুন।');
+                return;
+            }
+
+            if (confirm('আপনি কি নিশ্চিতভাবে নির্বাচিত ' + checkedBoxes.length + 'টি প্রশ্নপত্র মুছে ফেলতে চান? এতে অন্তর্ভুক্ত সকল সেকশন ও প্রশ্নপত্রের আইটেমও মুছে যাবে।')) {
+                var form = document.getElementById('bulkDeletePapersForm');
+                var container = document.getElementById('bulkDeleteHiddenInputs');
+                container.innerHTML = '';
+
+                checkedBoxes.forEach(function (cb) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'paper_ids[]';
+                    input.value = cb.value;
+                    container.appendChild(input);
+                });
+
+                form.submit();
+            }
+        }
+
+        // Initialize listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            updatePaperBulkBar();
+        });
+    </script>
 @endsection
