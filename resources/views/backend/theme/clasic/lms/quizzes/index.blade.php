@@ -11,7 +11,7 @@
     <div class="content-header p-0 mb-3">
         <div class="container-fluid">
             <div class="row align-items-center">
-                <div class="col-xl-4 col-lg-3 col-md-12 mb-2 mb-lg-0">
+                <div class="col-xl-3 col-lg-3 col-md-12 mb-2 mb-lg-0">
                     <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.4rem;">
                         <i class="fas fa-file-excel text-success mr-2"></i> কুইজ ও এক্সেল ডাটা আপলোড
                     </h1>
@@ -19,20 +19,18 @@
                         কোর্স ক্যাটাগরি ভিত্তিক কুইজ ব্যবস্থাপনা এবং এক্সেল শিটের মাধ্যমে বাল্ক MCQ প্রশ্ন আপলোড।
                     </p>
                 </div>
-                <div class="col-xl-8 col-lg-9 col-md-12 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 6px;">
-                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                <div class="col-xl-9 col-lg-9 col-md-12 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 5px;">
+                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-primary shadow-sm px-2.5" style="white-space: nowrap;">
                         <i class="fas fa-chart-line mr-1"></i> পরীক্ষার রিপোর্ট
                     </a>
-                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-info shadow-sm">
+                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-info shadow-sm px-2.5" style="white-space: nowrap;">
                         <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ডাউনলোড
                     </a>
-                    <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important;">
-                        <i class="fas fa-book-open mr-1"></i> লাইব্রেরি থেকে প্রশ্ন যোগ (No File)
-                    </button>
-                    <button type="button" class="btn btn-sm btn-success shadow-sm" data-toggle="modal" data-target="#excelImportModal">
+                    <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold px-2.5" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important; white-space: nowrap;"><i class="fas fa-book-open mr-1"></i> লাইব্রেরি প্রশ্ন যোগ</button>
+                    <button type="button" class="btn btn-sm btn-success shadow-sm px-2.5" data-toggle="modal" data-target="#excelImportModal" style="white-space: nowrap;">
                         <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
                     </button>
-                    <button type="button" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#createQuizModal">
+                    <button type="button" class="btn btn-sm btn-primary shadow-sm px-3 font-weight-bold" data-toggle="modal" data-target="#createQuizModal" style="white-space: nowrap;">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ
                     </button>
                 </div>
@@ -486,7 +484,7 @@
 
     <!-- Modal: Edit Quiz Info -->
     <div class="modal fade" id="editQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
             <div class="modal-content shadow-lg border-0">
                 <form id="editQuizForm" method="POST">
                     @csrf
@@ -742,7 +740,7 @@
 
     <!-- Modal: Create New Quiz Manually -->
 <div class="modal fade" id="createQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
         <div class="modal-content shadow-lg border-0">
             <form action="{{ route('admin.quizzes.store') }}" method="POST">
                 @csrf
@@ -884,7 +882,7 @@
 
 <!-- Modal: Generate Question Sets -->
 <div class="modal fade" id="generateSetsModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
         <div class="modal-content shadow-lg border-0">
             <form id="generateSetsForm" action="" method="POST">
                 @csrf

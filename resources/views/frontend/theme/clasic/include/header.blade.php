@@ -95,12 +95,105 @@
                 <img src="{{ safe_asset('frontend/image/wict-logo.png') }}" alt="{{ app_setting('site_title', 'Wake Up ICT') }}" class="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
             </a>
 
-            <!-- Course Search Bar (Desktop) -->
-            <div class="hidden 2xl:flex items-center w-44 shrink-0 mx-2">
-                <form action="{{ route('academic-training') }}" method="GET" class="w-full relative">
-                    <input type="text" name="search" placeholder="কোর্স খুঁজুন..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
-                    <i class="fa fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <!-- Course Search Bar with Real-time Auto-Suggestion (Desktop & Tablet) -->
+            @php
+                $activeCoursesList = \Illuminate\Support\Facades\Cache::remember('active_courses_for_search_bar', 3600, function() {
+                    return \App\model\Course::where('status', 1)
+                        ->select('id', 'course_title', 'course_slug', 'price', 'time_line', 'image')
+                        ->orderBy('sort_order', 'ASC')
+                        ->orderBy('id', 'ASC')
+                        ->get();
+                });
+            @endphp
+            <div class="hidden sm:flex items-center w-72 sm:w-80 md:w-[350px] lg:w-[360px] xl:w-[380px] shrink-0 mx-2 relative" id="header-search-wrapper">
+                <form id="header-course-search-form" action="{{ route('academic-training') }}" method="GET" class="w-full relative" autocomplete="off">
+                    <input type="text" 
+                           id="header-course-search-input"
+                           name="search" 
+                           value="{{ request('search') }}"
+                           placeholder="কোর্স খুঁজুন (যেমন: গ্রাফিক্স, ওয়েব, AI)..." 
+                           class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs sm:text-[13px] text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium"
+                           autocomplete="off">
+                    <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500 text-xs border-0 bg-transparent p-0 cursor-pointer" title="খুঁজুন">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <!-- Clear query icon -->
+                    <button type="button" id="header-search-clear-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-400 text-xs border-0 bg-transparent p-0 cursor-pointer" title="মুছুন">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
                 </form>
+
+                <!-- Course Auto-Suggestion Dropdown Panel (Identical Width & Alignment as Search Box) -->
+                <div id="course-suggestion-dropdown" 
+                     class="hidden absolute left-0 right-0 top-full mt-2 w-full rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl p-2.5 z-50 transition-all duration-200 max-h-[390px] overflow-y-auto">
+                    
+                    <!-- Panel Header -->
+                    <div class="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800/80 mb-1.5">
+                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wide">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>উপলব্ধ কোর্সসমূহ</span>
+                        </span>
+                        <span id="suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                            {{ $activeCoursesList->count() }}টি কোর্স
+                        </span>
+                    </div>
+
+                    <!-- Suggestions List Container -->
+                    <div id="suggestion-items-container" class="space-y-1">
+                        @foreach($activeCoursesList as $course)
+                            <div class="suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-900 border border-transparent hover:border-emerald-200 dark:hover:border-slate-800"
+                                 data-course-title="{{ $course->course_title }}"
+                                 onclick="selectCourseSuggestion('{{ addslashes($course->course_title) }}')">
+                                <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                                    <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold shadow-xs group-hover:scale-105 transition-transform">
+                                        <i class="fa fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="course-item-title text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                            {{ $course->course_title }}
+                                        </div>
+                                        <div class="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                            @if($course->time_line)
+                                                <span class="inline-flex items-center gap-1"><i class="fa fa-clock-o text-amber-500"></i> {{ $course->time_line }}</span>
+                                            @endif
+                                            <span>•</span>
+                                            <span class="text-emerald-600 dark:text-emerald-400 font-semibold">১০ জন ব্যাচ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
+                                        <span>সার্চ</span>
+                                        <i class="fa fa-search text-[9px]"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- No Match Message -->
+                    <div id="suggestion-no-match" class="hidden py-6 px-3 text-center">
+                        <div class="w-9 h-9 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-2">
+                            <i class="fa fa-search"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">সরাসরি কোনো কোর্স মেলেনি</p>
+                        <p class="text-[11px] text-slate-500 mb-3">সব কোর্সসমূহের বর্ণনায় খুঁজতে নিচের বাটনে চাপুন</p>
+                        <button type="button" onclick="submitHeaderSearch()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa fa-search text-[10px]"></i>
+                            <span>এই নামে খুঁজুন</span>
+                        </button>
+                    </div>
+
+                    <!-- Panel Footer Tip -->
+                    <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 px-2 flex items-center justify-between text-[10px] text-slate-400">
+                        <span class="flex items-center gap-1">
+                            <i class="fa fa-info-circle text-amber-500"></i>
+                            <span>ক্লিক করলে কোর্সের নামে সার্চ হবে</span>
+                        </span>
+                        <span class="font-mono text-slate-400 dark:text-slate-500">ESC দিয়ে বন্ধ</span>
+                    </div>
+
+                </div>
             </div>
 
             <!-- Desktop Navigation Links (Dynamically Managed from Backend) -->
@@ -173,19 +266,120 @@
                 </a>
             </div>
 
-            <!-- Mobile Controls -->
-            <div class="flex lg:hidden items-center gap-2">
+                        <!-- Mobile Controls -->
+            <div class="flex lg:hidden items-center gap-1.5 sm:gap-2">
+                <!-- Mobile Search Button -->
+                <button id="mobile-search-toggle-btn" type="button" class="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 focus:outline-none transition-colors border border-slate-700/60 bg-slate-900/60" aria-label="Search courses" title="কোর্স খুঁজুন">
+                    <i id="mobile-search-icon" class="fa fa-search text-sm text-emerald-400"></i>
+                    <i id="mobile-search-close-icon" class="fa fa-times text-sm hidden text-rose-400"></i>
+                </button>
+
                 <!-- Hamburger Button -->
-                <button id="mobile-menu-btn" type="button" class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 focus:outline-none" aria-label="Toggle navigation">
-                    <i id="hamburger-icon" class="fa fa-bars text-lg"></i>
-                    <i id="close-icon" class="fa fa-times text-lg hidden"></i>
+                <button id="mobile-menu-btn" type="button" class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 focus:outline-none transition-colors border border-slate-700/60 bg-slate-900/60" aria-label="Toggle navigation">
+                    <i id="hamburger-icon" class="fa fa-bars text-sm"></i>
+                    <i id="close-icon" class="fa fa-times text-sm hidden"></i>
                 </button>
             </div>
 
         </div>
     </div>
 
-    <!-- Mobile Navigation Overlay -->
+    
+    <!-- Mobile Floating Search Bar Drawer -->
+    <div id="mobile-search-drawer" class="hidden sm:hidden fixed inset-x-3 top-20 rounded-2xl bg-slate-950/95 dark:bg-slate-950/95 backdrop-blur-2xl border border-slate-800 dark:border-slate-800 shadow-2xl p-3 z-50 transition-all duration-300 max-h-[85vh] flex flex-col">
+        <!-- Search Input Form -->
+        <form id="mobile-course-search-form" action="{{ route('academic-training') }}" method="GET" class="relative w-full shrink-0" autocomplete="off">
+            <div class="relative flex items-center">
+                <i class="fa fa-search absolute left-3.5 text-slate-400 text-sm pointer-events-none"></i>
+                <input type="text" 
+                       id="mobile-course-search-input"
+                       name="search" 
+                       value="{{ request('search') }}"
+                       placeholder="কোর্স খুঁজুন (যেমন: গ্রাফিক্স, ওয়েব, AI)..." 
+                       class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium"
+                       autocomplete="off">
+                <!-- Clear Button -->
+                <button type="button" id="mobile-search-clear-btn" class="hidden absolute right-11 text-slate-400 hover:text-rose-400 text-sm border-0 bg-transparent p-1 cursor-pointer" title="মুছুন">
+                    <i class="fa fa-times-circle"></i>
+                </button>
+                <!-- Search Button -->
+                <button type="submit" class="absolute right-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-colors flex items-center gap-1 cursor-pointer">
+                    <span>সার্চ</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Course Suggestions Panel in Mobile Drawer -->
+        <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex-1 overflow-y-auto max-h-[340px] pr-1">
+            <div class="flex items-center justify-between px-1.5 py-1 mb-1">
+                <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>উপলব্ধ কোর্সসমূহ</span>
+                </span>
+                <span id="mobile-suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    {{ $activeCoursesList->count() }}টি কোর্স
+                </span>
+            </div>
+
+            <div id="mobile-suggestion-items-container" class="space-y-1">
+                @foreach($activeCoursesList as $course)
+                    <div class="mobile-suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-900 border border-transparent hover:border-emerald-200 dark:hover:border-slate-800"
+                         data-course-title="{{ $course->course_title }}"
+                         onclick="selectMobileCourseSuggestion('{{ addslashes($course->course_title) }}')">
+                        <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
+                                <i class="fa fa-graduation-cap"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="course-item-title text-xs font-bold text-slate-100 truncate group-hover:text-emerald-500 transition-colors">
+                                    {{ $course->course_title }}
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                    @if($course->time_line)
+                                        <span class="inline-flex items-center gap-1"><i class="fa fa-clock-o text-amber-500"></i> {{ $course->time_line }}</span>
+                                    @endif
+                                    <span>•</span>
+                                    <span class="text-emerald-500 font-semibold">১০ জন ব্যাচ</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
+                                <i class="fa fa-search text-[9px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- No Match in Mobile Drawer -->
+            <div id="mobile-suggestion-no-match" class="hidden py-5 px-3 text-center">
+                <div class="w-8 h-8 mx-auto rounded-full bg-slate-900 text-slate-400 flex items-center justify-center mb-1.5">
+                    <i class="fa fa-search text-xs"></i>
+                </div>
+                <p class="text-xs font-semibold text-slate-300 mb-0.5">কোনো সরাসরি কোর্স মেলেনি</p>
+                <p class="text-[11px] text-slate-400 mb-2.5">সকল কোর্সের ভেতরে খুঁজতে নিচের বাটনে চাপুন</p>
+                <button type="button" onclick="submitMobileSearch()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                    <i class="fa fa-search text-[10px]"></i>
+                    <span>এই নামে খুঁজুন</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Close Footer -->
+        <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <span class="flex items-center gap-1 text-[10px]">
+                <i class="fa fa-info-circle text-amber-500"></i>
+                <span>ক্লিক করলে কোর্সের নামে সার্চ হবে</span>
+            </span>
+            <button type="button" onclick="closeMobileSearchDrawer()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold transition-colors flex items-center gap-1">
+                <i class="fa fa-times text-[10px]"></i>
+                <span>বন্ধ করুন</span>
+            </button>
+        </div>
+    </div>
+
+<!-- Mobile Navigation Overlay -->
     <div id="mobile-menu" class="hidden lg:hidden fixed inset-x-4 top-20 rounded-2xl bg-slate-950/95 backdrop-blur-2xl border border-slate-800 shadow-2xl p-6 transition-all duration-300 z-50">
         <nav class="flex flex-col space-y-2">
             @foreach($headerMenus as $menu)
@@ -273,10 +467,255 @@
         var hamburger = document.getElementById('hamburger-icon');
         var close = document.getElementById('close-icon');
 
+        // Course Search Auto-Suggestion Logic
+        var searchInput = document.getElementById('header-course-search-input');
+        var searchDropdown = document.getElementById('course-suggestion-dropdown');
+        var searchForm = document.getElementById('header-course-search-form');
+        var clearBtn = document.getElementById('header-search-clear-btn');
+        var suggestionContainer = document.getElementById('suggestion-items-container');
+        var noMatchBox = document.getElementById('suggestion-no-match');
+        var countBadge = document.getElementById('suggestion-count-badge');
+        var searchWrapper = document.getElementById('header-search-wrapper');
+
+        function openSearchDropdown() {
+            if (searchDropdown) {
+                searchDropdown.classList.remove('hidden');
+            }
+        }
+
+        function closeSearchDropdown() {
+            if (searchDropdown) {
+                searchDropdown.classList.add('hidden');
+            }
+        }
+
+        window.submitHeaderSearch = function() {
+            if (searchForm) {
+                searchForm.submit();
+            }
+        };
+
+        window.selectCourseSuggestion = function(title) {
+            if (searchInput) {
+                searchInput.value = title;
+            }
+            closeSearchDropdown();
+            if (searchForm) {
+                searchForm.submit();
+            }
+        };
+
+        if (searchInput && searchDropdown) {
+            // Show suggestions on click or focus
+            searchInput.addEventListener('focus', function() {
+                openSearchDropdown();
+                filterSuggestions();
+            });
+
+            searchInput.addEventListener('click', function() {
+                openSearchDropdown();
+            });
+
+            // Filter suggestions as user types
+            searchInput.addEventListener('input', function() {
+                filterSuggestions();
+            });
+
+            function filterSuggestions() {
+                var query = searchInput.value.trim().toLowerCase();
+                var items = suggestionContainer ? suggestionContainer.querySelectorAll('.suggestion-item') : [];
+                var matchedCount = 0;
+
+                if (clearBtn) {
+                    if (query.length > 0) {
+                        clearBtn.classList.remove('hidden');
+                    } else {
+                        clearBtn.classList.add('hidden');
+                    }
+                }
+
+                items.forEach(function(item) {
+                    var title = (item.getAttribute('data-course-title') || '').toLowerCase();
+                    if (!query || title.indexOf(query) !== -1) {
+                        item.style.display = 'flex';
+                        matchedCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (countBadge) {
+                    countBadge.textContent = matchedCount + 'টি কোর্স';
+                }
+
+                if (matchedCount === 0 && query.length > 0) {
+                    if (noMatchBox) noMatchBox.classList.remove('hidden');
+                } else {
+                    if (noMatchBox) noMatchBox.classList.add('hidden');
+                }
+            }
+
+            // Clear button click
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    clearBtn.classList.add('hidden');
+                    filterSuggestions();
+                    searchInput.focus();
+                });
+            }
+
+            // Keyboard navigation (Arrow keys, Escape, Enter)
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeSearchDropdown();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (searchWrapper && !searchWrapper.contains(e.target)) {
+                    closeSearchDropdown();
+                }
+            });
+        }
+
+        
+        // ============================================
+        // Mobile Search Toggle & Auto-Suggestion Logic
+        // ============================================
+        var mobileSearchBtn = document.getElementById('mobile-search-toggle-btn');
+        var mobileSearchDrawer = document.getElementById('mobile-search-drawer');
+        var mobileSearchIcon = document.getElementById('mobile-search-icon');
+        var mobileSearchCloseIcon = document.getElementById('mobile-search-close-icon');
+        var mobileSearchInput = document.getElementById('mobile-course-search-input');
+        var mobileSearchForm = document.getElementById('mobile-course-search-form');
+        var mobileClearBtn = document.getElementById('mobile-search-clear-btn');
+        var mobileSuggestionContainer = document.getElementById('mobile-suggestion-items-container');
+        var mobileNoMatchBox = document.getElementById('mobile-suggestion-no-match');
+        var mobileCountBadge = document.getElementById('mobile-suggestion-count-badge');
+
+        function openMobileSearchDrawer() {
+            if (mobileSearchDrawer) {
+                mobileSearchDrawer.classList.remove('hidden');
+                if (mobileSearchIcon) mobileSearchIcon.classList.add('hidden');
+                if (mobileSearchCloseIcon) mobileSearchCloseIcon.classList.remove('hidden');
+                // Auto close mobile navigation menu if open
+                if (menu && !menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    if (hamburger) hamburger.classList.remove('hidden');
+                    if (close) close.classList.add('hidden');
+                }
+                setTimeout(function() {
+                    if (mobileSearchInput) {
+                        mobileSearchInput.focus();
+                        filterMobileSuggestions();
+                    }
+                }, 60);
+            }
+        }
+
+        function closeMobileSearchDrawer() {
+            if (mobileSearchDrawer) {
+                mobileSearchDrawer.classList.add('hidden');
+                if (mobileSearchIcon) mobileSearchIcon.classList.remove('hidden');
+                if (mobileSearchCloseIcon) mobileSearchCloseIcon.classList.add('hidden');
+            }
+        }
+
+        window.closeMobileSearchDrawer = closeMobileSearchDrawer;
+
+        window.submitMobileSearch = function() {
+            if (mobileSearchForm) {
+                mobileSearchForm.submit();
+            }
+        };
+
+        window.selectMobileCourseSuggestion = function(title) {
+            if (mobileSearchInput) {
+                mobileSearchInput.value = title;
+            }
+            closeMobileSearchDrawer();
+            if (mobileSearchForm) {
+                mobileSearchForm.submit();
+            }
+        };
+
+        function filterMobileSuggestions() {
+            if (!mobileSearchInput) return;
+            var query = mobileSearchInput.value.trim().toLowerCase();
+            var items = mobileSuggestionContainer ? mobileSuggestionContainer.querySelectorAll('.mobile-suggestion-item') : [];
+            var matchedCount = 0;
+
+            if (mobileClearBtn) {
+                if (query.length > 0) {
+                    mobileClearBtn.classList.remove('hidden');
+                } else {
+                    mobileClearBtn.classList.add('hidden');
+                }
+            }
+
+            items.forEach(function(item) {
+                var title = (item.getAttribute('data-course-title') || '').toLowerCase();
+                if (!query || title.indexOf(query) !== -1) {
+                    item.style.display = 'flex';
+                    matchedCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (mobileCountBadge) {
+                mobileCountBadge.textContent = matchedCount + 'টি কোর্স';
+            }
+
+            if (matchedCount === 0 && query.length > 0) {
+                if (mobileNoMatchBox) mobileNoMatchBox.classList.remove('hidden');
+            } else {
+                if (mobileNoMatchBox) mobileNoMatchBox.classList.add('hidden');
+            }
+        }
+
+        if (mobileSearchBtn && mobileSearchDrawer) {
+            mobileSearchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isHidden = mobileSearchDrawer.classList.contains('hidden');
+                if (isHidden) {
+                    openMobileSearchDrawer();
+                } else {
+                    closeMobileSearchDrawer();
+                }
+            });
+
+            if (mobileSearchInput) {
+                mobileSearchInput.addEventListener('input', filterMobileSuggestions);
+            }
+
+            if (mobileClearBtn) {
+                mobileClearBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (mobileSearchInput) {
+                        mobileSearchInput.value = '';
+                        filterMobileSuggestions();
+                        mobileSearchInput.focus();
+                    }
+                });
+            }
+
+            // Close mobile search on outside click
+            document.addEventListener('click', function(e) {
+                if (mobileSearchDrawer && !mobileSearchDrawer.contains(e.target) && !mobileSearchBtn.contains(e.target)) {
+                    closeMobileSearchDrawer();
+                }
+            });
+        }
+
         if (btn && menu) {
             btn.addEventListener('click', function () {
                 var isHidden = menu.classList.contains('hidden');
                 if (isHidden) {
+                    closeMobileSearchDrawer();
                     menu.classList.remove('hidden');
                     if (hamburger) hamburger.classList.add('hidden');
                     if (close) close.classList.remove('hidden');
