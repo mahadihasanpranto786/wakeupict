@@ -26,9 +26,14 @@ class QuizExcelImportService
         }
 
         try {
-            $spreadsheet = IOFactory::load($filePath);
+            $reader = IOFactory::createReaderForFile($filePath);
+            if (method_exists($reader, 'setReadDataOnly')) {
+                $reader->setReadDataOnly(true);
+            }
+            $spreadsheet = $reader->load($filePath);
             $sheet = $spreadsheet->getActiveSheet();
-            $rows = $sheet->toArray(null, true, true, true);
+            // Pass calculateFormulas = false so questions with formulas (e.g. =E1/F1, =SUM(A1:A5)) are parsed as plain text
+            $rows = $sheet->toArray(null, false, false, true);
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -81,20 +86,19 @@ class QuizExcelImportService
 
         if ($quiz) {
             $currentOrder = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
-            $existingQuestions = LmsQuestion::where('quiz_id', $quiz->id)->pluck('question_text')->map(function($t) {
-                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
-            })->toArray();
         } elseif ($courseId) {
             $currentOrder = LmsQuestion::where('course_id', $courseId)->max('order_index') ?: 0;
-            $existingQuestions = LmsQuestion::where('course_id', $courseId)->pluck('question_text')->map(function($t) {
-                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
-            })->toArray();
         } else {
             $currentOrder = LmsQuestion::max('order_index') ?: 0;
-            $existingQuestions = LmsQuestion::latest('id')->take(500)->pluck('question_text')->map(function($t) {
-                return strtolower(trim(preg_replace('/\s+/', ' ', $t)));
-            })->toArray();
         }
+
+        // Global duplicate prevention: Preload all existing question hashes across the entire database
+        $existingHashes = [];
+        LmsQuestion::whereNotNull('question_hash')->chunk(2000, function ($chunk) use (&$existingHashes) {
+            foreach ($chunk as $q) {
+                $existingHashes[$q->question_hash] = true;
+            }
+        });
 
         DB::beginTransaction();
 
@@ -110,8 +114,12 @@ class QuizExcelImportService
                     continue; // Skip blank rows
                 }
 
-                $normalizedQ = strtolower(trim(preg_replace('/\s+/', ' ', $qText)));
-                if (in_array($normalizedQ, $existingQuestions)) {
+                $hash = LmsQuestion::hashText($qText);
+                if (!$hash) {
+                    continue;
+                }
+
+                if (isset($existingHashes[$hash])) {
                     $errors[] = "Row {$rowIndex}: Duplicate question detected and skipped ('" . mb_substr($qText, 0, 45) . "...').";
                     continue;
                 }
@@ -161,7 +169,7 @@ class QuizExcelImportService
                     'is_active'      => true,
                 ]);
 
-                $existingQuestions[] = $normalizedQ;
+                $existingHashes[$hash] = true;
 
                 // Determine correct option
                 $correctIndex = $this->resolveCorrectOption($rawCorrect, [$optA, $optB, $optC, $optD]);

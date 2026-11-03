@@ -501,4 +501,128 @@ class LmsQuizAndExamTest extends TestCase
         $liveExam->delete();
         $emptyPracticeQuiz->delete();
     }
+
+    /**
+     * Test importing questions with formula text (e.g. '=E1/F1 সূত্রে F1 কে কী বলা হয়?') does not crash
+     */
+    public function testImportQuestionsWithFormulaTextDoesNotCrashFormulaEngine()
+    {
+        $dummyQuiz = \App\model\LmsQuiz::create([
+            'course_id' => $this->quiz->course_id,
+            'title' => 'Formula Import Test Quiz ' . uniqid(),
+            'quiz_type' => 'practice',
+            'duration_minutes' => 15,
+            'total_marks' => 0,
+            'pass_marks' => 1.0,
+            'is_published' => true,
+        ]);
+
+        $csvContent = "Question,Option A,Option B,Option C,Option D,Correct Answer,Marks\n";
+        $uniqueFormulaQ = "=E1/F1 সূত্রে F1 কে কী বলা হয়? " . uniqid();
+        $csvContent .= "\"{$uniqueFormulaQ}\",\"ভাজ্য\",\"ভাগফল\",\"ভাজক\",\"গুণফল\",\"C\",1\n";
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_quiz_') . '.csv';
+        file_put_contents($tempFile, $csvContent);
+
+        try {
+            $importService = new \App\Services\QuizExcelImportService();
+            $res = $importService->importFromFile($tempFile, $dummyQuiz->id);
+
+            $this->assertTrue($res['success']);
+            $this->assertEquals(1, $res['imported_count']);
+
+            $importedQ = \App\model\LmsQuestion::where('quiz_id', $dummyQuiz->id)
+                ->where('question_text', 'like', '%=E1/F1%')
+                ->first();
+
+            $this->assertNotNull($importedQ);
+            $this->assertStringContainsString('=E1/F1 সূত্রে F1 কে কী বলা হয়?', $importedQ->question_text);
+        } finally {
+            @unlink($tempFile);
+            \App\model\LmsQuestion::where('quiz_id', $dummyQuiz->id)->delete();
+            $dummyQuiz->delete();
+        }
+    }
+
+    /**
+     * Test duplicate questions are not inserted even if submitted multiple times at different times
+     */
+    public function testDuplicateQuestionsAreNotInsertedEvenIfSubmittedMultipleTimes()
+    {
+        $uniqueText = "What is anti-duplicate system test question " . uniqid() . "?";
+        $dummyQuiz1 = \App\model\LmsQuiz::create([
+            'course_id' => $this->quiz->course_id,
+            'title' => 'Dup Test Quiz 1 ' . uniqid(),
+            'quiz_type' => 'practice',
+            'duration_minutes' => 10,
+            'total_marks' => 0,
+            'pass_marks' => 1.0,
+            'is_published' => true,
+        ]);
+        $dummyQuiz2 = \App\model\LmsQuiz::create([
+            'course_id' => $this->quiz->course_id,
+            'title' => 'Dup Test Quiz 2 ' . uniqid(),
+            'quiz_type' => 'practice',
+            'duration_minutes' => 10,
+            'total_marks' => 0,
+            'pass_marks' => 1.0,
+            'is_published' => true,
+        ]);
+
+        $csv1 = "Question,Option A,Option B,Option C,Option D,Correct Answer,Marks\n";
+        $csv1 .= "\"{$uniqueText}\",\"Opt 1\",\"Opt 2\",\"Opt 3\",\"Opt 4\",\"A\",1\n";
+
+        // Batch 2: submitted later, has whitespace/punctuation variations
+        $csv2 = "Question,Option A,Option B,Option C,Option D,Correct Answer,Marks\n";
+        $csv2 .= "\"  " . strtoupper($uniqueText) . "  \",\"Opt 1\",\"Opt 2\",\"Opt 3\",\"Opt 4\",\"A\",1\n";
+
+        $file1 = tempnam(sys_get_temp_dir(), 'dup_test_1_') . '.csv';
+        $file2 = tempnam(sys_get_temp_dir(), 'dup_test_2_') . '.csv';
+        file_put_contents($file1, $csv1);
+        file_put_contents($file2, $csv2);
+
+        try {
+            $importService = new \App\Services\QuizExcelImportService();
+            
+            // First submission
+            $res1 = $importService->importFromFile($file1, $dummyQuiz1->id);
+            $this->assertTrue($res1['success']);
+            $this->assertEquals(1, $res1['imported_count']);
+
+            // Second submission at different time / different quiz
+            $res2 = $importService->importFromFile($file2, $dummyQuiz2->id);
+            $this->assertTrue($res2['success']);
+            $this->assertEquals(0, $res2['imported_count']);
+            $this->assertNotEmpty($res2['errors']);
+            $this->assertStringContainsString('Duplicate question detected', $res2['errors'][0]);
+
+            // Total in database must be strictly 1
+            $norm = \App\model\LmsQuestion::hashText($uniqueText);
+            $totalCount = \App\model\LmsQuestion::where('question_hash', $norm)->count();
+            $this->assertEquals(1, $totalCount);
+        } finally {
+            @unlink($file1);
+            @unlink($file2);
+            \App\model\LmsQuestion::where('question_hash', \App\model\LmsQuestion::hashText($uniqueText))->delete();
+            $dummyQuiz1->delete();
+            $dummyQuiz2->delete();
+        }
+    }
+
+    /**
+     * Test single exam attempt strictly prevents same question from appearing more than once
+     */
+    public function testSingleExamPreventsSameQuestionFromAppearingMoreThanOnce()
+    {
+        $rotationService = new \App\Services\PracticeQuestionRotationService();
+        $result = $rotationService->selectQuestionsForNewAttempt($this->student->id, null, 10);
+        $questions = $result['questions'];
+
+        $seenHashes = [];
+        foreach ($questions as $q) {
+            $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
+            $this->assertArrayNotHasKey($h, $seenHashes, "Question {$q->question_text} appeared more than once in the same exam!");
+            $seenHashes[$h] = true;
+        }
+    }
 }

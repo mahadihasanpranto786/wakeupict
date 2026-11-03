@@ -278,6 +278,13 @@ class QuestionBookController extends Controller
             'source_reference' => 'nullable|string|max:150',
         ]);
 
+        $duplicate = LmsQuestion::findDuplicate($request->question_text);
+        if ($duplicate) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'এই প্রশ্নটি ইতিমধ্যে প্রশ্ন ব্যাংকে সংরক্ষিত রয়েছে (Question ID: #' . $duplicate->id . ')। একই প্রশ্ন পুনরায় যোগ করা যাবে না।']);
+        }
+
         DB::beginTransaction();
         try {
             $cqSubquestions = null;
@@ -394,6 +401,13 @@ class QuestionBookController extends Controller
             'memory_aid'          => 'nullable|string',
         ]);
 
+        $duplicate = LmsQuestion::findDuplicate($request->question_text);
+        if ($duplicate) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'এই প্রশ্নটি ইতিমধ্যে প্রশ্ন ব্যাংকে সংরক্ষিত রয়েছে (Question ID: #' . $duplicate->id . ')। একই প্রশ্ন পুনরায় যোগ করা যাবে না।']);
+        }
+
         DB::beginTransaction();
         try {
             // Determine parent: If source is already derived, link to the root parent, otherwise link to source!
@@ -503,6 +517,13 @@ class QuestionBookController extends Controller
             'hints'          => 'nullable|string',
             'source_reference' => 'nullable|string|max:150',
         ]);
+
+        $duplicate = LmsQuestion::findDuplicate($request->question_text, $id);
+        if ($duplicate) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'একই প্রশ্ন অন্য একটি রেকর্ডে ইতিমধ্যে বিদ্যমান (Question ID: #' . $duplicate->id . ')।']);
+        }
 
         DB::beginTransaction();
         try {

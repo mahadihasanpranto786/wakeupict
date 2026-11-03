@@ -390,8 +390,40 @@ class PracticeQuestionRotationService
             $chosenQuestions = $poolQuery->inRandomOrder()->take($questionCount)->get();
         }
 
+        // Guarantee distinct questions within this single exam (no duplicate question texts or hashes)
+        $distinctQuestions = collect();
+        $seenHashes = [];
+        foreach ($chosenQuestions as $q) {
+            $h = $q->question_hash ?: LmsQuestion::hashText($q->question_text);
+            if ($h && !isset($seenHashes[$h])) {
+                $seenHashes[$h] = true;
+                $distinctQuestions->push($q);
+            }
+        }
+
+        // If duplicate filtering dropped count below requested questionCount, replenish with more unique questions
+        if ($distinctQuestions->count() < $questionCount) {
+            $shortage = $questionCount - $distinctQuestions->count();
+            $morePool = self::applyMcqConstraint(LmsQuestion::with('options'))
+                ->whereNotIn('id', $distinctQuestions->pluck('id')->toArray());
+            if ($category) {
+                $morePool->where('category', $category);
+            }
+            $candidates = $morePool->inRandomOrder()->take($shortage * 3)->get();
+            foreach ($candidates as $cand) {
+                $ch = $cand->question_hash ?: LmsQuestion::hashText($cand->question_text);
+                if ($ch && !isset($seenHashes[$ch])) {
+                    $seenHashes[$ch] = true;
+                    $distinctQuestions->push($cand);
+                    if ($distinctQuestions->count() >= $questionCount) {
+                        break;
+                    }
+                }
+            }
+        }
+
         // Randomize order so question positions change
-        $chosenQuestions = $chosenQuestions->shuffle()->values();
+        $chosenQuestions = $distinctQuestions->shuffle()->values();
 
         return [
             'questions'     => $chosenQuestions,

@@ -443,7 +443,20 @@ class AdminQuizController extends Controller
                     return redirect()->back()->withErrors(['error' => 'লাইব্রেরিতে এই ফিল্টার অনুযায়ী কোনো প্রশ্ন পাওয়া যায়নি।']);
                 }
 
+                $existingQuizHashes = \App\model\LmsQuestion::where('quiz_id', $quiz->id)
+                    ->whereNotNull('question_hash')
+                    ->pluck('question_hash')
+                    ->flip()
+                    ->toArray();
+
                 foreach ($sourceQuestions as $sq) {
+                    $h = $sq->question_hash ?: \App\model\LmsQuestion::hashText($sq->question_text);
+                    if ($h && isset($existingQuizHashes[$h])) {
+                        continue; // Skip duplicate question in this quiz
+                    }
+                    if ($h) {
+                        $existingQuizHashes[$h] = true;
+                    }
                     $order++;
                     $newQ = $sq->replicate();
                     $newQ->quiz_id = $quiz->id;

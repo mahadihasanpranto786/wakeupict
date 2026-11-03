@@ -18,6 +18,76 @@ class LmsQuestion extends Model
         'is_archived'    => 'boolean',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            if (!empty($model->question_text)) {
+                $model->question_hash = self::hashText($model->question_text);
+            }
+        });
+    }
+
+    /**
+     * Standardize question text for accurate duplicate detection across languages and formats
+     *
+     * @param string|null $text
+     * @return string
+     */
+    public static function normalizeText($text)
+    {
+        if ($text === null) {
+            return '';
+        }
+        $text = trim((string)$text);
+        // Strip invisible characters, zero-width spaces, BOM
+        $text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text);
+        // Collapse all whitespace sequences into a single space
+        $text = preg_replace('/\s+/u', ' ', $text);
+        // Remove spaces before punctuation (e.g. " ? " -> "?")
+        $text = preg_replace('/\s+([?!.,:;।])/u', '$1', $text);
+        // Multibyte lower case
+        $text = mb_strtolower($text, 'UTF-8');
+        // Strip trailing punctuation & whitespace for robust duplicate matching
+        $text = rtrim($text, '?!.,:;। ');
+        return $text;
+    }
+
+    /**
+     * Generate deterministic MD5 hash of normalized question text
+     *
+     * @param string|null $text
+     * @return string|null
+     */
+    public static function hashText($text)
+    {
+        $norm = self::normalizeText($text);
+        return $norm !== '' ? md5($norm) : null;
+    }
+
+    /**
+     * Check if a duplicate question already exists in the database
+     *
+     * @param string $text
+     * @param int|null $excludeId
+     * @return LmsQuestion|null
+     */
+    public static function findDuplicate($text, $excludeId = null)
+    {
+        $hash = self::hashText($text);
+        if (!$hash) {
+            return null;
+        }
+
+        $query = self::where('question_hash', $hash);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->first();
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
