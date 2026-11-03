@@ -11,6 +11,10 @@ use App\model\Income;
 use Intervention\Image\Facades\Image;
 use App\model\Student;
 use App\model\StudentPayment;
+use App\model\StudentAccount;
+use App\model\LmsEnrollment;
+use App\Services\StudentEnrollmentService;
+use Illuminate\Support\Facades\Hash;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Console\Presets\React;
@@ -200,31 +204,105 @@ class StudentController extends Controller
         $save_url = 'public/uploads/student/images/' . $name_gen;
 
 
-        Student::insert([
-            'course_id' => $request->course_id,
-            'batch_id' => $request->batch_id,
-            'course_fee' => $request->course_fee,
-            'student_name' => $request->student_name,
-            'gander' => $request->gander,
-            'fathers_name' => $request->fathers_name,
-            'mothers_name' => $request->mothers_name,
-            'nationality' => $request->nationality,
-            'national_id_no' => $request->national_id_no,
-            'present_address' => $request->present_address,
-            'permanent_address' => $request->permanent_address,
-            'personal_call_no' => $request->personal_call_no,
-            'email' => $request->email,
-            'religion' => $request->religion,
-            'occupation' => $request->occupation,
-            'age' => $request->age,
-            'educational_qualification' => $request->educational_qualification,
-            'result' => $request->result,
-            'passing_year' => $request->passing_year,
-            'student_photo' => $save_url,
+        $rawPhone = $request->personal_call_no;
+        $cleanPhone = StudentEnrollmentService::normalizePhone($rawPhone);
+        $courseModel = Course::find($request->course_id);
 
-            'status' => 1,
-            'created_at' => Carbon::now(),
-        ]);
+        $existingStudent = StudentEnrollmentService::findExistingStudentRecord($rawPhone, $request->email);
+        $existingAccount = StudentEnrollmentService::findExistingStudentAccount($rawPhone, $request->email);
+
+        $studentId = null;
+        if ($existingStudent) {
+            $studentId = $existingStudent->id;
+            $courses = !empty($existingStudent->selected_courses) 
+                ? (is_array($existingStudent->selected_courses) ? $existingStudent->selected_courses : json_decode($existingStudent->selected_courses, true)) 
+                : [];
+            if (!is_array($courses)) $courses = [];
+
+            if ($existingStudent->course_id) {
+                $hasP = false;
+                foreach ($courses as $c) {
+                    if (isset($c['id']) && (int)$c['id'] === (int)$existingStudent->course_id) { $hasP = true; break; }
+                }
+                if (!$hasP && ($p = Course::find($existingStudent->course_id))) {
+                    array_unshift($courses, ['id' => $p->id, 'title' => $p->course_title, 'price' => $p->price]);
+                }
+            }
+
+            if ($courseModel) {
+                $hasNew = false;
+                foreach ($courses as $c) {
+                    if (isset($c['id']) && (int)$c['id'] === (int)$courseModel->id) { $hasNew = true; break; }
+                }
+                if (!$hasNew) {
+                    $courses[] = ['id' => $courseModel->id, 'title' => $courseModel->course_title, 'price' => $courseModel->price];
+                }
+            }
+
+            $existingStudent->selected_courses = json_encode($courses, JSON_UNESCAPED_UNICODE);
+            $existingStudent->save();
+        } else {
+            $newCourses = [];
+            if ($courseModel) {
+                $newCourses[] = ['id' => $courseModel->id, 'title' => $courseModel->course_title, 'price' => $courseModel->price];
+            }
+            $studentId = Student::insertGetId([
+                'course_id' => $request->course_id,
+                'batch_id' => $request->batch_id,
+                'course_fee' => $request->course_fee,
+                'selected_courses' => !empty($newCourses) ? json_encode($newCourses, JSON_UNESCAPED_UNICODE) : null,
+                'student_name' => $request->student_name,
+                'gander' => $request->gander,
+                'fathers_name' => $request->fathers_name,
+                'mothers_name' => $request->mothers_name,
+                'nationality' => $request->nationality,
+                'national_id_no' => $request->national_id_no,
+                'present_address' => $request->present_address,
+                'permanent_address' => $request->permanent_address,
+                'personal_call_no' => $cleanPhone ?: $rawPhone,
+                'email' => $request->email,
+                'religion' => $request->religion,
+                'occupation' => $request->occupation,
+                'age' => $request->age,
+                'educational_qualification' => $request->educational_qualification,
+                'result' => $request->result,
+                'passing_year' => $request->passing_year,
+                'student_photo' => $save_url,
+                'status' => 1,
+                'created_at' => Carbon::now(),
+            ]);
+        }
+
+        // Provision/link Student Account & LMS Enrollment
+        $lastDigits = strlen($cleanPhone) >= 6 ? substr($cleanPhone, -6) : '123456';
+        if ($existingAccount) {
+            $studentAccount = $existingAccount;
+        } else {
+            $studentAccount = StudentAccount::create([
+                'name' => mb_strtoupper(trim($request->student_name)),
+                'email' => $request->email ?: null,
+                'phone' => $cleanPhone ?: $rawPhone,
+                'password' => Hash::make($lastDigits),
+                'avatar' => $save_url,
+                'status' => 1,
+                'meta' => [
+                    'registered_from' => 'admin_panel',
+                    'student_record_id' => $studentId,
+                    'temp_initial_pass' => true,
+                ],
+            ]);
+        }
+
+        if ($request->course_id) {
+            LmsEnrollment::firstOrCreate([
+                'student_account_id' => $studentAccount->id,
+                'course_id' => $request->course_id,
+            ], [
+                'batch_id' => $request->batch_id,
+                'enrollment_type' => 'applied',
+                'status' => 'active',
+            ]);
+        }
 
 
         $notification = ([
@@ -241,20 +319,55 @@ class StudentController extends Controller
     }
 
     //search applied student
-    function searchAppliedStudent(Request $request){
-        $students =  Student::where('personal_call_no', $request->search)->where('status', 1)->paginate(10);
-        return view('backend.theme.clasic.student.student_list', compact('students'));
+    function searchAppliedStudent(Request $request)
+    {
+        return $this->studentList($request);
     }
-
-
-
 
     //student list
-    function studentList()
+    function studentList(Request $request = null)
     {
-        $students =  Student::latest()->where('status', 1)->paginate(10);
-        return view('backend.theme.clasic.student.student_list', compact('students'));
+        if (!$request) {
+            $request = request();
+        }
+
+        $allCourses = Course::where('status', 1)->orderBy('course_title', 'ASC')->get();
+
+        // Ensure each student is shown only ONCE (grouped by unique phone number)
+        $uniqueIds = Student::where('status', 1)
+            ->selectRaw('MAX(id) as id')
+            ->groupBy('personal_call_no')
+            ->pluck('id');
+
+        $query = Student::whereIn('id', $uniqueIds);
+
+        // Course-wise filtering
+        if ($request->filled('course_id')) {
+            $cId = (int)$request->course_id;
+            $query->where(function ($q) use ($cId) {
+                $q->where('course_id', $cId)
+                  ->orWhere('selected_courses', 'like', '%"id":' . $cId . ',%')
+                  ->orWhere('selected_courses', 'like', '%"id": ' . $cId . ',%')
+                  ->orWhere('selected_courses', 'like', '%"id":' . $cId . '}%')
+                  ->orWhere('selected_courses', 'like', '%"id": ' . $cId . '}%');
+            });
+        }
+
+        // Search by phone, name, or email
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('personal_call_no', 'like', "%{$search}%")
+                  ->orWhere('student_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->orderBy('id', 'desc')->paginate(10)->appends($request->all());
+
+        return view('backend.theme.clasic.student.student_list', compact('students', 'allCourses'));
     }
+
     //student invoice
     function studentPrint($student_id)
     {

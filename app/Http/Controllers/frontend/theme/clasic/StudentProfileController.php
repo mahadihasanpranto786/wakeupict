@@ -23,7 +23,9 @@ class StudentProfileController extends Controller
     {
         $student = Auth::guard('student')->user();
         $admitted = $student->admitedStudent;
-        return view('frontend.theme.clasic.student.profile.index', compact('student', 'admitted'));
+        $courses = $student->full_courses_list;
+        $enrollments = $student->enrollments()->with(['course', 'batch'])->latest()->get();
+        return view('frontend.theme.clasic.student.profile.index', compact('student', 'admitted', 'courses', 'enrollments'));
     }
 
     /**

@@ -54,6 +54,68 @@ class StudentAccount extends Authenticatable
     }
 
     /**
+     * All enrolled/applied courses via LMS enrollments
+     */
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'lms_enrollments', 'student_account_id', 'course_id')
+            ->withPivot('batch_id', 'enrollment_type', 'status', 'created_at');
+    }
+
+    /**
+     * Get distinct list of all enrolled or applied courses for this student account
+     */
+    public function getFullCoursesListAttribute()
+    {
+        $courses = collect();
+
+        // 1. From LMS Enrollments
+        $enrollments = $this->enrollments()->with(['course', 'batch'])->latest()->get();
+        foreach ($enrollments as $enr) {
+            if ($enr->course) {
+                $courses->push([
+                    'id' => $enr->course_id,
+                    'title' => $enr->course->course_title,
+                    'price' => $enr->course->price,
+                    'status' => $enr->status ?: 'active',
+                    'enrollment_type' => $enr->enrollment_type ?: 'applied',
+                    'batch_number' => $enr->batch ? $enr->batch->batch_number : null,
+                    'enrolled_at' => $enr->created_at,
+                ]);
+            }
+        }
+
+        // 2. From admitedStudent if not already included
+        if ($this->admitedStudent && $this->admitedStudent->course) {
+            $alreadyIncluded = $courses->contains(function ($item) {
+                return isset($item['id']) && (int)$item['id'] === (int)$this->admitedStudent->course_id;
+            });
+
+            if (!$alreadyIncluded) {
+                $courses->push([
+                    'id' => $this->admitedStudent->course_id,
+                    'title' => $this->admitedStudent->course->course_title,
+                    'price' => $this->admitedStudent->course->price,
+                    'status' => 'admitted',
+                    'enrollment_type' => 'admitted',
+                    'batch_number' => $this->admitedStudent->batch ? $this->admitedStudent->batch->batch_number : null,
+                    'enrolled_at' => $this->admitedStudent->created_at,
+                ]);
+            }
+        }
+
+        return $courses;
+    }
+
+    /**
+     * Total count of distinct courses associated with this student account
+     */
+    public function getCoursesCountAttribute()
+    {
+        return $this->full_courses_list->count();
+    }
+
+    /**
      * LMS lesson progress relationship
      */
     public function lessonProgress()
