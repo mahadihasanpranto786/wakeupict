@@ -245,9 +245,17 @@ class StudentQuizController extends Controller
             ]);
         }
 
-        // 2. Freeze snapshot of questions and options
+        // 2. Freeze snapshot of questions and options (guaranteeing 0 duplicate questions in single exam)
         $snapshot = [];
+        $seenSnapshotHashes = [];
         foreach ($questions as $q) {
+            $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
+            if ($h && isset($seenSnapshotHashes[$h])) {
+                continue; // Prevent same question from appearing more than once
+            }
+            if ($h) {
+                $seenSnapshotHashes[$h] = true;
+            }
             $opts = $q->options;
             $optsArray = [];
             $optIdx = 0;
@@ -404,9 +412,19 @@ class StudentQuizController extends Controller
                 $paperItems = $paperItems->shuffle()->values();
             }
 
+            $seenAttemptHashes = [];
             foreach ($paperItems as $it) {
                 $q = $it->masterQuestion;
                 if (!$q) continue;
+
+                $qText = $it->getQuestionText() ?: $q->question_text;
+                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($qText);
+                if ($h && isset($seenAttemptHashes[$h])) {
+                    continue; // Skip duplicate question within the same exam
+                }
+                if ($h) {
+                    $seenAttemptHashes[$h] = true;
+                }
 
                 $type = $it->getQuestionType() ?: $q->question_type;
                 $isMcqFormat = in_array($type, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']);
@@ -480,7 +498,15 @@ class StudentQuizController extends Controller
                 $rawQuestions = $rawQuestions->shuffle()->values();
             }
 
+            $seenRawHashes = [];
             foreach ($rawQuestions as $q) {
+                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
+                if ($h && isset($seenRawHashes[$h])) {
+                    continue; // Skip duplicate question within the same exam
+                }
+                if ($h) {
+                    $seenRawHashes[$h] = true;
+                }
                 $opts = $q->options;
                 if (!$opts || $opts->count() < 2) {
                     continue;
@@ -582,6 +608,20 @@ class StudentQuizController extends Controller
                 $questions = $questions->shuffle();
             }
         }
+
+        // Guarantee no duplicate question appears in exam interface
+        $seenExamHashes = [];
+        $questions = $questions->filter(function($q) use (&$seenExamHashes) {
+            $text = isset($q->question_text) ? $q->question_text : '';
+            $h = !empty($q->question_hash) ? $q->question_hash : \App\model\LmsQuestion::hashText($text);
+            if ($h && isset($seenExamHashes[$h])) {
+                return false;
+            }
+            if ($h) {
+                $seenExamHashes[$h] = true;
+            }
+            return true;
+        })->values();
 
         // Load existing answers for this attempt
         $existingAnswers = LmsQuizAnswer::where('attempt_id', $attempt->id)

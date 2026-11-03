@@ -223,9 +223,11 @@ class AdminCertificateAndQuizImportTest extends TestCase
             'is_published'      => true,
         ]);
 
+        $q1 = "Unique Test What is CPU " . uniqid() . "?";
+        $q2 = "Unique Test Which tag is used for image in HTML " . uniqid() . "?";
         $csvData = "question_text,option_a,option_b,option_c,option_d,correct_option,marks,explanation\n";
-        $csvData .= "\"What is CPU?\",\"Central Processing Unit\",\"Computer Personal Unit\",\"Central Public Unit\",\"Control Processing Unit\",\"A\",\"2\",\"Central processing unit executes instructions.\"\n";
-        $csvData .= "\"Which tag is used for image in HTML?\",\"<picture>\",\"<img>\",\"<image>\",\"<src>\",\"B\",\"1.5\",\"The <img> tag embeds images in HTML.\"\n";
+        $csvData .= "\"{$q1}\",\"Central Processing Unit\",\"Computer Personal Unit\",\"Central Public Unit\",\"Control Processing Unit\",\"A\",\"2\",\"Central processing unit executes instructions.\"\n";
+        $csvData .= "\"{$q2}\",\"<picture>\",\"<img>\",\"<image>\",\"<src>\",\"B\",\"1.5\",\"The <img> tag embeds images in HTML.\"\n";
 
         $tempPath = tempnam(sys_get_temp_dir(), 'quiz_') . '.csv';
         file_put_contents($tempPath, $csvData);
@@ -250,13 +252,13 @@ class AdminCertificateAndQuizImportTest extends TestCase
         // Verify questions created in DB
         $this->assertDatabaseHas('lms_questions', [
             'quiz_id'       => $quiz->id,
-            'question_text' => 'What is CPU?',
+            'question_text' => $q1,
             'marks'         => 2.0,
         ]);
 
         $this->assertDatabaseHas('lms_questions', [
             'quiz_id'       => $quiz->id,
-            'question_text' => 'Which tag is used for image in HTML?',
+            'question_text' => $q2,
             'marks'         => 1.5,
         ]);
 

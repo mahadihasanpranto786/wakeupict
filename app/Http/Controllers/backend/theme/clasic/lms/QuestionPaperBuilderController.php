@@ -557,7 +557,22 @@ class QuestionPaperBuilderController extends Controller
             $added = 0;
             $addedList = [];
 
+            $existingPaperHashes = [];
+            foreach ($paper->items()->with('masterQuestion')->get() as $pi) {
+                if ($pi->masterQuestion) {
+                    $h = $pi->masterQuestion->question_hash ?: \App\model\LmsQuestion::hashText($pi->getQuestionText());
+                    if ($h) $existingPaperHashes[$h] = true;
+                }
+            }
+
             foreach ($matchedQuestions as $q) {
+                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
+                if ($h && isset($existingPaperHashes[$h])) {
+                    continue;
+                }
+                if ($h) {
+                    $existingPaperHashes[$h] = true;
+                }
                 $currOrder++;
                 $marks = $section->marks_per_question ?: ($q->marks ?: 1.00);
 
