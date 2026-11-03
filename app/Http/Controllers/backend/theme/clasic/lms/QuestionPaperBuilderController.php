@@ -146,10 +146,16 @@ class QuestionPaperBuilderController extends Controller
         // Fetch question library for left panel
         $qQuery = LmsQuestion::with('options')->where('is_archived', false);
 
-        if ($paper->course_id) {
+        $selectedCourseId = $request->input('library_course', $request->input('course_id'));
+        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+            $qQuery->where('course_id', $selectedCourseId);
+        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
             $qQuery->where(function ($q) use ($paper) {
                 $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
             });
+            $selectedCourseId = $paper->course_id;
+        } else {
+            $selectedCourseId = '';
         }
 
         if ($request->filled('library_search')) {
@@ -178,13 +184,14 @@ class QuestionPaperBuilderController extends Controller
         // Category & chapter lists for filters and auto-pick
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
         $chapters = LmsQuestion::whereNotNull('chapter')->where('chapter', '!=', '')->distinct()->pluck('chapter')->sort()->values();
+        $courses = \App\model\Course::where('status', 1)->orderBy('course_title')->get();
 
         // Calculate summary
         $totalQuestionsCount = $paper->items->count();
         $calculatedMarks = $paper->items->sum('marks');
 
         return view('backend.theme.clasic.lms.question_papers.builder', compact(
-            'paper', 'libraryQuestions', 'categories', 'chapters', 'totalQuestionsCount', 'calculatedMarks'
+            'paper', 'libraryQuestions', 'categories', 'chapters', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks'
         ));
     }
 
@@ -253,7 +260,10 @@ class QuestionPaperBuilderController extends Controller
 
         $qQuery = LmsQuestion::with('options')->where('is_archived', false);
 
-        if ($paper->course_id) {
+        $selectedCourseId = $request->input('course_id', $request->input('library_course'));
+        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+            $qQuery->where('course_id', $selectedCourseId);
+        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
             $qQuery->where(function ($q) use ($paper) {
                 $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
             });
@@ -506,7 +516,10 @@ class QuestionPaperBuilderController extends Controller
 
         $query = LmsQuestion::with('options')->where('is_archived', false);
 
-        if ($paper->course_id) {
+        $selectedCourseId = $request->input('course_id');
+        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+            $query->where('course_id', $selectedCourseId);
+        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
             $query->where(function ($q) use ($paper) {
                 $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
             });

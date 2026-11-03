@@ -267,6 +267,17 @@
                         </button>
                     </div>
                 </div>
+                <!-- Course Filter Dropdown -->
+                <div class="mb-2">
+                    <select id="libCourseFilter" class="form-control form-control-sm custom-select text-xs font-weight-bold text-dark" onchange="loadLibraryQuestionsAJAX()">
+                        <option value="">-- সকল কোর্স (All Courses) --</option>
+                        @foreach($courses as $crs)
+                            <option value="{{ $crs->id }}" {{ (string)$selectedCourseId === (string)$crs->id ? 'selected' : '' }}>
+                                {{ $crs->course_title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                 <!-- Library Filter Dropdowns -->
                 <div class="row g-1 mb-2">
                     <div class="col-6">
@@ -710,6 +721,17 @@
                         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
+                        <div class="form-group mb-2">
+                            <label class="text-xs font-weight-bold">কোর্স (Course Source):</label>
+                            <select id="autoPickCourse" class="form-control custom-select text-xs font-weight-bold text-dark">
+                                <option value="">-- যেকোনো কোর্স (All Courses) --</option>
+                                @foreach($courses as $crs)
+                                    <option value="{{ $crs->id }}" {{ (string)$selectedCourseId === (string)$crs->id ? 'selected' : '' }}>
+                                        {{ $crs->course_title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group mb-2">
                             <label class="text-xs font-weight-bold">কোন সেকশনে যুক্ত হবে: <span class="text-danger">*</span></label>
                             <select id="autoPickSectionSelect" class="form-control custom-select" onchange="syncSectionTypeToModal()" required>
@@ -1326,12 +1348,14 @@
 
         function loadLibraryQuestionsAJAX() {
             var search = document.getElementById('libSearchInput').value;
+            var course = document.getElementById('libCourseFilter') ? document.getElementById('libCourseFilter').value : '';
             var cat = document.getElementById('libCategoryFilter').value;
             var diff = document.getElementById('libDiffFilter').value;
             var type = document.getElementById('libTypeFilter') ? document.getElementById('libTypeFilter').value : '';
 
             var params = new URLSearchParams();
             if (search) params.append('search', search);
+            if (course) params.append('course_id', course);
             if (cat) params.append('category', cat);
             if (diff) params.append('difficulty', diff);
             if (type) params.append('type', type);
@@ -1569,6 +1593,7 @@
 
         // 13. Auto-Pick / Random Questions via AJAX (Zero Full Page Reload)
         function submitAutoPickAJAX() {
+            var courseId = document.getElementById('autoPickCourse') ? document.getElementById('autoPickCourse').value : '';
             var sectionId = document.getElementById('autoPickSectionSelect').value;
             var qType = document.getElementById('autoPickQuestionType').value;
             var category = document.getElementById('autoPickCategory').value;
@@ -1584,6 +1609,7 @@
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
+                    course_id: courseId,
                     section_id: sectionId,
                     question_type: qType,
                     category: category,

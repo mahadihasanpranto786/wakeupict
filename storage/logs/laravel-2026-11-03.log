@@ -266,3 +266,13 @@
 [stacktrace]
 #0 {main}
 "} 
+[2026-11-03 11:33:45] local.ERROR: Trying to get property 'photo' of non-object (View: C:\Herd\wakeupict\resources\views\backend\theme\clasic\include\profile\profile.blade.php) (View: C:\Herd\wakeupict\resources\views\backend\theme\clasic\include\profile\profile.blade.php) (View: C:\Herd\wakeupict\resources\views\backend\theme\clasic\include\profile\profile.blade.php) {"exception":"[object] (ErrorException(code: 0): Trying to get property 'photo' of non-object (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) at C:\\Herd\\wakeupict\\storage\\framework\\views\\58473321791005c30b355ade0705d00f3f0e5e51.php:70, ErrorException(code: 0): Trying to get property 'photo' of non-object (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) at C:\\Herd\\wakeupict\\storage\\framework\\views\\58473321791005c30b355ade0705d00f3f0e5e51.php:70, ErrorException(code: 0): Trying to get property 'photo' of non-object (View: C:\\Herd\\wakeupict\esources\\views\\backend\\theme\\clasic\\include\\profile\\profile.blade.php) at C:\\Herd\\wakeupict\\storage\\framework\\views\\58473321791005c30b355ade0705d00f3f0e5e51.php:70, ErrorException(code: 0): Trying to get property 'photo' of non-object at C:\\Herd\\wakeupict\\storage\\framework\\views\\58473321791005c30b355ade0705d00f3f0e5e51.php:70)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\View\\Engines\\PhpEngine.php(45): Illuminate\\View\\Engines\\CompilerEngine->handleViewException(Object(ErrorException), 0)
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\View\\Engines\\CompilerEngine.php(59): Illuminate\\View\\Engines\\PhpEngine->evaluatePath('C:\\\\Herd\\\\wakeupi...', Array)
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\View\\View.php(142): Illuminate\\View\\Engines\\CompilerEngine->get('C:\\\\Herd\\\\wakeupi...', Array)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\View\\View.php(125): Illuminate\\View\\View->getContents()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\View\\View.php(90): Illuminate\\View\\View->renderContents()
+#5 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\cda93a73-f2dc-4100-9926-f202e41a1546\\scratch\\test_builder_flow.php(12): Illuminate\\View\\View->render()
+#6 {main}
+"} 
