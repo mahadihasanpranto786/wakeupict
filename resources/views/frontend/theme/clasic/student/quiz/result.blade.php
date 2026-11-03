@@ -85,21 +85,24 @@
                 <span>ফলাফল আর্কাইভ</span>
             </a>
 
-            @if(!empty($practiceProgress))
+            <!-- Retake This Exam with exact submitted questions -->
+            @if($quiz->canAttempt($student->id))
+                <form action="{{ route('student.quiz.retake', $attempt->id) }}" method="POST" class="inline-block">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5" title="এই সেটের প্রশ্নগুলো নিয়ে পুনরায় পরীক্ষা দিন">
+                        <i class="fa fa-repeat"></i>
+                        <span>পুনরায় পরীক্ষা দিন (Retake)</span>
+                    </button>
+                </form>
+            @endif
+
+            @if(!empty($practiceProgress) || $quiz->quiz_type === 'practice')
                 <form action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
                     @csrf
                     <input type="hidden" name="question_count" value="{{ min(20, $totalQ > 0 ? $totalQ : 20) }}">
                     <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5">
                         <i class="fa fa-refresh"></i>
-                        <span>পরবর্তী ফ্রেশ প্রশ্নে প্র্যাকটিস শুরু</span>
-                    </button>
-                </form>
-            @elseif($quiz->canAttempt($student->id))
-                <form action="{{ route('student.quiz.start', $quiz->id) }}" method="POST" class="inline-block">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5">
-                        <i class="fa fa-repeat"></i>
-                        <span>পুনরায় পরীক্ষা দিন</span>
+                        <span>পরবর্তী নতুন প্রশ্নে প্র্যাকটিস</span>
                     </button>
                 </form>
             @endif

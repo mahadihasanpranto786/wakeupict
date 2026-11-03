@@ -631,9 +631,13 @@ class StudentQuizController extends Controller
         // Flagged question IDs
         $flaggedQuestionIds = $attempt->flagged_ids_array;
 
-        return view('frontend.theme.clasic.student.quiz.take', compact(
-            'student', 'quiz', 'attempt', 'questions', 'secondsRemaining', 'existingAnswers', 'flaggedQuestionIds'
-        ));
+        return response()
+            ->view('frontend.theme.clasic.student.quiz.take', compact(
+                'student', 'quiz', 'attempt', 'questions', 'secondsRemaining', 'existingAnswers', 'flaggedQuestionIds'
+            ))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
     }
 
     /**
@@ -966,6 +970,124 @@ class StudentQuizController extends Controller
     /**
      * Full Results History
      */
+    /**
+     * Retake an exam using the EXACT questions from a previously submitted attempt
+     */
+    public function retakeAttempt(Request $request, $attemptId)
+    {
+        $student = Auth::guard('student')->user();
+        $previousAttempt = LmsQuizAttempt::where('student_account_id', $student->id)->findOrFail($attemptId);
+        $quiz = $previousAttempt->quiz;
+
+        // If student already has an active in-progress attempt for this quiz, check if still valid
+        $activeAttempt = LmsQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_account_id', $student->id)
+            ->where('status', 'in_progress')
+            ->first();
+
+        if ($activeAttempt) {
+            $now = Carbon::now();
+            $maxTime = $activeAttempt->started_at->copy()->addMinutes($quiz->duration_minutes + 2);
+            if ($now->lessThanOrEqualTo($maxTime)) {
+                return redirect()->route('student.quiz.take', $activeAttempt->id)->with([
+                    'info' => 'আপনার এই কুইজের একটি চলমান পরীক্ষা চালু রয়েছে।',
+                ]);
+            } else {
+                $this->finalizeGrading($activeAttempt);
+            }
+        }
+
+        // Check attempt limit
+        if ($quiz->max_attempts > 0) {
+            $finishedCount = LmsQuizAttempt::where('quiz_id', $quiz->id)
+                ->where('student_account_id', $student->id)
+                ->whereIn('status', ['submitted', 'graded', 'timed_out'])
+                ->count();
+
+            if ($finishedCount >= $quiz->max_attempts) {
+                return redirect()->route('student.quiz.results', $previousAttempt->id)->with([
+                    'error' => 'আপনি এই কুইজের জন্য নির্ধারিত সর্বোচ্চ পরীক্ষার সীমা (' . $quiz->max_attempts . ' বার) অতিক্রম করেছেন।',
+                ]);
+            }
+        }
+
+        // Extract submitted questions snapshot from previous attempt
+        $snapshot = $previousAttempt->questions_snapshot;
+
+        // Fallback if snapshot was somehow empty
+        if (empty($snapshot) || !is_array($snapshot) || count($snapshot) === 0) {
+            if ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->exists()) {
+                $paperItems = $quiz->paper->items()->with(['masterQuestion.options', 'section'])->orderBy('order_index', 'asc')->get();
+                $snapshot = [];
+                foreach ($paperItems as $it) {
+                    $q = $it->masterQuestion;
+                    if (!$q) continue;
+                    $optsArray = [];
+                    $optIdx = 0;
+                    foreach ($q->options as $o) {
+                        $optsArray[] = ['id' => $o->id, 'text' => $o->option_text, 'order' => $optIdx++];
+                    }
+                    $snapshot[] = [
+                        'id' => $q->id,
+                        'paper_item_id' => $it->id,
+                        'question_text' => $it->getQuestionText() ?: $q->question_text,
+                        'question_type' => $it->getQuestionType() ?: $q->question_type,
+                        'marks' => (float)$it->marks,
+                        'negative_marks' => $it->negative_marks !== null ? (float)$it->negative_marks : null,
+                        'options' => $optsArray,
+                    ];
+                }
+            } elseif ($quiz->questions()->count() > 0) {
+                $rawQuestions = $quiz->activeQuestions()->with('options')->get();
+                $snapshot = [];
+                foreach ($rawQuestions as $q) {
+                    $optsArray = [];
+                    $optIdx = 0;
+                    foreach ($q->options as $o) {
+                        $optsArray[] = ['id' => $o->id, 'text' => $o->option_text, 'order' => $optIdx++];
+                    }
+                    $snapshot[] = [
+                        'id' => $q->id,
+                        'question_text' => $q->question_text,
+                        'question_type' => $q->question_type,
+                        'marks' => (float)$q->marks,
+                        'negative_marks' => $q->negative_marks !== null ? (float)$q->negative_marks : null,
+                        'options' => $optsArray,
+                    ];
+                }
+            } elseif ($quiz->quiz_type === 'practice') {
+                return $this->startPracticeExam($request);
+            }
+        }
+
+        if (empty($snapshot) || count($snapshot) === 0) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'পুনরায় পরীক্ষা দেওয়ার জন্য কোনো প্রশ্ন খুঁজে পাওয়া যায়নি।',
+            ]);
+        }
+
+        $nextNumber = LmsQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_account_id', $student->id)
+            ->count() + 1;
+
+        $newAttempt = LmsQuizAttempt::create([
+            'quiz_id'              => $quiz->id,
+            'student_account_id'   => $student->id,
+            'attempt_number'       => $nextNumber,
+            'started_at'           => Carbon::now(),
+            'total_marks'          => $previousAttempt->total_marks ?: $quiz->total_marks,
+            'status'               => 'in_progress',
+            'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
+            'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',
+            'questions_snapshot'   => $snapshot, // REUSE THE EXACT SUBMITTED QUESTIONS!
+            'flagged_question_ids' => [],
+        ]);
+
+        return redirect()->route('student.quiz.take', $newAttempt->id)->with([
+            'success' => 'পুনরায় পরীক্ষা শুরু হয়েছে! পূর্ববর্তী সেটের প্রশ্নগুলোর সঠিক উত্তর দিয়ে নিজেকে যাচাই করুন।',
+        ]);
+    }
+
     public function allResults()
     {
         $student = Auth::guard('student')->user();
