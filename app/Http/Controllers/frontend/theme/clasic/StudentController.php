@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
+use App\Services\StudentEnrollmentService;
 
 class StudentController extends Controller
 {
@@ -150,23 +151,7 @@ class StudentController extends Controller
             $selectedCourseIds = [(int)$request->course_id];
         }
 
-        $selectedCoursesData = [];
-        $totalCalculatedFee = 0;
-        if (!empty($selectedCourseIds)) {
-            $fetchedCourses = Course::whereIn('id', $selectedCourseIds)->get();
-            foreach ($fetchedCourses as $fc) {
-                $feeVal = is_numeric($fc->price) ? (float)$fc->price : (float)preg_replace('/[^\d.]/', '', (string)$fc->price);
-                $totalCalculatedFee += $feeVal;
-                $selectedCoursesData[] = [
-                    'id' => $fc->id,
-                    'title' => $fc->course_title,
-                    'price' => $fc->price,
-                ];
-            }
-        }
-
-        $primaryCourseId = !empty($selectedCourseIds) ? $selectedCourseIds[0] : (int)$request->input('course_id', 1);
-        $finalFee = $totalCalculatedFee > 0 ? (string)$totalCalculatedFee : (string)$request->input('course_fee', 0);
+        $primaryCourseId = !empty($selectedCourseIds) ? (int)$selectedCourseIds[0] : (int)$request->input('course_id', 1);
 
         // 4. Process Dynamic Attachments
         $attachmentsData = [];
@@ -192,20 +177,16 @@ class StudentController extends Controller
             }
         }
 
-        // 5. Insert Student Admission Record
-        $studentNameUpper = mb_strtoupper(trim($request->student_name));
-
-        $studentId = Student::insertGetId([
-            'course_id' => $primaryCourseId,
-            'course_fee' => $finalFee,
-            'selected_courses' => !empty($selectedCoursesData) ? json_encode($selectedCoursesData, JSON_UNESCAPED_UNICODE) : null,
-            'student_name' => $studentNameUpper,
+        // 5. Build Application Data Payload
+        $appData = [
+            'student_name' => $request->student_name,
             'gander' => $request->gander,
-            'date_of_birth' => $request->filled('date_of_birth') ? $request->date_of_birth : null,
+            'date_of_birth' => $request->date_of_birth,
             'fathers_name' => $request->fathers_name,
             'mothers_name' => $request->mothers_name,
             'nationality' => $request->nationality,
-            'national_id_no' => ($request->filled('id_type') ? '[' . $request->id_type . '] ' : '') . $request->national_id_no,
+            'id_type' => $request->id_type,
+            'national_id_no' => $request->national_id_no,
             'present_address' => $request->present_address,
             'permanent_address' => $request->permanent_address,
             'personal_call_no' => $request->personal_call_no,
@@ -214,63 +195,52 @@ class StudentController extends Controller
             'religion' => $request->religion,
             'occupation' => $request->occupation,
             'age' => $request->age,
-            'educational_qualification' => $primaryDegree,
-            'result' => $primaryResult,
-            'passing_year' => $primaryYear,
-            'qualifications_data' => !empty($qualifications) ? json_encode($qualifications, JSON_UNESCAPED_UNICODE) : null,
+            'educational_qualification' => $request->educational_qualification,
+            'result' => $request->result,
+            'passing_year' => $request->passing_year,
+            'qualifications' => $qualifications,
             'student_photo' => $save_photo_url,
-            'attachments_data' => !empty($attachmentsData) ? json_encode($attachmentsData, JSON_UNESCAPED_UNICODE) : null,
-            'status' => 1,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+            'attachments_data' => $attachmentsData,
+            'course_id' => $primaryCourseId,
+            'course_fee' => $request->input('course_fee', 0),
+            'selected_course_ids' => $selectedCourseIds,
+        ];
 
-        // 6. Automatically Provision Student LMS Account using Student Phone Number
-        $cleanPhone = preg_replace('/[^\d]/', '', (string)$request->personal_call_no);
-        $lastDigits = strlen($cleanPhone) >= 6 ? substr($cleanPhone, -6) : '123456';
-        $tempPassword = $lastDigits;
+        // 6. Process Registration & Enrollment via StudentEnrollmentService
+        $result = StudentEnrollmentService::processAdmissionApplication($appData, $request);
 
-        $studentAccount = StudentAccount::where('phone', $request->personal_call_no)
-            ->orWhere('phone', $cleanPhone)
-            ->orWhere('email', $request->email)
-            ->first();
-
-        $accountCreated = false;
-        if (!$studentAccount) {
-            $studentAccount = StudentAccount::create([
-                'name' => $studentNameUpper,
-                'email' => $request->email,
-                'phone' => $request->personal_call_no,
-                'password' => Hash::make($lastDigits),
-                'avatar' => $save_photo_url,
-                'status' => 1,
-                'meta' => [
-                    'registered_from' => 'online_admission_form',
-                    'student_record_id' => $studentId,
-                    'temp_initial_pass' => true,
-                ],
-            ]);
-            $accountCreated = true;
-        } else {
-            // Update password to predictable last 6 digits so applicant is never locked out
-            $studentAccount->update([
-                'name' => $studentNameUpper,
-                'password' => Hash::make($lastDigits),
-                'avatar' => $save_photo_url ?: $studentAccount->avatar,
-                'status' => 1,
-            ]);
-            $accountCreated = true;
+        // Conflict check failure (Phone belongs to Account A, Email belongs to Account B)
+        if ($result['status'] === 'conflict_error') {
+            return redirect()->back()
+                ->withInput()
+                ->with('conflict_warning', $result['message']);
         }
 
-        $student_name = $studentNameUpper;
-        $studentIdCode = $studentAccount ? $studentAccount->student_id_code : null;
+        // Already enrolled check failure
+        if ($result['status'] === 'already_enrolled') {
+            return redirect()->back()
+                ->withInput()
+                ->with('course_already_enrolled', $result['message']);
+        }
+
+        $student_name = mb_strtoupper(trim($request->student_name));
+        $studentAccount = $result['student_account'] ?? null;
+        $accountCreated = !empty($result['is_new_account']);
+        $tempPassword = $result['temp_password'] ?? null;
+        $studentIdCode = $result['student_id_code'] ?? ($studentAccount ? $studentAccount->student_id_code : null);
+        $enrolledCourses = $result['enrolled_courses'] ?? [];
+        $alreadyEnrolledCourses = $result['already_enrolled_courses'] ?? [];
+        $isExistingAccount = !$accountCreated;
 
         return view('frontend.theme.clasic.student.student_notification', compact(
             'student_name',
             'studentAccount',
             'accountCreated',
+            'isExistingAccount',
             'tempPassword',
-            'studentIdCode'
+            'studentIdCode',
+            'enrolledCourses',
+            'alreadyEnrolledCourses'
         ));
     }
 }

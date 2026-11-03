@@ -171,7 +171,7 @@
     @include('backend.theme.clasic.student.batch.DetailsModal')
     {{-- @include('backend.theme.clasic.student.batch.batchAndCourseWiseStudent') --}}
     <!-- jQuery -->
-    <script src="{{ asset('public/admin/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ safe_asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('#admitted-student-details').on('hidden.bs.modal', function() {

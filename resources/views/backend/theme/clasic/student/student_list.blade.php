@@ -44,18 +44,35 @@
                                         </button>
                                     </a>
                                 @endif
-                                <div class="col-md-4 bg-light float-right">
-                                    <form action="{{ route('search-applied-student') }}" method="GET">
-                                        @csrf
-                                        <div class="input-group input-group-sm">
-                                            <input class="form-control bg-light" type="number" name="search"
-                                                placeholder="Enter Student Number" aria-label="Search">
+                                <div class="col-md-8 float-right">
+                                    <form action="{{ route('students-list') }}" method="GET" class="d-flex flex-wrap justify-content-end align-items-center" style="gap: 8px;">
+                                        <div style="min-width: 200px;">
+                                            <select name="course_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                                                <option value="">-- All Courses (সকল কোর্স) --</option>
+                                                @if(isset($allCourses))
+                                                    @foreach($allCourses as $cOption)
+                                                        <option value="{{ $cOption->id }}" {{ request('course_id') == $cOption->id ? 'selected' : '' }}>
+                                                            {{ $cOption->course_title }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-sm" style="width: 220px;">
+                                            <input class="form-control bg-light" type="text" name="search"
+                                                value="{{ request('search') }}"
+                                                placeholder="Phone, Name or Email" aria-label="Search">
                                             <div class="input-group-append">
-                                                <button class="btn btn-navbar" type="submit">
+                                                <button class="btn btn-primary" type="submit">
                                                     <i class="fas fa-search"></i>
                                                 </button>
                                             </div>
                                         </div>
+                                        @if(request('course_id') || request('search'))
+                                            <a href="{{ route('students-list') }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-times"></i> Reset
+                                            </a>
+                                        @endif
                                     </form>
                                 </div>
                             </div>
@@ -91,7 +108,11 @@
                                                 @endif
                     
                                             </td> --}}
-                                            <td>{{ $student->student_name }}
+                                            <td>
+                                                <div class="font-weight-bold text-dark">{{ $student->student_name }}</div>
+                                                <div class="text-xs text-muted mt-0.5">
+                                                    <span class="badge badge-light border">1 Student Account</span>
+                                                </div>
                                             </td>
                                             <td>
                                                 @if ($student->batch_id == null)
@@ -105,7 +126,26 @@
                                                 {{ $student->personal_call_no }} </td>
                                             <td>{{ $student->email }} </td>
                                             <td>
-                                                {{ App\model\Course::find($student->course_id)->course_title }} </td>
+                                                @php
+                                                    $coursesList = $student->courses_list;
+                                                @endphp
+                                                @if($coursesList->count() > 0)
+                                                    <div class="d-flex flex-column" style="gap: 3px;">
+                                                        @foreach($coursesList as $cItem)
+                                                            <span class="badge badge-info p-1 text-left font-weight-bold" style="white-space: normal; font-size: 11px;">
+                                                                <i class="fas fa-book-reader mr-1"></i>{{ $cItem['title'] }}
+                                                            </span>
+                                                        @endforeach
+                                                        @if($coursesList->count() > 1)
+                                                            <span class="badge badge-secondary p-0.5 text-xs font-weight-bold" style="font-size: 10px;">
+                                                                {{ $coursesList->count() }} Courses Applied
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted text-xs">N/A</span>
+                                                @endif
+                                            </td>
 
                                             <td class="border">
                                                 <div class="d-flex">

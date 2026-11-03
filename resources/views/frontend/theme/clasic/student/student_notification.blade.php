@@ -15,9 +15,9 @@
             </div>
 
             <!-- Badge -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-mono tracking-wider uppercase mb-4">
-                <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                <span>Registration Successful</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ !empty($isExistingAccount) ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-brand-primary/10 border-brand-primary/20 text-brand-primary' }} text-xs font-mono tracking-wider uppercase mb-4">
+                <span class="w-1.5 h-1.5 rounded-full {{ !empty($isExistingAccount) ? 'bg-blue-400' : 'bg-brand-primary' }}"></span>
+                <span>{{ !empty($isExistingAccount) ? 'Existing Account · Course Added' : 'Registration Successful' }}</span>
             </div>
 
             <!-- Headline -->
@@ -25,8 +25,27 @@
                 ধন্যবাদ, <span class="text-brand-primary">{{ $student_name }}</span>!
             </h1>
             <p class="text-slate-300 text-base sm:text-lg mb-6">
-                আপনার ভর্তি আবেদন ও অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।
+                @if(!empty($isExistingAccount))
+                    আপনার বিদ্যমান স্টুডেন্ট অ্যাকাউন্টের সঙ্গে নতুন কোর্সটি সফলভাবে যুক্ত হয়েছে।
+                @else
+                    আপনার ভর্তি আবেদন ও স্টুডেন্ট অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।
+                @endif
             </p>
+
+            <!-- Newly Enrolled Courses List -->
+            @if(!empty($enrolledCourses) && count($enrolledCourses) > 0)
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left mb-6">
+                <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block mb-2">এই আবেদনে অন্তর্ভুক্ত কোর্স:</span>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($enrolledCourses as $ec)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-primary/15 border border-brand-primary/30 text-brand-primary text-xs font-bold">
+                            <i class="fa fa-graduation-cap"></i>
+                            <span>{{ $ec['title'] }}</span>
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             @if(isset($studentAccount) && $studentAccount)
             <!-- Student Portal Account Card -->
@@ -47,26 +66,39 @@
                         <span class="text-xs text-slate-400 block font-mono">Login Mobile / Phone:</span>
                         <strong class="text-brand-primary font-mono text-base">{{ $studentAccount->phone }}</strong>
                     </div>
-                    @php
-                        $displayPass = $tempPassword ?? (strlen(preg_replace('/[^\d]/', '', $studentAccount->phone)) >= 6 ? substr(preg_replace('/[^\d]/', '', $studentAccount->phone), -6) : '123456');
-                    @endphp
-                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-emerald-500/40 sm:col-span-2">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs text-slate-400 font-mono">Default Portal Password:</span>
-                            <span class="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">Auto-Generated</span>
+
+                    @if(empty($isExistingAccount))
+                        @php
+                            $displayPass = $tempPassword ?? (strlen(preg_replace('/[^\d]/', '', $studentAccount->phone)) >= 6 ? substr(preg_replace('/[^\d]/', '', $studentAccount->phone), -6) : '123456');
+                        @endphp
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-emerald-500/40 sm:col-span-2">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs text-slate-400 font-mono">Default Portal Password:</span>
+                                <span class="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">Auto-Generated</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                                <strong class="text-emerald-400 font-mono text-lg tracking-widest font-black">{{ $displayPass }}</strong>
+                                <span class="text-[11px] text-slate-400 font-sans">মোবাইল নম্বরের শেষ ৬ ডিজিট</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-1.5 leading-relaxed">
+                                <i class="fa fa-info-circle text-brand-primary"></i> এই পাসওয়ার্ড দিয়ে লগইন করুন। পোর্টালে ঢুকে যেকোনো সময় নতুন পাসওয়ার্ড সেট করতে পারবেন।
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                            <strong class="text-emerald-400 font-mono text-lg tracking-widest font-black">{{ $displayPass }}</strong>
-                            <span class="text-[11px] text-slate-400 font-sans">মোবাইল নম্বরের শেষ ৬ ডিজিট</span>
+                    @else
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-blue-500/30 sm:col-span-2">
+                            <div class="flex items-center gap-2 text-xs text-blue-300 font-semibold mb-1">
+                                <i class="fa fa-key text-blue-400"></i>
+                                <span>অ্যাকাউন্ট পাসওয়ার্ড অপরিবর্তিত রয়েছে</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400 block leading-relaxed">
+                                আপনি ইতিমধ্যে নিবন্ধিত শিক্ষার্থী। আপনার পূর্ববর্তী পাসওয়ার্ড দিয়ে সরাসরি লগইন করতে পারবেন। যদি পাসওয়ার্ড ভুলে গিয়ে থাকেন, তবে অ্যাডমিনের সাহায্য নিতে পারেন।
+                            </span>
                         </div>
-                        <span class="text-[11px] text-slate-400 block mt-1.5 leading-relaxed">
-                            <i class="fa fa-info-circle text-brand-primary"></i> এই পাসওয়ার্ড দিয়ে লগইন করুন। পোর্টালে ঢুকে যেকোনো সময় নতুন পাসওয়ার্ড সেট করতে পারবেন।
-                        </span>
-                    </div>
+                    @endif
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <span class="text-xs text-slate-400">অনলাইন পোর্টাল থেকে ক্লাস শিডিউল ও পেমেন্ট হিস্ট্রি দেখুন</span>
+                    <span class="text-xs text-slate-400">অনলাইন পোর্টাল থেকে সকল কোর্সের শিডিউল ও ক্লাস দেখুন</span>
                     <a href="{{ route('student.login') }}" class="px-4 py-2 rounded-lg bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider hover:bg-brand-accent transition-colors flex items-center gap-2">
                         <span>স্টুডেন্ট লগইন</span>
                         <i class="fa fa-arrow-right"></i>

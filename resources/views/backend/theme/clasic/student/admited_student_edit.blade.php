@@ -300,7 +300,7 @@
     </script>
 
     <!-- jQuery -->
-    <script src="{{ asset('public/admin/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ safe_asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <script>
         $(document).ready(function() {
 

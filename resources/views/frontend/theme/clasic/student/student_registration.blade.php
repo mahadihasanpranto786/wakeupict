@@ -222,6 +222,54 @@
                             </div>
                         @endif
 
+                        <!-- Identity Conflict Warning -->
+                        @if (session('conflict_warning'))
+                            <div class="mb-8 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-sm">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="fa fa-shield text-base"></i>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <h4 class="font-bold text-amber-300 text-sm">অ্যাকাউন্ট ভেরিফিকেশন সতর্কতা</h4>
+                                        <p class="text-xs text-amber-200/90 leading-relaxed">{{ session('conflict_warning') }}</p>
+                                        <div class="pt-2 flex items-center gap-3">
+                                            <a href="tel:01791612121" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-all">
+                                                <i class="fa fa-phone"></i>
+                                                <span>কল করুন: 01791612121</span>
+                                            </a>
+                                            <a href="{{ route('student.login') }}" class="text-xs text-amber-300 underline font-semibold hover:text-white">
+                                                স্টুডেন্ট লগইন পেজ
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Course Already Enrolled Alert -->
+                        @if (session('course_already_enrolled'))
+                            <div class="mb-8 p-5 rounded-2xl bg-blue-500/10 border border-blue-500/40 text-blue-200 text-sm">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="fa fa-info-circle text-base"></i>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <h4 class="font-bold text-blue-300 text-sm">কোর্সে ইতিমধ্যে আবেদন বা ভর্তি করা আছে</h4>
+                                        <p class="text-xs text-blue-200/90 leading-relaxed">{{ session('course_already_enrolled') }}</p>
+                                        <div class="pt-2 flex items-center gap-3">
+                                            <a href="{{ route('student.login') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 transition-all shadow-md">
+                                                <i class="fa fa-sign-in"></i>
+                                                <span>স্টুডেন্ট পোর্টালে সরাসরি লগইন করুন</span>
+                                            </a>
+                                            <a href="{{ route('student.courses.my') }}" class="text-xs text-blue-300 underline font-semibold hover:text-white">
+                                                আমার কোর্সসমূহ দেখুন
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <form method="POST" action="{{ route('store-student-form') }}" enctype="multipart/form-data" id="studentRegistrationForm">
                             @csrf
                             <input type="hidden" name="course_id" id="hidden_course_id" value="{{ $course->id }}">

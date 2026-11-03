@@ -7,12 +7,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Student Payment View</title>
 
-    <link href="{{ asset('public/admin/plugins/print/bootstrap.min.css') }}" rel="stylesheet" id="bootstrap-css">
-    <script src="{{ asset('public/admin/plugins/print/bootstrap.min.js') }}"></script>
+    <link href="{{ safe_asset('admin/plugins/print/bootstrap.min.css') }}" rel="stylesheet" id="bootstrap-css">
+    <script src="{{ safe_asset('admin/plugins/print/bootstrap.min.js') }}"></script>
     <!-- jQuery -->
-    <script src="{{ asset('public/admin/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ safe_asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="{{ asset('public/admin/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ safe_asset('admin/plugins/fontawesome-free/css/all.min.css') }}">
     <style>
         .col-print-1 {
             width: 8%;
