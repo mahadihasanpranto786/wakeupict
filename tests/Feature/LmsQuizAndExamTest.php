@@ -625,4 +625,86 @@ class LmsQuizAndExamTest extends TestCase
             $seenHashes[$h] = true;
         }
     }
+
+    /**
+     * Test Retake Submitted Attempt Reuses Exact Same Questions
+     */
+    public function testRetakeSubmittedAttemptReusesExactSameSubmittedQuestions()
+    {
+        // 1. Create a submitted attempt with a snapshot of questions
+        $snapshot = [
+            [
+                'id' => 991,
+                'question_text' => 'What is the capital of Bangladesh?',
+                'question_type' => 'mcq_single',
+                'marks' => 1.0,
+                'options' => [
+                    ['id' => 101, 'text' => 'Dhaka', 'order' => 0],
+                    ['id' => 102, 'text' => 'Chittagong', 'order' => 1],
+                ],
+            ],
+            [
+                'id' => 992,
+                'question_text' => 'What is 2 + 2?',
+                'question_type' => 'mcq_single',
+                'marks' => 1.0,
+                'options' => [
+                    ['id' => 201, 'text' => '4', 'order' => 0],
+                    ['id' => 202, 'text' => '5', 'order' => 1],
+                ],
+            ],
+        ];
+
+        $prevAttempt = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 1,
+            'started_at' => \Carbon\Carbon::now()->subMinutes(15),
+            'total_marks' => 2.0,
+            'status' => 'graded',
+            'view_mode' => 'all_questions',
+            'question_set' => 'Set A',
+            'questions_snapshot' => $snapshot,
+        ]);
+
+        // 2. Call retake endpoint
+        $response = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.retake', $prevAttempt->id));
+
+        // 3. Must create new attempt with status in_progress and identical questions
+        $newAttempt = \App\model\LmsQuizAttempt::where('quiz_id', $this->quiz->id)
+            ->where('student_account_id', $this->student->id)
+            ->where('id', '!=', $prevAttempt->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($newAttempt);
+        $this->assertEquals('in_progress', $newAttempt->status);
+        $this->assertEquals($snapshot, $newAttempt->questions_snapshot);
+        $response->assertRedirect(route('student.quiz.take', $newAttempt->id));
+    }
+
+    /**
+     * Test Navigating Back to Submitted Attempt Redirects to Results Without Restarting Exam
+     */
+    public function testNavigatingBackToSubmittedAttemptRedirectsToResultsWithoutRestartingExam()
+    {
+        // 1. Create a graded/submitted attempt
+        $attempt = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 2,
+            'started_at' => \Carbon\Carbon::now()->subMinutes(20),
+            'total_marks' => 10.0,
+            'status' => 'graded',
+            'view_mode' => 'all_questions',
+        ]);
+
+        // 2. Student hits Back button (GET request to take route)
+        $response = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.take', $attempt->id));
+
+        // Must redirect to results page immediately
+        $response->assertRedirect(route('student.quiz.results', $attempt->id));
+    }
 }

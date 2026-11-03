@@ -764,6 +764,7 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
         Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
         Route::get('/quiz/attempt/{attemptId}/result', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.result');
+        Route::match(['get', 'post'], '/quiz/attempt/{attemptId}/retake', 'frontend\theme\clasic\StudentQuizController@retakeAttempt')->name('quiz.retake');
 
 
         // Assignments & Projects (Coursework, File Uploads, Capstones & Rubric Feedback)

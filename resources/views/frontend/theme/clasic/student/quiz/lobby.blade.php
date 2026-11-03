@@ -156,6 +156,24 @@
                             <span>Start Assessment Now</span>
                         </button>
                     </form>
+                @elseif($attempts->count() > 0)
+                    <form action="{{ route('student.quiz.retake', $attempts->first()->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" 
+                                class="px-8 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2 hover:scale-105">
+                            <i class="fa fa-repeat"></i>
+                            <span>পূর্ববর্তী প্রশ্নে পুনরায় পরীক্ষা দিন (Retake Exam)</span>
+                        </button>
+                    </form>
+                @elseif($quiz->quiz_type === 'practice')
+                    <form action="{{ route('student.practice.start') }}" method="POST">
+                        @csrf
+                        <button type="submit" 
+                                class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
+                            <i class="fa fa-play"></i>
+                            <span>Start Assessment Now (অনুশীলন পরীক্ষা)</span>
+                        </button>
+                    </form>
                 @else
                     <button type="button" disabled class="px-8 py-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 font-bold text-xs uppercase tracking-wider cursor-not-allowed flex items-center gap-2">
                         <i class="fa fa-clock-o"></i>
@@ -210,9 +228,17 @@
                                         @endif
                                     </td>
                                     <td class="p-3.5 text-right">
-                                        <a href="{{ route('student.quiz.results', $att->id) }}" class="text-blue-600 hover:underline font-bold">
-                                            Review Sheet &rarr;
-                                        </a>
+                                        <div class="flex items-center justify-end gap-2.5">
+                                            <a href="{{ route('student.quiz.results', $att->id) }}" class="text-blue-600 hover:underline font-bold text-xs">
+                                                Review Sheet &rarr;
+                                            </a>
+                                            <form action="{{ route('student.quiz.retake', $att->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-emerald-600 hover:text-emerald-700 hover:underline font-bold text-xs flex items-center gap-1" title="এই প্রশ্নে পুনরায় পরীক্ষা দিন">
+                                                    <i class="fa fa-repeat"></i> পুনরায়
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

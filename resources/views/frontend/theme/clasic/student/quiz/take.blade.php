@@ -788,6 +788,17 @@
 
 <!-- Exam Controller Script -->
 <script>
+    // Immediate check if exam attempt was already completed (prevents Back button timer restart)
+    if (window.sessionStorage && window.sessionStorage.getItem('exam_completed_{{ $attempt->id }}') === '1') {
+        window.location.replace("{{ route('student.quiz.results', $attempt->id) }}");
+    }
+
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+            window.location.replace("{{ route('student.quiz.results', $attempt->id) }}");
+        }
+    });
+
     var remainingSeconds = {{ $secondsRemaining }};
     var timerElement = document.getElementById('exam-timer');
     var timerBox = document.getElementById('timer-box');
@@ -1338,6 +1349,9 @@
     }
 
     function executeFinalSubmit() {
+        if (window.sessionStorage) {
+            window.sessionStorage.setItem('exam_completed_{{ $attempt->id }}', '1');
+        }
         var form = document.getElementById('final-submit-form');
         
         // Harvest all text answers from page
