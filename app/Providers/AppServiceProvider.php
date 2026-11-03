@@ -26,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Force Bangladesh Standard Timezone (Asia/Dhaka, UTC+6) across PHP runtime
+        date_default_timezone_set(config('app.timezone', 'Asia/Dhaka'));
+
         // Ensure student auth guard is always registered even if server has stale config cache
         if (!config('auth.guards.student')) {
             config([
