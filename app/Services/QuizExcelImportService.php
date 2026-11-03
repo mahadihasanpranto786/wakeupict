@@ -26,9 +26,14 @@ class QuizExcelImportService
         }
 
         try {
-            $spreadsheet = IOFactory::load($filePath);
+            $reader = IOFactory::createReaderForFile($filePath);
+            if (method_exists($reader, 'setReadDataOnly')) {
+                $reader->setReadDataOnly(true);
+            }
+            $spreadsheet = $reader->load($filePath);
             $sheet = $spreadsheet->getActiveSheet();
-            $rows = $sheet->toArray(null, true, true, true);
+            // Pass calculateFormulas = false so questions with formulas (e.g. =E1/F1, =SUM(A1:A5)) are parsed as plain text
+            $rows = $sheet->toArray(null, false, false, true);
         } catch (Exception $e) {
             return [
                 'success' => false,
