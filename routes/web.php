@@ -752,6 +752,7 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::get('/exams/upcoming', 'frontend\theme\clasic\StudentQuizController@upcomingExams')->name('exams.upcoming')->middleware('student.feature:upcoming_exams');
         Route::get('/quiz', 'frontend\theme\clasic\StudentQuizController@onlineQuiz')->name('quiz.index')->middleware('student.feature:online_quiz');
         Route::get('/practice', 'frontend\theme\clasic\StudentQuizController@practiceTests')->name('practice.index')->middleware('student.feature:practice_tests');
+        Route::post('/practice/start', 'frontend\theme\clasic\StudentQuizController@startPracticeExam')->name('practice.start')->middleware('student.feature:practice_tests');
         Route::get('/results', 'frontend\theme\clasic\StudentQuizController@allResults')->name('results.index')->middleware('student.feature:results');
         Route::get('/exams/history', 'frontend\theme\clasic\StudentQuizController@examHistory')->name('exams.history')->middleware('student.feature:exam_history');
         Route::get('/quiz/{id}', 'frontend\theme\clasic\StudentQuizController@lobby')->name('quiz.lobby');
@@ -762,6 +763,7 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
         Route::post('/quiz/attempt/{attemptId}/switch-view-mode', 'frontend\theme\clasic\StudentQuizController@switchViewMode')->name('quiz.switch-view-mode');
         Route::post('/quiz/attempt/{attemptId}/submit', 'frontend\theme\clasic\StudentQuizController@submitQuiz')->name('quiz.submit');
         Route::get('/quiz/attempt/{attemptId}/results', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.results');
+        Route::get('/quiz/attempt/{attemptId}/result', 'frontend\theme\clasic\StudentQuizController@quizResults')->name('quiz.result');
 
 
         // Assignments & Projects (Coursework, File Uploads, Capstones & Rubric Feedback)

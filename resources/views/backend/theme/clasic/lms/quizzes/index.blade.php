@@ -11,7 +11,7 @@
     <div class="content-header p-0 mb-3">
         <div class="container-fluid">
             <div class="row align-items-center">
-                <div class="col-xl-4 col-lg-3 col-md-12 mb-2 mb-lg-0">
+                <div class="col-xl-3 col-lg-3 col-md-12 mb-2 mb-lg-0">
                     <h1 class="m-0 text-dark font-weight-bold" style="font-size: 1.4rem;">
                         <i class="fas fa-file-excel text-success mr-2"></i> কুইজ ও এক্সেল ডাটা আপলোড
                     </h1>
@@ -19,20 +19,21 @@
                         কোর্স ক্যাটাগরি ভিত্তিক কুইজ ব্যবস্থাপনা এবং এক্সেল শিটের মাধ্যমে বাল্ক MCQ প্রশ্ন আপলোড।
                     </p>
                 </div>
-                <div class="col-xl-8 col-lg-9 col-md-12 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 6px;">
-                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                <div class="col-xl-9 col-lg-9 col-md-12 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 5px;">
+                    <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-primary shadow-sm px-2.5" style="white-space: nowrap;">
                         <i class="fas fa-chart-line mr-1"></i> পরীক্ষার রিপোর্ট
                     </a>
-                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-info shadow-sm">
+                    <a href="{{ route('admin.quizzes.sample') }}" class="btn btn-sm btn-outline-info shadow-sm px-2.5" style="white-space: nowrap;">
                         <i class="fas fa-file-download mr-1"></i> নমুনা এক্সেল ডাউনলোড
                     </a>
-                    <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important;">
-                        <i class="fas fa-book-open mr-1"></i> লাইব্রেরি থেকে প্রশ্ন যোগ (No File)
+                    <button type="button" class="btn btn-sm btn-dark shadow-sm font-weight-bold px-2.5" data-toggle="modal" data-target="#practiceSettingsModal" style="white-space: nowrap;">
+                        <i class="fas fa-sliders-h mr-1 text-warning"></i> অনুশীলন পরীক্ষা সেটিংস
                     </button>
-                    <button type="button" class="btn btn-sm btn-success shadow-sm" data-toggle="modal" data-target="#excelImportModal">
+                    <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold px-2.5" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important; white-space: nowrap;"><i class="fas fa-book-open mr-1"></i> লাইব্রেরি প্রশ্ন যোগ</button>
+                    <button type="button" class="btn btn-sm btn-success shadow-sm px-2.5" data-toggle="modal" data-target="#excelImportModal" style="white-space: nowrap;">
                         <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
                     </button>
-                    <button type="button" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#createQuizModal">
+                    <button type="button" class="btn btn-sm btn-primary shadow-sm px-3 font-weight-bold" data-toggle="modal" data-target="#createQuizModal" style="white-space: nowrap;">
                         <i class="fas fa-plus-circle mr-1"></i> নতুন কুইজ
                     </button>
                 </div>
@@ -93,6 +94,56 @@
                     <span class="info-box-text text-muted">প্রকাশিত কুইজ (Published)</span>
                     <span class="info-box-number font-weight-bold text-info" style="font-size: 1.4rem;">{{ $publishedQuizzes }}</span>
                     <span class="text-xs text-muted">শিক্ষার্থীরা পরীক্ষা দিতে পারবে</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Practice Exam Control Strip -->
+    <div class="card shadow-sm border-0 mb-3" style="border-left: 4px solid #0284c7 !important; background: #ffffff;">
+        <div class="card-body py-2.5 px-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="d-flex align-items-center mb-2 mb-lg-0">
+                    <div class="mr-3 text-primary" style="font-size: 1.6rem;">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge badge-info font-weight-bold text-uppercase px-2 py-0.5" style="font-size: 10px;">Question Bank Practice Engine</span>
+                            <span class="badge {{ $practiceSettings['attempt_limit_type'] === 'single' ? 'badge-warning' : ($practiceSettings['attempt_limit_type'] === 'custom' ? 'badge-primary' : 'badge-success') }} font-weight-bold px-2 py-0.5" style="font-size: 10px;">
+                                @if($practiceSettings['attempt_limit_type'] === 'single') একক পরীক্ষা (Single Attempt)
+                                @elseif($practiceSettings['attempt_limit_type'] === 'custom') সর্বোচ্চ {{ $practiceSettings['max_attempts'] }} বার
+                                @else আনলিমিটেড (Unlimited Attempts)
+                                @endif
+                            </span>
+                        </div>
+                        <strong class="d-block text-dark font-weight-bold mt-0.5" style="font-size: 0.95rem;">
+                            শিক্ষার্থী প্যানেল অনুশীলন পরীক্ষা কনফিগারেশন (Student Practice Controls)
+                        </strong>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-start justify-content-lg-end" style="gap: 16px; font-size: 0.85rem;">
+                    <div class="text-dark">
+                        <i class="fas fa-list-ol text-primary mr-1"></i> প্রশ্নের সংখ্যা: <strong class="text-primary font-weight-bold">{{ $practiceSettings['question_count'] }} টি</strong>
+                    </div>
+                    <div class="text-dark">
+                        <i class="fas fa-stopwatch text-danger mr-1"></i> সময়সীমা: <strong class="text-danger font-weight-bold">{{ $practiceSettings['duration_minutes'] }} মিনিট</strong>
+                    </div>
+                    <div class="text-dark">
+                        <i class="fas fa-desktop text-info mr-1"></i> ইন্টারফেস মোড: 
+                        <strong class="text-info font-weight-bold">
+                            @if($practiceSettings['view_mode'] === 'all_questions') সব প্রশ্ন একসাথে (Full Paper)
+                            @elseif($practiceSettings['view_mode'] === 'one_by_one') একটি করে প্রশ্ন (Focus Mode)
+                            @else শিক্ষার্থীর পছন্দ (Student Choice)
+                            @endif
+                        </strong>
+                    </div>
+                    <div class="text-dark">
+                        <i class="fas fa-check-circle text-success mr-1"></i> প্রতি প্রশ্নে: <strong class="text-success font-weight-bold">{{ $practiceSettings['mark_per_question'] ?? 1 }} মার্ক</strong> (পাস: {{ $practiceSettings['pass_percentage'] ?? 40 }}%)
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold px-3 py-1 shadow-sm" data-toggle="modal" data-target="#practiceSettingsModal">
+                        <i class="fas fa-sliders-h mr-1"></i> সেটিংস পরিবর্তন করুন
+                    </button>
                 </div>
             </div>
         </div>
@@ -342,6 +393,300 @@
         <div id="bulkDeleteHiddenInputs"></div>
     </form>
 
+<!-- Modal: Practice Exam Settings -->
+<div class="modal fade" id="practiceSettingsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content shadow-lg border-0">
+            <form action="{{ route('admin.quizzes.practice-settings.update') }}" method="POST">
+                @csrf
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title font-weight-bold">
+                        অনুশীলন পরীক্ষা সেটিংস ও নিয়ন্ত্রণ (Practice Exam Configuration)
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="color: #0F172A;">
+                    <div class="alert alert-info border-0 mb-4 p-3 rounded" style="background-color: #E0F2FE; color: #0369A1;">
+                        <div class="text-xs font-weight-bold">
+                            এখানে নির্ধারিত সেটিংস শিক্ষার্থী প্যানেলের <strong>অনুশীলন পরীক্ষা (Question Bank Practice)</strong> কার্যক্রমে সরাসরি কার্যকর হবে। শিক্ষার্থী কতটি প্রশ্ন পাবে, কত সময় থাকবে, ইন্টারফেস লেআউট এবং কয়বার পরীক্ষা দিতে পারবে তা এখান থেকেই নিয়ন্ত্রিত হবে।
+                        </div>
+                    </div>
+
+                    <!-- Multiple Question Count & Duration Tiers -->
+                    <div class="card bg-light border mb-4">
+                        <div class="card-header bg-white py-2 border-bottom">
+                            <strong class="text-dark font-weight-bold" style="font-size: 0.92rem;">
+                                প্রশ্নের সংখ্যা ও সময়সীমা অপশনসমূহ (Question Count & Time Options)
+                            </strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive mb-0">
+                                <table class="table table-sm table-bordered table-hover mb-0" id="practiceTiersTable">
+                                    <thead class="thead-light" style="font-size: 11px;">
+                                        <tr>
+                                            <th style="width: 110px;">প্রশ্নের সংখ্যা (Count)</th>
+                                            <th style="width: 110px;">সময়সীমা (মিনিট)</th>
+                                            <th style="width: 110px;">পাস মার্ক (Pass Mark)</th>
+                                            <th>শিক্ষার্থীর ড্রপডাউনে প্রদর্শিত লেবেল</th>
+                                            <th style="width: 50px;" class="text-center">মুছুন</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="practiceTiersBody">
+                                        @foreach($practiceSettings['tiers'] as $tIndex => $tier)
+                                        @php
+                                            $tQ = (int)\App\Services\PracticeQuestionRotationService::toEnglishDigits($tier['questions']);
+                                            $tD = (int)\App\Services\PracticeQuestionRotationService::toEnglishDigits($tier['duration']);
+                                            $tP = (float)\App\Services\PracticeQuestionRotationService::toEnglishDigits($tier['pass_marks'] ?? round($tQ * 0.4, 1));
+                                        @endphp
+                                        <tr class="tier-row">
+                                            <td>
+                                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tier_questions[]" class="form-control form-control-sm font-weight-bold tier-q-input eng-number-int" value="{{ $tQ }}" required oninput="handlePracticeTierInput(this)">
+                                            </td>
+                                            <td>
+                                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="tier_durations[]" class="form-control form-control-sm font-weight-bold tier-d-input eng-number-int" value="{{ $tD }}" required oninput="handlePracticeTierInput(this)">
+                                            </td>
+                                            <td>
+                                                <input type="text" inputmode="decimal" name="tier_pass_marks[]" class="form-control form-control-sm font-weight-bold tier-p-input eng-number-float" value="{{ $tP }}" required oninput="handlePracticeTierInput(this)">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="tier_labels[]" class="form-control form-control-sm tier-l-input font-weight-bold" value="{{ $tier['label'] }}" placeholder="লেবেল লিখুন" required>
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <button type="button" class="btn btn-outline-danger btn-xs" onclick="removePracticeTierRow(this)" title="মুছুন">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="bg-white">
+                                        <tr>
+                                            <td colspan="5" class="p-2.5 bg-white border-top">
+                                                <button type="button" class="btn btn-xs btn-outline-success font-weight-bold px-3 py-1.5 shadow-sm" onclick="addPracticeTierRow()">
+                                                    নতুন অপশন যোগ করুন (Add Option)
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white py-1.5 px-3">
+                            <small class="text-muted text-xs">
+                                শিক্ষার্থী প্যানেলে এই অপশনগুলো ড্রপডাউনে থাকবে এবং শিক্ষার্থী তার পছন্দমতো প্রশ্নের সংখ্যা ও সময় নির্বাচন করে পরীক্ষা দেবে।
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <!-- 3. Interface Mode -->
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark text-sm">
+                                  ইন্টারফেস লেআউট মোড (Exam Layout) <span class="text-danger">*</span>
+                            </label>
+                            <select name="view_mode" class="form-control font-weight-bold" required>
+                                <option value="all_questions" {{ $practiceSettings['view_mode'] === 'all_questions' ? 'selected' : '' }}>
+                                    সব প্রশ্ন একসাথে (Full Paper View) — অ্যাডমিন ফিক্সড
+                                </option>
+                                <option value="one_by_one" {{ $practiceSettings['view_mode'] === 'one_by_one' ? 'selected' : '' }}>
+                                    একটি করে প্রশ্ন (One-by-One Focus Mode) — অ্যাডমিন ফিক্সড
+                                </option>
+                                <option value="student_choice" {{ $practiceSettings['view_mode'] === 'student_choice' ? 'selected' : '' }}>
+                                    শিক্ষার্থীর পছন্দমতো নির্বাচন (Allow Student to Choose)
+                                </option>
+                            </select>
+                            <small class="text-muted text-xs">অ্যাডমিন ফিক্সড নির্বাচন করলে শিক্ষার্থীর কাছে লেআউট লক থাকবে।</small>
+                        </div>
+
+                        <!-- 4. Attempt Policy -->
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark text-sm">
+                                পরীক্ষার সুযোগ / কতবার দেওয়া যাবে <span class="text-danger">*</span>
+                            </label>
+                            <select name="attempt_limit_type" id="practice_attempt_limit_type" class="form-control font-weight-bold" onchange="toggleCustomAttemptInput(this.value)" required>
+                                <option value="unlimited" {{ $practiceSettings['attempt_limit_type'] === 'unlimited' ? 'selected' : '' }}>
+                                    আনলিমিটেড অ্যাটেম্পট (Unlimited — যতবার ইচ্ছা অনুশীলন)
+                                </option>
+                                <option value="single" {{ $practiceSettings['attempt_limit_type'] === 'single' ? 'selected' : '' }}>
+                                    সিঙ্গেল অ্যাটেম্পট (Single Attempt — মাত্র ১ বার পরীক্ষা)
+                                </option>
+                                <option value="custom" {{ $practiceSettings['attempt_limit_type'] === 'custom' ? 'selected' : '' }}>
+                                    নির্দিষ্ট সংখ্যক অ্যাটেম্পট (Custom Count)
+                                </option>
+                            </select>
+                            <small class="text-muted text-xs">সিঙ্গেল মোডে শিক্ষার্থী একবারের বেশি পরীক্ষা শুরু করতে পারবে না।</small>
+                        </div>
+
+                        <!-- 5. Custom Max Attempts (conditional) -->
+                        <div class="col-md-6 mb-3" id="custom_attempt_container" style="{{ $practiceSettings['attempt_limit_type'] === 'custom' ? '' : 'display: none;' }}">
+                            <label class="font-weight-bold text-dark text-sm">
+                                সর্বোচ্চ অ্যাটেম্পট সংখ্যা (Max Attempts)
+                            </label>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" name="max_attempts" class="form-control font-weight-bold eng-number-int" value="{{ $practiceSettings['max_attempts'] ?: 1 }}" oninput="handlePracticeTierInput(this)">
+                            <small class="text-muted text-xs">শিক্ষার্থী মোট কতবার এই অনুশীলন পরীক্ষা দিতে পারবে।</small>
+                        </div>
+
+                        <!-- 6. Allow Category Choice -->
+                        <div class="col-md-6 mb-3 d-flex align-items-center">
+                            <div class="custom-control custom-switch mt-2">
+                                <input type="checkbox" class="custom-control-input" id="allow_category_choice" name="allow_category_choice" value="1" {{ $practiceSettings['allow_category_choice'] ? 'checked' : '' }}>
+                                <label class="custom-control-label font-weight-bold text-dark text-sm" for="allow_category_choice">
+                                    শিক্ষার্থীদের বিষয়/অধ্যায় নির্বাচনের সুযোগ দিন
+                                </label>
+                                <small class="text-muted d-block">আনচেক থাকলে শিক্ষার্থীরা সবসময় সম্পূর্ণ প্রশ্ন ব্যাংক থেকে পরীক্ষা দেবে।</small>
+                            </div>
+                        </div>
+
+                        <!-- 7. Mark per Question -->
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark text-sm">
+                                 প্রতি প্রশ্নে মার্ক (Marks per Question) <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" inputmode="decimal" name="mark_per_question" class="form-control font-weight-bold eng-number-float" value="{{ (float)\App\Services\PracticeQuestionRotationService::toEnglishDigits($practiceSettings['mark_per_question'] ?? 1) }}" required oninput="handlePracticeTierInput(this)">
+                            <small class="text-muted text-xs">প্রতিটি সঠিক উত্তরের জন্য প্রাপ্ত মান (ডিফল্ট: ১)।</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        সেটিংস সংরক্ষণ করুন (Save Settings)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCustomAttemptInput(val) {
+    var container = document.getElementById('custom_attempt_container');
+    if (container) {
+        container.style.display = (val === 'custom') ? 'block' : 'none';
+    }
+}
+
+// Universal Bengali to English Digits Real-Time Auto Converter
+function convertToEnglishDigits(str) {
+    if (str === null || str === undefined) return '';
+    var bn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9','।':'.'};
+    return str.toString().replace(/[০-৯।]/g, function(d) {
+        return bn[d] !== undefined ? bn[d] : d;
+    });
+}
+
+function autoUpdateTierLabel(input) {
+    if (!input) return;
+    var tr = input.closest('tr');
+    if (!tr) return;
+    var qInput = tr.querySelector('.tier-q-input');
+    var dInput = tr.querySelector('.tier-d-input');
+    var pInput = tr.querySelector('.tier-p-input');
+    var lbl = tr.querySelector('.tier-l-input');
+
+    var q = qInput ? convertToEnglishDigits(qInput.value).trim() : '';
+    var d = dInput ? convertToEnglishDigits(dInput.value).trim() : '';
+    var p = pInput ? convertToEnglishDigits(pInput.value).trim() : '';
+
+    if (!p && q && input === qInput) {
+        p = Math.round(Number(q) * 0.4 * 10) / 10;
+        if (pInput) pInput.value = p;
+    }
+
+    if (lbl) {
+        if (q && d) {
+            lbl.value = q + ' টি প্রশ্ন (' + d + ' মিনিট' + (p !== '' ? ' — পাস: ' + p : '') + ')';
+        } else if (q) {
+            lbl.value = q + ' টি প্রশ্ন' + (p !== '' ? ' (পাস: ' + p + ')' : '');
+        } else if (d) {
+            lbl.value = d + ' মিনিট' + (p !== '' ? ' — পাস: ' + p : '');
+        }
+    }
+}
+
+function handlePracticeTierInput(input) {
+    if (!input) return;
+    var raw = input.value;
+    var converted = convertToEnglishDigits(raw);
+
+    if (input.classList.contains('eng-number-int') || input.classList.contains('tier-q-input') || input.classList.contains('tier-d-input') || input.name === 'max_attempts' || input.name === 'question_count' || input.name === 'duration_minutes') {
+        converted = converted.replace(/[^0-9]/g, '');
+    } else if (input.classList.contains('eng-number-float') || input.classList.contains('tier-p-input') || input.name === 'mark_per_question') {
+        converted = converted.replace(/[^0-9.]/g, '');
+        var parts = converted.split('.');
+        if (parts.length > 2) {
+            converted = parts[0] + '.' + parts.slice(1).join('');
+        }
+    }
+
+    if (raw !== converted) {
+        input.value = converted;
+    }
+
+    if (input.classList.contains('tier-q-input') || input.classList.contains('tier-d-input') || input.classList.contains('tier-p-input')) {
+        autoUpdateTierLabel(input);
+    }
+}
+
+function addPracticeTierRow() {
+    var tbody = document.getElementById('practiceTiersBody');
+    var tr = document.createElement('tr');
+    tr.className = 'tier-row';
+    tr.innerHTML = '<td><input type="text" inputmode="numeric" pattern="[0-9]*" name="tier_questions[]" class="form-control form-control-sm font-weight-bold tier-q-input eng-number-int" value="20" required oninput="handlePracticeTierInput(this)"></td>' +
+                   '<td><input type="text" inputmode="numeric" pattern="[0-9]*" name="tier_durations[]" class="form-control form-control-sm font-weight-bold tier-d-input eng-number-int" value="20" required oninput="handlePracticeTierInput(this)"></td>' +
+                   '<td><input type="text" inputmode="decimal" name="tier_pass_marks[]" class="form-control form-control-sm font-weight-bold tier-p-input eng-number-float" value="8" required oninput="handlePracticeTierInput(this)"></td>' +
+                   '<td><input type="text" name="tier_labels[]" class="form-control form-control-sm tier-l-input font-weight-bold" value="20 টি প্রশ্ন (20 মিনিট — পাস: 8)" placeholder="লেবেল লিখুন" required></td>' +
+                   '<td class="text-center align-middle"><button type="button" class="btn btn-outline-danger btn-xs" onclick="removePracticeTierRow(this)" title="মুছুন"><i class="fas fa-trash-alt"></i></button></td>';
+    tbody.appendChild(tr);
+}
+
+function removePracticeTierRow(btn) {
+    var rows = document.querySelectorAll('#practiceTiersBody .tier-row');
+    if (rows.length <= 1) {
+        alert('কমপক্ষে একটি অপশন থাকা আবশ্যক!');
+        return;
+    }
+    btn.closest('tr').remove();
+}
+
+// Global Vanilla JS Event Delegation (runs before & independently of jQuery)
+document.addEventListener('input', function(e) {
+    var t = e.target;
+    if (t && (t.classList.contains('tier-q-input') || t.classList.contains('tier-d-input') || t.classList.contains('tier-p-input') || t.classList.contains('eng-number-int') || t.classList.contains('eng-number-float'))) {
+        handlePracticeTierInput(t);
+    }
+}, true);
+
+document.addEventListener('keyup', function(e) {
+    var t = e.target;
+    if (t && (t.classList.contains('tier-q-input') || t.classList.contains('tier-d-input') || t.classList.contains('tier-p-input'))) {
+        autoUpdateTierLabel(t);
+    }
+}, true);
+
+document.addEventListener('keydown', function(e) {
+    var t = e.target;
+    if (!t) return;
+    if (t.classList.contains('tier-q-input') || t.classList.contains('tier-d-input') || t.classList.contains('tier-p-input') || t.classList.contains('eng-number-int') || t.classList.contains('eng-number-float')) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            var step = (t.classList.contains('eng-number-float') || t.classList.contains('tier-p-input') || t.name === 'mark_per_question') ? 0.5 : 1;
+            var val = parseFloat(t.value) || 0;
+            if (e.key === 'ArrowUp') {
+                val = Math.round((val + step) * 10) / 10;
+            } else if (e.key === 'ArrowDown') {
+                val = Math.max(0, Math.round((val - step) * 10) / 10);
+            }
+            t.value = val;
+            handlePracticeTierInput(t);
+        }
+    }
+});
+</script>
+
 <!-- Modal: Excel Import -->
 <div class="modal fade" id="excelImportModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -486,7 +831,7 @@
 
     <!-- Modal: Edit Quiz Info -->
     <div class="modal fade" id="editQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
             <div class="modal-content shadow-lg border-0">
                 <form id="editQuizForm" method="POST">
                     @csrf
@@ -742,7 +1087,7 @@
 
     <!-- Modal: Create New Quiz Manually -->
 <div class="modal fade" id="createQuizModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
         <div class="modal-content shadow-lg border-0">
             <form action="{{ route('admin.quizzes.store') }}" method="POST">
                 @csrf
@@ -884,7 +1229,7 @@
 
 <!-- Modal: Generate Question Sets -->
 <div class="modal fade" id="generateSetsModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document" style="max-width: 960px; width: 95vw;">
         <div class="modal-content shadow-lg border-0">
             <form id="generateSetsForm" action="" method="POST">
                 @csrf

@@ -12,10 +12,22 @@ use Illuminate\Support\Facades\DB;
 class AcademicTrainingController extends Controller
 {
 
-    function index()
+    function index(Request $request)
     {
         $content_list = Page::where('page_name', '=', 'Academic')->get();
-        $courseData = Course::where('status', 1)->orderBy('sort_order', 'ASC')->orderBy('id', 'ASC')->get();
+        $query = Course::where('status', 1)->orderBy('sort_order', 'ASC')->orderBy('id', 'ASC');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('course_title', 'like', "%{$search}%")
+                  ->orWhere('short_description', 'like', "%{$search}%")
+                  ->orWhere('course_content', 'like', "%{$search}%")
+                  ->orWhere('course_slug', 'like', "%{$search}%");
+            });
+        }
+
+        $courseData = $query->get();
         $banner = CourseBanner::where('status',1)->where('active_status',1)->first();
         return view('frontend.theme.clasic.academic_training.academic_training', compact('content_list', 'courseData', 'banner'));
     }

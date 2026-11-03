@@ -1502,30 +1502,52 @@
 
 @section('script')
 <script>
+    function nl2brSafe(str) {
+        if (!str) return '';
+        return String(str).replace(/\n/g, '<br>');
+    }
     function showModal(modalId) {
+        var el = document.getElementById(modalId);
         if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
-            window.jQuery('#' + modalId).modal('show');
-        } else {
-            var el = document.getElementById(modalId);
-            if (el) {
-                el.classList.add('show');
-                el.style.display = 'block';
-                el.removeAttribute('aria-hidden');
+            try {
+                window.jQuery('#' + modalId).modal('show');
+                return;
+            } catch(e) {
+                console.warn('jQuery modal show error:', e);
+            }
+        }
+        if (el) {
+            el.classList.add('show');
+            el.style.display = 'block';
+            el.removeAttribute('aria-hidden');
+            document.body.classList.add('modal-open');
+            var existingBd = document.getElementById(modalId + '-bd');
+            if (!existingBd) {
+                var bd = document.createElement('div');
+                bd.className = 'modal-backdrop fade show';
+                bd.id = modalId + '-bd';
+                bd.onclick = function() { hideModal(modalId); };
+                document.body.appendChild(bd);
             }
         }
     }
 
     function hideModal(modalId) {
         if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
-            window.jQuery('#' + modalId).modal('hide');
-        } else {
-            var el = document.getElementById(modalId);
-            if (el) {
-                el.classList.remove('show');
-                el.style.display = 'none';
-                el.setAttribute('aria-hidden', 'true');
-            }
+            try {
+                window.jQuery('#' + modalId).modal('hide');
+            } catch(e) {}
         }
+        var el = document.getElementById(modalId);
+        if (el) {
+            el.classList.remove('show');
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+        }
+        document.body.classList.remove('modal-open');
+        var bd = document.getElementById(modalId + '-bd');
+        if (bd) bd.remove();
+        document.querySelectorAll('.modal-backdrop').forEach(function(b) { b.remove(); });
     }
     window.showModal = showModal;
     window.hideModal = hideModal;

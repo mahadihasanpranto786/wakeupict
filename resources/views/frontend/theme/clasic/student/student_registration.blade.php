@@ -587,10 +587,7 @@
                                                 7. Educational Qualification
                                             </h4>
                                         </div>
-                                        <button type="button" id="addQualificationBtn" class="px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 border border-brand-primary/30 text-brand-primary text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
-                                            <i class="fa fa-plus"></i>
-                                            <span>Add Another Qualification</span>
-                                        </button>
+                                        
                                     </div>
 
                                     <div class="overflow-x-auto">
@@ -704,6 +701,12 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div class="mt-3">
+                                        <button type="button" id="addQualificationBtn" class="px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 border border-brand-primary/30 text-brand-primary text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                                            <i class="fa fa-plus"></i>
+                                            <span>Add Another Qualification</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <!-- 8. Courses (Tick on your choice) -->
@@ -790,10 +793,7 @@
                                                 9. Document Attachments
                                             </h4>
                                         </div>
-                                        <button type="button" id="addAttachmentBtn" class="px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 border border-brand-primary/30 text-brand-primary text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
-                                            <i class="fa fa-plus"></i>
-                                            <span>Add Another Attachment</span>
-                                        </button>
+                                        
                                     </div>
 
                                     <div class="space-y-3" id="attachmentsContainer">

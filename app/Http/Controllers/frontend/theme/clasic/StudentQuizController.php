@@ -10,13 +10,17 @@ use App\model\LmsQuestion;
 use App\model\LmsQuestionOption;
 use App\model\LmsQuizAttempt;
 use App\model\LmsQuizAnswer;
+use App\Services\PracticeQuestionRotationService;
 use Carbon\Carbon;
 
 class StudentQuizController extends Controller
 {
-    public function __construct()
+    protected $rotationService;
+
+    public function __construct(PracticeQuestionRotationService $rotationService = null)
     {
         $this->middleware('auth:student');
+        $this->rotationService = $rotationService ?: app(PracticeQuestionRotationService::class);
     }
 
     /**
@@ -84,19 +88,234 @@ class StudentQuizController extends Controller
     /**
      * Practice tests list
      */
-    public function practiceTests()
+    /**
+     * Question Bank-based Unlimited Practice Dashboard
+     */
+    public function practiceTests(Request $request)
     {
         $student = Auth::guard('student')->user();
-        $quizzes = LmsQuiz::where('is_published', true)
-            ->where(function ($q) {
-                $q->where('quiz_type', 'practice')
-                  ->orWhere('max_attempts', 0);
-            })
-            ->with(['course', 'questions'])
-            ->orderBy('id', 'desc')
-            ->paginate(9);
+        $selectedCategory = $request->filled('category') ? trim($request->input('category')) : null;
+        
+        // 1. Comprehensive Question Bank Rotation Progress
+        $progress = $this->rotationService->getStudentProgress($student->id, $selectedCategory);
 
-        return view('frontend.theme.clasic.student.quiz.practice', compact('student', 'quizzes'));
+        // 2. Recent practice attempts taken by student
+        $recentAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            })
+            ->with(['quiz'])
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        // 3. Active in-progress attempt if any
+        $activePracticeAttempt = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->where('status', 'in_progress')
+            ->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            })
+            ->first();
+
+        // 4. Practice settings and student attempt limits
+        $practiceSettings = PracticeQuestionRotationService::getSettings();
+        $completedPracticeAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            })
+            ->whereIn('status', ['submitted', 'graded', 'timed_out'])
+            ->count();
+
+        $isAttemptLimitReached = false;
+        if ($practiceSettings['attempt_limit_type'] === 'single' && $completedPracticeAttempts >= 1) {
+            $isAttemptLimitReached = true;
+        } elseif ($practiceSettings['attempt_limit_type'] === 'custom' && $practiceSettings['max_attempts'] > 0 && $completedPracticeAttempts >= $practiceSettings['max_attempts']) {
+            $isAttemptLimitReached = true;
+        }
+
+        return view('frontend.theme.clasic.student.quiz.practice', compact(
+            'student', 'progress', 'recentAttempts', 'selectedCategory', 'activePracticeAttempt',
+            'practiceSettings', 'completedPracticeAttempts', 'isAttemptLimitReached'
+        ));
+    }
+
+    /**
+     * Start a new unlimited Question Bank practice exam with automatic question rotation
+     */
+    public function startPracticeExam(Request $request)
+    {
+        $student = Auth::guard('student')->user();
+        
+        $practiceSettings = PracticeQuestionRotationService::getSettings();
+
+        // Enforce admin attempt limits
+        $completedPracticeAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            })
+            ->whereIn('status', ['submitted', 'graded', 'timed_out'])
+            ->count();
+
+        if ($practiceSettings['attempt_limit_type'] === 'single' && $completedPracticeAttempts >= 1) {
+            return redirect()->route('student.practice.index')->with([
+                'error' => 'আপনি ইতিমধ্যে আপনার নির্ধারিত একক (Single) অনুশীলন পরীক্ষা সম্পন্ন করেছেন। অ্যাডমিন কর্তৃক পুনরায় অনুমতি না দেওয়া পর্যন্ত নতুন পরীক্ষা শুরু করা যাবে না।',
+            ]);
+        }
+
+        if ($practiceSettings['attempt_limit_type'] === 'custom' && $practiceSettings['max_attempts'] > 0 && $completedPracticeAttempts >= $practiceSettings['max_attempts']) {
+            return redirect()->route('student.practice.index')->with([
+                'error' => "আপনি ইতিমধ্যে সর্বোচ্চ {$practiceSettings['max_attempts']} টি নির্ধারিত অনুশীলন পরীক্ষা সম্পন্ন করেছেন।",
+            ]);
+        }
+
+        // Apply admin configured parameters with tier synchronization
+        $rawCount = $request->input('question_count') ?: $request->input('tier_selection');
+        $requestedCount = $rawCount 
+            ? max(1, min(100, (int)PracticeQuestionRotationService::toEnglishDigits($rawCount)))
+            : ($practiceSettings['question_count'] > 0 ? (int)$practiceSettings['question_count'] : 20);
+
+        $matchedDuration = null;
+        $matchedPassMarks = null;
+        if (!empty($practiceSettings['tiers'])) {
+            foreach ($practiceSettings['tiers'] as $tier) {
+                if ((int)PracticeQuestionRotationService::toEnglishDigits($tier['questions']) === $requestedCount) {
+                    $matchedDuration = (int)PracticeQuestionRotationService::toEnglishDigits($tier['duration']);
+                    if (isset($tier['pass_marks'])) {
+                        $matchedPassMarks = (float)PracticeQuestionRotationService::toEnglishDigits($tier['pass_marks']);
+                    }
+                    break;
+                }
+            }
+        }
+
+        $durationMinutes = $matchedDuration 
+            ?: ($request->filled('duration_minutes') 
+                ? max(1, min(300, (int)$request->input('duration_minutes'))) 
+                : ($practiceSettings['duration_minutes'] > 0 ? (int)$practiceSettings['duration_minutes'] : 20));
+
+        $questionCount = $requestedCount;
+
+        // Apply admin configured layout/interface mode
+        if ($practiceSettings['view_mode'] === 'student_choice') {
+            $viewMode = $request->input('view_mode', 'all_questions');
+            if (!in_array($viewMode, ['all_questions', 'one_by_one'])) {
+                $viewMode = 'all_questions';
+            }
+        } else {
+            $viewMode = in_array($practiceSettings['view_mode'], ['all_questions', 'one_by_one']) ? $practiceSettings['view_mode'] : 'all_questions';
+        }
+
+        $category = null;
+        if ($practiceSettings['allow_category_choice'] && $request->filled('category')) {
+            $category = trim($request->input('category'));
+        }
+
+        // Check if existing in-progress attempt exists
+        $activeAttempt = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->where('status', 'in_progress')
+            ->whereHas('quiz', function($q) {
+                $q->where('quiz_type', 'practice');
+            })
+            ->first();
+
+        if ($activeAttempt) {
+            $quiz = $activeAttempt->quiz;
+            $now = Carbon::now();
+            $maxTime = $activeAttempt->started_at->copy()->addMinutes(($quiz ? $quiz->duration_minutes : 30) + 2);
+
+            $existingCount = !empty($activeAttempt->questions_snapshot) ? count($activeAttempt->questions_snapshot) : 0;
+            // If time expired OR student starts a newly selected drill with different count:
+            if ($now->greaterThan($maxTime) || $existingCount !== $questionCount) {
+                $this->finalizeGrading($activeAttempt);
+            } else {
+                return redirect()->route('student.quiz.take', $activeAttempt->id)->with([
+                    'info' => 'আপনার একটি চলমান অনুশীলন পরীক্ষা রয়েছে। সেটি সম্পন্ন করুন।',
+                ]);
+            }
+        }
+
+        // 1. Select rotated questions prioritizing unattempted questions
+        $selection = $this->rotationService->selectQuestionsForNewAttempt($student->id, $category, $questionCount);
+        $questions = $selection['questions'];
+        $cycle = $selection['cycle'];
+        $isNewCycle = $selection['is_new_cycle'];
+
+        if ($questions->isEmpty()) {
+            return redirect()->route('student.practice.index')->with([
+                'error' => 'অনুশীলনের জন্য প্রশ্ন ব্যাংকে কোনো সক্রিয় প্রশ্ন পাওয়া যায়নি।',
+            ]);
+        }
+
+        // 2. Freeze snapshot of questions and options
+        $snapshot = [];
+        foreach ($questions as $q) {
+            $opts = $q->options;
+            $optsArray = [];
+            $optIdx = 0;
+            foreach ($opts as $o) {
+                $optsArray[] = [
+                    'id'    => $o->id,
+                    'text'  => $o->option_text,
+                    'order' => $optIdx++,
+                ];
+            }
+
+            $markPerQ = isset($practiceSettings['mark_per_question']) && (float)$practiceSettings['mark_per_question'] > 0
+                ? (float)$practiceSettings['mark_per_question']
+                : 1.0;
+
+            $snapshot[] = [
+                'id'              => $q->id,
+                'section_id'      => null,
+                'section_title'   => null,
+                'question_text'   => $q->question_text,
+                'question_type'   => $q->question_type,
+                'marks'           => $markPerQ,
+                'negative_marks'  => $q->negative_marks !== null ? (float)$q->negative_marks : 0.0,
+                'set_code'        => $q->set_code,
+                'category'        => $q->category,
+                'chapter'         => $q->chapter,
+                'topic'           => $q->topic,
+                'stimulus'        => $q->stimulus,
+                'hints'           => $q->hints,
+                'cq_subquestions' => $q->cq_subquestions_decoded,
+                'matching_pairs'  => $q->matching_pairs_decoded,
+                'options'         => $optsArray,
+            ];
+        }
+
+        // 3. Resolve or create system practice quiz with custom pass mark
+        $passMarksReq = $matchedPassMarks ?: ($request->filled('pass_marks') ? (float)$this->rotationService->toEnglishDigits($request->input('pass_marks')) : null);
+        $quiz = $this->rotationService->getOrCreatePracticeQuiz($category, count($questions), $durationMinutes, $passMarksReq);
+
+        $attemptNumber = LmsQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_account_id', $student->id)
+            ->count() + 1;
+
+        $totalMarks = round(count($questions) * $markPerQ, 2);
+
+        $newAttempt = LmsQuizAttempt::create([
+            'quiz_id'              => $quiz->id,
+            'student_account_id'   => $student->id,
+            'attempt_number'       => $attemptNumber,
+            'started_at'           => Carbon::now(),
+            'total_marks'          => $totalMarks,
+            'status'               => 'in_progress',
+            'view_mode'            => $viewMode,
+            'question_set'         => "Cycle {$cycle}",
+            'questions_snapshot'   => $snapshot,
+            'flagged_question_ids' => [],
+        ]);
+
+        // 4. Immediately record in student question history
+        $this->rotationService->recordAttemptQuestions($newAttempt, $questions, $student->id, $cycle);
+
+        $msg = $isNewCycle 
+            ? "🎉 অভিনন্দন! আপনি প্রশ্ন ব্যাংকের সকল প্রশ্ন অনুশীলন করেছেন। নতুন প্র্যাকটিস সাইকেল (Cycle {$cycle}) শুরু হয়েছে!"
+            : "আপনার নতুন অনুশীলন পরীক্ষা তৈরি হয়েছে। সম্পূর্ণ নতুন প্রশ্ন নিয়ে অনুশীলন শুরু করুন!";
+
+        return redirect()->route('student.quiz.take', $newAttempt->id)->with([
+            'success' => $msg,
+        ]);
     }
 
     /**
@@ -189,6 +408,13 @@ class StudentQuizController extends Controller
                 $q = $it->masterQuestion;
                 if (!$q) continue;
 
+                $type = $it->getQuestionType() ?: $q->question_type;
+                $isMcqFormat = in_array($type, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']);
+                // Strict MCQ constraint: non-MCQ formats are not allowed for student panel examinations
+                if (!$isMcqFormat || !$q->options || $q->options->count() < 2) {
+                    continue;
+                }
+
                 $opts = $q->options;
                 if ($quiz->shuffle_options) {
                     $opts = $opts->shuffle()->values();
@@ -227,8 +453,11 @@ class StudentQuizController extends Controller
                 ];
             }
         } else {
-            // Standard Quiz question retrieval
-            $questionsQuery = $quiz->activeQuestions()->with('options');
+            // Standard Quiz question retrieval (strictly MCQ format with options)
+            $questionsQuery = $quiz->activeQuestions()
+                ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+                ->has('options', '>=', 2)
+                ->with('options');
             $availableSets = $quiz->getAvailableSets();
             if (count($availableSets) > 1 && $assignedSet) {
                 $equivalents = \App\model\LmsQuiz::getEquivalentSetCodes($assignedSet);
@@ -240,7 +469,11 @@ class StudentQuizController extends Controller
             }
             $rawQuestions = $questionsQuery->get();
             if ($rawQuestions->isEmpty()) {
-                $rawQuestions = $quiz->activeQuestions()->with('options')->get();
+                $rawQuestions = $quiz->activeQuestions()
+                    ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+                    ->has('options', '>=', 2)
+                    ->with('options')
+                    ->get();
             }
 
             if ($quiz->shuffle_questions) {
@@ -249,6 +482,9 @@ class StudentQuizController extends Controller
 
             foreach ($rawQuestions as $q) {
                 $opts = $q->options;
+                if (!$opts || $opts->count() < 2) {
+                    continue;
+                }
                 if ($quiz->shuffle_options) {
                     $opts = $opts->shuffle()->values();
                 }
@@ -654,6 +890,9 @@ class StudentQuizController extends Controller
                     if (isset($snap['section_instructions'])) {
                         $q->section_instructions = $snap['section_instructions'];
                     }
+                    if (isset($snap['marks'])) {
+                        $q->marks = (float)$snap['marks'];
+                    }
                     if (!empty($snap['options']) && is_array($snap['options'])) {
                         $optOrderIds = array_column($snap['options'], 'id');
                         $sortedOpts = $q->options->sortBy(function($opt) use ($optOrderIds) {
@@ -674,8 +913,13 @@ class StudentQuizController extends Controller
 
         $answers = $attempt->answers->keyBy('question_id');
 
+        $attemptTotalMarks = $attempt->total_marks > 0 ? (float)$attempt->total_marks : (float)($quiz ? $quiz->total_marks : 0);
+        $attemptPassMarks = $attempt->pass_marks;
+        $markPerQuestion = $questions->count() > 0 ? round($attemptTotalMarks / $questions->count(), 2) : 1.0;
+
         return view('frontend.theme.clasic.student.quiz.result', compact(
-            'student', 'quiz', 'attempt', 'questions', 'answers', 'resultsLocked', 'resultsLockedMessage'
+            'student', 'quiz', 'attempt', 'questions', 'answers', 'resultsLocked', 'resultsLockedMessage',
+            'attemptTotalMarks', 'attemptPassMarks', 'markPerQuestion'
         ));
     }
 
@@ -712,9 +956,28 @@ class StudentQuizController extends Controller
         }
 
         $quiz = $attempt->quiz;
-        $questions = $quiz->getExamQuestions();
-        if ($questions->isEmpty()) {
-            $questions = $quiz->questions()->with('options')->get();
+        if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
+            $snapshotQIds = collect($attempt->questions_snapshot)->pluck('id')->toArray();
+            $snapshotMap = collect($attempt->questions_snapshot)->keyBy('id');
+            $questionsDb = \App\model\LmsQuestion::with('options')
+                ->whereIn('id', $snapshotQIds)
+                ->get();
+            $questions = collect();
+            foreach ($snapshotQIds as $sId) {
+                $q = $questionsDb->firstWhere('id', $sId);
+                if ($q) {
+                    $snap = $snapshotMap->get($sId);
+                    if ($snap && isset($snap['marks'])) {
+                        $q->marks = (float)$snap['marks'];
+                    }
+                    $questions->push($q);
+                }
+            }
+        } else {
+            $questions = $quiz ? $quiz->getExamQuestions() : collect();
+            if ($questions->isEmpty() && $quiz) {
+                $questions = $quiz->questions()->with('options')->get();
+            }
         }
 
         $totalMarksObtained = 0.0;
@@ -768,9 +1031,11 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = $question->negative_marks !== null
-                        ? abs((float)$question->negative_marks)
-                        : abs((float)($quiz->negative_marks ?: 0.0));
+                    $negMark = ($quiz && $quiz->quiz_type === 'practice')
+                        ? 0.0
+                        : ($question->negative_marks !== null
+                            ? abs((float)$question->negative_marks)
+                            : abs((float)($quiz ? ($quiz->negative_marks ?: 0.0) : 0.0)));
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -875,10 +1140,11 @@ class StudentQuizController extends Controller
         // Clamp final score to minimum 0
         $finalScore = max(0.0, $totalMarksObtained);
 
+        $attemptTotalMarks = $attempt->total_marks > 0 ? (float)$attempt->total_marks : (float)($quiz ? $quiz->total_marks : 0);
         $attempt->score = $finalScore;
         $attempt->negative_marks_deducted = $totalNegativeDeducted;
-        $attempt->percentage = $quiz->total_marks > 0 
-            ? round(($finalScore / $quiz->total_marks) * 100, 2) 
+        $attempt->percentage = $attemptTotalMarks > 0 
+            ? round(($finalScore / $attemptTotalMarks) * 100, 2) 
             : 0;
         $attempt->status = 'graded';
         $attempt->submitted_at = Carbon::now();

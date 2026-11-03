@@ -548,6 +548,60 @@
         html.light #main-header .fa-search {
             color: #64748b !important;
         }
+
+        /* Mobile Search Drawer in Light Theme */
+        html.light #mobile-search-drawer {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.08) !important;
+        }
+        html.light #mobile-search-drawer input {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light #mobile-search-drawer .mobile-suggestion-item {
+            color: #0f172a !important;
+        }
+        html.light #mobile-search-drawer .mobile-suggestion-item:hover {
+            background-color: #f1f5f9 !important;
+        }
+        html.light #mobile-search-drawer .course-item-title {
+            color: #0f172a !important;
+        }
+        html.light #mobile-search-drawer .mobile-suggestion-item:hover .course-item-title {
+            color: var(--brand-primary, #10b981) !important;
+        }
+        html.light #mobile-search-toggle-btn,
+        html.light #mobile-menu-btn {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html.light #mobile-search-toggle-btn:hover,
+        html.light #mobile-menu-btn:hover {
+            background-color: #f1f5f9 !important;
+            color: var(--brand-primary, #10b981) !important;
+        }
+
+        /* Header Search Auto-Suggestion Dropdown in Light Theme */
+        html.light #course-suggestion-dropdown {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.08) !important;
+        }
+        html.light #course-suggestion-dropdown .suggestion-item {
+            color: #0f172a !important;
+        }
+        html.light #course-suggestion-dropdown .suggestion-item:hover {
+            background-color: #f1f5f9 !important;
+        }
+        html.light #course-suggestion-dropdown .course-item-title {
+            color: #0f172a !important;
+        }
+        html.light #course-suggestion-dropdown .suggestion-item:hover .course-item-title {
+            color: var(--brand-primary, #10b981) !important;
+        }
         html.light #main-header div[class*="group-hover:block"] {
             background-color: #ffffff !important;
             border-color: #e2e8f0 !important;
