@@ -27,6 +27,8 @@
    - Maintain clean Blade code, PSR standards, and preserve existing routes and controllers.
 9. **Button & Badge Font Directives**:
    - Buttons, badges, and pills with `bg-rose-600` and `bg-emerald-100` MUST have **black font** (`#000000 !important; font-weight: 800;`).
+10. **Database Migrations & Raw SQL Output**:
+    - Whenever you create a new migration or modify an existing migration, **ALWAYS provide the exact raw SQL script (`ALTER TABLE`, `CREATE TABLE`, `UPDATE`, etc.) in your response** so the user can directly execute it on their live / cPanel production MySQL database via phpMyAdmin or SQL console without relying on `php artisan migrate`.
 
 ---
 

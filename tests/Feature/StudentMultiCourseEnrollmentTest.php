@@ -321,4 +321,72 @@ class StudentMultiCourseEnrollmentTest extends TestCase
         $response->assertSee('Web Development Bootcamp');
         $response->assertSee('12,000 TK');
     }
+
+    /**
+     * Test 8: Portal registration creates a master parent record in students table
+     */
+    public function testPortalRegistrationCreatesMasterParentStudentRecord()
+    {
+        $phone = '01722' . rand(100000, 999999);
+        $email = 'portal_student_' . uniqid() . '@example.com';
+
+        $response = $this->post('/student/register', [
+            'name' => 'Portal Registrant',
+            'phone' => $phone,
+            'email' => $email,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+
+        $response->assertRedirect(route('student.dashboard'));
+
+        // Check master student table has parent record
+        $parentStudent = Student::where('personal_call_no', $phone)->first();
+        $this->assertNotNull($parentStudent, 'Parent record in students table must be created upon portal registration.');
+        $this->assertEquals('Portal Registrant', $parentStudent->student_name);
+        $this->assertEquals($email, $parentStudent->email);
+
+        // Check student account is linked to parent student record
+        $account = StudentAccount::where('phone', $phone)->first();
+        $this->assertNotNull($account);
+        $this->assertEquals($parentStudent->id, $account->student_id);
+        $this->assertEquals('portal_registration', $account->meta['registration_source'] ?? null);
+    }
+
+    /**
+     * Test 9: Admin can view student accounts list and toggle account status
+     */
+    public function testAdminCanViewAndManageStudentAccountsList()
+    {
+        $admin = \App\User::first() ?: \App\User::create([
+            'name' => 'Admin User',
+            'email' => 'admin_' . uniqid() . '@example.com',
+            'password' => bcrypt('password'),
+            'type' => 'Admin',
+        ]);
+
+        $phone = '01733' . rand(100000, 999999);
+        $account = StudentAccount::create([
+            'name' => 'List Test Student',
+            'phone' => $phone,
+            'email' => 'list_' . uniqid() . '@example.com',
+            'password' => bcrypt('secret123'),
+            'status' => 1,
+            'meta' => ['registration_source' => 'portal_registration'],
+        ]);
+
+        // 1. Visit index page
+        $res = $this->actingAs($admin)->get(route('admin.student-accounts.index'));
+        $res->assertStatus(200);
+        $res->assertSee('List Test Student');
+        $res->assertSee($account->student_id_code);
+        $res->assertSee('পোর্টাল রেজিস্ট্রেশন');
+
+        // 2. Toggle status
+        $toggleRes = $this->actingAs($admin)->post(route('admin.student-accounts.toggle-status', $account->id));
+        $toggleRes->assertSessionHas('success');
+
+        $account->refresh();
+        $this->assertEquals(0, $account->status);
+    }
 }

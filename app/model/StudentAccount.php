@@ -40,6 +40,14 @@ class StudentAccount extends Authenticatable
     /**
      * Relationship to formally admitted student record
      */
+    /**
+     * Parent Student master record
+     */
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     public function admitedStudent()
     {
         return $this->belongsTo(AdmitedStudent::class, 'admited_student_id');

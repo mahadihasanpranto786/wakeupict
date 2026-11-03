@@ -462,6 +462,9 @@ class StudentEnrollmentService
                 $studentAccount = $existingAccount;
                 // Graceful update without resetting existing password
                 $updateFields = [];
+                if (empty($studentAccount->student_id)) {
+                    $updateFields['student_id'] = $studentId;
+                }
                 if ($savePhotoUrl && empty($studentAccount->avatar)) {
                     $updateFields['avatar'] = $savePhotoUrl;
                 }

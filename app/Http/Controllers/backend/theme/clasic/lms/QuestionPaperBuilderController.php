@@ -184,14 +184,25 @@ class QuestionPaperBuilderController extends Controller
         // Category & chapter lists for filters and auto-pick
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
         $chapters = LmsQuestion::whereNotNull('chapter')->where('chapter', '!=', '')->distinct()->pluck('chapter')->sort()->values();
-        $courses = \App\model\Course::where('status', 1)->orderBy('course_title')->get();
+        $courseCounts = LmsQuestion::where('is_archived', false)
+            ->select('course_id', DB::raw('count(*) as q_count'))
+            ->groupBy('course_id')
+            ->pluck('q_count', 'course_id')
+            ->toArray();
+
+        $courses = Course::where('status', 1)->orderBy('course_title')->get()->map(function ($c) use ($courseCounts) {
+            $c->q_count = $courseCounts[$c->id] ?? 0;
+            return $c;
+        });
+
+        $totalQuestionsInLib = LmsQuestion::where('is_archived', false)->count();
 
         // Calculate summary
         $totalQuestionsCount = $paper->items->count();
         $calculatedMarks = $paper->items->sum('marks');
 
         return view('backend.theme.clasic.lms.question_papers.builder', compact(
-            'paper', 'libraryQuestions', 'categories', 'chapters', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks'
+            'paper', 'libraryQuestions', 'categories', 'chapters', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks', 'totalQuestionsInLib'
         ));
     }
 

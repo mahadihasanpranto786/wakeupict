@@ -269,6 +269,11 @@ Route::get('/course-and-batch-wise-student', 'backend\theme\clasic\student\Stude
 // ajax course wise batch 
 Route::post('/courseWiseBatchAjax', 'backend\theme\clasic\student\StudentController@courseWiseBatchAjax')->name('courseWiseBatchAjax');
 Route::get('/print-all-student', 'backend\theme\clasic\student\StudentController@printAllStudent')->name('print-all-student');
+
+// Student Accounts Management (Unified registered students list)
+Route::get('/student-accounts', 'backend\theme\clasic\student\StudentAccountController@index')->name('admin.student-accounts.index');
+Route::post('/student-accounts/{id}/toggle-status', 'backend\theme\clasic\student\StudentAccountController@toggleStatus')->name('admin.student-accounts.toggle-status');
+Route::delete('/student-accounts/{id}', 'backend\theme\clasic\student\StudentAccountController@destroy')->name('admin.student-accounts.destroy');
 Route::get('print-searched-student/{student_number}', 'backend\theme\clasic\student\StudentController@printSearchedStudent');
 Route::post('/course-and-batch-wise-student-print', 'backend\theme\clasic\student\StudentController@courseAndBatchWiseStudentPrint')->name('course-and-batch-wise-student-print');
 

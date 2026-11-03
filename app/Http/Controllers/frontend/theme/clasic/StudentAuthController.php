@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\model\StudentAccount;
 use App\model\AdmitedStudent;
+use App\model\Student;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -108,34 +110,85 @@ class StudentAuthController extends Controller
             'password.confirmed' => 'Password confirmation does not match.',
         ]);
 
-        // Attempt automatic linking with formally admitted student record
-        $cleanPhone = preg_replace('/[^0-9]/', '', $request->phone);
-        $linkedStudent = AdmitedStudent::where('personal_call_no', $request->phone)
-            ->orWhere('personal_call_no', 'LIKE', '%' . substr($cleanPhone, -10))
-            ->orderBy('id', 'desc')
-            ->first();
+        $rawPhone = trim($request->phone);
+        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+        $rawEmail = $request->email ? strtolower(trim($request->email)) : null;
 
-        // Generate unique Student ID
-        $studentIdCode = StudentAccount::generateUniqueStudentId();
+        DB::beginTransaction();
+        try {
+            // 1. Locate or create parent Student record in master `students` table
+            $parentStudent = Student::where('personal_call_no', $rawPhone)
+                ->orWhere('personal_call_no', $cleanPhone)
+                ->orWhere('personal_call_no', 'LIKE', '%' . substr($cleanPhone, -10))
+                ->first();
 
-        $account = StudentAccount::create([
-            'student_id_code' => $studentIdCode,
-            'admited_student_id' => $linkedStudent ? $linkedStudent->id : null,
-            'name' => $request->name,
-            'email' => $request->email ? strtolower(trim($request->email)) : null,
-            'phone' => trim($request->phone),
-            'password' => Hash::make($request->password),
-            'avatar' => $linkedStudent ? $linkedStudent->student_photo : null,
-            'status' => 1,
-            'last_login_at' => Carbon::now(),
-            'last_login_ip' => $request->ip(),
-        ]);
+            if (!$parentStudent && !empty($rawEmail)) {
+                $parentStudent = Student::where('email', $rawEmail)->first();
+            }
 
-        Auth::guard('student')->login($account);
+            if (!$parentStudent) {
+                $parentStudent = Student::create([
+                    'student_name' => $request->name,
+                    'personal_call_no' => $rawPhone,
+                    'email' => $rawEmail ?: '',
+                    'course_id' => 0,
+                    'course_fee' => '0',
+                    'status' => 1,
+                    'gander' => 'other',
+                    'fathers_name' => '',
+                    'mothers_name' => '',
+                    'nationality' => 'Bangladeshi',
+                    'national_id_no' => '',
+                    'present_address' => '',
+                    'permanent_address' => '',
+                    'religion' => 'Islam',
+                    'occupation' => 'student',
+                    'age' => '',
+                    'educational_qualification' => '',
+                    'result' => '',
+                    'passing_year' => '',
+                ]);
+            }
 
-        return redirect()->route('student.dashboard')->with([
-            'success' => 'Account created successfully! Your unique Student ID is ' . $studentIdCode . '.',
-        ]);
+            // Attempt automatic linking with formally admitted student record
+            $linkedStudent = AdmitedStudent::where('personal_call_no', $rawPhone)
+                ->orWhere('personal_call_no', 'LIKE', '%' . substr($cleanPhone, -10))
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Generate unique Student ID
+            $studentIdCode = StudentAccount::generateUniqueStudentId();
+
+            $account = StudentAccount::create([
+                'student_id' => $parentStudent->id,
+                'student_id_code' => $studentIdCode,
+                'admited_student_id' => $linkedStudent ? $linkedStudent->id : null,
+                'name' => $request->name,
+                'email' => $rawEmail,
+                'phone' => $rawPhone,
+                'password' => Hash::make($request->password),
+                'avatar' => $linkedStudent ? $linkedStudent->student_photo : ($parentStudent->student_photo ?: null),
+                'status' => 1,
+                'meta' => [
+                    'registered_from' => 'portal_registration',
+                    'registration_source' => 'portal_registration',
+                    'student_record_id' => $parentStudent->id,
+                ],
+                'last_login_at' => Carbon::now(),
+                'last_login_ip' => $request->ip(),
+            ]);
+
+            DB::commit();
+
+            Auth::guard('student')->login($account);
+
+            return redirect()->route('student.dashboard')->with([
+                'success' => 'Account created successfully! Your unique Student ID is ' . $studentIdCode . '.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->withErrors(['error' => 'Registration could not be completed: ' . $e->getMessage()]);
+        }
     }
 
     /**

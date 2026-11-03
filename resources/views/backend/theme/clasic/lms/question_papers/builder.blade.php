@@ -270,10 +270,10 @@
                 <!-- Course Filter Dropdown -->
                 <div class="mb-2">
                     <select id="libCourseFilter" class="form-control form-control-sm custom-select text-xs font-weight-bold text-dark" onchange="loadLibraryQuestionsAJAX()">
-                        <option value="">-- সকল কোর্স (All Courses) --</option>
+                        <option value="">-- সকল কোর্স (All Courses) ({{ number_format($totalQuestionsInLib ?? 0) }}) --</option>
                         @foreach($courses as $crs)
                             <option value="{{ $crs->id }}" {{ (string)$selectedCourseId === (string)$crs->id ? 'selected' : '' }}>
-                                {{ $crs->course_title }}
+                                {{ $crs->course_title }} ({{ number_format($crs->q_count ?? 0) }})
                             </option>
                         @endforeach
                     </select>

@@ -308,6 +308,15 @@
             text-transform: uppercase;
         }
 
+        /* Standalone Flex Grid Fallback */
+        .row { display: flex; flex-wrap: wrap; margin-right: -10px; margin-left: -10px; }
+        .col-6 { flex: 0 0 50%; max-width: 50%; padding-right: 10px; padding-left: 10px; }
+        .mr-1 { margin-right: 4px; }
+        .mx-2 { margin-left: 8px; margin-right: 8px; }
+        .text-primary { color: #2563EB; }
+        .text-success { color: #16A34A; }
+        .text-dark { color: #0F172A; }
+
         /* Print Optimization */
         @media print {
             body {

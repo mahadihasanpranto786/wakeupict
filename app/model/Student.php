@@ -18,6 +18,11 @@ class Student extends Model
         return $this->belongsTo('App\model\Course', 'course_id');
     }
 
+    public function account()
+    {
+        return $this->hasOne('App\model\StudentAccount', 'student_id');
+    }
+
     public function studentAccount()
     {
         return $this->belongsTo('App\model\StudentAccount', 'personal_call_no', 'phone');

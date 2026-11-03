@@ -800,6 +800,12 @@
                                 <p>Admited Students List</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.student-accounts.index') }}" class="nav-link @yield('student_account_list_active')">
+                                <i class="fas fa-id-badge nav-icon text-warning"></i>
+                                <p>Student Accounts</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 {{-- ****************************************** student end ************************************************ --}}
