@@ -566,7 +566,7 @@ class QuestionPaperBuilderController extends Controller
         }
 
         $count = (int)$request->count;
-        $matchedQuestions = $query->inRandomOrder()->limit($count)->get();
+        $matchedQuestions = $query->inRandomOrder()->limit(max($count * 3, 20))->get();
 
         if ($matchedQuestions->isEmpty()) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -590,6 +590,9 @@ class QuestionPaperBuilderController extends Controller
             }
 
             foreach ($matchedQuestions as $q) {
+                if ($added >= $count) {
+                    break;
+                }
                 $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
                 if ($h && isset($existingPaperHashes[$h])) {
                     continue;
