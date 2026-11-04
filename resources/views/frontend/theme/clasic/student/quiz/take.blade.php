@@ -66,7 +66,7 @@
 <div class="max-w-6xl mx-auto space-y-5 exam-secure-zone" id="exam-container">
 
     <!-- Sticky Exam HUD Bar -->
-    <div class="student-card rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 sticky top-16 z-30 backdrop-blur-xl shadow-lg transition-all">
+    <div class="student-card rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 sticky top-16 z-40 backdrop-blur-xl shadow-lg transition-all">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
             <!-- Exam Title & Set Badge -->
@@ -124,7 +124,7 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="button" id="btn-submit-exam-top" onclick="confirmSubmitExam()" class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer relative z-40 select-none">
+                <button type="button" id="btn-submit-exam-top" onclick="confirmSubmitExam(event)" class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer relative z-50 pointer-events-auto select-none">
                     <i class="fa fa-check-circle"></i>
                     <span>জমা দিন</span>
                 </button>
@@ -792,7 +792,7 @@
 </div>
 
 <!-- Submission Confirmation Modal -->
-<div id="submit-modal" style="display: none; z-index: 999999;" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md items-center justify-center p-4">
+<div id="submit-modal" style="display: none; z-index: 9999999; background-color: rgba(15, 23, 42, 0.85);" class="fixed inset-0 backdrop-blur-md items-center justify-center p-4">
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center">
         <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto text-2xl">
             <i class="fa fa-question-circle"></i>
@@ -818,7 +818,7 @@
 </div>
 
 <!-- Strict Anti-Cheating & Exam Security Floating Toaster -->
-<div id="security-warning-toast" class="fixed top-20 right-4 sm:right-6 z-50 max-w-md w-full pointer-events-none transition-all duration-300 transform -translate-y-4 opacity-0">
+<div id="security-warning-toast" style="display: none;" class="hidden fixed bottom-6 right-4 sm:right-6 z-50 max-w-md w-full pointer-events-none transition-all duration-300 transform translate-y-4 opacity-0">
     <div id="sec-toast-card" class="pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 p-4 shadow-2xl border-2 border-amber-400 dark:border-amber-500 backdrop-blur-xl flex items-start gap-3">
         <!-- Toast Icon -->
         <div id="sec-toast-icon-wrap" class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 dark:text-amber-600 flex items-center justify-center shrink-0 text-lg">
@@ -1377,7 +1377,9 @@
     }
 
     // 8. Submission Modal
-    function confirmSubmitExam() {
+    function confirmSubmitExam(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (e && e.stopPropagation) e.stopPropagation();
         try {
             var btns = document.querySelectorAll('[id^="pal-btn-"]');
             var lockedCount = 0;
@@ -1408,7 +1410,7 @@
         var modal = document.getElementById('submit-modal');
         if (modal) {
             modal.style.setProperty('display', 'flex', 'important');
-            modal.style.setProperty('z-index', '999999', 'important');
+            modal.style.setProperty('z-index', '9999999', 'important');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         } else {
@@ -1743,9 +1745,13 @@
             desc.innerText = label + " — আপনার আইপি ও সকল কার্যকলাপ অ্যাডমিন রিপোর্টে সংরক্ষিত হচ্ছে।";
         }
 
-        // Show toast with slide-in animation
-        toast.classList.remove('opacity-0', '-translate-y-4');
-        toast.classList.add('opacity-100', 'translate-y-0');
+        // Show toast with slide-in animation from bottom
+        toast.style.display = 'block';
+        toast.classList.remove('hidden');
+        setTimeout(function() {
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+        }, 10);
 
         // Auto-dismiss after 6 seconds
         clearTimeout(secToastTimer);
@@ -1758,7 +1764,11 @@
         var toast = document.getElementById('security-warning-toast');
         if (toast) {
             toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', '-translate-y-4');
+            toast.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(function() {
+                toast.style.display = 'none';
+                toast.classList.add('hidden');
+            }, 300);
         }
     }
 
@@ -1778,15 +1788,13 @@
         var topBtn = document.getElementById('btn-submit-exam-top');
         if (topBtn) {
             topBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                confirmSubmitExam();
+                confirmSubmitExam(e);
             });
         }
         var palBtn = document.getElementById('btn-submit-exam-palette');
         if (palBtn) {
             palBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                confirmSubmitExam();
+                confirmSubmitExam(e);
             });
         }
     });

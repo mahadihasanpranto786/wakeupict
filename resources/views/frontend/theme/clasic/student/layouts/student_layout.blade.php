@@ -385,17 +385,37 @@
         html.light [class*="text-amber-400"] {
             color: #d97706 !important; /* amber-600 */
         }
+        html.light .text-amber-300,
+        html.light [class*="text-amber-300"] {
+            color: #78350f !important; /* amber-900 high contrast */
+        }
         html.light .text-emerald-400,
         html.light [class*="text-emerald-400"] {
             color: #059669 !important; /* emerald-600 */
+        }
+        html.light .text-emerald-300,
+        html.light [class*="text-emerald-300"] {
+            color: #064e3b !important; /* emerald-900 high contrast */
         }
         html.light .text-rose-400,
         html.light [class*="text-rose-400"] {
             color: #e11d48 !important; /* rose-600 */
         }
+        html.light .text-rose-300,
+        html.light [class*="text-rose-300"] {
+            color: #9f1239 !important; /* rose-900 high contrast */
+        }
         html.light .text-blue-400,
         html.light [class*="text-blue-400"] {
             color: #2563eb !important; /* blue-600 */
+        }
+        html.light .text-blue-300,
+        html.light [class*="text-blue-300"] {
+            color: #1e3a8a !important; /* blue-900 high contrast */
+        }
+        html.light .text-cyan-300,
+        html.light [class*="text-cyan-300"] {
+            color: #164e63 !important; /* cyan-900 high contrast */
         }
         html.light .text-purple-400,
         html.light .text-purple-300 {
@@ -692,7 +712,7 @@
             <!-- Dynamic Navigation Links -->
             <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
                 @foreach($studentMenus as $menu)
-                    {{-- Only show quiz_examination menu open, hide everything else as requested --}}
+                    {{-- User directive: Only show quiz_examination, hide everything else --}}
                     @if($menu->menu_key !== 'quiz_examination')
                         @continue
                     @endif
@@ -701,7 +721,7 @@
                         $hasChildren = $menu->activeChildren->count() > 0;
                         $isCurrent = $menu->isCurrent();
                         $isChildCurrent = $menu->isChildCurrent();
-                        $isOpen = true; // Kept open by default
+                        $isOpen = true;
                     @endphp
 
                     @if($hasChildren)
@@ -714,11 +734,11 @@
                                     <i class="{{ $menu->icon }} text-sm w-4 text-center text-brand-primary"></i>
                                     <span class="truncate">{{ $menu->getTitle() }}</span>
                                 </div>
-                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 rotate-90 text-brand-primary"></i>
+                                <i class="fa fa-angle-right arrow-icon text-xs transition-transform duration-200 {{ $isOpen ? 'rotate-90 text-brand-primary' : 'text-slate-500' }}"></i>
                             </button>
 
-                            <!-- Submenu Items (Always open by default) -->
-                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1">
+                            <!-- Submenu Items -->
+                            <div class="submenu-container mt-1 ml-4 pl-3 border-l-2 border-slate-800 space-y-1 {{ $isOpen ? '' : 'hidden' }}">
                                 @foreach($menu->activeChildren as $child)
                                     {{-- BTEB OMR & Litho is purely an Admin tool - never show in student portal --}}
                                     @if($child->menu_key === 'bteb_omr_sheet')
@@ -886,6 +906,7 @@
             <!-- Mobile Dynamic Links -->
             <nav class="flex-1 py-6 space-y-1.5">
                 @foreach($studentMenus as $menu)
+                    {{-- User directive: Only show quiz_examination, hide everything else --}}
                     @if($menu->menu_key !== 'quiz_examination')
                         @continue
                     @endif
@@ -992,5 +1013,6 @@
         @endif
     </script>
     @stack('scripts')
+    @stack('js')
 </body>
 </html>

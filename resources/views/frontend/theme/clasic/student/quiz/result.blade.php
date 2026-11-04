@@ -87,9 +87,9 @@
 
             <!-- Retake This Exam with exact submitted questions -->
             @if($quiz->canAttempt($student->id))
-                <form action="{{ route('student.quiz.retake', $attempt->id) }}" method="POST" class="inline-block">
+                <form id="form-retake-exam" action="{{ route('student.quiz.retake', $attempt->id) }}" method="POST" class="inline-block">
                     @csrf
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5" title="এই সেটের প্রশ্নগুলো নিয়ে পুনরায় পরীক্ষা দিন">
+                    <button type="button" onclick="confirmRetakeExam()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer" title="এই সেটের প্রশ্নগুলো নিয়ে পুনরায় পরীক্ষা দিন">
                         <i class="fa fa-repeat"></i>
                         <span>পুনরায় পরীক্ষা দিন (Retake)</span>
                     </button>
@@ -97,10 +97,10 @@
             @endif
 
             @if(!empty($practiceProgress) || $quiz->quiz_type === 'practice')
-                <form action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
+                <form id="form-fresh-practice-1" action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
                     @csrf
                     <input type="hidden" name="question_count" value="{{ min(20, $totalQ > 0 ? $totalQ : 20) }}">
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5">
+                    <button type="button" onclick="confirmFreshPractice('form-fresh-practice-1')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
                         <i class="fa fa-refresh"></i>
                         <span>পরবর্তী নতুন প্রশ্নে প্র্যাকটিস</span>
                     </button>
@@ -128,10 +128,10 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <form action="{{ route('student.practice.start') }}" method="POST">
+                <form id="form-fresh-practice-2" action="{{ route('student.practice.start') }}" method="POST">
                     @csrf
                     <input type="hidden" name="question_count" value="20">
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-transform hover:scale-105">
+                    <button type="button" onclick="confirmFreshPractice('form-fresh-practice-2')" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-transform hover:scale-105 cursor-pointer">
                         <i class="fa fa-play-circle text-base"></i>
                         <span>পরবর্তী ২০টি ফ্রেশ প্রশ্ন দিন</span>
                         <i class="fa fa-arrow-right"></i>
@@ -928,6 +928,90 @@
     }
 
     // 4. Switch Question Layout: '2-col' vs '1-col'
+    var pendingResultFormId = null;
+
+    function confirmRetakeExam() {
+        pendingResultFormId = 'form-retake-exam';
+        var iconWrap = document.getElementById('modal-action-icon-wrap');
+        var icon = document.getElementById('modal-action-icon');
+        var title = document.getElementById('modal-action-title');
+        var desc = document.getElementById('modal-action-desc');
+        var btn = document.getElementById('btn-proceed-result-action');
+
+        if (iconWrap) iconWrap.className = "w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto text-2xl";
+        if (icon) icon.className = "fa fa-repeat";
+        if (title) title.innerText = "পুনরায় পরীক্ষা শুরু করতে প্রস্তুত?";
+        if (desc) desc.innerText = "এই সেটের প্রশ্নগুলো নিয়ে একটি নতুন প্রচেষ্টা (Retake Attempt) শুরু হবে। আপনার পূর্ববর্তী ফলাফল সুরক্ষিত থাকবে।";
+        if (btn) {
+            btn.className = "w-1/2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer";
+            btn.innerText = "হ্যাঁ, পুনরায় পরীক্ষা দিন";
+        }
+
+        var modal = document.getElementById('result-action-confirm-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            if (confirm('আপনি কি এই পরীক্ষাটি পুনরায় শুরু করতে চান?')) {
+                var f = document.getElementById(pendingResultFormId);
+                if (f) f.submit();
+            }
+        }
+    }
+
+    function confirmFreshPractice(formId) {
+        pendingResultFormId = formId;
+        var iconWrap = document.getElementById('modal-action-icon-wrap');
+        var icon = document.getElementById('modal-action-icon');
+        var title = document.getElementById('modal-action-title');
+        var desc = document.getElementById('modal-action-desc');
+        var btn = document.getElementById('btn-proceed-result-action');
+
+        if (iconWrap) iconWrap.className = "w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto text-2xl";
+        if (icon) icon.className = "fa fa-refresh";
+        if (title) title.innerText = "পরবর্তী নতুন প্রশ্নে প্র্যাকটিস শুরু করবেন?";
+        if (desc) desc.innerText = "স্মার্ট প্রশ্ন ব্যাংক থেকে আপনার এখনো সমাধান না করা আনসিন প্রশ্নগুলোর রোটেশন নিয়ে নতুন অনুশীলন পরীক্ষা শুরু হবে।";
+        if (btn) {
+            btn.className = "w-1/2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer";
+            btn.innerText = "হ্যাঁ, নতুন প্র্যাকটিস শুরু করুন";
+        }
+
+        var modal = document.getElementById('result-action-confirm-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            if (confirm('আপনি কি পরবর্তী নতুন প্রশ্নে অনুশীলন শুরু করতে চান?')) {
+                var f = document.getElementById(pendingResultFormId);
+                if (f) f.submit();
+            }
+        }
+    }
+
+    function closeResultActionModal() {
+        var modal = document.getElementById('result-action-confirm-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        pendingResultFormId = null;
+    }
+
+    function proceedResultAction() {
+        if (pendingResultFormId) {
+            var btn = document.getElementById('btn-proceed-result-action');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> শুরু হচ্ছে...';
+            }
+            var form = document.getElementById(pendingResultFormId);
+            if (form) form.submit();
+        }
+    }
+
     function setQuestionLayout(layout) {
         var container = document.getElementById('questions-container');
         var btn2Col = document.getElementById('btn-layout-2col');
@@ -965,4 +1049,30 @@
         }
     }
 </style>
+<!-- Retake & Fresh Practice Confirmation Modal -->
+<div id="result-action-confirm-modal" style="display: none; z-index: 9999999; background-color: rgba(15, 23, 42, 0.85);" class="fixed inset-0 backdrop-blur-md items-center justify-center p-4">
+    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative z-10">
+        <div id="modal-action-icon-wrap" class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto text-2xl">
+            <i id="modal-action-icon" class="fa fa-repeat"></i>
+        </div>
+        
+        <div class="space-y-2">
+            <h3 class="text-lg font-black text-slate-900 dark:text-white" id="modal-action-title">
+                পুনরায় পরীক্ষা দিন
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium" id="modal-action-desc">
+                আপনি কি নিশ্চিতভাবে এই পরীক্ষাটি পুনরায় শুরু করতে চান?
+            </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 pt-1">
+            <button type="button" onclick="closeResultActionModal()" class="w-1/2 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer">
+                বাতিল (Cancel)
+            </button>
+            <button type="button" id="btn-proceed-result-action" onclick="proceedResultAction()" class="w-1/2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer">
+                হ্যাঁ, নিশ্চিত
+            </button>
+        </div>
+    </div>
+</div>
 @endsection
