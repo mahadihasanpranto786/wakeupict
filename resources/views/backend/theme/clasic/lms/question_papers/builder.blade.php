@@ -1653,5 +1653,13 @@
         setInterval(function() {
             savePaperDraft(false);
         }, 30000);
+
+        // Auto-load question library via AJAX if initially empty
+        document.addEventListener('DOMContentLoaded', function() {
+            var items = document.querySelectorAll('#libraryScrollContainer .draggable-library-card');
+            if (items.length === 0) {
+                loadLibraryQuestionsAJAX();
+            }
+        });
     </script>
 @endsection

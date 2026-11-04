@@ -627,8 +627,12 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::match(['GET', 'POST'], '/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyQuizzes')->name('bulk-delete');
     Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
     Route::get('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@attemptDetail')->name('attempt-detail');
+    Route::get('/reports/attempt/{id}/violations-data', 'backend\theme\clasic\lms\AdminQuizController@attemptViolationsJson')->name('attempt.violations-data');
+    Route::post('/reports/attempt/{id}/reset-violations', 'backend\theme\clasic\lms\AdminQuizController@resetAttemptViolations')->name('attempt.reset-violations');
     Route::delete('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@destroyAttempt')->name('attempt.destroy');
     Route::match(['GET', 'POST'], '/reports/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyAttempts')->name('reports.bulk-delete');
+    Route::post('/reports/bulk-reset-violations', 'backend\theme\clasic\lms\AdminQuizController@bulkResetViolations')->name('reports.bulk-reset-violations');
+    Route::get('/reports/parent-question/{id}/history', 'backend\theme\clasic\lms\AdminQuizController@parentQuestionHistory')->name('reports.parent-question-history');
     Route::post('/{id}/generate-sets', 'backend\theme\clasic\lms\AdminQuizController@generateSets')->name('generate-sets');
     Route::put('/{id}', 'backend\theme\clasic\lms\AdminQuizController@update')->name('update');
     Route::post('/{id}/import-from-library', 'backend\theme\clasic\lms\AdminQuizController@importFromLibrary')->name('import-from-library');

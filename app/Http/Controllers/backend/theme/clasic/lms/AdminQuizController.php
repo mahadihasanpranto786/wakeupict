@@ -660,7 +660,7 @@ class AdminQuizController extends Controller
      */
     public function reports(Request $request)
     {
-        $query = \App\model\LmsQuizAttempt::with(['quiz.course', 'student'])->latest('submitted_at');
+        $query = \App\model\LmsQuizAttempt::with(['quiz.course', 'student'])->orderBy('id', 'desc');
 
         if ($request->filled('quiz_id')) {
             $query->where('quiz_id', $request->quiz_id);
@@ -703,9 +703,107 @@ class AdminQuizController extends Controller
             ->count();
         $avgScore = round(\App\model\LmsQuizAttempt::where('status', 'graded')->avg('percentage') ?: 0, 1);
 
+        // -------------------------------------------------------------
+        // Parent Question Tracking & Cross-Attempt Analytics
+        // -------------------------------------------------------------
+        $activeTab = $request->input('tab', 'attempts');
+
+        $pqRaw = DB::table('lms_quiz_answers')
+            ->join('lms_questions', 'lms_quiz_answers.question_id', '=', 'lms_questions.id')
+            ->select(
+                DB::raw('COALESCE(lms_questions.parent_question_id, lms_questions.id) as master_question_id'),
+                DB::raw('COUNT(lms_quiz_answers.id) as total_answers_count'),
+                DB::raw('COUNT(DISTINCT lms_quiz_answers.attempt_id) as total_attempts_count'),
+                DB::raw('SUM(CASE WHEN lms_quiz_answers.is_correct = 1 THEN 1 ELSE 0 END) as correct_count'),
+                DB::raw('SUM(CASE WHEN lms_quiz_answers.is_correct = 0 THEN 1 ELSE 0 END) as incorrect_count')
+            )
+            ->groupBy(DB::raw('COALESCE(lms_questions.parent_question_id, lms_questions.id)'))
+            ->orderByDesc('total_answers_count');
+
+        if ($request->filled('q_search')) {
+            $qs = trim($request->q_search);
+            $pqRaw->where('lms_questions.question_text', 'like', "%{$qs}%");
+        }
+
+        $pqStats = $pqRaw->paginate(20, ['*'], 'q_page')->appends($request->all());
+
+        // Eager load master questions
+        $masterIds = collect($pqStats->items())->pluck('master_question_id')->filter()->unique()->toArray();
+        $masterQuestionsMap = LmsQuestion::with('options')->whereIn('id', $masterIds)->get()->keyBy('id');
+
+        foreach ($pqStats as $item) {
+            $item->parent_question = $masterQuestionsMap[$item->master_question_id] ?? null;
+            $item->accuracy_rate = $item->total_answers_count > 0 
+                ? round(($item->correct_count / $item->total_answers_count) * 100, 1) 
+                : 0;
+        }
+
         return view('backend.theme.clasic.lms.quizzes.reports', compact(
-            'attempts', 'quizzes', 'courses', 'totalAttempts', 'passedAttempts', 'failedAttempts', 'avgScore'
+            'attempts', 'quizzes', 'courses', 'totalAttempts', 'passedAttempts', 'failedAttempts', 'avgScore',
+            'pqStats', 'activeTab'
         ));
+    }
+
+    /**
+     * AJAX endpoint: Retrieve full attempt history grouped under a parent question
+     */
+    public function parentQuestionHistory($id)
+    {
+        $parentQuestion = LmsQuestion::with('options')->findOrFail($id);
+
+        // Find all question IDs (root question + all variant children)
+        $allQuestionIds = LmsQuestion::where('id', $id)
+            ->orWhere('parent_question_id', $id)
+            ->pluck('id')
+            ->toArray();
+
+        // Query all student answers for this question family
+        $answers = \App\model\LmsQuizAnswer::with([
+                'attempt.student',
+                'attempt.quiz'
+            ])
+            ->whereIn('question_id', $allQuestionIds)
+            ->latest('id')
+            ->limit(100)
+            ->get();
+
+        $history = $answers->map(function ($ans) {
+            $student = $ans->attempt ? $ans->attempt->student : null;
+            $quiz = $ans->attempt ? $ans->attempt->quiz : null;
+            return [
+                'attempt_id'      => $ans->attempt_id,
+                'student_name'    => $student ? $student->name : 'N/A',
+                'student_id_code' => $student ? ($student->student_id_code ?: '—') : '—',
+                'quiz_title'      => $quiz ? $quiz->title : 'পরীক্ষা',
+                'set'             => $ans->attempt ? ($ans->attempt->question_set ?: 'Set A') : 'Set A',
+                'is_correct'      => (bool)$ans->is_correct,
+                'marks_obtained'  => (float)$ans->marks_obtained,
+                'time'            => $ans->created_at ? $ans->created_at->format('d M, Y h:i A') : '—',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'parent_question' => [
+                'id'            => $parentQuestion->id,
+                'question_text' => $parentQuestion->question_text,
+                'category'      => $parentQuestion->category ?: 'General',
+                'question_type' => $parentQuestion->getTypeLabel(),
+                'difficulty'    => $parentQuestion->difficulty ?: 'medium',
+                'marks'         => (float)$parentQuestion->marks,
+                'options'       => $parentQuestion->options->map(function ($opt) {
+                    return [
+                        'option_text' => $opt->option_text,
+                        'is_correct'  => (bool)$opt->is_correct,
+                    ];
+                }),
+                'variants_count' => count($allQuestionIds) - 1,
+            ],
+            'total_appearances' => $answers->count(),
+            'correct_count'     => $answers->where('is_correct', true)->count(),
+            'incorrect_count'   => $answers->where('is_correct', false)->count(),
+            'history'           => $history,
+        ]);
     }
 
     /**
@@ -780,12 +878,121 @@ class AdminQuizController extends Controller
 
         $answers = $attempt->answers->keyBy('question_id');
 
-        return view('backend.theme.clasic.lms.quizzes.attempt_detail', compact('attempt', 'quiz', 'questions', 'answers'));
+        $dbViolationsCount = $attempt->violations()->count();
+        if ($dbViolationsCount > 0) {
+            $totalViolations = $dbViolationsCount;
+            $initialViolations = $attempt->violations()->oldest('id')->take(10)->get();
+        } elseif (!empty($attempt->security_violations_log) && is_array($attempt->security_violations_log)) {
+            $allLogs = collect($attempt->security_violations_log);
+            $totalViolations = $allLogs->count();
+            $initialViolations = $allLogs->take(10);
+        } else {
+            $totalViolations = 0;
+            $initialViolations = collect();
+        }
+        $hasMoreViolations = $totalViolations > 10;
+
+        return view('backend.theme.clasic.lms.quizzes.attempt_detail', compact(
+            'attempt', 'quiz', 'questions', 'answers', 'initialViolations', 'totalViolations', 'hasMoreViolations'
+        ));
+    }
+
+    /**
+     * AJAX endpoint for on-scroll pagination of security violations (10 per page)
+     */
+    public function attemptViolationsJson(Request $request, $id)
+    {
+        $attempt = \App\model\LmsQuizAttempt::findOrFail($id);
+        $page = max(1, (int)$request->input('page', 1));
+        $perPage = 10;
+
+        $dbViolationsCount = $attempt->violations()->count();
+
+        if ($dbViolationsCount > 0) {
+            $total = $dbViolationsCount;
+            $items = $attempt->violations()
+                ->oldest('id')
+                ->forPage($page, $perPage)
+                ->get()
+                ->map(function ($v, $idx) use ($page, $perPage) {
+                    return [
+                        'serial' => ($page - 1) * $perPage + $idx + 1,
+                        'warning_count' => (int)$v->warning_count,
+                        'title' => $v->violation_title,
+                        'details' => $v->details ?: 'অননুমোদিত কার্যকলাপ সনাক্ত',
+                        'ip_address' => $v->ip_address ?: '—',
+                        'timestamp' => $v->created_at ? $v->created_at->format('d M, Y h:i:s A') : '—',
+                        'type' => $v->violation_type,
+                    ];
+                });
+        } elseif (!empty($attempt->security_violations_log) && is_array($attempt->security_violations_log)) {
+            $all = collect($attempt->security_violations_log);
+            $total = $all->count();
+            $items = $all->slice(($page - 1) * $perPage, $perPage)->values()->map(function ($vlog, $idx) use ($page, $perPage) {
+                return [
+                    'serial' => ($page - 1) * $perPage + $idx + 1,
+                    'warning_count' => (int)($vlog['warning_number'] ?? (($page - 1) * $perPage + $idx + 1)),
+                    'title' => $vlog['title'] ?? ($vlog['violation_type'] ?? 'নিরাপত্তা লঙ্ঘন'),
+                    'details' => $vlog['details'] ?? '—',
+                    'ip_address' => '—',
+                    'timestamp' => $vlog['time'] ?? '—',
+                    'type' => $vlog['violation_type'] ?? 'security',
+                ];
+            });
+        } else {
+            $items = collect();
+            $total = 0;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $items,
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'has_more' => ($page * $perPage) < $total,
+        ]);
     }
 
     /**
      * Delete a single quiz attempt/result
      */
+
+    /**
+     * Permanent reset of security violations for a single attempt
+     */
+    public function resetAttemptViolations($id)
+    {
+        $attempt = \App\model\LmsQuizAttempt::findOrFail($id);
+        $attempt->update([
+            'security_violations_count' => 0,
+            'security_violations_log' => null,
+        ]);
+
+        \App\model\LmsExamViolation::where('attempt_id', $attempt->id)->delete();
+
+        return redirect()->back()->with('success', "অ্যাটেম্পট #{$attempt->id} এর সকল নিরাপত্তা লঙ্ঘন স্থায়ীভাবে রিসেট ও মুছে ফেলা হয়েছে।");
+    }
+
+    /**
+     * Bulk permanent reset of security violations for selected attempts
+     */
+    public function bulkResetViolations(Request $request)
+    {
+        $ids = $request->input('attempt_ids', []);
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->withErrors(['error' => 'অনুগ্রহ করে কমপক্ষে একটি ফলাফল নির্বাচন করুন।']);
+        }
+
+        \App\model\LmsQuizAttempt::whereIn('id', $ids)->update([
+            'security_violations_count' => 0,
+            'security_violations_log' => null,
+        ]);
+
+        \App\model\LmsExamViolation::whereIn('attempt_id', $ids)->delete();
+
+        return redirect()->back()->with('success', 'নির্বাচিত ' . count($ids) . 'টি ফলাফলের নিরাপত্তা লঙ্ঘন সফলভাবে রিসেট ও মুছে ফেলা হয়েছে।');
+    }
     public function destroyAttempt($id)
     {
         $attempt = \App\model\LmsQuizAttempt::findOrFail($id);

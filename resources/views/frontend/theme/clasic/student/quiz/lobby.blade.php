@@ -148,27 +148,27 @@
                 </a>
             @elseif($canAttempt)
                 @if($quiz->questions->count() > 0 || ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->count() > 0))
-                    <form action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
+                    <form id="start-exam-form-main" action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
                         @csrf
-                        <button type="submit" 
+                        <button type="button" onclick="confirmStartExam('start-exam-form-main', '{{ addslashes($quiz->title) }}', '{{ $quiz->duration_minutes }}', '{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'নির্ধারিত' }}')"
                                 class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
                             <i class="fa fa-play"></i>
                             <span>Start Assessment Now</span>
                         </button>
                     </form>
                 @elseif($attempts->count() > 0)
-                    <form action="{{ route('student.quiz.retake', $attempts->first()->id) }}" method="POST">
+                    <form id="retake-exam-form-lobby" action="{{ route('student.quiz.retake', $attempts->first()->id) }}" method="POST">
                         @csrf
-                        <button type="submit" 
+                        <button type="button" onclick="confirmStartExam('retake-exam-form-lobby', '{{ addslashes($quiz->title) }} (পুনঃপরীক্ষা)', '{{ $quiz->duration_minutes }}', 'পূর্ববর্তী সেট')"
                                 class="px-8 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2 hover:scale-105">
                             <i class="fa fa-repeat"></i>
                             <span>পূর্ববর্তী প্রশ্নে পুনরায় পরীক্ষা দিন (Retake Exam)</span>
                         </button>
                     </form>
                 @elseif($quiz->quiz_type === 'practice')
-                    <form action="{{ route('student.practice.start') }}" method="POST">
+                    <form id="practice-exam-form-lobby" action="{{ route('student.practice.start') }}" method="POST">
                         @csrf
-                        <button type="submit" 
+                        <button type="button" onclick="confirmStartExam('practice-exam-form-lobby', '{{ addslashes($quiz->title) }} (অনুশীলন)', '{{ $quiz->duration_minutes }}', '{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'অনুশীলন প্রশ্ন' }}')"
                                 class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
                             <i class="fa fa-play"></i>
                             <span>Start Assessment Now (অনুশীলন পরীক্ষা)</span>
@@ -250,4 +250,97 @@
     @endif
 
 </div>
+
+    <!-- Exam Start Confirmation Modal -->
+    <div id="exam-start-confirm-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center">
+            <!-- Icon -->
+            <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto text-3xl">
+                <i class="fa fa-play-circle"></i>
+            </div>
+
+            <div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                    পরীক্ষা শুরু নিশ্চিতকরণ
+                </span>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mt-2.5">
+                    আপনি কি পরীক্ষা শুরু করতে প্রস্তুত?
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                    "শুরু করুন" চাপার সাথে সাথেই আপনার পরীক্ষার সার্ভার কাউন্টডাউন টাইমার চালু হয়ে যাবে।
+                </p>
+
+                <!-- Exam Specs Card -->
+                <div class="p-3.5 my-3 rounded-2xl bg-slate-100 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5 text-left font-mono">
+                    <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                        <span class="text-slate-500 dark:text-slate-400">পরীক্ষার নাম:</span>
+                        <strong class="text-slate-900 dark:text-white truncate max-w-[200px]" id="start-confirm-title">{{ $quiz->title }}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                        <span class="text-slate-500 dark:text-slate-400">সময়সীমা:</span>
+                        <strong class="text-emerald-600 dark:text-emerald-400" id="start-confirm-duration">{{ $quiz->duration_minutes }} মিনিট</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                        <span class="text-slate-500 dark:text-slate-400">মোট প্রশ্ন:</span>
+                        <strong class="text-slate-900 dark:text-white" id="start-confirm-questions">{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'নির্ধারিত' }}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                        <span class="text-slate-500 dark:text-slate-400">পাস মার্ক:</span>
+                        <strong class="text-blue-600 dark:text-blue-400">{{ (float)$quiz->pass_marks }}</strong>
+                    </div>
+                </div>
+
+                <p class="text-[11px] text-rose-600 dark:text-rose-400 font-semibold leading-normal">
+                    ⚠️ সতর্কতা: পরীক্ষা চলাকালীন ব্রাউজার বন্ধ বা ট্যাব পরিবর্তন করবেন না।
+                </p>
+            </div>
+
+            <div class="flex items-center justify-center gap-3 pt-1">
+                <button type="button" onclick="closeStartConfirmModal()" class="w-1/2 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors">
+                    বাতিল (Cancel)
+                </button>
+                <button type="button" onclick="proceedStartExam()" class="w-1/2 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/30">
+                    হ্যাঁ, শুরু করুন &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pendingStartFormId = null;
+
+        function confirmStartExam(formId, title, duration, questions) {
+            pendingStartFormId = formId;
+            var tEl = document.getElementById('start-confirm-title');
+            var dEl = document.getElementById('start-confirm-duration');
+            var qEl = document.getElementById('start-confirm-questions');
+            if (tEl) tEl.innerText = title;
+            if (dEl) dEl.innerText = duration + ' মিনিট';
+            if (qEl) qEl.innerText = questions;
+
+            var modal = document.getElementById('exam-start-confirm-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeStartConfirmModal() {
+            var modal = document.getElementById('exam-start-confirm-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            pendingStartFormId = null;
+        }
+
+        function proceedStartExam() {
+            if (pendingStartFormId) {
+                var form = document.getElementById(pendingStartFormId);
+                if (form) {
+                    form.submit();
+                }
+            }
+        }
+    </script>
 @endsection

@@ -707,4 +707,394 @@ class LmsQuizAndExamTest extends TestCase
         // Must redirect to results page immediately
         $response->assertRedirect(route('student.quiz.results', $attempt->id));
     }
+
+    /**
+     * Test Strict Anti-Cheating System: Record security violations, verify warning tiers, and ensure exam is NEVER terminated
+     */
+    public function testStrictAntiCheatingSecurityViolationsTrackingAndNoAutoTermination()
+    {
+        // 1. Create an in-progress attempt
+        $attempt = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 1,
+            'started_at' => \Carbon\Carbon::now(),
+            'total_marks' => 20.0,
+            'status' => 'in_progress',
+            'view_mode' => 'all_questions',
+            'security_violations_count' => 0,
+        ]);
+
+        // 2. 1st Violation: Tab Switch
+        $response1 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.record-violation', $attempt->id), [
+                'violation_type' => 'tab_switch',
+                'details' => 'ব্রাউজার ট্যাব পরিবর্তন (৪ সেকেন্ড)',
+            ]);
+
+        $response1->assertStatus(200);
+        $response1->assertJson([
+            'success' => true,
+            'warning_count' => 1,
+            'violation_type' => 'tab_switch',
+        ]);
+
+        // Verify DB update
+        $attempt->refresh();
+        $this->assertEquals(1, $attempt->security_violations_count);
+        $this->assertEquals('in_progress', $attempt->status); // NEVER terminated!
+
+        // 3. 2nd Violation: Copy Attempt
+        $response2 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.record-violation', $attempt->id), [
+                'violation_type' => 'copy_attempt',
+                'details' => 'প্রশ্ন টেক্সট কপি করার চেষ্টা',
+            ]);
+
+        $response2->assertStatus(200);
+        $response2->assertJson([
+            'success' => true,
+            'warning_count' => 2,
+            'violation_type' => 'copy_attempt',
+        ]);
+
+        $attempt->refresh();
+        $this->assertEquals(2, $attempt->security_violations_count);
+        $this->assertEquals('in_progress', $attempt->status); // STILL in progress!
+
+        // 4. 3rd Violation: Restricted Shortcut
+        $response3 = $this->actingAs($this->student, 'student')
+            ->postJson(route('student.quiz.record-violation', $attempt->id), [
+                'violation_type' => 'restricted_shortcut',
+                'details' => 'Ctrl+U পেজ সোর্স দেখার চেষ্টা',
+            ]);
+
+        $response3->assertStatus(200);
+        $response3->assertJson([
+            'success' => true,
+            'warning_count' => 3,
+        ]);
+
+        $attempt->refresh();
+        $this->assertEquals(3, $attempt->security_violations_count);
+        $this->assertEquals('in_progress', $attempt->status); // STAYS IN PROGRESS!
+        $this->assertCount(3, $attempt->violations);
+
+        // 5. Verify Admin attempt detail reflects the security audit log
+        $admin = \App\User::first() ?: \App\User::create([
+            'name' => 'Admin Test',
+            'email' => 'admin_test_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        $detailResponse = $this->actingAs($admin)
+            ->get(route('admin.quizzes.attempt-detail', $attempt->id));
+        $detailResponse->assertStatus(200);
+        $detailResponse->assertSee('নিরাপত্তা ও অখণ্ডতা নিরীক্ষা');
+        $detailResponse->assertSee('মোট নিরাপত্তা লঙ্ঘন: 3টি');
+    }
+
+    /**
+     * Test Single Student Account: Reuse existing account across registration and course application
+     */
+    public function testSingleStudentAccountReuseAcrossRegistrationAndCourseApplication()
+    {
+        $uniquePhone = '01799' . rand(100000, 999999);
+        $uniqueEmail = 'student_' . rand(10000, 99999) . '@wakeupict.test';
+
+        // 1. First: Student registers via portal registration
+        $regResponse = $this->post(route('student.register.submit'), [
+            'name' => 'Single Account Test Student',
+            'phone' => $uniquePhone,
+            'email' => $uniqueEmail,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+
+        $regResponse->assertRedirect(route('student.dashboard'));
+
+        // Verify account exists
+        $account = \App\model\StudentAccount::where('phone', $uniquePhone)->first();
+        $this->assertNotNull($account);
+        $initialAccountId = $account->id;
+
+        // 2. Second: Same student applies for Course 1 via Admission Application
+        $course1 = \App\model\Course::first() ?: \App\model\Course::create([
+            'course_title' => 'Test Course A',
+            'slug' => 'test-course-a-' . rand(100, 999),
+            'course_fee' => 3000,
+            'status' => 1,
+        ]);
+
+        $request = new \Illuminate\Http\Request();
+        $applyResult1 = \App\Services\StudentEnrollmentService::processAdmissionApplication([
+            'student_name' => 'Single Account Test Student',
+            'personal_call_no' => $uniquePhone,
+            'email' => $uniqueEmail,
+            'course_id' => $course1->id,
+            'selected_course_ids' => [$course1->id],
+        ], $request);
+
+        $this->assertTrue($applyResult1['success']);
+        // Must reuse the SAME StudentAccount
+        $this->assertEquals($initialAccountId, $applyResult1['student_account']->id);
+
+        // 3. Third: Same student applies for Course 2
+        $course2 = \App\model\Course::where('id', '!=', $course1->id)->first() ?: \App\model\Course::create([
+            'course_title' => 'Test Course B',
+            'slug' => 'test-course-b-' . rand(100, 999),
+            'course_fee' => 4000,
+            'status' => 1,
+        ]);
+
+        $applyResult2 = \App\Services\StudentEnrollmentService::processAdmissionApplication([
+            'student_name' => 'Single Account Test Student',
+            'personal_call_no' => $uniquePhone,
+            'email' => $uniqueEmail,
+            'course_id' => $course2->id,
+            'selected_course_ids' => [$course2->id],
+        ], $request);
+
+        $this->assertTrue($applyResult2['success']);
+        // Must still reuse the SAME StudentAccount
+        $this->assertEquals($initialAccountId, $applyResult2['student_account']->id);
+
+        // Verify exactly 1 account exists for this phone in the entire database
+        $this->assertEquals(1, \App\model\StudentAccount::where('phone', $uniquePhone)->count());
+
+        // Verify student is enrolled in both courses
+        $enrollments = \App\model\LmsEnrollment::where('student_account_id', $initialAccountId)->pluck('course_id')->toArray();
+        $this->assertContains($course1->id, $enrollments);
+        $this->assertContains($course2->id, $enrollments);
+
+        // 4. Fourth: Student visits register again with the same phone to update credentials
+        \Illuminate\Support\Facades\Auth::guard('student')->logout();
+        $reRegResponse = $this->post(route('student.register.submit'), [
+            'name' => 'Single Account Test Student Updated',
+            'phone' => $uniquePhone,
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $reRegResponse->assertRedirect(route('student.dashboard'));
+        $account->refresh();
+        $this->assertEquals($initialAccountId, $account->id);
+        $this->assertTrue(Hash::check('newpassword123', $account->password));
+    }
+
+    /**
+     * Test Parent Question Tracking and History AJAX endpoint in Admin Reports
+     */
+    public function testParentQuestionTrackingAndHistoryEndpoint()
+    {
+        $admin = \App\User::first() ?: \App\User::create([
+            'name' => 'Admin Test',
+            'email' => 'admin_test_pq_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        // Create Parent Question
+        $parentQuestion = \App\model\LmsQuestion::create([
+            'question_text' => 'What is the main memory of a computer?',
+            'category' => 'Hardware',
+            'question_type' => 'mcq_single',
+            'marks' => 1.0,
+            'is_archived' => false,
+        ]);
+
+        // Create an attempt answering this question
+        $attempt = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 1,
+            'started_at' => \Carbon\Carbon::now(),
+            'total_marks' => 20.0,
+            'status' => 'graded',
+            'view_mode' => 'all_questions',
+        ]);
+
+        \App\model\LmsQuizAnswer::create([
+            'attempt_id' => $attempt->id,
+            'question_id' => $parentQuestion->id,
+            'is_correct' => true,
+            'marks_obtained' => 1.0,
+        ]);
+
+        // 1. Visit Reports with tab=questions
+        $reportsResponse = $this->actingAs($admin)
+            ->get(route('admin.quizzes.reports', ['tab' => 'questions']));
+        $reportsResponse->assertStatus(200);
+        $reportsResponse->assertSee('প্রশ্ন হিস্ট্রি ও মূল (প্যারেন্ট) প্রশ্ন পারফরম্যান্স বিশ্লেষণ');
+
+        // 2. Fetch Parent Question History AJAX Endpoint
+        $historyResponse = $this->actingAs($admin)
+            ->getJson(route('admin.quizzes.reports.parent-question-history', $parentQuestion->id));
+
+        $historyResponse->assertStatus(200);
+        $historyResponse->assertJson([
+            'success' => true,
+            'parent_question' => [
+                'id' => $parentQuestion->id,
+                'question_text' => 'What is the main memory of a computer?',
+            ],
+            'total_appearances' => 1,
+            'correct_count' => 1,
+            'incorrect_count' => 0,
+        ]);
+    }
+
+    /**
+     * Test Reset Violations (Single and Bulk) and Descending Order in Admin Reports
+     */
+    public function testSecurityViolationsResetAndReportsDescOrder()
+    {
+        $admin = \App\User::first() ?: \App\User::create([
+            'name' => 'Admin Reset Test',
+            'email' => 'admin_reset_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        // Create 2 attempts with violations
+        $attempt1 = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 10,
+            'started_at' => \Carbon\Carbon::now()->subMinutes(10),
+            'total_marks' => 20.0,
+            'status' => 'graded',
+            'view_mode' => 'all_questions',
+            'security_violations_count' => 3,
+            'security_violations_log' => [['warning_number' => 1, 'violation_type' => 'tab_switch', 'time' => '10:00 AM']],
+        ]);
+
+        \App\model\LmsExamViolation::create([
+            'attempt_id' => $attempt1->id,
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'violation_type' => 'tab_switch',
+            'warning_count' => 1,
+            'details' => 'Tab switch test',
+        ]);
+
+        $attempt2 = \App\model\LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number' => 11,
+            'started_at' => \Carbon\Carbon::now()->subMinutes(5),
+            'total_marks' => 20.0,
+            'status' => 'graded',
+            'view_mode' => 'all_questions',
+            'security_violations_count' => 5,
+            'security_violations_log' => [['warning_number' => 1, 'violation_type' => 'right_click', 'time' => '10:05 AM']],
+        ]);
+
+        \App\model\LmsExamViolation::create([
+            'attempt_id' => $attempt2->id,
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'violation_type' => 'right_click',
+            'warning_count' => 1,
+            'details' => 'Right click test',
+        ]);
+
+        // 1. Verify reports sorting is strictly DESC by attempt id
+        $response = $this->actingAs($admin)->get(route('admin.quizzes.reports'));
+        $response->assertStatus(200);
+        $attemptsOnPage = $response->viewData('attempts');
+        $this->assertTrue($attemptsOnPage->first()->id >= $attemptsOnPage->last()->id);
+
+        // 2. Test Single Attempt Reset Violations
+        $resetSingleResponse = $this->actingAs($admin)
+            ->post(route('admin.quizzes.attempt.reset-violations', $attempt1->id));
+        $resetSingleResponse->assertRedirect();
+
+        $attempt1->refresh();
+        $this->assertEquals(0, $attempt1->security_violations_count);
+        $this->assertNull($attempt1->security_violations_log);
+        $this->assertEquals(0, \App\model\LmsExamViolation::where('attempt_id', $attempt1->id)->count());
+
+        // 3. Test Bulk Reset Violations
+        $resetBulkResponse = $this->actingAs($admin)
+            ->post(route('admin.quizzes.reports.bulk-reset-violations'), [
+                'attempt_ids' => [$attempt2->id],
+            ]);
+        $resetBulkResponse->assertRedirect();
+
+        $attempt2->refresh();
+        $this->assertEquals(0, $attempt2->security_violations_count);
+        $this->assertNull($attempt2->security_violations_log);
+        $this->assertEquals(0, \App\model\LmsExamViolation::where('attempt_id', $attempt2->id)->count());
+    }
+
+    /**
+     * Test Attempt Detail Security Violations Compact Notification Feed & On-Scroll Pagination
+     */
+    public function testAttemptDetailSecurityViolationsOnScrollPagination()
+    {
+        $admin = \App\User::first();
+        if (!$admin) {
+            $admin = \App\User::create([
+                'name' => 'Admin User',
+                'email' => 'admin_vscroll@example.com',
+                'password' => bcrypt('password123'),
+            ]);
+        }
+
+        $attempt = LmsQuizAttempt::create([
+            'quiz_id' => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'status' => 'completed',
+            'started_at' => \Carbon\Carbon::now()->subMinutes(20),
+            'submitted_at' => \Carbon\Carbon::now(),
+            'attempt_number' => 15, 'total_marks' => 20.0,
+            'percentage' => 80,
+            'security_violations_count' => 15,
+            'security_violations_log' => null,
+        ]);
+
+        // Create 15 violations for this attempt
+        for ($i = 1; $i <= 15; $i++) {
+            \App\model\LmsExamViolation::create([
+                'attempt_id' => $attempt->id,
+                'quiz_id' => $this->quiz->id,
+                'student_account_id' => $this->student->id,
+                'violation_type' => 'right_click',
+                'warning_count' => $i,
+                'details' => 'Violation test #' . $i,
+                'ip_address' => '127.0.0.1',
+            ]);
+        }
+
+        // 1. Test attempt-detail HTML view
+        $viewResponse = $this->actingAs($admin)->get(route('admin.quizzes.attempt-detail', $attempt->id));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertViewHas('initialViolations');
+        $viewResponse->assertViewHas('totalViolations', 15);
+        $viewResponse->assertViewHas('hasMoreViolations', true);
+        $this->assertEquals(10, count($viewResponse->viewData('initialViolations')));
+
+        // 2. Test AJAX pagination endpoint page 1
+        $apiResponsePage1 = $this->actingAs($admin)->getJson(route('admin.quizzes.attempt.violations-data', $attempt->id) . '?page=1');
+        $apiResponsePage1->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'current_page' => 1,
+                'per_page' => 10,
+                'total' => 15,
+                'has_more' => true,
+            ]);
+        $this->assertCount(10, $apiResponsePage1->json('data'));
+
+        // 3. Test AJAX pagination endpoint page 2 (remaining 5 items)
+        $apiResponsePage2 = $this->actingAs($admin)->getJson(route('admin.quizzes.attempt.violations-data', $attempt->id) . '?page=2');
+        $apiResponsePage2->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'current_page' => 2,
+                'per_page' => 10,
+                'total' => 15,
+                'has_more' => false,
+            ]);
+        $this->assertCount(5, $apiResponsePage2->json('data'));
+    }
 }

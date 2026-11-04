@@ -128,6 +128,7 @@ class StudentEnrollmentService
         if (!empty($cleanPhone)) {
             $byPhone = StudentAccount::where('phone', $cleanPhone)
                 ->orWhere('phone', $rawPhone)
+                ->orWhere('phone', 'LIKE', '%' . substr($cleanPhone, -10))
                 ->first();
             if ($byPhone) {
                 return $byPhone;
