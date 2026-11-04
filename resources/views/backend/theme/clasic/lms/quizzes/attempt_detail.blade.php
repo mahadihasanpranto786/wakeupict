@@ -173,6 +173,118 @@
         </div>
     </div>
 
+    <!-- Exam Security & Anti-Cheating Audit Log Card (Compact Notification Feed) -->
+    <div class="card shadow-sm border-0 mb-4" id="violations-audit-card">
+        <div class="card-header bg-white py-2.5 px-3 border-bottom d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+            <div class="d-flex align-items-center" style="gap: 8px;">
+                <h6 class="font-weight-bold text-dark mb-0" style="font-size: 0.95rem;">
+                    <i class="fas fa-shield-alt text-primary mr-1.5"></i> পরীক্ষা নিরাপত্তা ও অখণ্ডতা নিরীক্ষা (Exam Security Audit Feed)
+                </h6>
+                @if(($attempt->security_violations_count ?: 0) > 0)
+                    <span class="badge {{ $attempt->security_violations_count >= 3 ? 'badge-danger' : 'badge-warning' }} px-2 py-0.5 font-weight-bold" style="{{ $attempt->security_violations_count >= 3 ? 'color: #000000 !important; font-weight: 800;' : '' }}">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> মোট নিরাপত্তা লঙ্ঘন: {{ $attempt->security_violations_count }}টি
+                    </span>
+                @else
+                    <span class="badge badge-success px-2 py-0.5 font-weight-bold">
+                        <i class="fas fa-check-circle mr-1"></i> ক্লিন পরীক্ষা (0 Violation)
+                    </span>
+                @endif
+            </div>
+
+            <div class="d-flex align-items-center" style="gap: 8px;">
+                @if(($totalViolations ?? 0) > 0)
+                    <span id="violations-loaded-counter" class="badge badge-light border text-muted px-2 py-1 font-mono text-xs">
+                        প্রদর্শিত: <strong class="text-dark" id="current-loaded-count">{{ min(10, $totalViolations) }}</strong> / {{ $totalViolations }}টি
+                    </span>
+                    <button type="button" onclick="confirmResetThisAttemptViolations({{ $attempt->id }})" class="btn btn-xs btn-outline-danger font-weight-bold" title="স্থায়ীভাবে সকল লঙ্ঘন রিসেট করুন">
+                        <i class="fas fa-undo-alt mr-1"></i> স্থায়ী রিসেট
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <div class="card-body p-2.5">
+            @if(($totalViolations ?? 0) == 0 && empty($attempt->security_violations_log))
+                <div class="p-3 bg-light rounded text-success font-weight-bold text-center border text-sm">
+                    <i class="fas fa-check-circle mr-1 text-success"></i> কোনো নিরাপত্তা লঙ্ঘন পরিলক্ষিত হয়নি। শিক্ষার্থী সম্পূর্ণ ক্লিন পরিবেশে পরীক্ষা সম্পন্ন করেছেন।
+                </div>
+            @else
+                <div class="p-2 mb-2 bg-light rounded border text-muted d-flex align-items-center justify-content-between" style="font-size: 0.78rem;">
+                    <div>
+                        <i class="fas fa-info-circle text-info mr-1"></i> <strong>লাইভ অডিট নোটিশ:</strong> স্ক্রল করুন, নিচে নামলে প্রতিবারে ১০টি করে রেকর্ড লোড হবে।
+                    </div>
+                    <span class="text-muted"><i class="fas fa-mouse text-secondary mr-1"></i> On-Scroll Feed</span>
+                </div>
+
+                <!-- Compact Scrollable Notification Container (Max-height ~360px) -->
+                <div id="violations-scroll-container" class="pr-1" style="max-height: 360px; overflow-y: auto; scrollbar-width: thin;">
+                    <div id="violations-items-list">
+                        @foreach($initialViolations as $idx => $v)
+                            @php
+                                $isDbModel = $v instanceof \App\model\LmsExamViolation;
+                                $serial = $idx + 1;
+                                $warnCount = $isDbModel ? $v->warning_count : ($v['warning_number'] ?? $serial);
+                                $title = $isDbModel ? $v->violation_title : ($v['title'] ?? ($v['violation_type'] ?? 'নিরাপত্তা লঙ্ঘন'));
+                                $details = $isDbModel ? ($v->details ?: 'অননুমোদিত কার্যকলাপ সনাক্ত') : ($v['details'] ?? '—');
+                                $ip = $isDbModel ? ($v->ip_address ?: '—') : '—';
+                                $time = $isDbModel ? ($v->created_at ? $v->created_at->format('d M, Y h:i:s A') : '—') : ($v['time'] ?? '—');
+                                $vType = $isDbModel ? $v->violation_type : ($v['violation_type'] ?? 'default');
+
+                                $icon = 'fa-exclamation-triangle';
+                                if (strpos($vType, 'tab') !== false || strpos($vType, 'blur') !== false) {
+                                    $icon = 'fa-window-restore';
+                                } elseif (strpos($vType, 'click') !== false) {
+                                    $icon = 'fa-mouse-pointer';
+                                } elseif (strpos($vType, 'copy') !== false || strpos($vType, 'cut') !== false || strpos($vType, 'paste') !== false) {
+                                    $icon = 'fa-copy';
+                                } elseif (strpos($vType, 'shortcut') !== false || strpos($vType, 'key') !== false) {
+                                    $icon = 'fa-keyboard';
+                                } elseif (strpos($vType, 'dev') !== false) {
+                                    $icon = 'fa-code';
+                                }
+                            @endphp
+                            <div class="violation-item p-2 mb-1.5 rounded border bg-white d-flex align-items-center justify-content-between" style="border-color: #e2e8f0; font-size: 0.82rem; transition: background-color 0.2s;">
+                                <div class="d-flex align-items-center" style="gap: 10px; min-width: 0;">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 {{ $warnCount >= 3 ? 'bg-danger text-white' : ($warnCount == 2 ? 'bg-warning text-dark' : 'bg-info text-white') }}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                        <i class="fas {{ $icon }}"></i>
+                                    </div>
+                                    <div style="min-width: 0;">
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 5px;">
+                                            <span class="badge {{ $warnCount >= 3 ? 'badge-danger' : ($warnCount == 2 ? 'badge-warning' : 'badge-info') }} px-1.5 py-0.5" style="font-size: 0.72rem; {{ $warnCount >= 3 ? 'color: #000000 !important; font-weight: 800;' : '' }}">
+                                                #{{ $serial }} সতর্কতা {{ $warnCount }}
+                                            </span>
+                                            <strong class="text-dark font-weight-bold text-truncate" style="color: #0f172a !important;">{{ $title }}</strong>
+                                        </div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.75rem; color: #475569 !important; margin-top: 1px;">
+                                            {{ $details }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0 ml-2 font-mono" style="font-size: 0.75rem; white-space: nowrap;">
+                                    <div class="text-dark font-weight-semibold" style="color: #0f172a !important;">
+                                        <i class="fas fa-network-wired text-muted mr-1" style="font-size: 0.7rem;"></i>{{ $ip }}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">
+                                        <i class="far fa-clock text-muted mr-1"></i>{{ $time }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Spinner Indicator -->
+                    <div id="violations-loading-indicator" class="text-center py-2 text-muted text-xs d-none">
+                        <i class="fas fa-spinner fa-spin text-primary mr-1"></i> আরো ১০টি লোড হচ্ছে...
+                    </div>
+
+                    <!-- End of Feed Indicator -->
+                    <div id="violations-end-indicator" class="text-center py-2 text-muted text-xs {{ ($hasMoreViolations ?? false) ? 'd-none' : '' }}">
+                        <i class="fas fa-check-circle text-success mr-1"></i> সকল {{ $totalViolations ?? 0 }}টি সতর্কতা লোড হয়েছে
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
     <!-- Questions & Student Answers Sheet -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
@@ -307,4 +419,141 @@
             @endforelse
         </div>
     </div>
+
+    <!-- Hidden Form for Single Attempt Reset Violations -->
+    <form id="singleResetForm" action="" method="POST" style="display: none;">
+        @csrf
+    </form>
+@endsection
+
+@section('script')
+<script>
+    function confirmResetThisAttemptViolations(attemptId) {
+        if (confirm('আপনি কি নিশ্চিত যে এই পরীক্ষার সকল নিরাপত্তা লঙ্ঘন (Audit Log) স্থায়ীভাবে মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।')) {
+            var form = document.getElementById('singleResetForm');
+            form.action = '{{ url("admin/quizzes/reports/attempt") }}/' + attemptId + '/reset-violations';
+            form.submit();
+        }
+    }
+
+    (function() {
+        var container = document.getElementById('violations-scroll-container');
+        if (!container) return;
+
+        var listEl = document.getElementById('violations-items-list');
+        var loadingIndicator = document.getElementById('violations-loading-indicator');
+        var endIndicator = document.getElementById('violations-end-indicator');
+        var counterEl = document.getElementById('current-loaded-count');
+
+        var isLoading = false;
+        var currentPage = 1;
+        var hasMore = {{ ($hasMoreViolations ?? false) ? 'true' : 'false' }};
+        var totalCount = {{ $totalViolations ?? 0 }};
+        var loadedCount = {{ count($initialViolations ?? []) }};
+        var violationsDataUrl = '{{ route("admin.quizzes.attempt.violations-data", $attempt->id) }}';
+
+        function getViolationIcon(type) {
+            type = (type || '').toLowerCase();
+            if (type.indexOf('tab') !== -1 || type.indexOf('blur') !== -1) return 'fa-window-restore';
+            if (type.indexOf('click') !== -1) return 'fa-mouse-pointer';
+            if (type.indexOf('copy') !== -1 || type.indexOf('cut') !== -1 || type.indexOf('paste') !== -1) return 'fa-copy';
+            if (type.indexOf('shortcut') !== -1 || type.indexOf('key') !== -1) return 'fa-keyboard';
+            if (type.indexOf('dev') !== -1) return 'fa-code';
+            return 'fa-exclamation-triangle';
+        }
+
+        function renderItems(items) {
+            items.forEach(function(item) {
+                var warnCount = item.warning_count || item.serial;
+                var badgeClass = warnCount >= 3 ? 'badge-danger' : (warnCount === 2 ? 'badge-warning' : 'badge-info');
+                var circleClass = warnCount >= 3 ? 'bg-danger text-white' : (warnCount === 2 ? 'bg-warning text-dark' : 'bg-info text-white');
+                var badgeStyle = warnCount >= 3 ? 'color: #000000 !important; font-weight: 800;' : '';
+                var iconClass = getViolationIcon(item.type);
+
+                var div = document.createElement('div');
+                div.className = 'violation-item p-2 mb-1.5 rounded border bg-white d-flex align-items-center justify-content-between';
+                div.style.borderColor = '#e2e8f0';
+                div.style.fontSize = '0.82rem';
+                div.style.transition = 'background-color 0.2s';
+
+                div.innerHTML = 
+                    '<div class="d-flex align-items-center" style="gap: 10px; min-width: 0;">' +
+                        '<div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 ' + circleClass + '" style="width: 28px; height: 28px; font-size: 0.75rem;">' +
+                            '<i class="fas ' + iconClass + '"></i>' +
+                        '</div>' +
+                        '<div style="min-width: 0;">' +
+                            '<div class="d-flex align-items-center flex-wrap" style="gap: 5px;">' +
+                                '<span class="badge ' + badgeClass + ' px-1.5 py-0.5" style="font-size: 0.72rem; ' + badgeStyle + '">' +
+                                    '#' + item.serial + ' সতর্কতা ' + warnCount +
+                                '</span>' +
+                                '<strong class="text-dark font-weight-bold text-truncate" style="color: #0f172a !important;">' + (item.title || 'নিরাপত্তা লঙ্ঘন') + '</strong>' +
+                            '</div>' +
+                            '<div class="text-muted text-truncate" style="font-size: 0.75rem; color: #475569 !important; margin-top: 1px;">' +
+                                (item.details || '—') +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="text-right flex-shrink-0 ml-2 font-mono" style="font-size: 0.75rem; white-space: nowrap;">' +
+                        '<div class="text-dark font-weight-semibold" style="color: #0f172a !important;">' +
+                            '<i class="fas fa-network-wired text-muted mr-1" style="font-size: 0.7rem;"></i>' + (item.ip_address || '—') +
+                        '</div>' +
+                        '<div class="text-muted" style="font-size: 0.7rem;">' +
+                            '<i class="far fa-clock text-muted mr-1"></i>' + (item.timestamp || '—') +
+                        '</div>' +
+                    '</div>';
+
+                listEl.appendChild(div);
+                loadedCount++;
+            });
+
+            if (counterEl) {
+                counterEl.innerText = Math.min(loadedCount, totalCount);
+            }
+        }
+
+        container.addEventListener('scroll', function() {
+            if (isLoading || !hasMore) return;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 35) {
+                loadNextBatch();
+            }
+        });
+
+        function loadNextBatch() {
+            if (isLoading || !hasMore) return;
+            isLoading = true;
+            if (loadingIndicator) loadingIndicator.classList.remove('d-none');
+
+            var nextPage = currentPage + 1;
+            var fetchUrl = violationsDataUrl + '?page=' + nextPage;
+
+            fetch(fetchUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data && res.data.length > 0) {
+                    currentPage = res.current_page;
+                    hasMore = res.has_more;
+                    renderItems(res.data);
+                } else {
+                    hasMore = false;
+                }
+            })
+            .catch(function(err) {
+                console.error('Error loading violations feed:', err);
+                hasMore = false;
+            })
+            .finally(function() {
+                isLoading = false;
+                if (loadingIndicator) loadingIndicator.classList.add('d-none');
+                if (!hasMore && endIndicator) {
+                    endIndicator.classList.remove('d-none');
+                }
+            });
+        }
+    })();
+</script>
 @endsection

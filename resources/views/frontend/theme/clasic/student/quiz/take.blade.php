@@ -32,7 +32,38 @@
     }
 @endphp
 
-<div class="max-w-6xl mx-auto space-y-5" id="exam-container">
+<style>
+    /* Strict Exam Security & Copy Protection */
+    .exam-secure-zone,
+    #exam-container {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+    }
+    .exam-secure-zone input[type="text"],
+    .exam-secure-zone textarea {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+    }
+    @keyframes pulse-subtle {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+    }
+    .pulse-subtle {
+        animation: pulse-subtle 2s infinite ease-in-out;
+    }
+    .bg-rose-600, [class*="bg-rose-600"],
+    .bg-emerald-100, [class*="bg-emerald-100"] {
+        color: #000000 !important;
+        font-weight: 800 !important;
+    }
+</style>
+
+<div class="max-w-6xl mx-auto space-y-5 exam-secure-zone" id="exam-container">
 
     <!-- Sticky Exam HUD Bar -->
     <div class="student-card rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 sticky top-16 z-30 backdrop-blur-xl shadow-lg transition-all">
@@ -93,7 +124,7 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="button" onclick="confirmSubmitExam()" class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5">
+                <button type="button" id="btn-submit-exam-top" onclick="confirmSubmitExam()" class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer relative z-40 select-none">
                     <i class="fa fa-check-circle"></i>
                     <span>জমা দিন</span>
                 </button>
@@ -741,7 +772,7 @@
 
                 <!-- Complete & Submit Action in Sidebar -->
                 <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                    <button type="button" onclick="confirmSubmitExam()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                    <button type="button" id="btn-submit-exam-palette" onclick="confirmSubmitExam()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 cursor-pointer select-none">
                         <i class="fa fa-flag-checkered text-sm"></i>
                         <span>পরীক্ষা সমাপ্ত ও জমা দিন</span>
                     </button>
@@ -761,7 +792,7 @@
 </div>
 
 <!-- Submission Confirmation Modal -->
-<div id="submit-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+<div id="submit-modal" style="display: none; z-index: 999999;" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md items-center justify-center p-4">
     <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center">
         <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto text-2xl">
             <i class="fa fa-question-circle"></i>
@@ -779,10 +810,39 @@
             <button type="button" onclick="closeSubmitModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors">
                 পরীক্ষায় ফিরে যান
             </button>
-            <button type="button" onclick="executeFinalSubmit()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md">
+            <button type="button" id="btn-final-confirm-submit" onclick="executeFinalSubmit()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer">
                 হ্যাঁ, নিশ্চিতভাবে জমা দিন
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Strict Anti-Cheating & Exam Security Floating Toaster -->
+<div id="security-warning-toast" class="fixed top-20 right-4 sm:right-6 z-50 max-w-md w-full pointer-events-none transition-all duration-300 transform -translate-y-4 opacity-0">
+    <div id="sec-toast-card" class="pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 p-4 shadow-2xl border-2 border-amber-400 dark:border-amber-500 backdrop-blur-xl flex items-start gap-3">
+        <!-- Toast Icon -->
+        <div id="sec-toast-icon-wrap" class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 dark:text-amber-600 flex items-center justify-center shrink-0 text-lg">
+            <i id="sec-toast-icon" class="fa fa-exclamation-triangle"></i>
+        </div>
+        <!-- Toast Content -->
+        <div class="flex-grow min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <span id="sec-toast-badge" class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 font-bold">
+                    সতর্কবার্তা ১
+                </span>
+                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500" id="sec-toast-time"></span>
+            </div>
+            <h4 id="sec-toast-title" class="text-xs sm:text-sm font-bold leading-snug">
+                অনাকাঙ্ক্ষিত নিরাপত্তা কার্যকলাপ সনাক্ত হয়েছে!
+            </h4>
+            <p id="sec-toast-desc" class="text-[11px] text-slate-300 dark:text-slate-600 mt-0.5 leading-normal">
+                ট্যাব পরিবর্তন বা কপি করার চেষ্টা রেকর্ড করা হয়েছে।
+            </p>
+        </div>
+        <!-- Close Button -->
+        <button type="button" onclick="hideSecurityToast()" class="text-slate-400 hover:text-white dark:hover:text-slate-900 text-xs p-1 rounded-lg">
+            <i class="fa fa-times"></i>
+        </button>
     </div>
 </div>
 
@@ -1318,67 +1378,417 @@
 
     // 8. Submission Modal
     function confirmSubmitExam() {
-        var btns = document.querySelectorAll('[id^="pal-btn-"]');
-        var lockedCount = Array.from(btns).filter(function(b) {
-            return b.classList.contains('bg-emerald-600');
-        }).length;
-        var draftCount = Array.from(btns).filter(function(b) {
-            return b.classList.contains('bg-blue-600');
-        }).length;
-        var answeredTotal = lockedCount + draftCount;
-        var unans = totalQuestions - answeredTotal;
+        try {
+            var btns = document.querySelectorAll('[id^="pal-btn-"]');
+            var lockedCount = 0;
+            var draftCount = 0;
+            if (btns && btns.length) {
+                for (var i = 0; i < btns.length; i++) {
+                    var b = btns[i];
+                    if (b.classList.contains('bg-emerald-600')) lockedCount++;
+                    else if (b.classList.contains('bg-blue-600')) draftCount++;
+                }
+            }
+            var answeredTotal = lockedCount + draftCount;
+            var totQ = typeof totalQuestions !== 'undefined' ? totalQuestions : (btns ? btns.length : 0);
+            var unans = Math.max(0, totQ - answeredTotal);
 
-        var box = document.getElementById('modal-summary-box');
-        if (box) {
-            box.innerHTML = 
-                '<div class="flex justify-between"><span>মোট প্রশ্ন:</span><strong class="text-slate-900 dark:text-white">' + toBengaliDigits(totalQuestions) + ' টি</strong></div>' +
-                '<div class="flex justify-between text-emerald-600"><span>উত্তর নিশ্চিত/লকড:</span><strong>' + toBengaliDigits(lockedCount) + ' টি</strong></div>' +
-                (draftCount > 0 ? '<div class="flex justify-between text-blue-600"><span>ড্রাফট (জমা দিলে নিশ্চিত হবে):</span><strong>' + toBengaliDigits(draftCount) + ' টি</strong></div>' : '') +
-                '<div class="flex justify-between text-rose-500"><span>উত্তর বাকি (অনুর্ত্তীর্ণ):</span><strong>' + toBengaliDigits(unans) + ' টি</strong></div>';
+            var box = document.getElementById('modal-summary-box');
+            if (box) {
+                box.innerHTML = 
+                    '<div class="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800"><span>মোট প্রশ্ন:</span><strong class="text-slate-900 dark:text-white">' + toBengaliDigits(totQ) + ' টি</strong></div>' +
+                    '<div class="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800 text-emerald-600"><span>উত্তর নিশ্চিত/লকড:</span><strong>' + toBengaliDigits(lockedCount) + ' টি</strong></div>' +
+                    (draftCount > 0 ? '<div class="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800 text-blue-600"><span>ড্রাফট (জমা দিলে নিশ্চিত হবে):</span><strong>' + toBengaliDigits(draftCount) + ' টি</strong></div>' : '') +
+                    '<div class="flex justify-between py-1 text-rose-500 font-bold"><span>উত্তর বাকি (অনুর্ত্তীর্ণ):</span><strong>' + toBengaliDigits(unans) + ' টি</strong></div>';
+            }
+        } catch (err) {
+            console.error('Submit modal count summary calculation error:', err);
         }
 
         var modal = document.getElementById('submit-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        if (modal) {
+            modal.style.setProperty('display', 'flex', 'important');
+            modal.style.setProperty('z-index', '999999', 'important');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            if (confirm('আপনি কি নিশ্চিতভাবে এই পরীক্ষাটি জমা দিতে চান?')) {
+                executeFinalSubmit();
+            }
+        }
     }
 
     function closeSubmitModal() {
         var modal = document.getElementById('submit-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.style.setProperty('display', 'none', 'important');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
 
     function executeFinalSubmit() {
+        isSubmitting = true;
         if (window.sessionStorage) {
             window.sessionStorage.setItem('exam_completed_{{ $attempt->id }}', '1');
         }
         var form = document.getElementById('final-submit-form');
-        
-        // Harvest all text answers from page
-        var textInputs = document.querySelectorAll('input[id^="text-ans-"], textarea[id^="text-ans-"], input[id^="single-text-ans-"], textarea[id^="single-text-ans-"]');
-        textInputs.forEach(function(inp) {
-            var qId = inp.id.replace('single-text-ans-', '').replace('text-ans-', '');
-            if (qId && inp.value.trim() !== '') {
-                var hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'text_answers[' + qId + ']';
-                hidden.value = inp.value.trim();
-                form.appendChild(hidden);
-            }
-        });
-
-        // Harvest all CQ answers
-        for (var qId in cqAnswersState) {
-            for (var subKey in cqAnswersState[qId]) {
-                var hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'cq_answers[' + qId + '][' + subKey + ']';
-                hidden.value = cqAnswersState[qId][subKey];
-                form.appendChild(hidden);
-            }
+        if (!form) {
+            console.error('Final submit form not found.');
+            return;
         }
 
-        form.submit();
+        var confirmBtn = document.getElementById('btn-final-confirm-submit');
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> জমা হচ্ছে...';
+        }
+
+        // Harvest all text answers from page
+        try {
+            var textInputs = document.querySelectorAll('input[id^="text-ans-"], textarea[id^="text-ans-"], input[id^="single-text-ans-"], textarea[id^="single-text-ans-"]');
+            textInputs.forEach(function(inp) {
+                var qId = inp.id.replace('single-text-ans-', '').replace('text-ans-', '');
+                if (qId && inp.value.trim() !== '') {
+                    var hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'text_answers[' + qId + ']';
+                    hidden.value = inp.value.trim();
+                    form.appendChild(hidden);
+                }
+            });
+
+            // Harvest all CQ answers
+            if (typeof cqAnswersState !== 'undefined') {
+                for (var qId in cqAnswersState) {
+                    for (var subKey in cqAnswersState[qId]) {
+                        var hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = 'cq_answers[' + qId + '][' + subKey + ']';
+                        hidden.value = cqAnswersState[qId][subKey];
+                        form.appendChild(hidden);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Harvest error:', e);
+        }
+
+        if (typeof HTMLFormElement !== 'undefined' && HTMLFormElement.prototype.submit) {
+            HTMLFormElement.prototype.submit.call(form);
+        } else {
+            form.submit();
+        }
     }
+
+    // =========================================================================
+    // STRICT ANTI-CHEATING & EXAM SECURITY SYSTEM
+    // =========================================================================
+    var securityViolationCount = {{ (int)($attempt->security_violations_count ?: 0) }};
+    var recordViolationUrl = "{{ route('student.quiz.record-violation', $attempt->id) }}";
+    var isSubmitting = false;
+    var lastViolationTime = 0;
+    var blurTimestamp = 0;
+
+    function isInputField(target) {
+        if (!target) return false;
+        var tag = target.tagName ? target.tagName.toLowerCase() : '';
+        return tag === 'input' || tag === 'textarea';
+    }
+
+    // 1. Copy Protection (Block contextmenu, copy, cut, paste outside inputs)
+    // Directive: Right-click is blocked silently without triggering or saving warning alerts
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        triggerSecurityViolation('copy_attempt', 'প্রশ্ন বা টেক্সট কপি করার চেষ্টা');
+    });
+
+    document.addEventListener('cut', function(e) {
+        e.preventDefault();
+        triggerSecurityViolation('cut_attempt', 'টেক্সট কাট করার চেষ্টা');
+    });
+
+    document.addEventListener('paste', function(e) {
+        if (!isInputField(e.target)) {
+            e.preventDefault();
+            triggerSecurityViolation('paste_attempt', 'অননুমোদিত পেস্ট করার চেষ্টা');
+        }
+    });
+
+    document.addEventListener('selectstart', function(e) {
+        if (!isInputField(e.target)) {
+            e.preventDefault();
+        }
+    });
+
+    // 2. Keyboard Restrictions (Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+P, Ctrl+S, F12, DevTools)
+    document.addEventListener('keydown', function(e) {
+        if (isSubmitting) return;
+
+        var key = e.key ? e.key.toLowerCase() : '';
+        var isCtrl = e.ctrlKey || e.metaKey;
+
+        // F12
+        if (e.keyCode === 123 || e.key === 'F12') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('dev_tools', 'F12 ডেভেলপার টুলস খোলার চেষ্টা');
+            return;
+        }
+
+        // Ctrl + Shift + I/J/C (DevTools inspect)
+        if (isCtrl && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('dev_tools', 'Ctrl+Shift+' + key.toUpperCase() + ' ডেভেলপার কনসোল খোলার চেষ্টা');
+            return;
+        }
+
+        // Ctrl + U (View source)
+        if (isCtrl && key === 'u') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('restricted_shortcut', 'Ctrl+U পেজ সোর্স দেখার চেষ্টা');
+            return;
+        }
+
+        // Ctrl + P (Print)
+        if (isCtrl && key === 'p') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('restricted_shortcut', 'Ctrl+P প্রিন্ট ডায়ালগ খোলার চেষ্টা');
+            return;
+        }
+
+        // Ctrl + S (Save page)
+        if (isCtrl && key === 's') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('restricted_shortcut', 'Ctrl+S পেজ সেভ করার চেষ্টা');
+            return;
+        }
+
+        // Ctrl + C (Copy)
+        if (isCtrl && key === 'c') {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('restricted_shortcut', 'Ctrl+C কপি শর্টকাট ব্যবহারের চেষ্টা');
+            return;
+        }
+
+        // Ctrl + V (Paste outside inputs)
+        if (isCtrl && key === 'v' && !isInputField(e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSecurityViolation('restricted_shortcut', 'Ctrl+V পেস্ট শর্টকাট ব্যবহারের চেষ্টা');
+            return;
+        }
+    });
+
+    // 3. Tab Switching & Window Focus Detection
+    document.addEventListener('visibilitychange', function() {
+        if (isSubmitting) return;
+        if (document.hidden) {
+            blurTimestamp = Date.now();
+        } else {
+            if (blurTimestamp > 0) {
+                var diffMs = Date.now() - blurTimestamp;
+                blurTimestamp = 0;
+                if (diffMs > 800) {
+                    var diffSec = Math.max(1, Math.round(diffMs / 1000));
+                    triggerSecurityViolation('tab_switch', 'ব্রাউজার ট্যাব পরিবর্তন বা মিনিমাইজ করা হয়েছিল (' + diffSec + ' সেকেন্ড)');
+                }
+            }
+        }
+    });
+
+    window.addEventListener('blur', function() {
+        if (isSubmitting) return;
+        if (!blurTimestamp) {
+            blurTimestamp = Date.now();
+        }
+    });
+
+    window.addEventListener('focus', function() {
+        if (isSubmitting) return;
+        if (blurTimestamp > 0) {
+            var diffMs = Date.now() - blurTimestamp;
+            blurTimestamp = 0;
+            if (diffMs > 1200) {
+                var diffSec = Math.max(1, Math.round(diffMs / 1000));
+                triggerSecurityViolation('window_blur', 'উইন্ডো ফোকাস হারিয়েছে (' + diffSec + ' সেকেন্ড)');
+            }
+        }
+    });
+
+    // 4. Trigger Security Violation Handler
+    function triggerSecurityViolation(type, details) {
+        if (isSubmitting) return;
+        var now = Date.now();
+        if (now - lastViolationTime < 1800) {
+            // Debounce within 1.8 seconds
+            return;
+        }
+        lastViolationTime = now;
+
+        securityViolationCount++;
+
+        // Render modal UI based on warning tier
+        renderSecurityWarningModal(securityViolationCount, type, details);
+
+        // Gentle audio alert
+        try {
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                var ctx = new AudioContext();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(securityViolationCount >= 3 ? 550 : 440, ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            }
+        } catch (e) {}
+
+        // Post to backend asynchronously
+        fetch(recordViolationUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                violation_type: type,
+                details: details
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.warning_count) {
+                securityViolationCount = data.warning_count;
+                updateSecurityBadgeTier(securityViolationCount);
+            }
+        })
+        .catch(function(err) {
+            console.warn('Violation logging network notice:', err);
+        });
+    }
+
+    var secToastTimer = null;
+
+    function renderSecurityWarningModal(count, type, details) {
+        // Alias to toaster
+        showSecurityToast(count, type, details);
+    }
+
+    function showSecurityToast(count, type, details) {
+        var toast = document.getElementById('security-warning-toast');
+        var card = document.getElementById('sec-toast-card');
+        var iconWrap = document.getElementById('sec-toast-icon-wrap');
+        var icon = document.getElementById('sec-toast-icon');
+        var badge = document.getElementById('sec-toast-badge');
+        var title = document.getElementById('sec-toast-title');
+        var desc = document.getElementById('sec-toast-desc');
+        var time = document.getElementById('sec-toast-time');
+
+        if (!toast) return;
+
+        var typeNames = {
+            'tab_switch': 'ট্যাব পরিবর্তন (Tab Switch)',
+            'window_blur': 'উইন্ডো ফোকাস হারানো (Window Blur)',
+            'right_click': 'মাউসের রাইট ক্লিক (Context Menu)',
+            'copy_attempt': 'কপি করার চেষ্টা (Copy Protection)',
+            'cut_attempt': 'কাট করার চেষ্টা (Cut Protection)',
+            'paste_attempt': 'পেস্ট করার চেষ্টা (Paste Protection)',
+            'restricted_shortcut': 'নিষিদ্ধ কিবোর্ড শর্টকাট (Shortcut Blocked)',
+            'dev_tools': 'ডেভেলপার টুলস / F12 (DevTools Blocked)'
+        };
+
+        var label = typeNames[type] || 'নিরাপত্তা নিয়ম লঙ্ঘন';
+        if (time) time.innerText = new Date().toLocaleTimeString('bn-BD');
+
+        if (count <= 1) {
+            card.className = "pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 p-4 shadow-2xl border-2 border-amber-400 dark:border-amber-500 backdrop-blur-xl flex items-start gap-3";
+            iconWrap.className = "w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 dark:text-amber-600 flex items-center justify-center shrink-0 text-lg";
+            icon.className = "fa fa-exclamation-triangle";
+            badge.className = "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 font-bold";
+            badge.innerText = "সতর্কবার্তা ১";
+            title.innerText = "অনাকাঙ্ক্ষিত কার্যকলাপ সনাক্ত হয়েছে!";
+            desc.innerText = label + " — " + (details || 'পরীক্ষা চলাকালীন ট্যাব পরিবর্তন বা কপি নিষিদ্ধ।');
+        } else if (count === 2) {
+            card.className = "pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 p-4 shadow-2xl border-2 border-orange-500 dark:border-orange-500 backdrop-blur-xl flex items-start gap-3";
+            iconWrap.className = "w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 dark:text-orange-600 flex items-center justify-center shrink-0 text-lg";
+            icon.className = "fa fa-shield-alt";
+            badge.className = "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-orange-500 text-white font-bold";
+            badge.innerText = "২য় কড়া সতর্কতা";
+            title.innerText = "দ্বিতীয়বার নিরাপত্তা নিয়ম লঙ্ঘন সনাক্ত!";
+            desc.innerText = label + " — অডিট লগে রেকর্ড করা হচ্ছে। পরীক্ষা স্বাভাবিকভাবে চলমান।";
+        } else {
+            card.className = "pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 p-4 shadow-2xl border-2 border-rose-500 dark:border-rose-500 backdrop-blur-xl flex items-start gap-3";
+            iconWrap.className = "w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 dark:text-rose-600 flex items-center justify-center shrink-0 text-lg pulse-subtle";
+            icon.className = "fa fa-ban";
+            badge.className = "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white font-bold";
+            badge.innerText = "গুরুতর সতর্কতা #" + toBengaliDigits(count);
+            title.innerText = "গুরুতর নিরাপত্তা নিয়ম লঙ্ঘন রেকর্ড হচ্ছে!";
+            desc.innerText = label + " — আপনার আইপি ও সকল কার্যকলাপ অ্যাডমিন রিপোর্টে সংরক্ষিত হচ্ছে।";
+        }
+
+        // Show toast with slide-in animation
+        toast.classList.remove('opacity-0', '-translate-y-4');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        // Auto-dismiss after 6 seconds
+        clearTimeout(secToastTimer);
+        secToastTimer = setTimeout(function() {
+            hideSecurityToast();
+        }, 6000);
+    }
+
+    function hideSecurityToast() {
+        var toast = document.getElementById('security-warning-toast');
+        if (toast) {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', '-translate-y-4');
+        }
+    }
+
+    function updateSecurityBadgeTier(count) {
+        var badge = document.getElementById('sec-toast-badge');
+        if (badge && count >= 3) {
+            badge.innerText = "গুরুতর সতর্কতা #" + toBengaliDigits(count);
+        }
+    }
+
+    function acknowledgeSecurityWarning() {
+        hideSecurityToast();
+    }
+
+    // Direct event listener binding for submit buttons as bulletproof safety net
+    window.addEventListener('DOMContentLoaded', function() {
+        var topBtn = document.getElementById('btn-submit-exam-top');
+        if (topBtn) {
+            topBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                confirmSubmitExam();
+            });
+        }
+        var palBtn = document.getElementById('btn-submit-exam-palette');
+        if (palBtn) {
+            palBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                confirmSubmitExam();
+            });
+        }
+    });
 </script>
 @endsection

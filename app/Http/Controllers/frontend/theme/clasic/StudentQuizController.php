@@ -973,6 +973,64 @@ class StudentQuizController extends Controller
     /**
      * Retake an exam using the EXACT questions from a previously submitted attempt
      */
+    /**
+     * Record an anti-cheating security violation (Tab switch, copy, cut, right-click, shortcuts)
+     * NOTE: Strictly adheres to user directive: Never automatically terminate, cancel or interrupt exam.
+     */
+    public function recordViolation(Request $request, $attemptId)
+    {
+        $student = Auth::guard('student')->user();
+        $attempt = LmsQuizAttempt::where('student_account_id', $student->id)->findOrFail($attemptId);
+
+        $request->validate([
+            'violation_type' => 'required|string|max:60',
+            'details'        => 'nullable|string|max:500',
+        ]);
+
+        $violationType = $request->input('violation_type');
+        $details = $request->input('details');
+
+        if ($attempt->status === 'in_progress') {
+            $newCount = ($attempt->security_violations_count ?: 0) + 1;
+
+            // 1. Create permanent audit record
+            \App\model\LmsExamViolation::create([
+                'attempt_id'         => $attempt->id,
+                'quiz_id'            => $attempt->quiz_id,
+                'student_account_id' => $student->id,
+                'violation_type'     => $violationType,
+                'warning_count'      => $newCount,
+                'details'            => $details,
+                'ip_address'         => $request->ip(),
+            ]);
+
+            // 2. Append to attempt log array
+            $currentLog = is_array($attempt->security_violations_log) ? $attempt->security_violations_log : [];
+            $currentLog[] = [
+                'warning_number' => $newCount,
+                'violation_type' => $violationType,
+                'title'          => \App\model\LmsExamViolation::translateViolationType($violationType),
+                'details'        => $details,
+                'time'           => Carbon::now()->toDateTimeString(),
+            ];
+
+            $attempt->update([
+                'security_violations_count' => $newCount,
+                'security_violations_log'   => $currentLog,
+            ]);
+
+            return response()->json([
+                'success'        => true,
+                'warning_count'  => $newCount,
+                'violation_type' => $violationType,
+                'title'          => \App\model\LmsExamViolation::translateViolationType($violationType),
+                'message'        => 'নিরাপত্তা লঙ্ঘন রেকর্ড করা হয়েছে।',
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Exam is not in progress.'], 400);
+    }
+
     public function retakeAttempt(Request $request, $attemptId)
     {
         $student = Auth::guard('student')->user();

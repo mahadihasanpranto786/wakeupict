@@ -82,6 +82,22 @@
         </div>
     </div>
 
+    <!-- Reports Navigation Tabs: Attempts vs Parent Questions Tracking -->
+    <ul class="nav nav-pills mb-3" id="reportsTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') !== 'questions' ? 'active bg-primary text-white' : 'text-dark bg-white border' }} shadow-sm mr-2" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['q_page', 'q_search']), ['tab' => 'attempts'])) }}">
+                <i class="fas fa-user-graduate mr-1"></i> শিক্ষার্থী পরীক্ষা ফলাফল তালিকা (Attempts)
+                <span class="badge {{ ($activeTab ?? 'attempts') !== 'questions' ? 'badge-light text-primary' : 'badge-secondary' }} ml-1">{{ number_format($totalAttempts) }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') === 'questions' ? 'active bg-primary text-white' : 'text-dark bg-white border' }} shadow-sm" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['page', 'search']), ['tab' => 'questions'])) }}">
+                <i class="fas fa-project-diagram mr-1"></i> প্রশ্ন হিস্ট্রি ও প্যারেন্ট প্রশ্ন ট্র্যাকিং (Parent Question Analytics)
+                <span class="badge {{ ($activeTab ?? 'attempts') === 'questions' ? 'badge-light text-primary' : 'badge-secondary' }} ml-1">{{ number_format($pqStats->total() ?? 0) }}</span>
+            </a>
+        </li>
+    </ul>
+    @if(($activeTab ?? 'attempts') !== 'questions')
     <!-- Filters Card -->
     <div class="card card-outline card-primary shadow-sm border-0 mb-3">
         <div class="card-header bg-white py-3 border-bottom">
@@ -161,6 +177,10 @@
             </div>
         </div>
 
+                <form id="bulkResetViolationsForm" action="{{ route('admin.quizzes.reports.bulk-reset-violations') }}" method="POST" style="display: none;">
+            @csrf
+            <div id="bulkResetInputsContainer"></div>
+        </form>
         <form id="bulkDeleteForm" action="{{ route('admin.quizzes.reports.bulk-delete') }}" method="POST">
             @csrf
             <div class="card-body p-0 table-responsive">
@@ -179,6 +199,7 @@
                         <th class="text-center">শতকরা</th>
                         <th class="text-center">সময়</th>
                         <th class="text-center">ফলাফল</th>
+                        <th class="text-center" style="width: 120px;">নিরাপত্তা অডিট</th>
                         <th class="text-center">জমার তারিখ</th>
                         <th class="text-center" style="width: 120px;">অ্যাকশন</th>
                     </tr>
@@ -248,6 +269,18 @@
                                     <span class="badge badge-secondary px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> চলমান</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                @if(($attempt->security_violations_count ?: 0) == 0)
+                                    <span class="badge badge-success px-2 py-1"><i class="fas fa-shield-alt mr-1"></i> ক্লিন (Clean)</span>
+                                @else
+                                    <button type="button" 
+                                            class="btn btn-xs {{ $attempt->security_violations_count >= 3 ? 'btn-danger' : 'btn-warning' }} font-weight-bold" 
+                                            onclick="openViolationAuditModal({{ $attempt->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'N/A') }}', {{ (int)$attempt->security_violations_count }}, {{ json_encode($attempt->security_violations_log ?: []) }})"
+                                            title="নিরাপত্তা লঙ্ঘন অডিট লগ দেখুন">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> {{ $attempt->security_violations_count }}টি লঙ্ঘন
+                                    </button>
+                                @endif
+                            </td>
                             <td class="text-center text-xs text-muted">
                                 {{ $attempt->submitted_at ? $attempt->submitted_at->format('d M, Y h:i A') : $attempt->updated_at->format('d M, Y') }}
                             </td>
@@ -290,6 +323,141 @@
         @csrf
         @method('DELETE')
     </form>
+
+    @endif
+
+    @if(($activeTab ?? 'attempts') === 'questions')
+    <!-- Parent Question Analytics & Tracking Card -->
+    <div class="card card-outline card-info shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <h5 class="card-title font-weight-bold text-dark mb-0">
+                        <i class="fas fa-sitemap text-info mr-2"></i> প্রশ্ন হিস্ট্রি ও মূল (প্যারেন্ট) প্রশ্ন পারফরম্যান্স বিশ্লেষণ
+                    </h5>
+                    <p class="text-muted text-xs mb-0 mt-1">
+                        একই মূল প্রশ্ন একাধিক পরীক্ষায় বা সেটে কতবার এসেছে এবং শিক্ষার্থীরা কতটা সঠিকভাবে উত্তর দিয়েছে তা ট্র্যাক করুন।
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <form action="{{ route('admin.quizzes.reports') }}" method="GET" class="d-inline-block">
+                        <input type="hidden" name="tab" value="questions">
+                        <div class="input-group input-group-sm" style="max-width: 320px;">
+                            <input type="text" name="q_search" class="form-control" placeholder="প্রশ্ন বা টপিক খুঁজুন..." value="{{ request('q_search') }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-info" type="submit"><i class="fas fa-search"></i> খুঁজুন</button>
+                                @if(request('q_search'))
+                                    <a href="{{ route('admin.quizzes.reports', ['tab' => 'questions']) }}" class="btn btn-outline-secondary" title="রিসেট"><i class="fas fa-times"></i></a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0 text-sm">
+                <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
+                    <tr>
+                        <th class="text-center" style="width: 50px;">#</th>
+                        <th style="min-width: 280px;">মূল / প্যারেন্ট প্রশ্ন ও ক্যাটাগরি (Parent Question)</th>
+                        <th class="text-center" style="width: 140px;">মোট উত্তর প্রদান</th>
+                        <th class="text-center" style="width: 100px;">সঠিক</th>
+                        <th class="text-center" style="width: 100px;">ভুল</th>
+                        <th class="text-center" style="width: 160px;">সাফল্যের হার (%)</th>
+                        <th class="text-center" style="width: 130px;">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($pqStats as $pStat)
+                        @php
+                            $pq = $pStat->parent_question;
+                            $accuracy = $pStat->accuracy_rate;
+                        @endphp
+                        <tr>
+                            <td class="text-center text-muted font-weight-bold">{{ $loop->iteration + ($pqStats->currentPage() - 1) * $pqStats->perPage() }}</td>
+                            <td>
+                                @if($pq)
+                                    <div class="font-weight-bold text-dark font-size-14 mb-1">
+                                        {{ $pq->question_text }}
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap gap-1 text-xs">
+                                        <span class="badge badge-light border mr-1 font-mono">#Q-{{ $pq->id }}</span>
+                                        <span class="badge badge-info mr-1">{{ $pq->category ?: 'General' }}</span>
+                                        <span class="badge badge-secondary mr-1">{{ $pq->getTypeLabel() }}</span>
+                                        @if($pq->difficulty)
+                                            <span class="badge badge-light border mr-1">{{ ucfirst($pq->difficulty) }}</span>
+                                        @endif
+                                        @php
+                                            $variantsCount = \App\model\LmsQuestion::where('parent_question_id', $pq->id)->count();
+                                        @endphp
+                                        @if($variantsCount > 0)
+                                            <span class="badge badge-primary font-weight-bold mr-1">
+                                                <i class="fas fa-code-branch mr-1"></i> {{ $variantsCount }}টি ভ্যারিয়েন্ট
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="text-muted font-italic">প্রশ্ন #{{ $pStat->master_question_id }} (আর্কাইভকৃত বা মুছে ফেলা হয়েছে)</div>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <span class="font-weight-bold text-dark" style="font-size: 1.05rem;">{{ number_format($pStat->total_answers_count) }}</span> <span class="text-xs text-muted">বার</span>
+                                <div class="text-xs text-muted mt-0.5">({{ $pStat->total_attempts_count }}টি অ্যাটেম্পটে)</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-success px-2.5 py-1 font-weight-bold text-xs">
+                                    <i class="fas fa-check mr-1"></i> {{ number_format($pStat->correct_count) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-danger px-2.5 py-1 font-weight-bold text-xs">
+                                    <i class="fas fa-times mr-1"></i> {{ number_format($pStat->incorrect_count) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <div class="progress mr-2 flex-grow-1" style="height: 8px; max-width: 80px;">
+                                        <div class="progress-bar {{ $accuracy >= 70 ? 'bg-success' : ($accuracy >= 40 ? 'bg-warning' : 'bg-danger') }}" style="width: {{ $accuracy }}%"></div>
+                                    </div>
+                                    <span class="font-weight-bold text-xs {{ $accuracy >= 70 ? 'text-success' : ($accuracy >= 40 ? 'text-warning' : 'text-danger') }}">{{ $accuracy }}%</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if($pq)
+                                    <button type="button" class="btn btn-sm btn-outline-info font-weight-bold shadow-sm" onclick="openParentQuestionModal({{ $pq->id }})">
+                                        <i class="fas fa-history mr-1"></i> হিস্ট্রি দেখুন
+                                    </button>
+                                @else
+                                    <span class="text-muted text-xs">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-question-circle fa-3x mb-3 text-muted opacity-50"></i>
+                                <p class="font-weight-bold mb-0">কোনো প্রশ্নের উত্তরপত্র বা হিস্ট্রি পাওয়া যায়নি।</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($pqStats->hasPages())
+        <div class="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center flex-wrap">
+            <div class="text-muted text-xs mb-2 mb-md-0">
+                মোট <strong>{{ $pqStats->total() }}</strong> টি প্রশ্নের মধ্যে {{ $pqStats->firstItem() ?? 0 }} - {{ $pqStats->lastItem() ?? 0 }} দেখানো হচ্ছে।
+            </div>
+            <div>
+                {{ $pqStats->links() }}
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
 
     <script>
         function updateBulkBar() {
@@ -336,6 +504,28 @@
             updateBulkBar();
         }
 
+        
+        function executeBulkResetViolations() {
+            var checked = document.querySelectorAll('.attempt-checkbox:checked');
+            if (checked.length === 0) {
+                alert('অনুগ্রহ করে প্রথমে কমপক্ষে একটি ফলাফল নির্বাচন করুন।');
+                return;
+            }
+            if (confirm('আপনি কি নিশ্চিতভাবে নির্বাচিত ' + checked.length + 'টি ফলাফলের সকল নিরাপত্তা লঙ্ঘন রিসেট ও মুছে ফেলতে চান?')) {
+                var form = document.getElementById('bulkResetViolationsForm');
+                var container = document.getElementById('bulkResetInputsContainer');
+                container.innerHTML = '';
+                checked.forEach(function(cb) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'attempt_ids[]';
+                    input.value = cb.value;
+                    container.appendChild(input);
+                });
+                form.submit();
+            }
+        }
+
         function executeBulkDelete() {
             var checked = document.querySelectorAll('.attempt-checkbox:checked');
             if (checked.length === 0) {
@@ -354,6 +544,274 @@
                 form.action = '/admin/quizzes/reports/attempt/' + attemptId;
                 form.submit();
             }
+        }
+    </script>
+
+    <!-- Violation Logs Modal -->
+    <div class="modal fade" id="violationAuditModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-dark text-white py-2">
+                    <h5 class="modal-title font-weight-bold text-sm" id="violationAuditModalLabel">
+                        <i class="fas fa-shield-alt text-warning mr-2"></i> পরীক্ষা নিরাপত্তা অডিট লগ (Anti-Cheating Security Audit)
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded border">
+                        <div>
+                            <span class="text-muted text-xs">শিক্ষার্থী:</span>
+                            <strong id="violationAuditStudentName" class="text-dark ml-1"></strong>
+                        </div>
+                        <div>
+                            <span class="text-muted text-xs">অ্যাটেম্পট আইডি:</span>
+                            <span id="violationAuditAttemptId" class="badge badge-secondary ml-1"></span>
+                        </div>
+                        <div>
+                            <span class="text-muted text-xs">মোট লঙ্ঘন:</span>
+                            <span id="violationAuditTotalBadge" class="badge badge-danger ml-1 font-weight-bold"></span>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm table-striped text-xs mb-0">
+                            <thead class="bg-light font-weight-bold">
+                                <tr>
+                                    <th style="width: 45px;" class="text-center">#</th>
+                                    <th>লঙ্ঘনের ধরন (Violation Type)</th>
+                                    <th>বিবরণ (Details)</th>
+                                    <th style="width: 150px;">সময় (Timestamp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="violationAuditTableBody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 justify-content-between">
+                    <form id="singleResetViolationsForm" action="" method="POST" class="d-inline" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর নিরাপত্তা লঙ্ঘন স্থায়ীভাবে রিসেট করতে চান?');">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm">
+                            <i class="fas fa-trash-alt mr-1"></i> এই ফলাফলটির লঙ্ঘন রিসেট করুন
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-secondary font-weight-bold" data-dismiss="modal">বন্ধ করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function escapeHtml(str) {
+            if (!str) return '';
+            var p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
+        function openViolationAuditModal(attemptId, studentName, count, logs) {
+            document.getElementById('violationAuditStudentName').innerText = studentName;
+            document.getElementById('violationAuditAttemptId').innerText = '#' + attemptId;
+            document.getElementById('violationAuditTotalBadge').innerText = count + 'টি সনাক্ত';
+            var sForm = document.getElementById('singleResetViolationsForm');
+            if (sForm) sForm.action = '/admin/quizzes/reports/attempt/' + attemptId + '/reset-violations';
+            
+            var tbody = document.getElementById('violationAuditTableBody');
+            tbody.innerHTML = '';
+            
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">কোনো বিস্তারিত রেকর্ড পাওয়া যায়নি।</td></tr>';
+            } else {
+                logs.forEach(function(item, idx) {
+                    var tr = document.createElement('tr');
+                    tr.innerHTML = 
+                        '<td class="text-center font-weight-bold">' + (idx + 1) + '</td>' +
+                        '<td><span class="badge badge-danger text-xs mr-1">' + escapeHtml(item.title || item.violation_type || 'নিরাপত্তা লঙ্ঘন') + '</span></td>' +
+                        '<td class="text-muted">' + escapeHtml(item.details || '—') + '</td>' +
+                        '<td class="font-mono text-xs text-dark">' + escapeHtml(item.time || '—') + '</td>';
+                    tbody.appendChild(tr);
+                });
+            }
+            $('#violationAuditModal').modal('show');
+        }
+    </script>
+
+    <!-- Parent Question History Modal -->
+    <div class="modal fade" id="parentQuestionHistoryModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h5 class="modal-title font-weight-bold text-sm" id="parentQuestionHistoryModalLabel">
+                        <i class="fas fa-project-diagram mr-2"></i> মূল (প্যারেন্ট) প্রশ্ন বিস্তারিত ট্র্যাকিং ও শিক্ষার্থী উত্তর হিস্ট্রি
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="pqModalLoading" class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="text-muted text-xs mt-2">তথ্য লোড হচ্ছে...</p>
+                    </div>
+
+                    <div id="pqModalContent" style="display: none;">
+                        <!-- Question Preview Card -->
+                        <div class="p-3 bg-light rounded border mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge badge-primary font-mono" id="pqPreviewCode">#Q-</span>
+                                <div>
+                                    <span class="badge badge-info mr-1" id="pqPreviewCategory"></span>
+                                    <span class="badge badge-secondary mr-1" id="pqPreviewType"></span>
+                                    <span class="badge badge-light border" id="pqPreviewVariants"></span>
+                                </div>
+                            </div>
+                            <h5 class="font-weight-bold text-dark mb-3" id="pqPreviewText"></h5>
+                            
+                            <div id="pqPreviewOptionsContainer" class="row g-2">
+                                <!-- Options rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Stats KPI Banner -->
+                        <div class="row g-2 mb-3 text-center">
+                            <div class="col-sm-3 col-6">
+                                <div class="p-2 bg-light border rounded">
+                                    <div class="text-muted text-xs font-weight-bold">মোট উপস্থিতি</div>
+                                    <div class="h5 font-weight-bold mb-0 text-dark" id="pqStatTotal">0</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="p-2 bg-light border rounded">
+                                    <div class="text-muted text-xs font-weight-bold">সঠিক উত্তর</div>
+                                    <div class="h5 font-weight-bold mb-0 text-success" id="pqStatCorrect">0</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="p-2 bg-light border rounded">
+                                    <div class="text-muted text-xs font-weight-bold">ভুল উত্তর</div>
+                                    <div class="h5 font-weight-bold mb-0 text-danger" id="pqStatIncorrect">0</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="p-2 bg-light border rounded">
+                                    <div class="text-muted text-xs font-weight-bold">সাফল্যের হার</div>
+                                    <div class="h5 font-weight-bold mb-0 text-primary" id="pqStatRate">0%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attempts History Table -->
+                        <h6 class="font-weight-bold text-dark mb-2">
+                            <i class="fas fa-list-alt text-muted mr-1"></i> পরীক্ষাসমূহে এই প্রশ্নের উপস্থিতি ও ফলাফল টাইমলাইন
+                        </h6>
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-bordered table-sm table-striped text-xs mb-0">
+                                <thead class="bg-light font-weight-bold sticky-top">
+                                    <tr>
+                                        <th style="width: 45px;" class="text-center">#</th>
+                                        <th>শিক্ষার্থী (Student)</th>
+                                        <th>পরীক্ষা ও সেট (Quiz & Set)</th>
+                                        <th class="text-center" style="width: 100px;">ফলাফল</th>
+                                        <th class="text-center" style="width: 90px;">প্রাপ্ত মান</th>
+                                        <th style="width: 150px;">তারিখ ও সময়</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pqHistoryTableBody">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 justify-content-between">
+                    <form id="singleResetViolationsForm" action="" method="POST" class="d-inline" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর নিরাপত্তা লঙ্ঘন স্থায়ীভাবে রিসেট করতে চান?');">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm">
+                            <i class="fas fa-trash-alt mr-1"></i> এই ফলাফলটির লঙ্ঘন রিসেট করুন
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-secondary font-weight-bold" data-dismiss="modal">বন্ধ করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openParentQuestionModal(questionId) {
+            $('#parentQuestionHistoryModal').modal('show');
+            document.getElementById('pqModalLoading').style.display = 'block';
+            document.getElementById('pqModalContent').style.display = 'none';
+
+            fetch('/admin/quizzes/reports/parent-question/' + questionId + '/history')
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    document.getElementById('pqModalLoading').style.display = 'none';
+                    if (!res.success) {
+                        alert('প্রশ্ন তথ্য লোড করতে ব্যর্থ হয়েছে');
+                        return;
+                    }
+                    document.getElementById('pqModalContent').style.display = 'block';
+
+                    var q = res.parent_question;
+                    document.getElementById('pqPreviewCode').innerText = '#Q-' + q.id;
+                    document.getElementById('pqPreviewCategory').innerText = q.category;
+                    document.getElementById('pqPreviewType').innerText = q.question_type;
+                    document.getElementById('pqPreviewVariants').innerText = q.variants_count > 0 ? (q.variants_count + 'টি ভ্যারিয়েন্ট সংযুক্ত') : 'মূল প্রশ্ন (Original)';
+                    document.getElementById('pqPreviewText').innerText = q.question_text;
+
+                    // Render options
+                    var optContainer = document.getElementById('pqPreviewOptionsContainer');
+                    optContainer.innerHTML = '';
+                    if (q.options && q.options.length > 0) {
+                        q.options.forEach(function(opt, oIdx) {
+                            var col = document.createElement('div');
+                            col.className = 'col-sm-6 mb-2';
+                            var isCorr = opt.is_correct;
+                            col.innerHTML = '<div class="p-2 rounded border ' + (isCorr ? 'bg-success text-white border-success' : 'bg-white text-dark') + ' text-xs font-weight-bold d-flex align-items-center">' +
+                                '<span class="badge ' + (isCorr ? 'badge-light text-success' : 'badge-light border') + ' mr-2">' + String.fromCharCode(65 + oIdx) + '</span>' +
+                                '<span class="flex-grow-1">' + escapeHtml(opt.option_text) + '</span>' +
+                                (isCorr ? '<i class="fas fa-check-circle ml-1"></i>' : '') +
+                                '</div>';
+                            optContainer.appendChild(col);
+                        });
+                    }
+
+                    // Stats
+                    var total = res.total_appearances || 0;
+                    var corr = res.correct_count || 0;
+                    var incorr = res.incorrect_count || 0;
+                    var rate = total > 0 ? Math.round((corr / total) * 100) : 0;
+
+                    document.getElementById('pqStatTotal').innerText = total + ' বার';
+                    document.getElementById('pqStatCorrect').innerText = corr;
+                    document.getElementById('pqStatIncorrect').innerText = incorr;
+                    document.getElementById('pqStatRate').innerText = rate + '%';
+
+                    // History table
+                    var tbody = document.getElementById('pqHistoryTableBody');
+                    tbody.innerHTML = '';
+                    if (!res.history || res.history.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">এই প্রশ্নের অধীনে এখনো কোনো ফলাফল জমা পড়েনি।</td></tr>';
+                    } else {
+                        res.history.forEach(function(item, idx) {
+                            var tr = document.createElement('tr');
+                            tr.innerHTML = 
+                                '<td class="text-center font-weight-bold">' + (idx + 1) + '</td>' +
+                                '<td><strong>' + escapeHtml(item.student_name) + '</strong> <span class="badge badge-light border ml-1">' + escapeHtml(item.student_id_code) + '</span></td>' +
+                                '<td>' + escapeHtml(item.quiz_title) + ' <span class="badge badge-light border ml-1">' + escapeHtml(item.set) + '</span></td>' +
+                                '<td class="text-center">' + (item.is_correct ? '<span class="badge badge-success px-2 py-0.5 font-weight-bold"><i class="fas fa-check"></i> সঠিক</span>' : '<span class="badge badge-danger px-2 py-0.5 font-weight-bold"><i class="fas fa-times"></i> ভুল</span>') + '</td>' +
+                                '<td class="text-center font-mono font-weight-bold">' + item.marks_obtained + '</td>' +
+                                '<td class="font-mono text-muted">' + escapeHtml(item.time) + '</td>';
+                            tbody.appendChild(tr);
+                        });
+                    }
+                })
+                .catch(function(err) {
+                    document.getElementById('pqModalLoading').style.display = 'none';
+                    alert('ত্রুটি: ' + err);
+                });
         }
     </script>
 @endsection

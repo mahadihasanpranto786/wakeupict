@@ -96,6 +96,59 @@ class StudentAuthController extends Controller
      */
     public function register(Request $request)
     {
+        $rawPhone = trim($request->phone ?: '');
+        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+        $rawEmail = $request->email ? strtolower(trim($request->email)) : null;
+
+        // Check if an existing student account already exists with this phone or email
+        $existingAccount = null;
+        if (!empty($cleanPhone)) {
+            $existingAccount = StudentAccount::where('phone', $rawPhone)
+                ->orWhere('phone', $cleanPhone)
+                ->orWhere('phone', 'LIKE', '%' . substr($cleanPhone, -10))
+                ->first();
+        }
+        if (!$existingAccount && !empty($rawEmail)) {
+            $existingAccount = StudentAccount::where('email', $rawEmail)->first();
+        }
+
+        // If existing account exists (e.g. from prior course application or enrollment), reuse it seamlessly!
+        if ($existingAccount) {
+            $request->validate([
+                'name' => 'required|string|max:191',
+                'password' => 'required|string|min:6|confirmed',
+            ], [
+                'name.required' => 'Please enter your full name.',
+                'password.min' => 'Password must be at least 6 characters.',
+                'password.confirmed' => 'Password confirmation does not match.',
+            ]);
+
+            DB::beginTransaction();
+            try {
+                $existingAccount->name = $request->name ?: $existingAccount->name;
+                if ($rawEmail && empty($existingAccount->email)) {
+                    $existingAccount->email = $rawEmail;
+                }
+                $existingAccount->password = Hash::make($request->password);
+                $existingAccount->status = 1;
+                $existingAccount->last_login_at = Carbon::now();
+                $existingAccount->last_login_ip = $request->ip();
+                $existingAccount->save();
+
+                DB::commit();
+
+                Auth::guard('student')->login($existingAccount);
+
+                return redirect()->route('student.dashboard')->with([
+                    'success' => 'আপনার বিদ্যমান স্টুডেন্ট অ্যাকাউন্ট সফলভাবে সক্রিয় করা হয়েছে এবং লগইন সম্পন্ন হয়েছে!',
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->withErrors(['error' => 'নিবন্ধন সম্পন্ন করতে ব্যর্থ: ' . $e->getMessage()]);
+            }
+        }
+
+        // Otherwise, validate fresh account registration
         $request->validate([
             'name' => 'required|string|max:191',
             'phone' => 'required|string|max:25|unique:student_accounts,phone',
@@ -109,10 +162,6 @@ class StudentAuthController extends Controller
             'password.min' => 'Password must be at least 6 characters.',
             'password.confirmed' => 'Password confirmation does not match.',
         ]);
-
-        $rawPhone = trim($request->phone);
-        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
-        $rawEmail = $request->email ? strtolower(trim($request->email)) : null;
 
         DB::beginTransaction();
         try {

@@ -21,6 +21,8 @@ class LmsQuizAttempt extends Model
         'negative_marks_deducted' => 'float',
         'questions_snapshot' => 'array',
         'flagged_question_ids' => 'array',
+        'security_violations_log' => 'array',
+        'security_violations_count' => 'integer',
     ];
 
     public function quiz()
@@ -36,6 +38,11 @@ class LmsQuizAttempt extends Model
     public function answers()
     {
         return $this->hasMany(LmsQuizAnswer::class, 'attempt_id');
+    }
+
+    public function violations()
+    {
+        return $this->hasMany(LmsExamViolation::class, 'attempt_id');
     }
 
     public function getPassMarksAttribute()
