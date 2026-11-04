@@ -232,9 +232,9 @@
                                             <a href="{{ route('student.quiz.results', $att->id) }}" class="text-blue-600 hover:underline font-bold text-xs">
                                                 Review Sheet &rarr;
                                             </a>
-                                            <form action="{{ route('student.quiz.retake', $att->id) }}" method="POST" class="inline">
+                                            <form id="retake-att-form-{{ $att->id }}" action="{{ route('student.quiz.retake', $att->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-emerald-600 hover:text-emerald-700 hover:underline font-bold text-xs flex items-center gap-1" title="এই প্রশ্নে পুনরায় পরীক্ষা দিন">
+                                                <button type="button" onclick="confirmStartExam('retake-att-form-{{ $att->id }}', '{{ addslashes($quiz->title) }} (পুনঃপরীক্ষা #{{ $att->attempt_number }})', '{{ $quiz->duration_minutes }}', 'পূর্ববর্তী সেট')" class="text-emerald-600 hover:text-emerald-700 hover:underline font-bold text-xs flex items-center gap-1 cursor-pointer" title="এই প্রশ্নে পুনরায় পরীক্ষা দিন">
                                                     <i class="fa fa-repeat"></i> পুনরায়
                                                 </button>
                                             </form>

@@ -237,7 +237,7 @@
         @endif
 
         <!-- Launch Form -->
-        <form action="{{ route('student.practice.start') }}" method="POST" class="mt-5 space-y-5">
+        <form id="form-practice-start" action="{{ route('student.practice.start') }}" method="POST" onsubmit="return handlePracticeFormSubmit(event)" class="mt-5 space-y-5">
             @csrf
 
             <div class="grid grid-cols-1 {{ $practiceSettings['view_mode'] === 'student_choice' ? 'md:grid-cols-3' : 'md:grid-cols-2' }} gap-5">
@@ -336,8 +336,7 @@
                     <span>পরীক্ষার সীমা শেষ (Attempt Limit Reached)</span>
                 </button>
                 @else
-                <button type="submit" 
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] cursor-pointer">
+                <button type="button" onclick="confirmPracticeStart(event)" id="btn-practice-start-trigger" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] cursor-pointer cursor-pointer">
                     <i class="fa fa-play-circle text-base"></i>
                     <span>পরীক্ষা শুরু করুন (Start Exam)</span>
                     <i class="fa fa-arrow-right text-xs"></i>
@@ -471,14 +470,55 @@
                     </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>
 
 </div>
-@endsection
 
-@push('js')
+<!-- Practice Exam Start Confirmation Modal -->
+<div id="practice-start-confirm-modal" style="display: none; z-index: 9999999; background-color: rgba(15, 23, 42, 0.85);" class="fixed inset-0 backdrop-blur-md items-center justify-center p-4">
+    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative z-10">
+        <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto text-2xl">
+            <i class="fa fa-play-circle"></i>
+        </div>
+        
+        <div class="space-y-2">
+            <h3 class="text-lg font-black text-slate-900 dark:text-white">
+                অনুশীলন পরীক্ষা শুরু করতে প্রস্তুত?
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                পরীক্ষা শুরু করার পর টাইমার স্বয়ংক্রিয়ভাবে চালু হবে এবং আপনার নির্বাচিত বিষয়ের প্রশ্নপত্র লোড হবে।
+            </p>
+
+            <div class="p-3.5 my-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5 text-left font-mono">
+                <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                    <span class="text-slate-500 dark:text-slate-400">নির্বাচিত বিষয়:</span>
+                    <strong class="text-slate-900 dark:text-white truncate max-w-[200px]" id="modal-confirm-category">সব বিষয় মিলিয়ে</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                    <span class="text-slate-500 dark:text-slate-400">প্রশ্নের সংখ্যা:</span>
+                    <strong class="text-emerald-600 dark:text-emerald-400" id="modal-confirm-qcount">১০ টি প্রশ্ন</strong>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold leading-normal">
+                💡 পরীক্ষা সম্পন্ন করে তাৎক্ষণিক ওএমআর শিট ও বিস্তারিত ব্যাখ্যা দেখতে পারবেন।
+            </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 pt-1">
+            <button type="button" onclick="closePracticeConfirmModal()" class="w-1/2 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer">
+                বাতিল (Cancel)
+            </button>
+            <button type="button" id="btn-modal-confirm-start" onclick="proceedPracticeStart()" class="w-1/2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/30 cursor-pointer">
+                হ্যাঁ, শুরু করুন &rarr;
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function syncPracticeTier(select) {
     if (!select) return;
@@ -492,6 +532,68 @@ function syncPracticeTier(select) {
     if (pInput && p) pInput.value = p;
 }
 
+var practiceConfirmed = false;
+
+function handlePracticeFormSubmit(e) {
+    if (!practiceConfirmed) {
+        if (e && e.preventDefault) e.preventDefault();
+        confirmPracticeStart(e);
+        return false;
+    }
+    return true;
+}
+
+function confirmPracticeStart(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    var form = document.getElementById('form-practice-start');
+    if (!form) return;
+
+    var catSelect = form.querySelector('select[name="category"]');
+    var qSelect = form.querySelector('select[name="question_count"]');
+
+    var catText = catSelect && catSelect.selectedIndex >= 0 ? catSelect.options[catSelect.selectedIndex].text : 'সব বিষয় মিলিয়ে';
+    var qText = qSelect && qSelect.selectedIndex >= 0 ? qSelect.options[qSelect.selectedIndex].text : '১০ টি প্রশ্ন';
+
+    var cEl = document.getElementById('modal-confirm-category');
+    var qEl = document.getElementById('modal-confirm-qcount');
+    if (cEl) cEl.innerText = catText.split('(')[0].trim();
+    if (qEl) qEl.innerText = qText;
+
+    var modal = document.getElementById('practice-start-confirm-modal');
+    if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } else {
+        if (confirm('আপনি কি অনুশীলন পরীক্ষা শুরু করতে প্রস্তুত?')) {
+            practiceConfirmed = true;
+            form.submit();
+        }
+    }
+}
+
+function closePracticeConfirmModal() {
+    var modal = document.getElementById('practice-start-confirm-modal');
+    if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function proceedPracticeStart() {
+    practiceConfirmed = true;
+    var btn = document.getElementById('btn-modal-confirm-start');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> পরীক্ষা শুরু হচ্ছে...';
+    }
+    var form = document.getElementById('form-practice-start');
+    if (form) form.submit();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     var select = document.getElementById('tierSelect');
     if (select) {
@@ -501,4 +603,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endpush
+@endsection
