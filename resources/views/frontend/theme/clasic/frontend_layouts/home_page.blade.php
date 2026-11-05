@@ -507,8 +507,9 @@
                         <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                             কোন কোর্সটি আপনার ক্যারিয়ারের জন্য উপযুক্ত তা নির্ধারণে আমাদের এক্সপার্টদের সাথে কথা বলুন।
                         </p>
-                        <a href="tel:01791612121" class="block w-full py-3 rounded-xl btn-brand-primary text-white dark:bg-slate-800 dark:text-brand-primary font-bold text-xs border border-brand-primary dark:border-brand-primary/30 transition-all shadow-sm">
-                            <i class="fa fa-phone mr-1"></i> ০১৭৯১-৬১২১২১
+                        <a href="tel:01791612121" class="btn-brand-primary flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl text-white font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg" style="background-color: #F26522 !important; background: #F26522 !important; color: #FFFFFF !important; border: 1px solid #F26522 !important;">
+                            <i class="fa fa-phone text-white text-sm"></i>
+                            <span class="text-white font-black text-sm tracking-wide">০১৭৯১-৬১২১২১</span>
                         </a>
                     </div>
                 </div>

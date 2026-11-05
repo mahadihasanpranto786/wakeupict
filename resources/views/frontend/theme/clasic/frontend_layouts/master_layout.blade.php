@@ -406,15 +406,71 @@
         html.light [class*="hover:text-brand-primary"]:hover {
             color: #B9380A !important;
         }
-        /* Exclude button white text from group-hover text recoloring */
+        /* Universal Primary Brand Button System (Background & Text Guarantee) */
+        .btn-brand-primary,
         html.light .btn-brand-primary,
-        html.light .btn-brand-primary *,
+        a.btn-brand-primary,
         html.light a.btn-brand-primary,
-        html.light a.btn-brand-primary *,
+        button.btn-brand-primary,
         html.light button.btn-brand-primary,
+        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn),
+        a[href*="tel:01791612121"].btn-brand-primary {
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            color: #ffffff !important;
+            border: 1px solid #F26522 !important;
+            border-color: #F26522 !important;
+            box-shadow: 0 4px 14px -2px rgba(242, 101, 34, 0.45) !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-brand-primary *,
+        html.light .btn-brand-primary *,
+        a.btn-brand-primary *,
+        html.light a.btn-brand-primary *,
+        button.btn-brand-primary *,
         html.light button.btn-brand-primary *,
+        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn) *,
+        a[href*="tel:01791612121"].btn-brand-primary *,
         html.light .course-item-card a .inline-flex,
         html.light .course-item-card a .inline-flex * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }
+
+        .btn-brand-primary:hover,
+        html.light .btn-brand-primary:hover,
+        a.btn-brand-primary:hover,
+        html.light a.btn-brand-primary:hover,
+        button.btn-brand-primary:hover,
+        html.light button.btn-brand-primary:hover,
+        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn):hover,
+        a[href*="tel:01791612121"].btn-brand-primary:hover {
+            background-color: #E95420 !important;
+            background: #E95420 !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px -2px rgba(242, 101, 34, 0.60) !important;
+        }
+
+        /* Course Filter Buttons Active State */
+        .course-filter-btn.active,
+        html.light .course-filter-btn.active {
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            color: #ffffff !important;
+            border-color: #F26522 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 6px 18px -2px rgba(242, 101, 34, 0.45) !important;
+        }
+        .course-filter-btn.active *,
+        html.light .course-filter-btn.active * {
+            color: #ffffff !important;
+        }
+        .course-filter-btn.active:hover,
+        html.light .course-filter-btn.active:hover {
+            background-color: #E95420 !important;
+            border-color: #E95420 !important;
             color: #ffffff !important;
         }
 

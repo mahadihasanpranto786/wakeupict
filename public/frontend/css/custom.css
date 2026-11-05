@@ -965,3 +965,33 @@ html.light .bento-card p {
     color: #334155 !important;
     font-weight: 500 !important;
 }
+
+/* Course Track Filter Buttons */
+.course-filter-btn.active,
+html.light .course-filter-btn.active {
+    background-color: #F26522 !important;
+    background: #F26522 !important;
+    color: #FFFFFF !important;
+    border-color: #F26522 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 6px 18px -2px rgba(242, 101, 34, 0.45) !important;
+}
+
+.course-filter-btn.active *,
+html.light .course-filter-btn.active * {
+    color: #FFFFFF !important;
+}
+
+.course-filter-btn.active:hover,
+html.light .course-filter-btn.active:hover {
+    background-color: #E95420 !important;
+    border-color: #E95420 !important;
+    color: #FFFFFF !important;
+}
+
+.course-filter-btn.active .filter-count,
+html.light .course-filter-btn.active .filter-count {
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+}
