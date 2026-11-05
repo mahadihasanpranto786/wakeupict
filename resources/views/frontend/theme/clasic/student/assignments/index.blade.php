@@ -94,7 +94,7 @@
                                 <span>View Submission</span>
                             </a>
                         @else
-                            <a href="{{ route('student.assignments.submit.id', $assign->id) }}" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                            <a href="{{ route('student.assignments.submit.id', $assign->id) }}" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                                 <i class="fa fa-upload"></i>
                                 <span>Submit Work</span>
                             </a>

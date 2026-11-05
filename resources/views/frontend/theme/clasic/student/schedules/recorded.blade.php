@@ -48,7 +48,7 @@
 
                     <div class="pt-4 border-t border-slate-800/80">
                         @if($rec->recording_url)
-                            <a href="{{ $rec->recording_url }}" target="_blank" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                            <a href="{{ $rec->recording_url }}" target="_blank" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                                 <i class="fa fa-play"></i>
                                 <span>Watch Video Replay</span>
                             </a>

@@ -201,7 +201,7 @@
         }
 
         .print-toolbar button:hover {
-            background: #059669;
+            background: #F26522;
             transform: scale(1.05);
         }
 

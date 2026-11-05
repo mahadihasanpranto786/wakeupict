@@ -19,7 +19,7 @@
             </p>
         </div>
         <div>
-            <a href="{{ route('student.support.create') }}" class="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center gap-2">
+            <a href="{{ route('student.support.create') }}" class="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center gap-2">
                 <i class="fa fa-plus"></i>
                 <span>Open New Ticket</span>
             </a>
@@ -49,19 +49,19 @@
     <!-- Filter Tabs -->
     <div class="flex flex-wrap items-center gap-2">
         <a href="{{ route('student.support.index') }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ !request('status') ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ !request('status') ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             All Tickets
         </a>
         <a href="{{ route('student.support.index', ['status' => 'open']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'open' ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'open' ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             Open
         </a>
         <a href="{{ route('student.support.index', ['status' => 'answered']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'answered' ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'answered' ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             Answered
         </a>
         <a href="{{ route('student.support.index', ['status' => 'closed']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'closed' ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('status') === 'closed' ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             Closed
         </a>
     </div>
@@ -147,7 +147,7 @@
                 You haven't opened any support tickets yet or none match your selected status. Click below if you need assistance.
             </p>
             <div>
-                <a href="{{ route('student.support.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase bg-brand-primary text-slate-950">
+                <a href="{{ route('student.support.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase bg-brand-primary text-white">
                     <i class="fa fa-plus"></i>
                     <span>Create Ticket</span>
                 </a>

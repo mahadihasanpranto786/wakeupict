@@ -33,7 +33,7 @@
                         </span>
                     </div>
 
-                    <a href="{{ route('student.assignments.submit.id', $item->id) }}" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5 shrink-0">
+                    <a href="{{ route('student.assignments.submit.id', $item->id) }}" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5 shrink-0">
                         <span>Upload Work</span>
                         <i class="fa fa-arrow-right"></i>
                     </a>

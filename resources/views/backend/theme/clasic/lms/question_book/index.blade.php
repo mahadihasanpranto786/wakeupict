@@ -96,7 +96,7 @@
     }
     .qb-opt-box.is-correct {
         background: #f0fdf4 !important;
-        border: 1.5px solid #059669 !important;
+        border: 1.5px solid #F26522 !important;
         color: #0f172a !important;
         font-weight: 700;
     }
@@ -109,7 +109,7 @@
         flex-shrink: 0;
     }
     .qb-opt-box.is-correct .qb-opt-letter {
-        background: #059669;
+        background: #F26522;
         color: #ffffff;
     }
     .qb-opt-box:not(.is-correct) .qb-opt-letter {

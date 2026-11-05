@@ -193,7 +193,7 @@
             animation: slideInRight 0.3s ease;
             transition: all 0.3s ease;
         }
-        .builder-toast.toast-success { background: #059669; }
+        .builder-toast.toast-success { background: #F26522; }
         .builder-toast.toast-danger { background: #dc2626; }
         .builder-toast.toast-info { background: #0284c7; }
         @keyframes slideInRight {

@@ -23,7 +23,7 @@
         </p>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald flex items-center justify-center gap-2">
+            <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald flex items-center justify-center gap-2">
                 <i class="fa fa-arrow-left"></i>
                 <span>Return to Dashboard</span>
             </a>

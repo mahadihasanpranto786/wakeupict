@@ -63,7 +63,7 @@
                         <!-- Big Join Button -->
                         <div class="shrink-0 self-start md:self-auto">
                             @if($cls->meeting_link)
-                                <a href="{{ $cls->meeting_link }}" target="_blank" class="px-6 py-3.5 rounded-2xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                                <a href="{{ $cls->meeting_link }}" target="_blank" class="px-6 py-3.5 rounded-2xl bg-brand-primary hover:bg-brand-accent text-white font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                                     <i class="fa fa-video-camera"></i>
                                     <span>Launch Live Class</span>
                                 </a>
@@ -103,7 +103,7 @@
             <p class="text-xs text-slate-400 mb-6 leading-relaxed">
                 There are no live broadcasts currently active. Check the full timetable to view upcoming scheduled sessions.
             </p>
-            <a href="{{ route('student.schedule.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
+            <a href="{{ route('student.schedule.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-white font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
                 <span>View Full Class Schedule</span>
             </a>
         </div>

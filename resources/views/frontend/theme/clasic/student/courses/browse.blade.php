@@ -119,18 +119,18 @@
                         </p>
 
                         <!-- 10MS-Style Key Features List -->
-                        <div class="pt-2 space-y-1.5 text-xs text-slate-400 border-t border-slate-800/60">
+                        <div class="pt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium border-t border-slate-200 dark:border-slate-800/60">
                             <div class="flex items-center gap-2">
-                                <i class="fa fa-check text-emerald-400 text-[10px]"></i>
-                                <span>আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস</span>
+                                <i class="fa fa-check text-brand-primary dark:text-brand-primary text-[10px] shrink-0"></i>
+                                <span class="text-slate-800 dark:text-slate-200 font-semibold">আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="fa fa-check text-emerald-400 text-[10px]"></i>
-                                <span>প্রিন্টেড লেকচার শিট ও এসাইনমেন্ট</span>
+                                <i class="fa fa-check text-brand-primary dark:text-brand-primary text-[10px] shrink-0"></i>
+                                <span class="text-slate-800 dark:text-slate-200 font-semibold">প্রিন্টেড লেকচার শিট ও এসাইনমেন্ট</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="fa fa-check text-emerald-400 text-[10px]"></i>
-                                <span>ক্যাম্পাস ট্রেইনারের সার্বক্ষণিক সাপোর্ট</span>
+                                <i class="fa fa-check text-brand-primary dark:text-brand-primary text-[10px] shrink-0"></i>
+                                <span class="text-slate-800 dark:text-slate-200 font-semibold">ক্যাম্পাস ট্রেইনারের সার্বক্ষণিক সাপোর্ট</span>
                             </div>
                         </div>
                     </div>

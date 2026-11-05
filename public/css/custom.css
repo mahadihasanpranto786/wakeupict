@@ -73,15 +73,17 @@
   /* active sidebar  */
   
   .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
-      background-color: #079e5f;
-      color: #fff;
+      background-color: #F26522 !important;
+      color: #172033 !important;
+      font-weight: 800 !important;
   }
   
   /* card-header  */
   
   .card-header {
-      background-color: #079e5f;
-      color: white;
+      background-color: #F26522 !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
   }
   
   

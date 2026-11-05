@@ -74,7 +74,7 @@
             </div>
 
             <div class="flex justify-end pt-4 border-t border-slate-800">
-                <button type="submit" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald">
+                <button type="submit" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald">
                     Save Profile Changes
                 </button>
             </div>

@@ -6,6 +6,7 @@
     <link rel="shortcut icon" type="image/jpg" href="{{ URL::asset('frontend/image/wakeupict-fabicon.png') }}" />
 
     <link rel="stylesheet" href="{{ URL::asset('frontend/css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ safe_asset('frontend/css/custom.css') }}">
     <title>
         Error 404| Page not found
     </title>
@@ -13,6 +14,8 @@
         /* CSS */
         .header404 {
             font-size: 1000%;
+            color: #F26522;
+            font-weight: 800;
         }
 
         .button-17 {

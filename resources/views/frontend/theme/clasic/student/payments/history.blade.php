@@ -17,7 +17,7 @@
                 Complete log of tuition fees paid, verification statuses, and historical accounts records.
             </p>
         </div>
-        <a href="{{ route('student.fees.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald self-start sm:self-auto">
+        <a href="{{ route('student.fees.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald self-start sm:self-auto">
             <i class="fa fa-plus"></i>
             <span>Submit New Payment</span>
         </a>
@@ -73,7 +73,7 @@
                                     </td>
                                     <td class="p-4 text-right">
                                         @if($pay->status === 'verified' && $pay->receipt_number)
-                                            <a href="{{ route('student.receipts.print', $pay->receipt_number) }}" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-brand-primary hover:text-slate-950 text-slate-200 text-xs font-semibold transition-all">
+                                            <a href="{{ route('student.receipts.print', $pay->receipt_number) }}" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-brand-primary hover:text-white text-slate-200 text-xs font-semibold transition-all">
                                                 <i class="fa fa-print mr-1"></i> Receipt
                                             </a>
                                         @else

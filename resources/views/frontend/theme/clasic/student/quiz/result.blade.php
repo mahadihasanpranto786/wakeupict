@@ -100,7 +100,7 @@
                 <form id="form-fresh-practice-1" action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
                     @csrf
                     <input type="hidden" name="question_count" value="{{ min(20, $totalQ > 0 ? $totalQ : 20) }}">
-                    <button type="button" onclick="confirmFreshPractice('form-fresh-practice-1')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <button type="button" onclick="confirmFreshPractice('form-fresh-practice-1')" class="px-4 py-2 rounded-xl btn-brand-primary font-bold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
                         <i class="fa fa-refresh"></i>
                         <span>পরবর্তী নতুন প্রশ্নে প্র্যাকটিস</span>
                     </button>
@@ -147,7 +147,7 @@
 
         <div class="relative z-10 mt-4 pt-4 border-t border-white/20">
             <div class="w-full h-3 bg-black/25 rounded-full overflow-hidden p-0.5 border border-white/20">
-                <div class="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 rounded-full transition-all duration-700 shadow-md"
+                <div class="h-full bg-gradient-to-r from-[#F26522] via-[#FB923C] to-[#FED7AA] rounded-full transition-all duration-700 shadow-md"
                      style="width: {{ max(3, min(100, $practiceProgress['coverage_pct'])) }}%"></div>
             </div>
         </div>
@@ -350,7 +350,7 @@
                             $matrixColor = 'bg-emerald-600 text-white border-emerald-600 font-bold shadow-sm';
                             $matrixBadge = '✓';
                         } elseif ($isAnswered && !$isCorrect) {
-                            $matrixColor = 'bg-rose-600 text-white border-rose-600 font-bold shadow-sm';
+                            $matrixColor = 'bg-rose-600 text-black border-rose-600 font-extrabold shadow-sm';
                             $matrixBadge = '✗';
                         }
                     @endphp
@@ -501,7 +501,7 @@
                     <!-- Question Header: Number, Marks & Status Badge -->
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 text-xs">
                         <div class="flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 {{ $isPending ? 'bg-amber-500 text-white' : ($isAnswered && $isCorrect ? 'bg-emerald-600 text-white' : ($isAnswered && !$isCorrect ? 'bg-rose-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300')) }}">
+                            <span class="w-6 h-6 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 {{ $isPending ? 'bg-amber-400 text-slate-950 font-black' : ($isAnswered && $isCorrect ? 'bg-emerald-600 text-white font-bold' : ($isAnswered && !$isCorrect ? 'bg-rose-600 text-black font-extrabold' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300')) }}">
                                 {{ $toBng($index + 1) }}
                             </span>
                             <span class="font-bold text-[11px] uppercase tracking-wider {{ $isPending ? 'text-amber-700 dark:text-amber-400' : ($isAnswered && $isCorrect ? 'text-emerald-700 dark:text-emerald-400' : ($isAnswered && !$isCorrect ? 'text-rose-700 dark:text-rose-400' : 'text-slate-500')) }}">
@@ -553,7 +553,7 @@
                                         $optBadge = '<span class="text-[10px] font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-1"><i class="fa fa-check"></i> সঠিক উত্তর</span>';
                                     } elseif ($wasSelected && !$isOfficialCorrect) {
                                         $optBorder = 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-950 dark:text-rose-200 font-semibold';
-                                        $bubbleBg = 'bg-rose-600 border-rose-600 text-white font-bold';
+                                        $bubbleBg = 'bg-rose-600 border-rose-600 text-black font-extrabold';
                                         $optBadge = '<span class="text-[10px] font-mono uppercase tracking-wider text-rose-600 dark:text-rose-400 font-bold shrink-0 flex items-center gap-1"><i class="fa fa-times"></i> আপনার ভুল উত্তর</span>';
                                     }
                                 @endphp
@@ -968,12 +968,12 @@
         var desc = document.getElementById('modal-action-desc');
         var btn = document.getElementById('btn-proceed-result-action');
 
-        if (iconWrap) iconWrap.className = "w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto text-2xl";
+        if (iconWrap) iconWrap.className = "w-16 h-16 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center justify-center mx-auto text-2xl";
         if (icon) icon.className = "fa fa-refresh";
         if (title) title.innerText = "পরবর্তী নতুন প্রশ্নে প্র্যাকটিস শুরু করবেন?";
         if (desc) desc.innerText = "স্মার্ট প্রশ্ন ব্যাংক থেকে আপনার এখনো সমাধান না করা আনসিন প্রশ্নগুলোর রোটেশন নিয়ে নতুন অনুশীলন পরীক্ষা শুরু হবে।";
         if (btn) {
-            btn.className = "w-1/2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer";
+            btn.className = "w-1/2 py-3 rounded-xl btn-brand-primary font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer";
             btn.innerText = "হ্যাঁ, নতুন প্র্যাকটিস শুরু করুন";
         }
 

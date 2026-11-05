@@ -54,6 +54,8 @@
     <link rel="stylesheet" href="{{ URL::asset('admin/css/toastr/toastr.min.css') }}">
     <!-- custom css -->
     <link rel="stylesheet" href="{{ asset('public/admin/dist/css/style.css') }}">
+    <!-- Wake Up ICT Universal Brand Stylesheet (Orange, White, Dark Navy) -->
+    <link rel="stylesheet" href="{{ safe_asset('frontend/css/custom.css') }}">
 
     <style>
         html[lang="bn"],

@@ -9,14 +9,14 @@
                 'id' => $webUser->id,
                 'name' => $webUser->name,
                 'student_id_code' => 'ADMIN-PORTAL',
-                'avatar_url' => "https://ui-avatars.com/api/?name=" . urlencode($webUser->name) . "&background=0b1329&color=10b981&bold=true",
+                'avatar_url' => "https://ui-avatars.com/api/?name=" . urlencode($webUser->name) . "&background=0b1329&color=F26522&bold=true",
             ];
         } else {
             $studentUser = (object)[
                 'id' => 0,
                 'name' => 'Student Portal User',
                 'student_id_code' => 'WUICT-DEMO',
-                'avatar_url' => "https://ui-avatars.com/api/?name=Student&background=0b1329&color=10b981&bold=true",
+                'avatar_url' => "https://ui-avatars.com/api/?name=Student&background=0b1329&color=F26522&bold=true",
             ];
         }
     }
@@ -56,12 +56,16 @@
         }
 
         :root {
-            --brand-primary: {{ app_setting('theme_primary_color', '#10b981') }};
-            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '16, 185, 129') }};
-            --brand-accent: {{ app_setting('theme_accent_color', '#34d399') }};
-            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '52, 211, 153') }};
+            --brand-primary: {{ app_setting('theme_primary_color', '#F26522') }};
+            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '242, 101, 34') }};
+            --brand-hover: #E95420;
+            --brand-hover-rgb: 233, 84, 32;
+            --brand-light: #FFF1E8;
+            --brand-dark-navy: #172033;
+            --brand-accent: {{ app_setting('theme_accent_color', '#FB923C') }};
+            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '251, 146, 60') }};
             --brand-cyan: {{ app_setting('theme_cyan_color', '#22d3ee') }};
-            --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
+            --brand-indigo: {{ app_setting('theme_indigo_color', '#C2410C') }};
         }
 
         /* Clean Uncluttered Modern Typography */
@@ -191,8 +195,8 @@
         html.light textarea:focus,
         html.light select:focus {
             background-color: #ffffff !important;
-            border-color: var(--brand-primary, #10b981) !important;
-            box-shadow: 0 0 0 1px var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            box-shadow: 0 0 0 1px var(--brand-primary, #F26522) !important;
         }
 
         html.light input:disabled,
@@ -246,14 +250,14 @@
         }
 
         input[type="checkbox"]:not(.sr-only):hover {
-            border-color: var(--brand-primary, #10b981) !important;
-            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.2) !important;
         }
 
         input[type="checkbox"]:not(.sr-only):checked {
-            background-color: var(--brand-primary, #10b981) !important;
-            border-color: var(--brand-primary, #10b981) !important;
-            box-shadow: 0 2px 5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.3) !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            box-shadow: 0 2px 5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.3) !important;
         }
 
         input[type="checkbox"]:not(.sr-only):checked::after {
@@ -293,12 +297,12 @@
         }
 
         input[type="radio"]:not(.sr-only):hover {
-            border-color: var(--brand-primary, #10b981) !important;
-            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.2) !important;
         }
 
         input[type="radio"]:not(.sr-only):checked {
-            border-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
             border-width: 5px !important;
             background-color: #ffffff !important;
         }
@@ -311,8 +315,8 @@
             color: #475569 !important;
         }
         html.light [id*="palette-btn-"].bg-brand-primary {
-            background-color: var(--brand-primary, #10b981) !important;
-            color: #020617 !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            color: #ffffff !important;
         }
 
         /* 6. Tables */
@@ -333,14 +337,14 @@
         html.light a[class*="bg-brand-primary"],
         html.light button[class*="bg-brand-primary"],
         html.light .bg-brand-primary {
-            background-color: var(--brand-primary, #10b981) !important;
-            color: #020617 !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
         }
         html.light a[class*="bg-brand-primary"] *,
         html.light button[class*="bg-brand-primary"] *,
         html.light .bg-brand-primary * {
-            color: #020617 !important;
+            color: #ffffff !important;
         }
 
         /* Preserve bright text for colored badges / status buttons */
@@ -391,11 +395,11 @@
         }
         html.light .text-emerald-400,
         html.light [class*="text-emerald-400"] {
-            color: #059669 !important; /* emerald-600 */
+            color: #B9380A !important; /* Deep Brand Dark Orange >= 4.5:1 WCAG AA */
         }
         html.light .text-emerald-300,
         html.light [class*="text-emerald-300"] {
-            color: #064e3b !important; /* emerald-900 high contrast */
+            color: #7C2D12 !important; /* Deep Dark Amber high contrast >= 7:1 */
         }
         html.light .text-rose-400,
         html.light [class*="text-rose-400"] {
@@ -422,7 +426,7 @@
             color: #7c3aed !important; /* purple-600 */
         }
         html.light .text-brand-primary {
-            color: var(--brand-primary, #059669) !important;
+            color: var(--brand-primary, #F26522) !important;
         }
         html.light .text-brand-cyan {
             color: #0891b2 !important;
@@ -459,8 +463,8 @@
             background-color: #f1f5f9 !important;
         }
         html.light .submenu-container a[class*="bg-brand-primary"] {
-            background-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.12) !important;
-            color: var(--brand-primary, #059669) !important;
+            background-color: rgba(var(--brand-primary-rgb, 242, 101, 34), 0.12) !important;
+            color: var(--brand-primary, #F26522) !important;
             font-weight: 700 !important;
         }
 
@@ -476,13 +480,13 @@
         /* Active sidebar link */
         html.light nav a.bg-brand-primary,
         html.light .student-sidebar a.bg-brand-primary {
-            background-color: var(--brand-primary, #10b981) !important;
-            color: #020617 !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
         }
         html.light nav a.bg-brand-primary *,
         html.light .student-sidebar a.bg-brand-primary * {
-            color: #020617 !important;
+            color: #ffffff !important;
         }
 
         /* 9. Header Controls in Top Navbar */
@@ -640,10 +644,10 @@
                             700: '#334155',
                         },
                         brand: {
-                            primary: 'var(--brand-primary, #10b981)',
-                            accent: 'var(--brand-accent, #34d399)',
+                            primary: 'var(--brand-primary, #F26522)',
+                            accent: 'var(--brand-accent, #FB923C)',
                             cyan: 'var(--brand-cyan, #22d3ee)',
-                            indigo: 'var(--brand-indigo, #6366f1)',
+                            indigo: 'var(--brand-indigo, #C2410C)',
                         }
                     },
                     fontFamily: {
@@ -653,7 +657,8 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        'glow-emerald': '0 0 25px -5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.35)',
+                        'glow-emerald': '0 0 25px -5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.35)',
+                        'glow-brand': '0 0 25px -5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.35)',
                     }
                 }
             }
@@ -757,8 +762,8 @@
                     @else
                         <!-- Direct Link -->
                         <a href="{{ $menu->resolveUrl() }}" 
-                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isCurrent ? 'bg-brand-primary text-slate-950 shadow-glow-emerald font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
-                            <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isCurrent ? 'text-slate-950' : 'text-slate-400' }}"></i>
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isCurrent ? 'bg-brand-primary text-white shadow-glow-brand font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                            <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isCurrent ? 'text-white' : 'text-slate-400' }}"></i>
                             <span class="truncate">{{ $menu->getTitle() }}</span>
                         </a>
                     @endif

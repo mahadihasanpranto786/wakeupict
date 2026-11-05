@@ -129,7 +129,7 @@
                     type="file" 
                     name="submitted_file" 
                     id="submitted_file" 
-                    class="w-full p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-brand-primary hover:file:text-slate-950 file:transition-all cursor-pointer">
+                    class="w-full p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-brand-primary hover:file:text-white file:transition-all cursor-pointer">
                 <span class="text-[11px] text-slate-500 font-mono block">
                     Supported: {{ strtoupper($assignment->allowed_file_types) }} (Maximum size: {{ $assignment->max_file_size_mb }}MB)
                 </span>
@@ -137,7 +137,7 @@
 
             <!-- Submit Button -->
             <div class="pt-4 border-t border-slate-800/80">
-                <button type="submit" class="px-8 py-3.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                <button type="submit" class="px-8 py-3.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                     <i class="fa fa-cloud-upload"></i>
                     <span>Confirm &amp; Submit Assignment</span>
                 </button>

@@ -27,13 +27,13 @@
                 extend: {
                     colors: {
                         brand: {
-                            primary: '#10b981',
-                            primaryHover: '#059669',
-                            accent: '#34d399',
+                            primary: '#F26522',
+                            primaryHover: '#E95420',
+                            accent: '#FB923C',
                             cyan: '#06b6d4',
-                            indigo: '#6366f1',
+                            indigo: '#C2410C',
                             dark: '#030712',
-                            card: '#0b1329',
+                            card: '#172033',
                             border: '#1e293b',
                         }
                     },
@@ -42,9 +42,9 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        'glow-emerald': '0 0 40px -10px rgba(16, 185, 129, 0.35)',
+                        'glow-emerald': '0 0 40px -10px rgba(242, 101, 34, 0.35)',
                         'glow-cyan': '0 0 40px -10px rgba(6, 182, 212, 0.35)',
-                        'card-glow': '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 50px -10px rgba(16, 185, 129, 0.15)',
+                        'card-glow': '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 50px -10px rgba(242, 101, 34, 0.15)',
                     },
                     animation: {
                         'float': 'float 8s ease-in-out infinite',
@@ -136,22 +136,22 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #030712; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        ::-webkit-scrollbar-thumb:hover { background: #F26522; }
     </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-brand-primary selection:text-slate-950">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
     <!--========================== Ambient Dynamic Glow Orbs ============================-->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <!-- Top Left Emerald Orb -->
-        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-emerald-500/20 via-brand-primary/10 to-transparent rounded-full blur-[140px] animate-float"></div>
+        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-[#F26522]/20 via-brand-primary/10 to-transparent rounded-full blur-[140px] animate-float"></div>
         
         <!-- Bottom Right Cyan/Indigo Orb -->
         <div class="absolute -bottom-40 -right-40 w-[650px] h-[650px] bg-gradient-to-tl from-cyan-500/15 via-indigo-500/10 to-transparent rounded-full blur-[150px] animate-float-reverse"></div>
         
         <!-- Center Core Ambient Accent -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#F26522]/5 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
         
         <!-- Cyber Background Grid -->
         <div class="absolute inset-0 bg-grid-cyber opacity-70 [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div>
@@ -161,10 +161,10 @@
     <header class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 flex items-center justify-between">
         <!-- Brand Logo -->
         <a href="{{ route('home-page') }}" class="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.02]">
-            <div class="relative w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-lg group-hover:border-emerald-500/40 transition-colors">
+            <div class="relative w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-lg group-hover:border-[#F26522]/40 transition-colors">
                 <img src="{{ safe_asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT Logo" class="w-full h-full object-contain">
-                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#F26522] animate-ping"></span>
+                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#F26522]"></span>
             </div>
             <div>
                 <div class="text-base font-extrabold tracking-tight text-white group-hover:text-brand-primary transition-colors flex items-center gap-1.5">
@@ -177,7 +177,7 @@
         </a>
 
         <!-- Return to Main Site Link -->
-        <a href="{{ route('home-page') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/70 hover:bg-slate-800/90 border border-slate-800/80 hover:border-emerald-500/40 text-xs font-mono text-slate-300 hover:text-emerald-400 transition-all duration-200 backdrop-blur-md">
+        <a href="{{ route('home-page') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/70 hover:bg-slate-800/90 border border-slate-800/80 hover:border-[#F26522]/40 text-xs font-mono text-slate-300 hover:text-[#F26522] transition-all duration-200 backdrop-blur-md">
             <i class="fa fa-arrow-left text-[10px]"></i>
             <span class="hidden sm:inline">Return to Website</span>
             <span class="sm:hidden">Home</span>
@@ -206,7 +206,7 @@
 
                 <!-- Session / Validation Flash Alerts -->
                 @if (session('status'))
-                    <div class="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
+                    <div class="mb-6 p-3.5 rounded-xl bg-[#F26522]/10 border border-[#F26522]/30 text-[#F26522] text-xs font-mono flex items-center gap-2.5">
                         <i class="fa fa-check-circle text-sm"></i>
                         <span>{{ session('status') }}</span>
                     </div>
@@ -245,7 +245,7 @@
                                 autocomplete="email" 
                                 autofocus
                                 placeholder="engineer@wakeupict.com"
-                                class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950/80 border @error('email') border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 @else border-slate-800 focus:border-emerald-500 focus:ring-emerald-500/20 @enderror focus:ring-2 focus:outline-none text-white placeholder-slate-500 text-sm transition-all duration-200"
+                                class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950/80 border @error('email') border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 @else border-slate-800 focus:border-[#F26522] focus:ring-[#F26522]/20 @enderror focus:ring-2 focus:outline-none text-white placeholder-slate-500 text-sm transition-all duration-200"
                             />
                         </div>
                         @error('email')
@@ -263,7 +263,7 @@
                                 Password
                             </label>
                             @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-xs font-mono text-emerald-400 hover:text-emerald-300 transition-colors">
+                                <a href="{{ route('password.request') }}" class="text-xs font-mono text-[#F26522] hover:text-[#E95420] transition-colors">
                                     Forgot?
                                 </a>
                             @endif
@@ -279,7 +279,7 @@
                                 required 
                                 autocomplete="current-password"
                                 placeholder="••••••••••••"
-                                class="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-950/80 border @error('password') border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 @else border-slate-800 focus:border-emerald-500 focus:ring-emerald-500/20 @enderror focus:ring-2 focus:outline-none text-white placeholder-slate-500 text-sm font-mono tracking-wider transition-all duration-200"
+                                class="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-950/80 border @error('password') border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 @else border-slate-800 focus:border-[#F26522] focus:ring-[#F26522]/20 @enderror focus:ring-2 focus:outline-none text-white placeholder-slate-500 text-sm font-mono tracking-wider transition-all duration-200"
                             />
                             <!-- Show/Hide Password Interactive Button -->
                             <button 
@@ -308,7 +308,7 @@
                                 name="remember" 
                                 id="remember" 
                                 {{ old('remember') ? 'checked' : '' }}
-                                class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer transition-colors"
+                                class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-[#F26522] focus:ring-[#F26522]/20 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer transition-colors"
                             />
                             <span class="text-xs text-slate-300 group-hover:text-white transition-colors font-medium">
                                 Keep session active
@@ -316,7 +316,7 @@
                         </label>
 
                         <div class="flex items-center gap-1 text-[11px] font-mono text-slate-500">
-                            <i class="fa fa-lock text-[10px] text-emerald-500/70"></i>
+                            <i class="fa fa-lock text-[10px] text-[#F26522]/70"></i>
                             <span>End-to-End</span>
                         </div>
                     </div>
@@ -325,7 +325,7 @@
                     <div class="pt-2">
                         <button 
                             type="submit" 
-                            class="btn-shimmer group relative w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-glow-emerald hover:shadow-[0_0_50px_-5px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                            class="btn-shimmer group relative w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-sm tracking-wider uppercase bg-gradient-to-r from-[#F26522] to-[#E95420] hover:from-[#E95420] hover:to-[#C2410C] text-white shadow-glow-brand hover:shadow-[0_0_50px_-5px_rgba(242,101,34,0.5)] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                         >
                             <span>Authenticate Session</span>
                             <i class="fa fa-arrow-right text-xs group-hover:translate-x-1.5 transition-transform duration-200"></i>
@@ -348,7 +348,7 @@
                 <div class="text-center">
                     <p class="text-xs text-slate-400">
                         Need access permissions? 
-                        <a href="{{ route('contact-us-page') }}" class="text-emerald-400 hover:text-emerald-300 font-semibold underline underline-offset-4 transition-colors">
+                        <a href="{{ route('contact-us-page') }}" class="text-[#F26522] hover:text-[#E95420] font-semibold underline underline-offset-4 transition-colors">
                             Contact Administration
                         </a>
                     </p>
@@ -386,10 +386,10 @@
                     if (isPassword) {
                         passwordInput.setAttribute('type', 'text');
                         toggleIcon.classList.remove('fa-eye');
-                        toggleIcon.classList.add('fa-eye-slash', 'text-emerald-400');
+                        toggleIcon.classList.add('fa-eye-slash', 'text-[#F26522]');
                     } else {
                         passwordInput.setAttribute('type', 'password');
-                        toggleIcon.classList.remove('fa-eye-slash', 'text-emerald-400');
+                        toggleIcon.classList.remove('fa-eye-slash', 'text-[#F26522]');
                         toggleIcon.classList.add('fa-eye');
                     }
                 });

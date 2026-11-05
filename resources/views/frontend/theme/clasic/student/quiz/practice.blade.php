@@ -23,12 +23,12 @@
     @if(!empty($activePracticeAttempt))
     <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-2 border-amber-400 dark:border-amber-500/40 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
-            <div class="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg font-black shadow-md shadow-amber-500/30 flex-shrink-0 animate-bounce">
+            <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-lg font-black shadow-md shadow-amber-500/30 flex-shrink-0 animate-bounce">
                 <i class="fa fa-clock-o"></i>
             </div>
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500 text-white uppercase tracking-wider">চলমান পরীক্ষা</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-slate-950 font-black uppercase tracking-wider">চলমান পরীক্ষা</span>
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">শুরু: {{ $activePracticeAttempt->started_at ? $activePracticeAttempt->started_at->diffForHumans() : 'এখনই' }}</span>
                 </div>
                 <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">
@@ -41,7 +41,7 @@
         </div>
         <div class="flex items-center gap-3 w-full md:w-auto">
             <a href="{{ route('student.quiz.take', $activePracticeAttempt->id) }}" 
-               class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm shadow-md shadow-amber-500/30 transition-all">
+               class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-brand-primary text-white font-extrabold text-sm transition-all">
                 <span>পরীক্ষায় ফিরে যান</span>
                 <i class="fa fa-arrow-right"></i>
             </a>
@@ -93,7 +93,7 @@
                 </span>
             </div>
             <div class="w-full h-2.5 bg-black/30 rounded-full overflow-hidden p-0.5 border border-white/10">
-                <div class="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 rounded-full transition-all duration-700"
+                <div class="h-full bg-gradient-to-r from-[#F26522] via-[#FB923C] to-[#FED7AA] rounded-full transition-all duration-700"
                      style="width: {{ max(2, min(100, $progress['coverage_pct'])) }}%"></div>
             </div>
         </div>
@@ -186,7 +186,7 @@
     <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-7 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100 dark:border-slate-800">
             <div>
-                <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Interactive Test Generator</span>
+                <span class="text-[11px] font-bold text-brand-primary uppercase tracking-wider">Interactive Test Generator</span>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5">
                     নতুন অনুশীলন পরীক্ষা শুরু করুন (Start Rotated Exam)
                 </h3>
@@ -336,7 +336,7 @@
                     <span>পরীক্ষার সীমা শেষ (Attempt Limit Reached)</span>
                 </button>
                 @else
-                <button type="button" onclick="confirmPracticeStart(event)" id="btn-practice-start-trigger" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] cursor-pointer cursor-pointer">
+                <button type="button" onclick="confirmPracticeStart(event)" id="btn-practice-start-trigger" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl btn-brand-primary font-black text-sm transition-all hover:scale-[1.01] cursor-pointer">
                     <i class="fa fa-play-circle text-base"></i>
                     <span>পরীক্ষা শুরু করুন (Start Exam)</span>
                     <i class="fa fa-arrow-right text-xs"></i>
@@ -377,7 +377,7 @@
                 </div>
 
                 <div class="w-full h-2 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden mb-1.5">
-                    <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all" style="width: {{ $categoryItem['coverage_pct'] }}%"></div>
+                    <div class="h-full bg-gradient-to-r from-[#F26522] to-[#FB923C] rounded-full transition-all" style="width: {{ $categoryItem['coverage_pct'] }}%"></div>
                 </div>
 
                 <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -512,7 +512,7 @@
             <button type="button" onclick="closePracticeConfirmModal()" class="w-1/2 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer">
                 বাতিল (Cancel)
             </button>
-            <button type="button" id="btn-modal-confirm-start" onclick="proceedPracticeStart()" class="w-1/2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/30 cursor-pointer">
+            <button type="button" id="btn-modal-confirm-start" onclick="proceedPracticeStart()" class="w-1/2 py-3 rounded-xl btn-brand-primary font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer">
                 হ্যাঁ, শুরু করুন &rarr;
             </button>
         </div>

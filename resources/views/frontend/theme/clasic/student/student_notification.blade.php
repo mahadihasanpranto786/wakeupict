@@ -99,7 +99,7 @@
 
                 <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <span class="text-xs text-slate-400">অনলাইন পোর্টাল থেকে সকল কোর্সের শিডিউল ও ক্লাস দেখুন</span>
-                    <a href="{{ route('student.login') }}" class="px-4 py-2 rounded-lg bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider hover:bg-brand-accent transition-colors flex items-center gap-2">
+                    <a href="{{ route('student.login') }}" class="px-4 py-2 rounded-lg bg-brand-primary text-white font-bold text-xs uppercase tracking-wider hover:bg-brand-accent transition-colors flex items-center gap-2">
                         <span>স্টুডেন্ট লগইন</span>
                         <i class="fa fa-arrow-right"></i>
                     </a>
@@ -125,7 +125,7 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="{{ url('/') }}" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                <a href="{{ url('/') }}" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-white transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2">
                     <i class="fa fa-home"></i>
                     <span>Home Page</span>
                 </a>
