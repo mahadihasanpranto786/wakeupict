@@ -63,7 +63,7 @@
             <div class="student-card rounded-3xl p-6 sm:p-7 backdrop-blur-xl border transition-all {{ $isStaff ? 'bg-gradient-to-r from-slate-900/95 to-blue-950/40 border-blue-500/30 shadow-xl' : 'bg-slate-900/80 border-slate-800' }}">
                 <div class="flex items-start gap-4">
                     <!-- Avatar -->
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-sm {{ $isStaff ? 'bg-brand-primary text-slate-950 shadow-glow-emerald' : 'bg-slate-800 text-slate-300' }}">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-sm {{ $isStaff ? 'bg-brand-primary text-white shadow-glow-emerald' : 'bg-slate-800 text-slate-300' }}">
                         @if($isStaff)
                             <i class="fa fa-shield-alt"></i>
                         @else
@@ -144,7 +144,7 @@
                            class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700">
                 </div>
 
-                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald flex items-center justify-center gap-2">
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald flex items-center justify-center gap-2">
                     <i class="fa fa-paper-plane"></i>
                     <span>Send Reply</span>
                 </button>

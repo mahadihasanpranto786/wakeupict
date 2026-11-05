@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="pt-4 border-t border-slate-800/80">
-                        <a href="{{ route('student.receipts.print', $rc->receipt_number) }}" target="_blank" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                        <a href="{{ route('student.receipts.print', $rc->receipt_number) }}" target="_blank" class="w-full justify-center px-4 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                             <i class="fa fa-print"></i>
                             <span>Print / Download Receipt</span>
                         </a>
@@ -79,7 +79,7 @@
             <p class="text-xs text-slate-400 mb-6 leading-relaxed">
                 Official money receipts appear here automatically once your tuition payments are reviewed and verified by accounts desk.
             </p>
-            <a href="{{ route('student.fees.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
+            <a href="{{ route('student.fees.index') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-white font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
                 <span>Submit Fee Payment</span>
             </a>
         </div>

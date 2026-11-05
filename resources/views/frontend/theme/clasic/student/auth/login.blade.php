@@ -40,12 +40,12 @@
             <!-- Interactive 2-Tab Navigation Switcher -->
             <div class="p-1 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 grid grid-cols-2 gap-1 mb-4 select-none shadow-inner">
                 <button type="button" onclick="switchAuthTab('login')" id="tabBtn-login"
-                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'login' ? 'bg-brand-primary text-slate-950 shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'login' ? 'bg-brand-primary text-white shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                     <i class="fa fa-sign-in"></i>
                     <span>লগইন (Sign In)</span>
                 </button>
                 <button type="button" onclick="switchAuthTab('register')" id="tabBtn-register"
-                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'register' ? 'bg-brand-primary text-slate-950 shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                        class="auth-tab-btn py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $activeTab === 'register' ? 'bg-brand-primary text-white shadow-md font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                     <i class="fa fa-user-plus"></i>
                     <span>রেজিস্ট্রেশন (Register)</span>
                 </button>
@@ -127,7 +127,7 @@
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa fa-sign-in"></i>
                             <span>Sign In to Dashboard</span>
                         </button>
@@ -225,7 +225,7 @@
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa fa-check-circle"></i>
                             <span>Activate &amp; Enter Dashboard</span>
                         </button>
@@ -261,7 +261,7 @@
             paneRegister.classList.remove('hidden');
 
             btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-            btnRegister.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-slate-950 shadow-md font-extrabold';
+            btnRegister.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-white shadow-md font-extrabold';
 
             heading.innerText = 'Create Student Account';
             subheading.innerText = 'Activate your student portal access using your admission phone number.';
@@ -275,7 +275,7 @@
             paneLogin.classList.remove('hidden');
 
             btnRegister.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-            btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-slate-950 shadow-md font-extrabold';
+            btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-white shadow-md font-extrabold';
 
             heading.innerText = 'Student Login';
             subheading.innerText = 'Enter your Student ID, Email, or Phone to access your courses.';

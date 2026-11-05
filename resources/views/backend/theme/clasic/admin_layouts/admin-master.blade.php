@@ -71,16 +71,22 @@
 
     <!-- ★ Enterprise Visual Override (loaded LAST to override AdminLTE styles) -->
     <link rel="stylesheet" href="{{ asset('css/admin-enterprise.css') }}">
+    <!-- Wake Up ICT Universal Brand Stylesheet (Orange, White, Black) -->
+    <link rel="stylesheet" href="{{ safe_asset('frontend/css/custom.css') }}">
 
     <!-- Critical inline: prevent AdminLTE gray flash before CSS loads and inject dynamic theme palette -->
     <style>
         :root {
-            --brand-primary: {{ app_setting('theme_primary_color', '#10b981') }};
-            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '16, 185, 129') }};
-            --brand-accent: {{ app_setting('theme_accent_color', '#34d399') }};
-            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '52, 211, 153') }};
+            --brand-primary: {{ app_setting('theme_primary_color', '#F26522') }};
+            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '242, 101, 34') }};
+            --brand-accent: {{ app_setting('theme_accent_color', '#FB923C') }};
+            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '251, 146, 60') }};
+            --brand-hover: #E95420;
+            --brand-hover-rgb: 233, 84, 32;
+            --brand-light: #FFF1E8;
+            --brand-dark-navy: #172033;
             --brand-cyan: {{ app_setting('theme_cyan_color', '#22d3ee') }};
-            --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
+            --brand-indigo: {{ app_setting('theme_indigo_color', '#C2410C') }};
         }
         html.dark, html.dark body, html.dark .wrapper, html.dark .content-wrapper {
             background-color: #030712 !important;
@@ -93,8 +99,8 @@
             color: #0f172a !important;
         }
         .main-sidebar, aside.main-sidebar {
-            background-color: #040a15 !important;
-            background: #040a15 !important;
+            background-color: #172033 !important;
+            background: #172033 !important;
         }
         html.dark .main-header, html.dark nav.main-header {
             background-color: rgba(4,10,21,0.97) !important;
@@ -201,8 +207,8 @@
         #selectAllCheckbox:hover,
         #selectAllQuizzesCheckbox:hover,
         table input[type="checkbox"]:hover {
-            border-color: #059669 !important;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+            border-color: #F26522 !important;
+            box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.20) !important;
         }
 
         .adm-checkbox:checked,
@@ -212,9 +218,9 @@
         #selectAllQuizzesCheckbox:checked,
         table input[type="checkbox"]:checked,
         .custom-control-input[type="checkbox"]:checked {
-            background-color: #059669 !important;
-            border-color: #059669 !important;
-            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25) !important;
+            background-color: #F26522 !important;
+            border-color: #F26522 !important;
+            box-shadow: 0 2px 4px rgba(242, 101, 34, 0.35) !important;
         }
 
         .adm-checkbox:checked::after,
@@ -235,7 +241,7 @@
         /* Checkbox row highlighted state */
         tr.selected-row,
         tr.table-active-selected {
-            background-color: rgba(16, 185, 129, 0.08) !important;
+            background-color: rgba(242, 101, 34, 0.10) !important;
         }
 
         /* Radio buttons in backend modals / option lists */
@@ -276,7 +282,7 @@
         .modal input[type="radio"]:checked,
         .input-group-text input[type="radio"]:checked,
         .custom-control-input[type="radio"]:checked {
-            border-color: #059669 !important;
+            border-color: #F26522 !important;
             border-width: 5px !important;
             background-color: #ffffff !important;
         }
@@ -307,9 +313,9 @@
             background-color: #0f172a !important;
         }
         .custom-control-input:checked ~ .custom-control-label::before {
-            border-color: #059669 !important;
-            background-color: #059669 !important;
-            box-shadow: 0 0 0 1px #059669, 0 2px 4px rgba(5, 150, 105, 0.2) !important;
+            border-color: #F26522 !important;
+            background-color: #F26522 !important;
+            box-shadow: 0 0 0 1px #F26522, 0 2px 4px rgba(242, 101, 34, 0.25) !important;
         }
         .custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
@@ -329,11 +335,11 @@
         @keyframes adm-logo-bounce {
             0%, 100% {
                 transform: scale(1) translateY(0);
-                filter: drop-shadow(0 0 8px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5));
+                filter: drop-shadow(0 0 8px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.5));
             }
             50% {
                 transform: scale(1.08) translateY(-3px);
-                filter: drop-shadow(0 0 16px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.8));
+                filter: drop-shadow(0 0 16px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.8));
             }
         }
         .adm-logo-animated {
@@ -357,35 +363,35 @@
     <div id="preloader" style="position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #030712; transition: opacity 0.5s ease-out;">
         <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; margin-bottom: 20px;">
             <!-- Ambient Radial Pulse -->
-            <div style="position: absolute; inset: 0; border-radius: 50%; animation: adm-pulse 2s infinite; background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%); opacity: 0.22;"></div>
+            <div style="position: absolute; inset: 0; border-radius: 50%; animation: adm-pulse 2s infinite; background: radial-gradient(circle, var(--brand-primary, #F26522) 0%, transparent 70%); opacity: 0.22;"></div>
             
             <!-- Outer Spinning Gradient Track -->
-            <div style="position: absolute; width: 104px; height: 104px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-cyan, #22d3ee); animation: adm-spin 1.2s linear infinite;"></div>
+            <div style="position: absolute; width: 104px; height: 104px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--brand-primary, #F26522); border-right-color: var(--brand-cyan, #22d3ee); animation: adm-spin 1.2s linear infinite;"></div>
             
             <!-- Secondary Counter Ring -->
             <div style="position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.15); border-top-color: var(--brand-accent, #34d399); border-left-color: var(--brand-indigo, #6366f1); animation: adm-spin 3s linear infinite reverse;"></div>
 
             <!-- Central Glass Orb with Logo -->
             <div class="adm-logo-card" style="position: relative; z-index: 10; width: 68px; height: 68px; border-radius: 18px; background-color: rgba(11, 19, 41, 0.92); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
-                <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(var(--brand-primary-rgb, 16, 185, 129), 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+                <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(var(--brand-primary-rgb, 242, 101, 34), 0.15) 0%, transparent 70%); pointer-events: none;"></div>
                 <img src="{{ asset('frontend/image/wakeupict-fabicon.png') }}" alt="Wake Up ICT Logo" class="adm-logo-animated" style="width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 2;">
             </div>
 
             <!-- Orbiting Satellite Dot -->
             <div style="position: absolute; width: 120px; height: 120px; animation: adm-spin 2.5s linear infinite; pointer-events: none;">
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--brand-primary, #10b981); box-shadow: 0 0 10px var(--brand-primary, #10b981);"></div>
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--brand-primary, #F26522); box-shadow: 0 0 10px var(--brand-primary, #F26522);"></div>
             </div>
         </div>
 
         <!-- Typography & Progress Track -->
         <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--brand-primary, #10b981); display: inline-block;"></span>
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--brand-primary, #F26522); display: inline-block;"></span>
                 <span class="adm-preloader-text" style="color: #f1f5f9; font-weight: 700;">WAKE UP ICT ADMIN</span>
             </div>
             <!-- Progress Track -->
             <div class="adm-bar-bg" style="width: 140px; height: 3px; border-radius: 9999px; background-color: rgba(255,255,255,0.08); overflow: hidden; position: relative;">
-                <div class="adm-bar-indeterminate" style="width: 50%; height: 100%; border-radius: 9999px; background: linear-gradient(90deg, var(--brand-primary, #10b981), var(--brand-cyan, #22d3ee));"></div>
+                <div class="adm-bar-indeterminate" style="width: 50%; height: 100%; border-radius: 9999px; background: linear-gradient(90deg, var(--brand-primary, #F26522), var(--brand-cyan, #22d3ee));"></div>
             </div>
         </div>
     </div>

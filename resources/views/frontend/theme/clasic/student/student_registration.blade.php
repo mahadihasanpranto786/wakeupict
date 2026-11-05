@@ -966,7 +966,7 @@
                                 <!-- Next Step / Final Submit Button Container -->
                                 <div class="w-full sm:w-auto">
                                     <!-- Next Step Button (Shown on Steps 1, 2, 3) -->
-                                    <button type="button" id="wizardNextBtn" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2.5 cursor-pointer select-none">
+                                    <button type="button" id="wizardNextBtn" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-brand-primary hover:bg-brand-accent text-white transition-all duration-300 shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2.5 cursor-pointer select-none">
                                         <span class="pointer-events-none">Continue to Next Step</span>
                                         <i class="fa fa-arrow-right pointer-events-none"></i>
                                     </button>
@@ -996,7 +996,7 @@
                             <img src="{{ URL::asset($course->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $course->course_title }}">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
                             <div class="absolute bottom-3 left-3">
-                                <span class="px-3 py-1 rounded-lg bg-brand-primary text-slate-950 font-mono font-bold text-xs uppercase tracking-wider shadow">
+                                <span class="px-3 py-1 rounded-lg bg-brand-primary text-white font-mono font-bold text-xs uppercase tracking-wider shadow">
                                     Admissions Open
                                 </span>
                             </div>
@@ -1152,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (stepNum < currentStep) {
                 // Completed Step
                 btn.className = 'wizard-step-indicator flex flex-col items-center p-3 rounded-2xl border transition-all text-center cursor-pointer border-emerald-500/40 bg-emerald-500/10 text-emerald-400';
-                if (iconWrap) iconWrap.className = 'indicator-icon-wrap w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono mb-1.5 transition-all bg-emerald-400 text-slate-950';
+                if (iconWrap) iconWrap.className = 'indicator-icon-wrap w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono mb-1.5 transition-all bg-emerald-400 text-white';
                 if (numEl) numEl.classList.add('hidden');
                 if (checkEl) checkEl.classList.remove('hidden');
                 if (pulseRingEl) pulseRingEl.classList.add('hidden');
@@ -1160,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (stepNum === currentStep) {
                 // Active Step
                 btn.className = 'wizard-step-indicator flex flex-col items-center p-3 rounded-2xl border transition-all text-center cursor-pointer border-brand-primary bg-brand-primary/10 text-brand-primary shadow-glow-emerald/30';
-                if (iconWrap) iconWrap.className = 'indicator-icon-wrap w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono mb-1.5 transition-all bg-brand-primary text-slate-950 font-bold ring-2 ring-brand-primary ring-offset-2 ring-offset-slate-950';
+                if (iconWrap) iconWrap.className = 'indicator-icon-wrap w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono mb-1.5 transition-all bg-brand-primary text-white font-bold ring-2 ring-brand-primary ring-offset-2 ring-offset-slate-950';
                 if (numEl) numEl.classList.remove('hidden');
                 if (checkEl) checkEl.classList.add('hidden');
                 if (pulseRingEl) pulseRingEl.classList.remove('hidden');

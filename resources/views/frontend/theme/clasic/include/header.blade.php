@@ -1,5 +1,5 @@
 <!-- 10 Minute School Inspired Top Emergency Helpline & Admission Notice Strip with Running Newsfeed -->
-<div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white py-1.5 px-3 sm:px-6 lg:px-8 text-xs font-medium shadow-sm transition-all duration-300" id="top-announcement-strip">
+<div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-[#0f172a] to-slate-900 border-b border-[#F26522]/30 text-white py-1.5 px-3 sm:px-6 lg:px-8 text-xs font-medium shadow-sm transition-all duration-300" id="top-announcement-strip">
     <div class="w-full flex items-center justify-between gap-3 sm:gap-4">
         
         <!-- Left: Pinned Pulse Badge (Zero gap layout) -->
@@ -34,8 +34,8 @@
         <div class="flex items-center gap-2 sm:gap-3 shrink-0 text-[11px] font-sans font-semibold tracking-wide z-10 text-white/95">
             
             <!-- Hotline Helpline -->
-            <a href="tel:01791612121" class="hidden md:inline-flex hover:text-amber-300 transition-colors items-center gap-1.5 font-mono text-[11px] font-bold">
-                <i class="fa fa-phone text-amber-300"></i>
+            <a href="tel:01791612121" id="top-hotline-link" class="hidden md:inline-flex hover:text-amber-300 transition-colors items-center gap-1.5 font-mono text-[11px] font-bold" style="background: transparent !important; background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important;">
+                <i class="fa fa-phone text-white"></i>
                 <span>01791-612121</span>
             </a>
 
@@ -57,15 +57,15 @@
                 </form>
             @else
                 <!-- Guest Student: Login & Sign Up (Daraz Style) -->
-                <a href="{{ route('student.login') }}" class="hover:text-amber-300 transition-colors inline-flex items-center gap-1 uppercase font-bold text-[11px]">
-                    <i class="fa fa-user-circle text-amber-300"></i>
+                <a href="{{ route('student.login') }}" class="text-[#F26522] hover:text-[#EA580C] transition-colors inline-flex items-center gap-1 uppercase font-black text-[11px]">
+                    <i class="fa fa-user-circle text-[#F26522]"></i>
                     <span>LOGIN</span>
                 </a>
 
                 <span class="text-white/30">|</span>
 
                 <a href="{{ route('student.register') }}" class="hover:text-amber-300 transition-colors inline-flex items-center gap-1 uppercase font-bold text-[11px]">
-                    <i class="fa fa-user-plus text-amber-300"></i>
+                    <i class="fa fa-user-plus text-[#F26522]"></i>
                     <span>SIGN UP</span>
                 </a>
             @endif
@@ -74,10 +74,10 @@
 
             <!-- Language Switcher (Daraz Style: ভাষা / Language) -->
             <div class="inline-flex items-center gap-1 text-[11px] font-bold">
-                <i class="fa fa-globe text-amber-300 text-xs"></i>
-                <a href="{{ route('language.switch', 'en') }}" class="px-1.5 py-0.5 rounded text-[10px] uppercase transition-colors {{ App::getLocale() == 'en' ? 'bg-amber-300 text-slate-950 font-black shadow-xs' : 'text-white/80 hover:text-white' }}">EN</a>
+                <i class="fa fa-globe text-[#F26522] text-xs"></i>
+                <a href="{{ route('language.switch', 'en') }}" class="px-1.5 py-0.5 rounded text-[10px] uppercase transition-colors {{ App::getLocale() == 'en' ? 'bg-[#F26522] text-white font-black shadow-xs' : 'text-white/80 hover:text-white' }}">EN</a>
                 <span class="text-white/30 text-[10px]">|</span>
-                <a href="{{ route('language.switch', 'bn') }}" class="px-1.5 py-0.5 rounded text-[10px] transition-colors {{ App::getLocale() == 'bn' ? 'bg-amber-300 text-slate-950 font-black shadow-xs' : 'text-white/80 hover:text-white' }}">বাং</a>
+                <a href="{{ route('language.switch', 'bn') }}" class="px-1.5 py-0.5 rounded text-[10px] transition-colors {{ App::getLocale() == 'bn' ? 'bg-[#F26522] text-white font-black shadow-xs' : 'text-white/80 hover:text-white' }}">বাং</a>
             </div>
 
         </div>
@@ -112,9 +112,9 @@
                            name="search" 
                            value="{{ request('search') }}"
                            placeholder="কোর্স খুঁজুন (যেমন: গ্রাফিক্স, ওয়েব, AI)..." 
-                           class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs sm:text-[13px] text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium"
+                           class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs sm:text-[13px] text-slate-200 placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium"
                            autocomplete="off">
-                    <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500 text-xs border-0 bg-transparent p-0 cursor-pointer" title="খুঁজুন">
+                    <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-primary text-xs border-0 bg-transparent p-0 cursor-pointer" title="খুঁজুন">
                         <i class="fa fa-search"></i>
                     </button>
                     <!-- Clear query icon -->
@@ -130,10 +130,10 @@
                     <!-- Panel Header -->
                     <div class="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800/80 mb-1.5">
                         <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wide">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
                             <span>উপলব্ধ কোর্সসমূহ</span>
                         </span>
-                        <span id="suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span id="suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                             {{ $activeCoursesList->count() }}টি কোর্স
                         </span>
                     </div>
@@ -141,15 +141,15 @@
                     <!-- Suggestions List Container -->
                     <div id="suggestion-items-container" class="space-y-1">
                         @foreach($activeCoursesList as $course)
-                            <div class="suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-900 border border-transparent hover:border-emerald-200 dark:hover:border-slate-800"
+                            <div class="suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-orange-50 dark:hover:bg-slate-900 border border-transparent hover:border-orange-200 dark:hover:border-slate-800"
                                  data-course-title="{{ $course->course_title }}"
                                  onclick="selectCourseSuggestion('{{ addslashes($course->course_title) }}')">
                                 <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                                    <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold shadow-xs group-hover:scale-105 transition-transform">
+                                    <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-slate-800 text-brand-primary dark:text-brand-primary flex items-center justify-center shrink-0 text-xs font-bold shadow-xs group-hover:scale-105 transition-transform">
                                         <i class="fa fa-graduation-cap"></i>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="course-item-title text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <div class="course-item-title text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-brand-primary dark:group-hover:text-brand-primary transition-colors">
                                             {{ $course->course_title }}
                                         </div>
                                         <div class="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -157,12 +157,12 @@
                                                 <span class="inline-flex items-center gap-1"><i class="fa fa-clock-o text-amber-500"></i> {{ $course->time_line }}</span>
                                             @endif
                                             <span>•</span>
-                                            <span class="text-emerald-600 dark:text-emerald-400 font-semibold">১০ জন ব্যাচ</span>
+                                            <span class="text-brand-primary dark:text-brand-primary font-semibold">১০ জন ব্যাচ</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-1 shrink-0">
-                                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
+                                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-400 group-hover:bg-brand-primary group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
                                         <span>সার্চ</span>
                                         <i class="fa fa-search text-[9px]"></i>
                                     </span>
@@ -178,7 +178,7 @@
                         </div>
                         <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">সরাসরি কোনো কোর্স মেলেনি</p>
                         <p class="text-[11px] text-slate-500 mb-3">সব কোর্সসমূহের বর্ণনায় খুঁজতে নিচের বাটনে চাপুন</p>
-                        <button type="button" onclick="submitHeaderSearch()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                        <button type="button" onclick="submitHeaderSearch()" class="px-3 py-1.5 rounded-xl btn-brand-primary text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
                             <i class="fa fa-search text-[10px]"></i>
                             <span>এই নামে খুঁজুন</span>
                         </button>
@@ -200,7 +200,7 @@
             @php
                 $headerMenus = \App\Services\FrontendMenuService::getTree('header');
             @endphp
-            <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 font-medium text-[13px] 2xl:text-sm text-slate-300 shrink-0">
+            <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 font-semibold text-[13px] 2xl:text-sm text-slate-900 dark:text-slate-200 shrink-0">
                 @foreach($headerMenus as $menu)
                     @php
                         $hasChildren = $menu->activeChildren->count() > 0;
@@ -212,7 +212,7 @@
                         <div class="relative group shrink-0">
                             <a href="{{ $menu->resolveUrl() }}" 
                                target="{{ $menu->target }}"
-                               class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 inline-flex items-center gap-1 {{ $isActive ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
+                               class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 inline-flex items-center gap-1 {{ $isActive ? 'nav-active text-brand-primary font-extrabold bg-[#FFF1E8] border border-orange-200 shadow-2xs dark:bg-slate-800/50 dark:border-transparent dark:text-brand-primary' : 'text-slate-800 hover:text-brand-primary hover:bg-[#FFF1E8] border border-transparent hover:border-orange-200 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60 font-semibold' }}">
                                 @if($menu->icon)
                                     <i class="{{ $menu->icon }} mr-1"></i>
                                 @endif
@@ -223,11 +223,11 @@
                                 @endif
                             </a>
                             <!-- Dropdown Box -->
-                            <div class="hidden group-hover:block absolute left-0 mt-1 w-52 rounded-xl bg-slate-950/95 border border-slate-800 shadow-2xl p-1.5 z-50 text-xs backdrop-blur-xl">
+                            <div class="hidden group-hover:block absolute left-0 mt-1 w-52 rounded-xl bg-white dark:bg-slate-950/95 border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-50 text-xs backdrop-blur-xl">
                                 @foreach($menu->activeChildren as $child)
                                     <a href="{{ $child->resolveUrl() }}" 
                                        target="{{ $child->target }}"
-                                       class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/80 hover:text-brand-primary transition-colors whitespace-nowrap {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                                       class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-800 dark:text-slate-300 hover:bg-[#FFF1E8] hover:text-brand-primary dark:hover:bg-slate-800/80 dark:hover:text-brand-primary transition-colors whitespace-nowrap {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-[#FFF1E8] dark:bg-slate-800/50' : 'font-medium' }}">
                                         <div class="flex items-center gap-2">
                                             @if($child->icon)
                                                 <i class="{{ $child->icon }}"></i>
@@ -245,7 +245,7 @@
                         <!-- Direct Link -->
                         <a href="{{ $menu->resolveUrl() }}" 
                            target="{{ $menu->target }}"
-                           class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-800/60 inline-flex items-center gap-1 {{ $isActive ? 'text-brand-primary font-semibold bg-slate-800/50' : '' }}">
+                           class="whitespace-nowrap shrink-0 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl transition-all duration-200 inline-flex items-center gap-1 {{ $isActive ? 'nav-active text-brand-primary font-extrabold bg-[#FFF1E8] border border-orange-200 shadow-2xs dark:bg-slate-800/50 dark:border-transparent dark:text-brand-primary' : 'text-slate-800 hover:text-brand-primary hover:bg-[#FFF1E8] border border-transparent hover:border-orange-200 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60 font-semibold' }}">
                             @if($menu->icon)
                                 <i class="{{ $menu->icon }} mr-1"></i>
                             @endif
@@ -260,8 +260,8 @@
 
             <!-- Right CTA (Desktop Hotline) - Student Login, Sign Up & Language are in the Top Utility Strip -->
             <div class="hidden lg:flex items-center shrink-0">
-                <a href="tel:01791612121" class="header-hotline-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 2xl:px-4 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap">
-                    <i class="fa fa-phone text-amber-300"></i>
+                <a href="tel:01791612121" class="header-hotline-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 2xl:px-4 2xl:py-2 rounded-xl font-bold text-xs tracking-wider uppercase btn-brand-primary text-white shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap">
+                    <i class="fa fa-phone text-white"></i>
                     <span>01791-612121</span>
                 </a>
             </div>
@@ -270,7 +270,7 @@
             <div class="flex lg:hidden items-center gap-1.5 sm:gap-2">
                 <!-- Mobile Search Button -->
                 <button id="mobile-search-toggle-btn" type="button" class="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 focus:outline-none transition-colors border border-slate-700/60 bg-slate-900/60" aria-label="Search courses" title="কোর্স খুঁজুন">
-                    <i id="mobile-search-icon" class="fa fa-search text-sm text-emerald-400"></i>
+                    <i id="mobile-search-icon" class="fa fa-search text-sm text-brand-primary"></i>
                     <i id="mobile-search-close-icon" class="fa fa-times text-sm hidden text-rose-400"></i>
                 </button>
 
@@ -296,14 +296,14 @@
                        name="search" 
                        value="{{ request('search') }}"
                        placeholder="কোর্স খুঁজুন (যেমন: গ্রাফিক্স, ওয়েব, AI)..." 
-                       class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium"
+                       class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-brand-primary/20 font-medium"
                        autocomplete="off">
                 <!-- Clear Button -->
                 <button type="button" id="mobile-search-clear-btn" class="hidden absolute right-11 text-slate-400 hover:text-rose-400 text-sm border-0 bg-transparent p-1 cursor-pointer" title="মুছুন">
                     <i class="fa fa-times-circle"></i>
                 </button>
                 <!-- Search Button -->
-                <button type="submit" class="absolute right-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-colors flex items-center gap-1 cursor-pointer">
+                <button type="submit" class="absolute right-1.5 px-3 py-1.5 rounded-lg btn-brand-primary text-white font-bold text-xs shadow-sm transition-colors flex items-center gap-1 cursor-pointer">
                     <span>সার্চ</span>
                 </button>
             </div>
@@ -313,25 +313,25 @@
         <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex-1 overflow-y-auto max-h-[340px] pr-1">
             <div class="flex items-center justify-between px-1.5 py-1 mb-1">
                 <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-wide">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
                     <span>উপলব্ধ কোর্সসমূহ</span>
                 </span>
-                <span id="mobile-suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                <span id="mobile-suggestion-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                     {{ $activeCoursesList->count() }}টি কোর্স
                 </span>
             </div>
 
             <div id="mobile-suggestion-items-container" class="space-y-1">
                 @foreach($activeCoursesList as $course)
-                    <div class="mobile-suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-900 border border-transparent hover:border-emerald-200 dark:hover:border-slate-800"
+                    <div class="mobile-suggestion-item group flex items-center justify-between p-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-orange-50 dark:hover:bg-slate-900 border border-transparent hover:border-orange-200 dark:hover:border-slate-800"
                          data-course-title="{{ $course->course_title }}"
                          onclick="selectMobileCourseSuggestion('{{ addslashes($course->course_title) }}')">
                         <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
+                            <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-slate-800 text-brand-primary dark:text-brand-primary flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
                                 <i class="fa fa-graduation-cap"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="course-item-title text-xs font-bold text-slate-100 truncate group-hover:text-emerald-500 transition-colors">
+                                <div class="course-item-title text-xs font-bold text-slate-100 truncate group-hover:text-brand-primary transition-colors">
                                     {{ $course->course_title }}
                                 </div>
                                 <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
@@ -339,12 +339,12 @@
                                         <span class="inline-flex items-center gap-1"><i class="fa fa-clock-o text-amber-500"></i> {{ $course->time_line }}</span>
                                     @endif
                                     <span>•</span>
-                                    <span class="text-emerald-500 font-semibold">১০ জন ব্যাচ</span>
+                                    <span class="text-brand-primary font-semibold">১০ জন ব্যাচ</span>
                                 </div>
                             </div>
                         </div>
                         <div class="shrink-0">
-                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-400 group-hover:bg-brand-primary group-hover:text-white transition-all flex items-center gap-1 shadow-2xs">
                                 <i class="fa fa-search text-[9px]"></i>
                             </span>
                         </div>
@@ -359,7 +359,7 @@
                 </div>
                 <p class="text-xs font-semibold text-slate-300 mb-0.5">কোনো সরাসরি কোর্স মেলেনি</p>
                 <p class="text-[11px] text-slate-400 mb-2.5">সকল কোর্সের ভেতরে খুঁজতে নিচের বাটনে চাপুন</p>
-                <button type="button" onclick="submitMobileSearch()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                <button type="button" onclick="submitMobileSearch()" class="px-3 py-1.5 rounded-xl btn-brand-primary text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm">
                     <i class="fa fa-search text-[10px]"></i>
                     <span>এই নামে খুঁজুন</span>
                 </button>
@@ -395,7 +395,7 @@
                         @foreach($menu->activeChildren as $child)
                             <a href="{{ $child->resolveUrl() }}" 
                                target="{{ $child->target }}"
-                               class="mobile-nav-link flex items-center justify-between px-4 py-2.5 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors pl-6 {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                               class="mobile-nav-link flex items-center justify-between px-4 py-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-[#FFF1E8] hover:text-brand-primary dark:hover:bg-slate-800/80 font-medium transition-colors pl-6 {{ $child->isCurrent() ? 'text-brand-primary font-bold bg-[#FFF1E8] dark:bg-slate-800/50' : '' }}">
                                 <span class="flex items-center gap-2">
                                     @if($child->icon)
                                         <i class="{{ $child->icon }}"></i>
@@ -409,7 +409,7 @@
                 @else
                     <a href="{{ $menu->resolveUrl() }}" 
                        target="{{ $menu->target }}"
-                       class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-200 hover:bg-slate-800/80 hover:text-brand-primary font-medium transition-colors {{ $isActive ? 'text-brand-primary font-bold bg-slate-800/50' : '' }}">
+                       class="mobile-nav-link flex items-center justify-between px-4 py-3 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-[#FFF1E8] hover:text-brand-primary dark:hover:bg-slate-800/80 font-semibold transition-colors {{ $isActive ? 'text-brand-primary font-bold bg-[#FFF1E8] dark:bg-slate-800/50' : '' }}">
                         <span class="flex items-center gap-2">
                             @if($menu->icon)
                                 <i class="{{ $menu->icon }}"></i>
@@ -426,7 +426,7 @@
 
             <div class="pt-4 mt-2 border-t border-slate-800 space-y-2.5">
                 @if(function_exists('is_student_logged_in') && is_student_logged_in())
-                    <a href="{{ route('student.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-brand-primary text-slate-950">
+                    <a href="{{ route('student.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-brand-primary text-white">
                         <i class="fa fa-graduation-cap"></i>
                         <span>Student Dashboard</span>
                     </a>
@@ -436,7 +436,7 @@
                             <i class="fa fa-user-circle text-brand-primary"></i>
                             <span>LOGIN</span>
                         </a>
-                        <a href="{{ route('student.register') }}" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <a href="{{ route('student.register') }}" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-bold text-xs tracking-wider uppercase btn-brand-primary text-white">
                             <i class="fa fa-user-plus"></i>
                             <span>SIGN UP</span>
                         </a>
@@ -445,12 +445,12 @@
                 <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs">
                     <span class="text-slate-400 font-medium">ভাষা / Language:</span>
                     <div class="flex items-center gap-1 font-mono font-bold">
-                        <a href="{{ route('language.switch', 'en') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'en' ? 'bg-brand-primary text-slate-950' : 'text-slate-400 hover:text-white' }}">EN</a>
+                        <a href="{{ route('language.switch', 'en') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'en' ? 'bg-brand-primary text-white' : 'text-slate-400 hover:text-white' }}">EN</a>
                         <span class="text-slate-600">|</span>
-                        <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-slate-950' : 'text-slate-400 hover:text-white' }}">বাং</a>
+                        <a href="{{ route('language.switch', 'bn') }}" class="px-2 py-0.5 rounded {{ App::getLocale() == 'bn' ? 'bg-brand-primary text-white' : 'text-slate-400 hover:text-white' }}">বাং</a>
                     </div>
                 </div>
-                <a href="tel:01791612121" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-emerald-600/20 border border-emerald-500/30 text-emerald-400">
+                <a href="tel:01791612121" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wider uppercase bg-orange-500/20 border border-orange-500/30 text-[#F26522]">
                     <i class="fa fa-phone"></i>
                     <span>হটলাইন: 01791-612121</span>
                 </a>

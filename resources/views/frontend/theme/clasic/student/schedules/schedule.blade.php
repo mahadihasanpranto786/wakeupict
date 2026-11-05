@@ -19,7 +19,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('student.live.index') }}" class="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5">
+            <a href="{{ route('student.live.index') }}" class="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5">
                 <i class="fa fa-video-camera"></i>
                 <span>Live Classes</span>
             </a>
@@ -96,7 +96,7 @@
                         <!-- Right Action Buttons -->
                         <div class="flex items-center gap-3 self-end md:self-auto shrink-0">
                             @if($sched->class_type == 'live_online' && $sched->meeting_link)
-                                <a href="{{ $sched->meeting_link }}" target="_blank" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                                <a href="{{ $sched->meeting_link }}" target="_blank" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                                     <i class="fa fa-video-camera"></i>
                                     <span>Join Session</span>
                                 </a>

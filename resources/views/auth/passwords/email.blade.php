@@ -27,8 +27,8 @@
                 extend: {
                     colors: {
                         brand: {
-                            primary: '#10b981',
-                            primaryHover: '#059669',
+                            primary: '#F26522',
+                            primaryHover: '#E95420',
                             accent: '#34d399',
                             cyan: '#06b6d4',
                             indigo: '#6366f1',
@@ -42,8 +42,8 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        'glow-emerald': '0 0 40px -10px rgba(16, 185, 129, 0.35)',
-                        'card-glow': '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 50px -10px rgba(16, 185, 129, 0.15)',
+                        'glow-emerald': '0 0 40px -10px rgba(242, 101, 34, 0.35)',
+                        'card-glow': '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 50px -10px rgba(242, 101, 34, 0.15)',
                     },
                     animation: {
                         'float': 'float 8s ease-in-out infinite',
@@ -114,11 +114,11 @@
     </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-brand-primary selection:text-slate-950">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
     <!-- Ambient Glow Orbs -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-emerald-500/20 via-brand-primary/10 to-transparent rounded-full blur-[140px] animate-float"></div>
+        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-[#F26522]/20 via-brand-primary/10 to-transparent rounded-full blur-[140px] animate-float"></div>
         <div class="absolute -bottom-40 -right-40 w-[650px] h-[650px] bg-gradient-to-tl from-cyan-500/15 via-indigo-500/10 to-transparent rounded-full blur-[150px] animate-float-reverse"></div>
         <div class="absolute inset-0 bg-grid-cyber opacity-70 [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div>
     </div>
@@ -135,7 +135,7 @@
             </div>
         </a>
 
-        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/70 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 hover:text-emerald-400 transition-all backdrop-blur-md">
+        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/70 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 hover:text-[#F26522] transition-all backdrop-blur-md">
             <i class="fa fa-arrow-left text-[10px]"></i>
             <span>Back to Login</span>
         </a>
@@ -148,8 +148,8 @@
             <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-card-glow">
                 
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono tracking-wider uppercase mb-5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F26522]/10 border border-[#F26522]/25 text-[#F26522] text-xs font-mono tracking-wider uppercase mb-5">
+                        <span class="w-2 h-2 rounded-full bg-[#F26522] animate-pulse"></span>
                         <span>Credential Recovery</span>
                     </div>
 
@@ -162,8 +162,8 @@
                 </div>
 
                 @if (session('status'))
-                    <div class="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
-                        <i class="fa fa-check-circle text-sm text-emerald-400"></i>
+                    <div class="mb-6 p-3.5 rounded-xl bg-[#F26522]/10 border border-[#F26522]/30 text-[#F26522] text-xs font-mono flex items-center gap-2.5">
+                        <i class="fa fa-check-circle text-sm text-[#F26522]"></i>
                         <span>{{ session('status') }}</span>
                     </div>
                 @endif
@@ -188,7 +188,7 @@
                                 autocomplete="email" 
                                 autofocus
                                 placeholder="engineer@wakeupict.com"
-                                class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950/80 border @error('email') border-rose-500/80 focus:border-rose-500 @else border-slate-800 focus:border-emerald-500 @enderror focus:ring-2 focus:ring-emerald-500/20 focus:outline-none text-white placeholder-slate-500 text-sm transition-all"
+                                class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950/80 border @error('email') border-rose-500/80 focus:border-rose-500 @else border-slate-800 focus:border-[#F26522] @enderror focus:ring-2 focus:ring-[#F26522]/20 focus:outline-none text-white placeholder-slate-500 text-sm transition-all"
                             />
                         </div>
                         @error('email')
@@ -202,7 +202,7 @@
                     <div class="pt-2">
                         <button 
                             type="submit" 
-                            class="btn-shimmer group relative w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-glow-emerald transition-all hover:-translate-y-0.5"
+                            class="btn-shimmer group relative w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-sm tracking-wider uppercase bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] text-white shadow-glow-brand transition-all hover:-translate-y-0.5"
                         >
                             <span>Transmit Recovery Link</span>
                             <i class="fa fa-paper-plane text-xs group-hover:translate-x-1.5 transition-transform duration-200"></i>
@@ -210,8 +210,8 @@
                     </div>
 
                     <div class="text-center pt-2">
-                        <a href="{{ route('login') }}" class="text-xs font-mono text-slate-400 hover:text-emerald-400 transition-colors">
-                            Remembered password? <span class="text-emerald-400 underline">Sign In</span>
+                        <a href="{{ route('login') }}" class="text-xs font-mono text-slate-400 hover:text-[#F26522] transition-colors">
+                            Remembered password? <span class="text-[#F26522] underline">Sign In</span>
                         </a>
                     </div>
                 </form>

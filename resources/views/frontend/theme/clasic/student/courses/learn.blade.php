@@ -106,7 +106,7 @@
                                     id="btn-toggle-complete"
                                     type="button" 
                                     onclick="toggleLessonComplete({{ $currentLesson->id }})"
-                                    class="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 {{ $isCompleted ? 'bg-brand-primary text-slate-950 shadow-glow-emerald' : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700' }}">
+                                    class="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 {{ $isCompleted ? 'bg-brand-primary text-white shadow-glow-emerald' : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700' }}">
                                     <i id="btn-toggle-icon" class="fa {{ $isCompleted ? 'fa-check-circle' : 'fa-circle-o' }}"></i>
                                     <span id="btn-toggle-text">{{ $isCompleted ? 'Completed' : 'Mark as Completed' }}</span>
                                 </button>
@@ -225,7 +225,7 @@
                                             <!-- Checkmark / Play indicator -->
                                             <span 
                                                 id="playlist-icon-{{ $lsn->id }}"
-                                                class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 {{ $isDone ? 'bg-brand-primary text-slate-950 font-bold' : ($isActive ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40' : 'bg-slate-800 text-slate-500') }}">
+                                                class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 {{ $isDone ? 'bg-brand-primary text-white font-bold' : ($isActive ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40' : 'bg-slate-800 text-slate-500') }}">
                                                 <i class="fa {{ $isDone ? 'fa-check' : ($isActive ? 'fa-play' : 'fa-play-circle-o') }}"></i>
                                             </span>
 
@@ -293,14 +293,14 @@
 
             if (data.status === 'success') {
                 if (data.is_completed) {
-                    btn.className = "px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 bg-brand-primary text-slate-950 shadow-glow-emerald";
+                    btn.className = "px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 bg-brand-primary text-white shadow-glow-emerald";
                     btnIcon.className = "fa fa-check-circle";
                     btnText.innerText = "Completed";
 
                     // Update playlist icon
                     var pIcon = document.getElementById('playlist-icon-' + lessonId);
                     if (pIcon) {
-                        pIcon.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 bg-brand-primary text-slate-950 font-bold";
+                        pIcon.className = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 bg-brand-primary text-white font-bold";
                         pIcon.innerHTML = '<i class="fa fa-check"></i>';
                     }
                 } else {

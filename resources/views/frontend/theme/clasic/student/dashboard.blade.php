@@ -18,15 +18,15 @@
     <!-- =========================================================================
          1. MODERN WELCOME HERO BANNER (QUIZ & EXAMINATION FOCUSED)
          ========================================================================= -->
-    <div class="student-card relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950 border border-emerald-500/30 p-6 sm:p-8 backdrop-blur-xl shadow-2xl text-white">
+    <div class="student-card student-card-brand-hero relative overflow-hidden rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl text-white">
         <!-- Ambient Decorative Glow -->
-        <div class="absolute -right-16 -top-16 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -right-16 -top-16 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute right-1/3 -bottom-20 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <div class="relative flex-shrink-0">
-                    <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-400 shadow-glow-emerald bg-slate-800">
+                    <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-orange-500 shadow-glow-brand bg-slate-800">
                     <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900" title="Active Campus Student"></span>
                 </div>
                 <div>
@@ -45,7 +45,7 @@
                     </div>
 
                     <h1 class="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                        স্বাগতম, <span class="text-emerald-600 dark:text-emerald-400">{{ $student->name }}</span>! 👋
+                        স্বাগতম, <span class="text-brand-primary" style="color: #F26522 !important;">{{ $student->name }}</span>! 👋
                     </h1>
                     <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 max-w-2xl leading-relaxed font-semibold">
                         Wake Up ICT অনলাইন পরীক্ষা পোর্টালে আপনাকে স্বাগতম। এখান থেকে আনলিমিটেড প্রশ্ন ব্যাংক অনুশীলন করুন, নির্ধারিত কুইজে অংশ নিন এবং আপনার প্রতিটি পরীক্ষার বিস্তারিত ওএমআর ফলাফল যাচাই করুন।
@@ -55,7 +55,7 @@
 
             <!-- Quick Action Shortcuts -->
             <div class="flex flex-wrap items-center gap-2.5 shrink-0 pt-2 lg:pt-0">
-                <a href="{{ route('student.practice.index') }}" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center gap-2 active:scale-95" style="color: #ffffff !important; font-weight: 800; background-color: #059669 !important;">
+                <a href="{{ route('student.practice.index') }}" class="px-4 py-2.5 rounded-xl btn-brand-primary text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center gap-2 active:scale-95">
                     <i class="fa fa-check-square-o text-sm"></i>
                     <span>অনুশীলন পরীক্ষা</span>
                 </a>
@@ -138,7 +138,7 @@
             </p>
             <div class="mt-2 flex items-center justify-between text-xs font-medium">
                 <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mr-2">
-                    <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full" style="width: {{ min(100, max(0, $passRate)) }}%"></div>
+                    <div class="bg-gradient-to-r from-[#F26522] to-[#FB923C] h-2 rounded-full" style="width: {{ min(100, max(0, $passRate)) }}%"></div>
                 </div>
                 <span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">{{ $toBng($passRate) }}%</span>
             </div>
@@ -451,7 +451,7 @@
     <!-- =========================================================================
          6. QUESTION BANK UNLIMITED PRACTICE CALL-TO-ACTION BANNER
          ========================================================================= -->
-    <div class="student-card rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-700 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="student-card rounded-3xl bg-gradient-to-r from-[#F26522] via-[#EA580C] to-[#C2410C] p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="space-y-2 text-center md:text-left">
             <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-mono font-bold tracking-wide uppercase inline-block">
                 আনলিমিটেড সেলফ-পেসড প্রস্তুতি
@@ -459,13 +459,13 @@
             <h3 class="text-xl sm:text-2xl font-black">
                 প্রশ্ন ব্যাংক থেকে রোটেশন ভিত্তিক স্মার্ট ড্রিল দিন!
             </h3>
-            <p class="text-xs sm:text-sm text-emerald-100 max-w-xl leading-relaxed">
+            <p class="text-xs sm:text-sm text-orange-100 max-w-xl leading-relaxed">
                 প্রতিটি চেষ্টায় ভিন্ন ভিন্ন প্রশ্ন সেটের মুখোমুখি হয়ে নিজেকে নির্ভুলভাবে প্রস্তুত করুন। পরীক্ষা শেষে তাৎক্ষণিক ওএমআর ও সঠিক উত্তর দেখার সুবিধা।
             </p>
         </div>
         <div class="shrink-0">
-            <a href="{{ route('student.practice.index') }}" class="px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-emerald-950 font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center gap-2 active:scale-95">
-                <i class="fa fa-bolt text-emerald-600"></i>
+            <a href="{{ route('student.practice.index') }}" class="px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-[#0F172A] font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center gap-2 active:scale-95">
+                <i class="fa fa-bolt text-[#F26522]"></i>
                 <span>প্র্যাকটিস শুরু করুন</span>
             </a>
         </div>

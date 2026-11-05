@@ -56,14 +56,14 @@
                 <!-- Key Metrics & Enrollment Action -->
                 <div class="pt-4 flex flex-wrap items-center gap-4">
                     @if($isEnrolled)
-                        <a href="{{ route('student.courses.learn', $course->id) }}" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-sm uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                        <a href="{{ route('student.courses.learn', $course->id) }}" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-sm uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                             <i class="fa fa-play"></i>
                             <span>Continue Learning</span>
                         </a>
                     @else
                         <form action="{{ route('student.courses.enroll', $course->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-sm uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
+                            <button type="submit" class="px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-sm uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-2">
                                 <i class="fa fa-graduation-cap"></i>
                                 <span>Enroll Now (Free with Admission)</span>
                             </button>
@@ -167,7 +167,7 @@
                                     <div class="flex items-center gap-3 min-w-0">
                                         <!-- Status / Icon Indicator -->
                                         @if($isDone)
-                                            <span class="w-6 h-6 rounded-full bg-brand-primary text-slate-950 flex items-center justify-center text-[10px] shrink-0" title="Completed">
+                                            <span class="w-6 h-6 rounded-full bg-brand-primary text-white flex items-center justify-center text-[10px] shrink-0" title="Completed">
                                                 <i class="fa fa-check"></i>
                                             </span>
                                         @elseif($lesson->is_free_preview || $isEnrolled)
@@ -202,7 +202,7 @@
                                         @endif
 
                                         @if($isEnrolled || $lesson->is_free_preview)
-                                            <a href="{{ route('student.courses.learn', [$course->id, $lesson->id]) }}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-brand-primary hover:text-slate-950 text-slate-200 text-xs font-semibold transition-all">
+                                            <a href="{{ route('student.courses.learn', [$course->id, $lesson->id]) }}" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-brand-primary hover:text-white text-slate-200 text-xs font-semibold transition-all">
                                                 <i class="fa fa-play mr-1"></i> Watch
                                             </a>
                                         @else

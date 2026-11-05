@@ -30,12 +30,12 @@
                 <div class="lg:col-span-7 flex flex-col justify-center text-left reveal-on-scroll">
                     
                     <!-- Live Status Badge with Floating Wave -->
-                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 dark:bg-slate-900/90 dark:border-brand-primary/30 dark:text-brand-primary text-xs font-mono font-bold tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-xs animate-badge-float">
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#FFF1E8] border border-orange-200 text-slate-900 dark:bg-slate-900/90 dark:border-brand-primary/30 dark:text-brand-primary text-xs font-mono font-bold tracking-wider uppercase mb-6 w-fit backdrop-blur-md shadow-xs animate-badge-float">
                         <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 dark:bg-brand-primary opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-brand-primary"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
                         </span>
-                        <span class="text-emerald-950 dark:text-brand-primary font-black">{{ app_setting('hero_badge', __('frontend.hero.badge')) }}</span>
+                        <span class="text-slate-900 dark:text-brand-primary font-black">{{ app_setting('hero_badge', __('frontend.hero.badge')) }}</span>
                     </div>
 
                     <!-- Kinetic Display Headline with Animated Gradient Shimmer -->
@@ -50,7 +50,7 @@
 
                     <!-- High-Impact Dual CTAs with Shimmer Effect -->
                     <div class="flex flex-wrap items-center gap-4 mb-12">
-                        <a href="{{ route('academic-training') }}" class="btn-shimmer inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                        <a href="{{ route('academic-training') }}" class="btn-shimmer inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl font-semibold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-white transition-all duration-300 shadow-glow-brand hover:-translate-y-1">
                             <span>{{ app_setting('hero_btn1_text', __('frontend.hero.explore_courses')) }}</span>
                             <i class="fa fa-arrow-right text-xs"></i>
                         </a>
@@ -139,10 +139,10 @@
 
                             <!-- Carousel Controls (Show if more than 1) -->
                             @if(count($homeSliders) > 1)
-                                <button type="button" id="slider-prev-btn" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-brand-primary hover:text-slate-950 text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" aria-label="Previous Slide">
+                                <button type="button" id="slider-prev-btn" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-brand-primary hover:text-white text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" aria-label="Previous Slide">
                                     <i class="fa fa-chevron-left text-xs"></i>
                                 </button>
-                                <button type="button" id="slider-next-btn" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-brand-primary hover:text-slate-950 text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" aria-label="Next Slide">
+                                <button type="button" id="slider-next-btn" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-brand-primary hover:text-white text-white border border-slate-700/80 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" aria-label="Next Slide">
                                     <i class="fa fa-chevron-right text-xs"></i>
                                 </button>
 
@@ -224,18 +224,18 @@
     <!--========================== 10 Minute School Inspired: Offline Course Categories & Explorer ============================-->
     <section id="courses-explorer" class="py-20 sm:py-28 relative bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
         <!-- Ambient Glow -->
-        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none"></div>
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-orange-500/10 blur-[130px] rounded-full pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             <!-- Section Header -->
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400 font-mono text-xs font-black uppercase tracking-wider mb-4 shadow-xs animate-badge-float">
-                    <i class="fa fa-graduation-cap text-emerald-800 dark:text-emerald-400 text-sm"></i>
-                    <span class="text-emerald-950 dark:text-emerald-400 font-black">ক্যাম্পাস স্কিলস ও একাডেমিক ট্রেনিং</span>
+                <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#FFF1E8] border border-orange-200 text-brand-primary dark:bg-orange-500/10 dark:border-orange-500/30 dark:text-brand-primary font-mono text-xs font-black uppercase tracking-wider mb-4 shadow-xs animate-badge-float">
+                    <i class="fa fa-graduation-cap text-brand-primary dark:text-brand-primary text-sm"></i>
+                    <span class="text-brand-primary dark:text-brand-primary font-black">ক্যাম্পাস স্কিলস ও একাডেমিক ট্রেনিং</span>
                 </div>
                 <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                    দেশসেরা <span class="text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-400">অফলাইন ল্যাব কোর্সসমূহ</span>
+                    দেশসেরা <span class="text-brand-primary dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-[#F26522] dark:via-[#FB923C] dark:to-amber-400">অফলাইন ল্যাব কোর্সসমূহ</span>
                 </h2>
                 <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-4 leading-relaxed">
                     সরাসরি ক্যাম্পাসে আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস, অভিজ্ঞ মেন্টরদের নিবিড় গাইডেন্স এবং কোর্স শেষে সরকারি ও ইন্ডাস্ট্রি ভেরিফায়েড সার্টিফিকেট।
@@ -254,7 +254,7 @@
                     <i class="fa fa-code mr-1.5 text-blue-500 dark:text-blue-400"></i> <span>ওয়েব ডেভেলপমেন্ট</span>
                 </button>
                 <button type="button" onclick="filterCourses('ict', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
-                    <i class="fa fa-book mr-1.5 text-emerald-600 dark:text-emerald-400"></i> <span>ক্লাস ৬-১০ ICT</span>
+                    <i class="fa fa-book mr-1.5 text-brand-primary dark:text-brand-primary"></i> <span>ক্লাস ৬-১০ ICT</span>
                 </button>
                 <button type="button" onclick="filterCourses('marketing', this)" class="category-pill px-4 py-2.5 rounded-xl text-xs shrink-0">
                     <i class="fa fa-bullhorn mr-1.5 text-amber-500 dark:text-amber-400"></i> <span>ডিজিটাল মার্কেটিং</span>
@@ -293,22 +293,22 @@
                             $currentPrice = $cleanPrice > 0 ? $cleanPrice : 3500;
                             $originalPrice = round($currentPrice * 1.35);
                         @endphp
-                        <div class="course-item rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1.5 shadow-sm" data-category="{{ $cat }}">
+                        <div class="course-item rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col justify-between hover:border-brand-primary/50 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1.5 shadow-sm" data-category="{{ $cat }}">
                             
                             <!-- Thumbnail with 10MS Style Badges -->
                             <div class="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
                                 @if($course->image)
                                     <img src="{{ safe_asset($course->image) }}" alt="{{ $course->course_title }}" onerror="this.onerror=null; this.src='{{ safe_asset('uploads/course/images/1711513200931914.jpg') }}';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-emerald-950/40 text-slate-700 text-4xl">
-                                        <i class="fa fa-laptop text-emerald-500/40"></i>
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-orange-950/20 text-slate-700 text-4xl">
+                                        <i class="fa fa-laptop text-brand-primary/40"></i>
                                     </div>
                                 @endif
                                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
                                 
                                 <!-- Top Floating Badges -->
                                 <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-950/90 backdrop-blur-md border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-950/90 backdrop-blur-md border border-brand-primary/30 text-brand-primary font-mono text-[10px] font-bold">
                                         🔥 অফলাইন ল্যাব
                                     </span>
                                 </div>
@@ -321,7 +321,7 @@
                                 <!-- Schedule pill at bottom of thumbnail -->
                                 <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-slate-200">
                                     <span class="bg-slate-950/90 px-2.5 py-0.5 rounded-md backdrop-blur-sm border border-slate-800">
-                                        <i class="fa fa-clock-o text-emerald-400 mr-1"></i> {{ $course->time_line ?: '৩ মাস' }}
+                                        <i class="fa fa-clock-o text-brand-primary mr-1"></i> {{ $course->time_line ?: '৩ মাস' }}
                                     </span>
                                     <span class="bg-slate-950/90 px-2.5 py-0.5 rounded-md backdrop-blur-sm text-cyan-300 border border-slate-800">
                                         <i class="fa fa-map-marker mr-1"></i> ল্যাব #১
@@ -332,23 +332,23 @@
                             <!-- Card Body -->
                             <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
                                 <div>
-                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-primary dark:group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
                                         {{ $course->course_title }}
                                     </h3>
                                     
                                     <!-- 10MS Spec Highlights -->
-                                    <div class="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                                    <div class="mt-3 space-y-1.5 text-xs text-slate-800 dark:text-slate-200 font-medium">
                                         <div class="flex items-center gap-1.5">
-                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
-                                            <span>হাতে-কলমে আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস</span>
+                                            <i class="fa fa-check-circle text-brand-primary dark:text-brand-primary text-xs shrink-0"></i>
+                                            <span class="text-slate-800 dark:text-slate-200 font-semibold">হাতে-কলমে আধুনিক কম্পিউটার ল্যাব প্র্যাকটিস</span>
                                         </div>
                                         <div class="flex items-center gap-1.5">
-                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
-                                            <span>প্রিন্টেড লেকচার শিট ও ল্যাব টাস্ক</span>
+                                            <i class="fa fa-check-circle text-brand-primary dark:text-brand-primary text-xs shrink-0"></i>
+                                            <span class="text-slate-800 dark:text-slate-200 font-semibold">প্রিন্টেড লেকচার শিট ও ল্যাব টাস্ক</span>
                                         </div>
                                         <div class="flex items-center gap-1.5">
-                                            <i class="fa fa-check-circle text-emerald-600 dark:text-emerald-400 text-xs"></i>
-                                            <span>অ্যাডমিন ভেরিফায়েড সার্টিফিকেট</span>
+                                            <i class="fa fa-check-circle text-brand-primary dark:text-brand-primary text-xs shrink-0"></i>
+                                            <span class="text-slate-800 dark:text-slate-200 font-semibold">অ্যাডমিন ভেরিফায়েড সার্টিফিকেট</span>
                                         </div>
                                     </div>
                                 </div>
@@ -357,25 +357,25 @@
                                 <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <span class="text-xs text-slate-500 dark:text-slate-400 block">কোর্স ফি:</span>
+                                            <span class="text-xs text-slate-700 dark:text-slate-300 font-bold block">কোর্স ফি:</span>
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                                                <span class="text-lg font-black text-brand-primary dark:text-brand-primary font-mono">
                                                     ৳ {{ number_format($currentPrice) }}
                                                 </span>
-                                                <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-mono">
+                                                <span class="text-xs text-slate-500 dark:text-slate-400 line-through font-mono font-semibold">
                                                     ৳ {{ number_format($originalPrice) }}
                                                 </span>
                                             </div>
                                         </div>
-                                        <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 font-mono text-[10px] font-bold">
+                                        <span class="px-2.5 py-1 rounded-md bg-[#FFF1E8] text-[#C2410C] border border-[#FED7AA] dark:bg-orange-950/60 dark:border-orange-800 dark:text-brand-primary font-mono text-[11px] font-extrabold shadow-2xs">
                                             Save 26%
                                         </span>
                                     </div>
 
                                     <!-- 10MS Full-Width Action Button -->
-                                    <a href="{{ route('course-details', $course->course_slug ?: $course->id) }}" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group-hover:shadow-lg">
-                                        <span>বিস্তারিত ও সিলেবাস</span>
-                                        <i class="fa fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                    <a href="{{ route('course-details', $course->course_slug ?: $course->id) }}" class="w-full py-2.5 px-4 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group-hover:shadow-lg" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                        <span style="color: #FFFFFF !important;">বিস্তারিত ও সিলেবাস</span>
+                                        <i class="fa fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1" style="color: #FFFFFF !important;"></i>
                                     </a>
                                 </div>
 
@@ -389,7 +389,7 @@
             <!-- Bottom Browse All CTA -->
             <div class="text-center mt-12">
                 <a href="{{ route('academic-training') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-all shadow-sm">
-                    <i class="fa fa-book text-emerald-600 dark:text-emerald-400"></i>
+                    <i class="fa fa-book text-brand-primary dark:text-brand-primary"></i>
                     <span>সকল কোর্স ক্যাটালগ দেখুন</span>
                     <i class="fa fa-arrow-right text-xs"></i>
                 </a>
@@ -402,7 +402,7 @@
     <section class="py-20 sm:py-28 relative bg-slate-100/70 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-xs font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold mb-2 block">
+                <span class="text-xs font-mono uppercase tracking-widest text-brand-primary dark:text-brand-primary font-semibold mb-2 block">
                     <i class="fa fa-star text-amber-500 mr-1"></i> আমাদের বিশেষত্ব
                 </span>
                 <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -416,8 +416,8 @@
             <!-- Bento 4-Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Card 1 -->
-                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl">
+                <div class="bento-card p-6 rounded-3xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-brand-primary/40 transition-all duration-300 space-y-4 hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-[#FFF1E8] dark:bg-orange-950/30 border border-orange-200 dark:border-orange-500/20 text-brand-primary dark:text-brand-primary flex items-center justify-center text-2xl">
                         <i class="fa fa-desktop"></i>
                     </div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">আধুনিক কম্পিউটার ল্যাব</h3>
@@ -465,12 +465,12 @@
     <!--========================== 10 Minute School Style: Student Portal & Counseling Banner ============================-->
     <section class="py-16 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="student-portal-banner rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white dark:from-emerald-950/80 dark:via-slate-900/90 dark:to-slate-950 border border-emerald-200 dark:border-emerald-500/30 p-8 sm:p-12 relative overflow-hidden shadow-xl backdrop-blur-xl transition-all duration-200">
-                <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="student-portal-banner rounded-3xl bg-gradient-to-r from-orange-50/60 via-slate-50 to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border border-orange-200/60 dark:border-brand-primary/30 p-8 sm:p-12 relative overflow-hidden shadow-xl backdrop-blur-xl transition-all duration-200">
+                <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                     <div class="lg:col-span-8 space-y-4">
-                        <span class="px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-500/30">
+                        <span class="px-3.5 py-1.5 rounded-full bg-[#FFF1E8] text-brand-primary dark:bg-orange-500/20 dark:text-brand-primary font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 border border-orange-200 dark:border-brand-primary/30">
                             <i class="fa fa-graduation-cap"></i>
                             <span>স্মার্ট স্টুডেন্ট পোর্টাল</span>
                         </span>
@@ -482,33 +482,34 @@
                         </p>
                         <div class="pt-2 flex flex-wrap items-center gap-4">
                             @if(function_exists('is_student_logged_in') && is_student_logged_in())
-                                <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
-                                    <i class="fa fa-tachometer"></i>
-                                    <span>ড্যাশবোর্ডে প্রবেশ করুন</span>
+                                <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                    <i class="fa fa-tachometer" style="color: #FFFFFF !important;"></i>
+                                    <span style="color: #FFFFFF !important;">ড্যাশবোর্ডে প্রবেশ করুন</span>
                                 </a>
                             @else
-                                <a href="{{ route('student.login') }}" class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
-                                    <i class="fa fa-sign-in"></i>
-                                    <span>স্টুডেন্ট লগইন</span>
+                                <a href="{{ route('student.login') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                    <i class="fa fa-sign-in" style="color: #FFFFFF !important;"></i>
+                                    <span style="color: #FFFFFF !important;">স্টুডেন্ট লগইন</span>
                                 </a>
                                 <a href="{{ route('student.register') }}" class="px-5 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-all flex items-center gap-2 shadow-sm">
-                                    <i class="fa fa-user-plus text-emerald-600 dark:text-emerald-400"></i>
+                                    <i class="fa fa-user-plus text-brand-primary dark:text-brand-primary"></i>
                                     <span>নতুন শিক্ষার্থী নিবন্ধন</span>
                                 </a>
                             @endif
                         </div>
                     </div>
 
-                    <div class="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-emerald-200 dark:border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-md">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center mx-auto text-xl border border-emerald-100 dark:border-none">
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-md">
+                        <div class="w-12 h-12 rounded-xl bg-[#FFF1E8] text-brand-primary dark:bg-orange-500/10 dark:text-brand-primary flex items-center justify-center mx-auto text-xl border border-orange-200 dark:border-none">
                             <i class="fa fa-phone"></i>
                         </div>
                         <h4 class="text-base font-bold text-slate-900 dark:text-white">ফ্রি ক্যারিয়ার কাউন্সেলিং</h4>
                         <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                             কোন কোর্সটি আপনার ক্যারিয়ারের জন্য উপযুক্ত তা নির্ধারণে আমাদের এক্সপার্টদের সাথে কথা বলুন।
                         </p>
-                        <a href="tel:01791612121" class="block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-slate-800 dark:text-emerald-400 font-bold text-xs border border-emerald-600 dark:border-emerald-500/30 transition-all shadow-sm">
-                            <i class="fa fa-phone mr-1"></i> ০১৭৯১-৬১২১২১
+                        <a href="tel:01791612121" id="counseling-hotline-btn" class="counseling-hotline-btn btn-brand-primary flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl text-white font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg" style="background-color: #F26522 !important; background: #F26522 !important; color: #FFFFFF !important; border: 1px solid #F26522 !important;">
+                            <i class="fa fa-phone" style="color: #FFFFFF !important;"></i>
+                            <span style="color: #FFFFFF !important; font-weight: 800; font-size: 14px;">০১৭৯১-৬১২১২১</span>
                         </a>
                     </div>
                 </div>
@@ -659,7 +660,7 @@
                                 <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 card-overlay-text">
                                     <div class="flex-1">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[11px] sm:text-xs font-mono uppercase tracking-wider font-extrabold mb-2.5 shadow-md international-badge-black" style="background-color: #ffffff !important; color: #000000 !important;">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            <span class="w-2 h-2 rounded-full bg-brand-primary"></span>
                                             <span style="color: #000000 !important; font-weight: 800;">{{ $badgeText }}</span>
                                         </span>
                                         <h4 class="text-xl sm:text-2xl font-black text-white group-hover:text-cyan-300 transition-colors drop-shadow-md leading-snug international-card-title" style="color: #ffffff !important;">
@@ -782,7 +783,7 @@
                 {{ app_setting('cta_banner_sub', __('frontend.sections.cta_sub')) }}
             </p>
             <div class="flex flex-wrap items-center justify-center gap-4">
-                <a href="{{ route('contact-us-page') }}" class="px-8 py-4 rounded-xl font-bold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-slate-950 transition-all duration-300 shadow-glow-emerald hover:-translate-y-1">
+                <a href="{{ route('contact-us-page') }}" class="px-8 py-4 rounded-xl font-bold text-sm tracking-wider uppercase bg-brand-primary hover:bg-brand-accent text-white transition-all duration-300 shadow-glow-brand hover:-translate-y-1">
                     {{ app_setting('cta_btn_text', __('frontend.sections.cta_button')) }}
                 </a>
                 <a href="{{ route('academic-training') }}" class="px-8 py-4 rounded-xl font-bold text-sm tracking-wider uppercase bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 transition-all duration-300 hover:-translate-y-1">

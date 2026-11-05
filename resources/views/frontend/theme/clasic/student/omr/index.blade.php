@@ -250,7 +250,7 @@
 
                 <!-- Direct Print Button -->
                 <button type="button" onclick="window.print()" 
-                    class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-black text-xs tracking-wide flex items-center gap-2 transition-all shadow-glow-emerald active:scale-95">
+                    class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-black text-xs tracking-wide flex items-center gap-2 transition-all shadow-glow-emerald active:scale-95">
                     <i class="fa fa-print text-sm"></i>
                     <span>প্রিন্ট ওএমআর শিট</span>
                 </button>
@@ -469,7 +469,7 @@
                 <button type="button" onclick="closeBatchModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">
                     বাতিল
                 </button>
-                <button type="submit" class="px-5 py-2 rounded-xl bg-brand-primary text-slate-950 font-black text-xs flex items-center gap-2">
+                <button type="submit" class="px-5 py-2 rounded-xl bg-brand-primary text-white font-black text-xs flex items-center gap-2">
                     <i class="fa fa-print"></i>
                     <span>ব্যাচ প্রিন্ট প্রিভিউ খুলুন</span>
                 </button>

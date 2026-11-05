@@ -344,11 +344,11 @@
                                         $optIcon = '<i class="far fa-circle mr-1.5 text-muted"></i>';
 
                                         if ($isCorrectOption && $isStudentChoice) {
-                                            $boxStyle = 'background-color: #ecfdf5 !important; border: 2px solid #059669 !important; color: #0f172a !important; font-weight: 700;';
-                                            $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #059669 !important;"></i>';
+                                            $boxStyle = 'background-color: #ecfdf5 !important; border: 2px solid #F26522 !important; color: #0f172a !important; font-weight: 700;';
+                                            $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #F26522 !important;"></i>';
                                         } elseif ($isCorrectOption) {
-                                            $boxStyle = 'background-color: #f0fdf4 !important; border: 2px solid #059669 !important; color: #0f172a !important; font-weight: 700;';
-                                            $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #059669 !important;"></i>';
+                                            $boxStyle = 'background-color: #f0fdf4 !important; border: 2px solid #F26522 !important; color: #0f172a !important; font-weight: 700;';
+                                            $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #F26522 !important;"></i>';
                                         } elseif ($isStudentChoice) {
                                             $boxStyle = 'background-color: #fef2f2 !important; border: 2px solid #dc2626 !important; color: #0f172a !important; font-weight: 700;';
                                             $optIcon = '<i class="fas fa-times-circle mr-1.5 text-danger font-weight-bold" style="color: #dc2626 !important;"></i>';
@@ -359,12 +359,12 @@
                                             <span class="mr-2 font-weight-bold text-dark" style="color: #0f172a !important;">{{ chr(65 + $optIdx) }}.</span>
                                             <span class="flex-grow-1 font-weight-bold text-dark" style="color: #0f172a !important;">{!! $optIcon !!} {{ $opt->option_text }}</span>
                                             @if($isStudentChoice)
-                                                <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: {{ $isCorrectOption ? '#059669' : '#dc2626' }} !important; padding: 4px 8px;">
+                                                <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: {{ $isCorrectOption ? '#F26522' : '#dc2626' }} !important; padding: 4px 8px;">
                                                     <i class="fas fa-user-check mr-1"></i> শিক্ষার্থীর পছন্দ
                                                 </span>
                                             @endif
                                             @if($isCorrectOption)
-                                                <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: #059669 !important; padding: 4px 8px;">
+                                                <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: #F26522 !important; padding: 4px 8px;">
                                                     <i class="fas fa-check mr-1"></i> সঠিক উত্তর
                                                 </span>
                                             @endif
@@ -375,12 +375,12 @@
                         @elseif($qType === 'true_false')
                             <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">
                                 <div class="mb-1.5"><strong class="text-dark" style="color: #0f172a !important;">শিক্ষার্থীর প্রদত্ত উত্তর:</strong> <span class="font-weight-bold {{ $ans && $ans->is_correct ? 'text-success' : 'text-danger' }}" style="font-size: 1rem;">{{ $ans ? ($ans->text_answer ?: 'কোনো উত্তর দেওয়া হয়নি') : 'কোনো উত্তর দেওয়া হয়নি' }}</span></div>
-                                <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত সঠিক উত্তর:</strong> <span class="font-weight-bold text-success" style="color: #059669 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text ?: ($q->getFormattedCorrectAnswer() ?: 'N/A') }}</span></div>
+                                <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত সঠিক উত্তর:</strong> <span class="font-weight-bold text-success" style="color: #F26522 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text ?: ($q->getFormattedCorrectAnswer() ?: 'N/A') }}</span></div>
                             </div>
                         @elseif($qType === 'fill_blanks')
                             <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">
                                 <div class="mb-1.5"><strong class="text-dark" style="color: #0f172a !important;">শিক্ষার্থীর লিখিত উত্তর:</strong> <span class="font-weight-bold {{ $ans && $ans->is_correct ? 'text-success' : 'text-danger' }}" style="font-size: 1rem;">{{ $ans && $ans->text_answer ? $ans->text_answer : 'ফাঁকা রাখা হয়েছিল' }}</span></div>
-                                <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত শব্দ / ক্লু:</strong> <span class="font-weight-bold text-success" style="color: #059669 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text }}</span></div>
+                                <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত শব্দ / ক্লু:</strong> <span class="font-weight-bold text-success" style="color: #F26522 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text }}</span></div>
                             </div>
                         @elseif($ans && (!empty($ans->text_answer) || !empty($ans->cq_answers)))
                             <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">

@@ -84,7 +84,7 @@
             <p class="text-xs text-slate-400 mb-6 leading-relaxed">
                 You do not have any PDF handouts uploaded yet, or you haven't enrolled in courses with attached resources.
             </p>
-            <a href="{{ route('student.courses.browse') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
+            <a href="{{ route('student.courses.browse') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-white font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
                 <i class="fa fa-search"></i>
                 <span>Explore Available Courses</span>
             </a>

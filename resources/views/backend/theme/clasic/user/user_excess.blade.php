@@ -51,7 +51,7 @@
         justify-content: center !important;
         font-weight: 700 !important;
         border-radius: 50% !important;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        background: linear-gradient(135deg, #10b981 0%, #F26522 100%) !important;
         color: #ffffff !important;
         box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
         flex-shrink: 0 !important;
@@ -275,7 +275,7 @@
         display: inline-block !important;
     }
     html.dark .selected-counter-badge {
-        background: #059669 !important;
+        background: #F26522 !important;
         color: #ffffff !important;
     }
 

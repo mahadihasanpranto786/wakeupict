@@ -162,7 +162,7 @@
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-black text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center justify-center gap-2">
                             <i class="fa fa-paper-plane"></i>
                             <span>Submit Payment for Verification</span>
                         </button>

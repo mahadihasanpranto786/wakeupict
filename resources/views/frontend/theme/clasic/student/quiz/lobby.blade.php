@@ -142,7 +142,7 @@
 
             @if($activeAttempt)
                 <a href="{{ route('student.quiz.take', $activeAttempt->id) }}" 
-                   class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
+                   class="px-8 py-3.5 rounded-2xl btn-brand-primary font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center gap-2 hover:scale-105">
                     <i class="fa fa-play"></i>
                     <span>Resume In-Progress Exam</span>
                 </a>
@@ -151,7 +151,7 @@
                     <form id="start-exam-form-main" action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
                         @csrf
                         <button type="button" onclick="confirmStartExam('start-exam-form-main', '{{ addslashes($quiz->title) }}', '{{ $quiz->duration_minutes }}', '{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'নির্ধারিত' }}')"
-                                class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
+                                class="px-8 py-3.5 rounded-2xl btn-brand-primary font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center gap-2 hover:scale-105">
                             <i class="fa fa-play"></i>
                             <span>Start Assessment Now</span>
                         </button>
@@ -169,7 +169,7 @@
                     <form id="practice-exam-form-lobby" action="{{ route('student.practice.start') }}" method="POST">
                         @csrf
                         <button type="button" onclick="confirmStartExam('practice-exam-form-lobby', '{{ addslashes($quiz->title) }} (অনুশীলন)', '{{ $quiz->duration_minutes }}', '{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'অনুশীলন প্রশ্ন' }}')"
-                                class="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 hover:scale-105">
+                                class="px-8 py-3.5 rounded-2xl btn-brand-primary font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center gap-2 hover:scale-105">
                             <i class="fa fa-play"></i>
                             <span>Start Assessment Now (অনুশীলন পরীক্ষা)</span>
                         </button>
@@ -299,7 +299,7 @@
                 <button type="button" onclick="closeStartConfirmModal()" class="w-1/2 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors">
                     বাতিল (Cancel)
                 </button>
-                <button type="button" onclick="proceedStartExam()" class="w-1/2 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/30">
+                <button type="button" onclick="proceedStartExam()" class="w-1/2 py-3 rounded-xl btn-brand-primary font-black text-xs uppercase tracking-wider transition-all shadow-md">
                     হ্যাঁ, শুরু করুন &rarr;
                 </button>
             </div>

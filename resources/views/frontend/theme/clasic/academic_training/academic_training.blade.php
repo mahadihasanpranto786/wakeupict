@@ -148,7 +148,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-slate-800/80 dark:hover:bg-emerald-500 dark:text-slate-200 dark:hover:text-slate-950 border border-emerald-600 dark:border-slate-700/80 transition-all duration-300 shadow-sm">
+                                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase btn-brand-primary bg-[#F26522] hover:bg-[#E95420] text-white transition-all duration-300 shadow-sm">
                                         <span class="text-white font-bold">{{ __('frontend.academic.view_syllabus') }}</span>
                                         <i class="fa fa-arrow-right text-[10px] text-white"></i>
                                     </div>
@@ -167,7 +167,7 @@
                     </div>
                     <h4 class="text-xl font-bold text-white mb-2">{{ App::getLocale() == 'bn' ? 'কোনো কোর্স পাওয়া যায়নি' : 'No Courses Found' }}</h4>
                     <p class="text-slate-400 text-sm mb-6">{{ App::getLocale() == 'bn' ? 'এই ট্র্যাকে বর্তমানে কোনো লাইভ কোর্স নেই।' : 'No live courses available in this track at the moment.' }}</p>
-                    <button type="button" onclick="document.querySelector('[data-filter=\'all\']').click()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold font-mono text-xs uppercase tracking-wider transition-colors shadow-lg shadow-emerald-500/20">
+                    <button type="button" onclick="document.querySelector('[data-filter=\'all\']').click()" class="px-5 py-2.5 rounded-xl btn-brand-primary bg-[#F26522] hover:bg-[#E95420] text-white font-bold font-mono text-xs uppercase tracking-wider transition-all shadow-md">
                         {{ App::getLocale() == 'bn' ? 'সবগুলো কোর্স দেখুন' : 'View All Tracks' }}
                     </button>
                 </div>
@@ -194,11 +194,20 @@
         border-color: #334155;
     }
     .course-filter-btn.active {
-        background-color: #10b981 !important;
+        background-color: #F26522 !important;
+        background: #F26522 !important;
         color: #ffffff !important;
-        border-color: #10b981 !important;
-        font-weight: 700;
-        box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.35);
+        border-color: #F26522 !important;
+        font-weight: 800 !important;
+        box-shadow: 0 8px 20px -4px rgba(242, 101, 34, 0.45);
+    }
+    .course-filter-btn.active:hover {
+        background-color: #E95420 !important;
+        border-color: #E95420 !important;
+        color: #ffffff !important;
+    }
+    .course-filter-btn.active * {
+        color: #ffffff !important;
     }
     .course-filter-btn .filter-count {
         display: inline-flex;
@@ -233,10 +242,28 @@
         border-color: #cbd5e1 !important;
     }
     html.light .course-filter-btn.active {
-        background-color: #10b981 !important;
+        background-color: #F26522 !important;
+        background: #F26522 !important;
         color: #ffffff !important;
-        border-color: #10b981 !important;
-        box-shadow: 0 6px 16px -2px rgba(16, 185, 129, 0.3);
+        border-color: #F26522 !important;
+        box-shadow: 0 6px 16px -2px rgba(242, 101, 34, 0.45);
+    }
+    html.light .course-filter-btn.active:hover {
+        background-color: #E95420 !important;
+        border-color: #E95420 !important;
+        color: #ffffff !important;
+    }
+    html.light .course-filter-btn.active * {
+        color: #ffffff !important;
+    }
+    html.light .course-filter-btn:not(.active):hover {
+        background-color: #FFF1E8 !important;
+        border-color: #FED7AA !important;
+        color: #F26522 !important;
+    }
+    html.light .course-filter-btn:not(.active):hover .filter-count {
+        background-color: #FED7AA !important;
+        color: #C2410C !important;
     }
     html.light .course-filter-btn.active .filter-count {
         background-color: rgba(255, 255, 255, 0.28) !important;

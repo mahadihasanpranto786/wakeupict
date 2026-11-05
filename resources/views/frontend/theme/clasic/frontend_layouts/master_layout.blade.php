@@ -35,12 +35,16 @@
         }
 
         :root {
-            --brand-primary: {{ app_setting('theme_primary_color', '#10b981') }};
-            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '16, 185, 129') }};
-            --brand-accent: {{ app_setting('theme_accent_color', '#34d399') }};
-            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '52, 211, 153') }};
+            --brand-primary: {{ app_setting('theme_primary_color', '#F26522') }};
+            --brand-primary-rgb: {{ app_setting('theme_primary_rgb', '242, 101, 34') }};
+            --brand-hover: #E95420;
+            --brand-hover-rgb: 233, 84, 32;
+            --brand-light: #FFF1E8;
+            --brand-dark-navy: #172033;
+            --brand-accent: {{ app_setting('theme_accent_color', '#FB923C') }};
+            --brand-accent-rgb: {{ app_setting('theme_accent_rgb', '251, 146, 60') }};
             --brand-cyan: {{ app_setting('theme_cyan_color', '#22d3ee') }};
-            --brand-indigo: {{ app_setting('theme_indigo_color', '#6366f1') }};
+            --brand-indigo: {{ app_setting('theme_indigo_color', '#C2410C') }};
         }
 
         /* Clean Uncluttered Modern Typography */
@@ -65,19 +69,19 @@
 
         /* Utility Theme Classes */
         .theme-glow-primary {
-            box-shadow: 0 0 30px -5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.35);
+            box-shadow: 0 0 30px -5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.35);
         }
         .theme-border-primary {
-            border-color: var(--brand-primary, #10b981);
+            border-color: var(--brand-primary, #F26522);
         }
         .theme-text-primary {
-            color: var(--brand-primary, #10b981);
+            color: var(--brand-primary, #F26522);
         }
         .theme-bg-primary {
-            background-color: var(--brand-primary, #10b981);
+            background-color: var(--brand-primary, #F26522);
         }
         .theme-bg-primary-dim {
-            background-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.12);
+            background-color: rgba(var(--brand-primary-rgb, 242, 101, 34), 0.12);
         }
 
         /* =========================================================
@@ -133,7 +137,7 @@
         html.light a[class*="bg-slate-900"]:hover,
         html.light div[class*="hover:-translate-y-1"]:hover,
         html.light div[class*="hover:-translate-y-1.5"]:hover {
-            border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5) !important;
+            border-color: rgba(var(--brand-primary-rgb, 242, 101, 34), 0.5) !important;
             box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05) !important;
         }
 
@@ -171,9 +175,10 @@
         /* Badge and Chip contrast in Light Mode */
         html.light [class*="bg-emerald-500/10"]:not(button):not(.header-hotline-btn),
         html.light [class*="bg-emerald-500/20"]:not(button):not(.header-hotline-btn) {
-            background-color: #ecfdf5 !important;
-            border-color: #a7f3d0 !important;
-            color: #047857 !important;
+            background-color: #FFF1E8 !important;
+            border-color: #FED7AA !important;
+            color: #7C2D12 !important;
+            font-weight: 700 !important;
         }
         html.light [class*="bg-rose-500/10"],
         html.light [class*="bg-rose-500/20"] {
@@ -264,7 +269,7 @@
         /* Universal Text-White Override in Light Mode */
         html.light .text-white:not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-blue"]):not([class*="bg-teal"]):not([class*="bg-indigo"]):not([class*="bg-brand"]):not([class*="bg-amber"]):not([class*="bg-purple"]):not([class*="bg-red"]):not([class*="bg-green"]):not(.text-white-force):not(button):not(button *):not(.btn):not(.btn *):not(.badge):not(.badge *):not(.hero-slide *):not(#top-announcement-strip *):not(.btn-shimmer *):not([class*="btn-"]):not([class*="btn-"] *),
         html.light div.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
-        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
+        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *):not(.counseling-hotline-btn *):not(.btn-brand-primary *),
         html.light p.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *) {
             color: #0f172a !important;
         }
@@ -355,7 +360,8 @@
         html.light [class*="text-emerald-400"],
         html.light .text-brand-accent,
         html.light [class*="text-brand-accent"] {
-            color: #047857 !important;
+            color: #B9380A !important;
+            font-weight: 700 !important;
         }
         html.light .text-cyan-400,
         html.light [class*="text-cyan-400"],
@@ -390,7 +396,7 @@
             color: #0f172a;
         }
         html.light a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not(#top-announcement-strip *):hover {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
 
         /* Hover Text Transitions */
@@ -398,11 +404,152 @@
         html.light [class*="group"]:hover [class*="group-hover:text-brand-primary"],
         html.light [class*="hover:text-emerald-400"]:hover,
         html.light [class*="hover:text-brand-primary"]:hover {
-            color: #047857 !important;
+            color: #B9380A !important;
         }
-        html.light [class*="hover:text-white"]:hover,
-        html.light [class*="group"]:hover [class*="group-hover:text-white"] {
-            color: var(--brand-primary, #10b981) !important;
+        /* Universal Primary Brand Button System (Background & Text Guarantee) */
+        .btn-brand-primary,
+        html.light .btn-brand-primary,
+        a.btn-brand-primary,
+        html.light a.btn-brand-primary,
+        button.btn-brand-primary,
+        html.light button.btn-brand-primary,
+        .counseling-hotline-btn,
+        html.light .counseling-hotline-btn,
+        #counseling-hotline-btn,
+        html.light #counseling-hotline-btn {
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            color: #ffffff !important;
+            border: 1px solid #F26522 !important;
+            border-color: #F26522 !important;
+            box-shadow: 0 4px 14px -2px rgba(242, 101, 34, 0.45) !important;
+            font-weight: 800 !important;
+        }
+
+        .btn-brand-primary *,
+        html.light .btn-brand-primary *,
+        a.btn-brand-primary *,
+        html.light a.btn-brand-primary *,
+        button.btn-brand-primary *,
+        html.light button.btn-brand-primary *,
+        .counseling-hotline-btn *,
+        .counseling-hotline-btn span,
+        .counseling-hotline-btn i,
+        html.light .counseling-hotline-btn *,
+        html.light .counseling-hotline-btn span,
+        html.light .counseling-hotline-btn i,
+        #counseling-hotline-btn *,
+        #counseling-hotline-btn span,
+        #counseling-hotline-btn i,
+        html.light #counseling-hotline-btn *,
+        html.light #counseling-hotline-btn span,
+        html.light #counseling-hotline-btn i,
+        html.light .course-item-card a .inline-flex,
+        html.light .course-item-card a .inline-flex * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }
+
+        .btn-brand-primary:hover,
+        html.light .btn-brand-primary:hover,
+        a.btn-brand-primary:hover,
+        html.light a.btn-brand-primary:hover,
+        button.btn-brand-primary:hover,
+        html.light button.btn-brand-primary:hover,
+        .counseling-hotline-btn:hover,
+        html.light .counseling-hotline-btn:hover,
+        #counseling-hotline-btn:hover,
+        html.light #counseling-hotline-btn:hover {
+            background-color: #E95420 !important;
+            background: #E95420 !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px -2px rgba(242, 101, 34, 0.60) !important;
+        }
+
+        /* Top Announcement Strip Hotline: STRICTLY NO BACKGROUND COLOR */
+        #top-announcement-strip a[href*="tel:01791612121"],
+        html.light #top-announcement-strip a[href*="tel:01791612121"],
+        #top-hotline-link,
+        html.light #top-hotline-link {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            color: #ffffff !important;
+        }
+        #top-announcement-strip a[href*="tel:01791612121"] *,
+        html.light #top-announcement-strip a[href*="tel:01791612121"] *,
+        #top-hotline-link *,
+        html.light #top-hotline-link * {
+            color: #ffffff !important;
+            background: transparent !important;
+        }
+        #top-announcement-strip a[href*="tel:01791612121"]:hover,
+        html.light #top-announcement-strip a[href*="tel:01791612121"]:hover,
+        #top-hotline-link:hover,
+        html.light #top-hotline-link:hover,
+        #top-hotline-link:hover * {
+            color: #FCD34D !important;
+            background: transparent !important;
+        }
+
+        /* Course Filter Buttons Active State */
+        .course-filter-btn.active,
+        html.light .course-filter-btn.active {
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            color: #ffffff !important;
+            border-color: #F26522 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 6px 18px -2px rgba(242, 101, 34, 0.45) !important;
+        }
+        .course-filter-btn.active *,
+        html.light .course-filter-btn.active * {
+            color: #ffffff !important;
+        }
+        .course-filter-btn.active:hover,
+        html.light .course-filter-btn.active:hover {
+            background-color: #E95420 !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
+        }
+
+        /* High-Contrast Card Specifications & Highlights Guarantee (Light Mode) */
+        html.light .course-item,
+        html.light .course-item-card,
+        html.light .bento-card {
+            color: #0f172a !important;
+        }
+        html.light .course-item h3,
+        html.light .course-item-card h3,
+        html.light .bento-card h3 {
+            color: #0f172a !important;
+            font-weight: 800 !important;
+        }
+        html.light .course-item [class*="space-y-"] span,
+        html.light .course-item-card [class*="space-y-"] span,
+        html.light .course-item div.flex span,
+        html.light .course-item-card div.flex span {
+            color: #1e293b !important;
+            font-weight: 600 !important;
+        }
+        html.light .course-item .fa-check-circle,
+        html.light .course-item-card .fa-check,
+        html.light .course-item-card .fa-check-circle {
+            color: #F26522 !important;
+        }
+        html.light .course-item [class*="bg-rose-50"],
+        html.light [class*="bg-rose-50"] {
+            background-color: #FFF1E8 !important;
+            border: 1px solid #FED7AA !important;
+            color: #C2410C !important;
+            font-weight: 800 !important;
+        }
+        html.light .bento-card p {
+            color: #334155 !important;
+            font-weight: 500 !important;
         }
 
         /* Form Inputs & Textarea */
@@ -425,7 +572,7 @@
         html.light input:focus,
         html.light textarea:focus,
         html.light select:focus {
-            border-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
             box-shadow: 0 0 0 2px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
         }
 
@@ -462,13 +609,13 @@
         }
 
         input[type="checkbox"]:not(.sr-only):hover {
-            border-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
             box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.2) !important;
         }
 
         input[type="checkbox"]:not(.sr-only):checked {
-            background-color: var(--brand-primary, #10b981) !important;
-            border-color: var(--brand-primary, #10b981) !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            border-color: var(--brand-primary, #F26522) !important;
             box-shadow: 0 2px 5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.3) !important;
         }
 
@@ -483,7 +630,7 @@
         }
 
         input[type="checkbox"]:not(.sr-only):focus-visible {
-            outline: 2px solid var(--brand-primary, #10b981) !important;
+            outline: 2px solid var(--brand-primary, #F26522) !important;
             outline-offset: 2px !important;
         }
 
@@ -492,13 +639,13 @@
             color: #334155 !important;
         }
         html.light nav[aria-label="Breadcrumb"] a:hover {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light nav[aria-label="Breadcrumb"] span {
             color: #64748b !important;
         }
         html.light nav[aria-label="Breadcrumb"] span.text-brand-primary {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
 
         /* Tables in Light Mode */
@@ -521,21 +668,52 @@
 
         /* Header Navigation & Dropdowns */
         html.light #main-header .rounded-2xl {
-            background-color: rgba(255, 255, 255, 0.96) !important;
+            background-color: rgba(255, 255, 255, 0.98) !important;
             border-color: #cbd5e1 !important;
             box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
         }
+        html.light #main-header nav {
+            color: #0f172a !important;
+        }
         html.light #main-header nav a {
             color: #0f172a !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
+            border: 1px solid transparent !important;
+            background-color: transparent !important;
+            text-decoration: none !important;
         }
-        html.light #main-header nav a:hover {
-            color: var(--brand-primary, #10b981) !important;
-            background-color: #f1f5f9 !important;
+        html.light #main-header nav a span,
+        html.light #main-header nav a i {
+            color: inherit !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
-        html.light #main-header nav a[class*="text-brand-primary"] {
-            color: var(--brand-primary, #10b981) !important;
-            background-color: #ecfdf5 !important;
+        html.light #main-header nav a:not(.nav-active):hover {
+            color: #F26522 !important;
+            background-color: #FFF1E8 !important;
+            border-color: #FED7AA !important;
+        }
+        html.light #main-header nav a:not(.nav-active):hover span,
+        html.light #main-header nav a:not(.nav-active):hover i {
+            color: #F26522 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        html.light #main-header nav a.nav-active {
+            color: #F26522 !important;
+            background-color: #FFF1E8 !important;
+            border: 1px solid #FED7AA !important;
+            font-weight: 800 !important;
+        }
+        html.light #main-header nav a.nav-active span,
+        html.light #main-header nav a.nav-active i {
+            color: #F26522 !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
         html.light #main-header input {
             background-color: #f8fafc !important;
@@ -570,7 +748,7 @@
             color: #0f172a !important;
         }
         html.light #mobile-search-drawer .mobile-suggestion-item:hover .course-item-title {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light #mobile-search-toggle-btn,
         html.light #mobile-menu-btn {
@@ -581,7 +759,7 @@
         html.light #mobile-search-toggle-btn:hover,
         html.light #mobile-menu-btn:hover {
             background-color: #f1f5f9 !important;
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
 
         /* Header Search Auto-Suggestion Dropdown in Light Theme */
@@ -600,7 +778,7 @@
             color: #0f172a !important;
         }
         html.light #course-suggestion-dropdown .suggestion-item:hover .course-item-title {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light #main-header div[class*="group-hover:block"] {
             background-color: #ffffff !important;
@@ -612,7 +790,7 @@
         }
         html.light #main-header div[class*="group-hover:block"] a:hover {
             background-color: #f1f5f9 !important;
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light #main-header a[href*="student/login"] {
             background-color: #ffffff !important;
@@ -620,15 +798,15 @@
             color: #0f172a !important;
         }
         html.light #main-header a[href*="student/login"]:hover {
-            border-color: var(--brand-primary, #10b981) !important;
-            color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light #main-header a[href*="tel:01791612121"],
         html.light .header-hotline-btn {
-            background-color: #059669 !important;
-            border-color: #059669 !important;
+            background-color: #F26522 !important;
+            border-color: #F26522 !important;
             color: #ffffff !important;
-            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3) !important;
+            box-shadow: 0 2px 6px rgba(242, 101, 34, 0.35) !important;
         }
         html.light #main-header a[href*="tel:01791612121"] *,
         html.light .header-hotline-btn * {
@@ -636,8 +814,8 @@
         }
         html.light #main-header a[href*="tel:01791612121"]:hover,
         html.light .header-hotline-btn:hover {
-            background-color: #047857 !important;
-            border-color: #047857 !important;
+            background-color: #E95420 !important;
+            border-color: #E95420 !important;
             color: #ffffff !important;
         }
         html.light #mobile-menu-btn {
@@ -653,7 +831,7 @@
         }
         html.light #mobile-menu .mobile-nav-link:hover {
             background-color: #f1f5f9 !important;
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
 
         /* Architectural Footer: Adaptive Light and Dark Contrast */
@@ -669,18 +847,18 @@
             color: #1e293b !important;
         }
         html.light .site-footer a:hover {
-            color: #047857 !important;
+            color: #B9380A !important;
         }
         html.light .site-footer h4 {
-            color: #047857 !important;
-            font-weight: 700 !important;
+            color: #B9380A !important;
+            font-weight: 800 !important;
         }
         html.light .site-footer li,
         html.light .site-footer span {
             color: #334155 !important;
         }
         html.light .site-footer i {
-            color: #047857 !important;
+            color: #B9380A !important;
         }
         html.light .site-footer .social-icon {
             background-color: #f1f5f9 !important;
@@ -688,9 +866,9 @@
             color: #334155 !important;
         }
         html.light .site-footer .social-icon:hover {
-            background-color: #ecfdf5 !important;
-            border-color: #10b981 !important;
-            color: #047857 !important;
+            background-color: #FFF1E8 !important;
+            border-color: #B9380A !important;
+            color: #7C2D12 !important;
         }
         html.light .site-footer .border-b,
         html.light .site-footer .border-slate-800\/80 {
@@ -752,7 +930,7 @@
 
         html.light .student-portal-banner {
             background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%) !important;
-            border-color: #a7f3d0 !important;
+            border-color: #FED7AA !important;
             box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.12) !important;
         }
         html.light .student-portal-banner h3 {
@@ -789,7 +967,7 @@
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
         }
         html.light .about-page-wrapper .team-card:hover {
-            border-color: #10b981 !important;
+            border-color: #F26522 !important;
             box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.15) !important;
         }
         html.light .about-page-wrapper .team-card h3,
@@ -811,7 +989,7 @@
         }
         html.dark .about-page-wrapper .team-card:hover {
             background-color: rgba(30, 41, 59, 0.95) !important;
-            border-color: #10b981 !important;
+            border-color: #F26522 !important;
             box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.25) !important;
         }
         html.dark .about-page-wrapper .team-card h3,
@@ -901,15 +1079,15 @@
         }
         html.light .dark-pagination .page-item.active .page-link,
         html.light .pagination .page-item.active .page-link {
-            background-color: var(--brand-primary, #10b981) !important;
-            color: #030712 !important;
-            border-color: var(--brand-primary, #10b981) !important;
+            background-color: var(--brand-primary, #F26522) !important;
+            color: #FFFFFF !important;
+            border-color: var(--brand-primary, #F26522) !important;
             font-weight: bold;
         }
         html.light .dark-pagination .page-item .page-link:hover,
         html.light .pagination .page-item .page-link:hover {
-            border-color: var(--brand-primary, #10b981) !important;
-            color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
             background-color: #f8fafc !important;
         }
 
@@ -949,7 +1127,7 @@
             background: #cbd5e1;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--brand-primary, #10b981);
+            background: var(--brand-primary, #F26522);
         }
         
         /* Subtle grid background utility */
@@ -1064,9 +1242,9 @@
             box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
         }
         html.light #scroll-to-top:hover {
-            background-color: var(--brand-primary, #10b981) !important;
+            background-color: var(--brand-primary, #F26522) !important;
             color: #ffffff !important;
-            border-color: var(--brand-primary, #10b981) !important;
+            border-color: var(--brand-primary, #F26522) !important;
         }
 
         /* 5. Button Shimmer Light-Sweep Animation */
@@ -1102,7 +1280,7 @@
 
         /* 6. Kinetic Gradient Wave for Headlines */
         .text-gradient-animated {
-            background: linear-gradient(135deg, #ffffff 0%, var(--brand-primary, #10b981) 40%, var(--brand-cyan, #22d3ee) 75%, #ffffff 100%);
+            background: linear-gradient(135deg, #ffffff 0%, var(--brand-primary, #F26522) 40%, var(--brand-cyan, #22d3ee) 75%, #ffffff 100%);
             background-size: 250% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1114,7 +1292,7 @@
             100% { background-position: 0% 50%; }
         }
         html.light .text-gradient-animated {
-            background: linear-gradient(135deg, #0f172a 0%, var(--brand-primary, #10b981) 45%, #0284c7 80%, #0f172a 100%);
+            background: linear-gradient(135deg, #0f172a 0%, var(--brand-primary, #F26522) 45%, #0284c7 80%, #0f172a 100%);
             background-size: 250% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1160,7 +1338,7 @@
             box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.04) !important;
         }
         html.light .accordion-item:hover {
-            border-color: rgba(var(--brand-primary-rgb, 16, 185, 129), 0.5) !important;
+            border-color: rgba(var(--brand-primary-rgb, 242, 101, 34), 0.5) !important;
             box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08) !important;
         }
         html.light .accordion-toggle {
@@ -1177,18 +1355,19 @@
             color: #0f172a !important;
         }
         html.light .accordion-toggle:hover span.accordion-title {
-            color: var(--brand-primary, #10b981) !important;
+            color: var(--brand-dark-orange, #B9380A) !important;
         }
         html.light .accordion-toggle .font-mono {
-            background-color: #ecfdf5 !important;
-            color: #047857 !important;
-            border: 1px solid #a7f3d0 !important;
+            background-color: #FFF1E8 !important;
+            color: #7C2D12 !important;
+            border: 1px solid #FED7AA !important;
+            font-weight: 700 !important;
         }
         html.light .accordion-toggle .fa-chevron-down {
             color: #64748b !important;
         }
         html.light .accordion-toggle:hover .fa-chevron-down {
-            color: #047857 !important;
+            color: #B9380A !important;
         }
         html.light .accordion-item div[id^="content-item-"] {
             background-color: #ffffff !important;
@@ -1287,13 +1466,33 @@
         }
 
         /* 14. Course Syllabus CTA Button */
-        html.light .course-item-card a .inline-flex.rounded-xl {
-            background-color: #059669 !important;
-            border-color: #059669 !important;
+        html.light .course-item-card a .inline-flex.rounded-xl,
+        html.light .course-item-card a.btn-brand-primary {
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            border-color: #F26522 !important;
             color: #ffffff !important;
-            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25) !important;
+            box-shadow: 0 4px 14px rgba(242, 101, 34, 0.45) !important;
+            font-weight: 700 !important;
         }
-        html.light .course-item-card a .inline-flex.rounded-xl * {
+        html.light .course-item-card a .inline-flex.rounded-xl *,
+        html.light .course-item-card a.btn-brand-primary * {
+            color: #ffffff !important;
+        }
+        html.light .course-item-card:hover a .inline-flex.rounded-xl,
+        html.light .course-item-card:hover a.btn-brand-primary,
+        html.light .course-item-card a .inline-flex.rounded-xl:hover,
+        html.light .course-item-card a.btn-brand-primary:hover {
+            background-color: #E95420 !important;
+            background: #E95420 !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(242, 101, 34, 0.60) !important;
+        }
+        html.light .course-item-card:hover a .inline-flex.rounded-xl *,
+        html.light .course-item-card:hover a.btn-brand-primary *,
+        html.light .course-item-card a .inline-flex.rounded-xl:hover *,
+        html.light .course-item-card a.btn-brand-primary:hover * {
             color: #ffffff !important;
         }
         /* 15. Top Announcement Strip Gap Fix (Flush against browser viewport top even on 110% zoom) */
@@ -1315,10 +1514,18 @@
             align-items: center;
         }
         .category-pill.active {
-            background-color: #059669 !important;
-            border: 1px solid #059669 !important;
+            background-color: #F26522 !important;
+            background: #F26522 !important;
+            border: 1px solid #F26522 !important;
             color: #ffffff !important;
-            box-shadow: 0 4px 14px -1px rgba(5, 150, 105, 0.35) !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px -1px rgba(242, 101, 34, 0.45) !important;
+        }
+        .category-pill.active:hover {
+            background-color: #E95420 !important;
+            background: #E95420 !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
         }
         .category-pill.active * {
             color: #ffffff !important;
@@ -1379,6 +1586,123 @@
         html.light #international-works .card-overlay-text span:not([class*="text-cyan"]) {
             color: #ffffff !important;
         }
+
+
+/* ============================================================================
+   UNIVERSAL BRAND ORANGE BACKGROUND => PURE WHITE TEXT GUARANTEE
+   Ensures WCAG AAA contrast whenever #F26522 or #E95420 is used as background
+   ============================================================================ */
+[style*="background-color: #F26522"],
+[style*="background-color:#F26522"],
+[style*="background: #F26522"],
+[style*="background:#F26522"],
+[style*="background-color: #E95420"],
+[style*="background-color:#E95420"],
+[style*="background: #E95420"],
+[style*="background:#E95420"],
+[style*="background-color: rgb(242, 101, 34)"],
+[style*="background: rgb(242, 101, 34)"],
+[style*="background-color: rgb(233, 84, 32)"],
+[style*="background: rgb(233, 84, 32)"],
+.bg-brand-primary,
+a.bg-brand-primary,
+button.bg-brand-primary,
+.btn-brand-primary,
+a.btn-brand-primary,
+button.btn-brand-primary,
+.btn-brand-action,
+.course-filter-btn.active,
+.category-pill.active,
+.counseling-hotline-btn,
+#counseling-hotline-btn,
+html.light .btn-brand-primary,
+html.light a.btn-brand-primary,
+html.light button.btn-brand-primary,
+html.light .course-item a.btn-brand-primary,
+html.light .course-item-card a.btn-brand-primary,
+html.light .counseling-hotline-btn,
+html.light #counseling-hotline-btn {
+    color: #FFFFFF !important;
+}
+
+[style*="background-color: #F26522"] *,
+[style*="background-color:#F26522"] *,
+[style*="background: #F26522"] *,
+[style*="background:#F26522"] *,
+[style*="background-color: #E95420"] *,
+[style*="background-color:#E95420"] *,
+[style*="background: #E95420"] *,
+[style*="background:#E95420"] *,
+[style*="background-color: rgb(242, 101, 34)"] *,
+[style*="background: rgb(242, 101, 34)"] *,
+[style*="background-color: rgb(233, 84, 32)"] *,
+[style*="background: rgb(233, 84, 32)"] *,
+.bg-brand-primary *,
+a.bg-brand-primary *,
+button.bg-brand-primary *,
+.btn-brand-primary *,
+a.btn-brand-primary *,
+button.btn-brand-primary *,
+.btn-brand-action *,
+.course-filter-btn.active *,
+.category-pill.active *,
+.counseling-hotline-btn *,
+#counseling-hotline-btn *,
+html.light .btn-brand-primary *,
+html.light a.btn-brand-primary *,
+html.light button.btn-brand-primary *,
+html.light .course-item a.btn-brand-primary *,
+html.light .course-item-card a.btn-brand-primary *,
+html.light .counseling-hotline-btn *,
+html.light #counseling-hotline-btn * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
+/* Hover, Focus, Active states */
+[style*="background-color: #F26522"]:hover,
+[style*="background: #F26522"]:hover,
+.bg-brand-primary:hover,
+.btn-brand-primary:hover,
+a.btn-brand-primary:hover,
+button.btn-brand-primary:hover,
+.btn-brand-action:hover,
+.course-item:hover a.btn-brand-primary,
+.course-item-card:hover a.btn-brand-primary,
+.course-item a.btn-brand-primary:hover,
+.course-item-card a.btn-brand-primary:hover,
+html.light .course-item:hover a.btn-brand-primary,
+html.light .course-item-card:hover a.btn-brand-primary,
+html.light .course-item a.btn-brand-primary:hover,
+html.light .course-item-card a.btn-brand-primary:hover,
+.counseling-hotline-btn:hover,
+#counseling-hotline-btn:hover {
+    color: #FFFFFF !important;
+    background-color: #E95420 !important;
+    background: #E95420 !important;
+}
+
+[style*="background-color: #F26522"]:hover *,
+[style*="background: #F26522"]:hover *,
+.bg-brand-primary:hover *,
+.btn-brand-primary:hover *,
+a.btn-brand-primary:hover *,
+button.btn-brand-primary:hover *,
+.btn-brand-action:hover *,
+.course-item:hover a.btn-brand-primary *,
+.course-item-card:hover a.btn-brand-primary *,
+.course-item a.btn-brand-primary:hover *,
+.course-item-card a.btn-brand-primary:hover *,
+html.light .course-item:hover a.btn-brand-primary *,
+html.light .course-item-card:hover a.btn-brand-primary *,
+html.light .course-item a.btn-brand-primary:hover *,
+html.light .course-item-card a.btn-brand-primary:hover *,
+.counseling-hotline-btn:hover *,
+#counseling-hotline-btn:hover * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
     </style>
 
     <!-- Tailwind CSS (v3 with Forms, Typography, Aspect-Ratio plugins) -->
@@ -1401,11 +1725,11 @@
                             surface: '#0b1329',
                             card: '#0f172a',
                             border: '#1e293b',
-                            primary: 'var(--brand-primary, #10b981)',
-                            primaryHover: 'var(--brand-accent, #059669)',
-                            accent: 'var(--brand-accent, #34d399)',
+                            primary: 'var(--brand-primary, #F26522)',
+                            primaryHover: 'var(--brand-accent, #F26522)',
+                            accent: 'var(--brand-accent, #FB923C)',
                             cyan: 'var(--brand-cyan, #22d3ee)',
-                            indigo: 'var(--brand-indigo, #6366f1)',
+                            indigo: 'var(--brand-indigo, #C2410C)',
                         }
                     },
                     fontFamily: {
@@ -1415,7 +1739,8 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        'glow-emerald': '0 0 25px -5px rgba(var(--brand-primary-rgb, 16, 185, 129), 0.35)',
+                        'glow-emerald': '0 0 25px -5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.35)',
+                        'glow-brand': '0 0 25px -5px rgba(var(--brand-primary-rgb, 242, 101, 34), 0.35)',
                         'glow-cyan': '0 0 25px -5px rgba(34, 211, 238, 0.35)',
                         'glow-indigo': '0 0 25px -5px rgba(99, 102, 241, 0.35)',
                         'card-dark': '0 20px 40px -15px rgba(0, 0, 0, 0.7)',
@@ -1447,6 +1772,8 @@
     <!-- Toastr Notifications & Datepicker -->
     <link rel="stylesheet" href="{{ safe_asset('admin/css/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ safe_asset('admin/plugins/datepicker/datepicker.css') }}">
+    <!-- Wake Up ICT Brand Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ safe_asset('frontend/css/custom.css') }}?v={{ file_exists(public_path('frontend/css/custom.css')) ? filemtime(public_path('frontend/css/custom.css')) : '1.0' }}">
 
     <!-- SEO & OpenGraph Meta Tags -->
     <title>@yield('title', 'Wake Up ICT — Enterprise Technology & Engineering')</title>
@@ -1475,17 +1802,17 @@
     @stack('css')
 </head>
 
-<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-brand-primary selection:text-slate-950 min-h-screen flex flex-col overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-brand-primary selection:text-white min-h-screen flex flex-col overflow-x-hidden">
 
     <!-- Modern Dynamic Theme Preloader with Animated Wake Up ICT Favicon -->
     <div id="app-preloader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center transition-all duration-700 ease-out bg-slate-950">
         <div class="relative flex items-center justify-center w-32 h-32 mb-6">
             
             <!-- Ambient Pulsing Glow Aura -->
-            <div class="absolute inset-0 rounded-full animate-ping opacity-20" style="background: radial-gradient(circle, var(--brand-primary, #10b981) 0%, transparent 70%); animation-duration: 2.2s;"></div>
+            <div class="absolute inset-0 rounded-full animate-ping opacity-20" style="background: radial-gradient(circle, var(--brand-primary, #F26522) 0%, transparent 70%); animation-duration: 2.2s;"></div>
             
             <!-- Outer Spinning Gradient Track -->
-            <div class="absolute w-28 h-28 rounded-full border-2 border-transparent animate-spin" style="border-top-color: var(--brand-primary, #10b981); border-right-color: var(--brand-cyan, #22d3ee); animation-duration: 1.4s;"></div>
+            <div class="absolute w-28 h-28 rounded-full border-2 border-transparent animate-spin" style="border-top-color: var(--brand-primary, #F26522); border-right-color: var(--brand-cyan, #22d3ee); animation-duration: 1.4s;"></div>
             
             <!-- Middle Counter-Rotating Dashed Tech Ring -->
             <div class="absolute w-32 h-32 rounded-full border border-dashed border-slate-700/60 animate-[spin_3.5s_linear_infinite_reverse]" style="border-top-color: var(--brand-accent, #34d399); border-left-color: var(--brand-indigo, #6366f1);"></div>
@@ -1500,19 +1827,19 @@
 
             <!-- Orbiting Satellite Dot -->
             <div class="absolute w-32 h-32 animate-spin pointer-events-none" style="animation-duration: 2.8s;">
-                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--brand-primary, #10b981); box-shadow: 0 0 12px var(--brand-primary, #10b981);"></div>
+                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--brand-primary, #F26522); box-shadow: 0 0 12px var(--brand-primary, #F26522);"></div>
             </div>
         </div>
 
         <!-- Typography & Sleek Loading Progress Indicator -->
         <div class="flex flex-col items-center gap-3">
             <div class="flex items-center gap-2 font-mono text-xs tracking-widest uppercase font-semibold text-slate-400">
-                <span class="w-2 h-2 rounded-full animate-pulse" style="background: var(--brand-primary, #10b981);"></span>
+                <span class="w-2 h-2 rounded-full animate-pulse" style="background: var(--brand-primary, #F26522);"></span>
                 <span class="preloader-text text-white tracking-[0.22em] font-bold text-sm">WAKE UP ICT</span>
             </div>
             <!-- Progress Track with Sliding Highlight -->
             <div class="w-40 h-1 rounded-full bg-slate-800/90 overflow-hidden relative preloader-bar-bg">
-                <div class="preloader-bar-indeterminate h-full w-1/2 rounded-full" style="background: linear-gradient(90deg, var(--brand-primary, #10b981), var(--brand-cyan, #22d3ee));"></div>
+                <div class="preloader-bar-indeterminate h-full w-1/2 rounded-full" style="background: linear-gradient(90deg, var(--brand-primary, #F26522), var(--brand-cyan, #22d3ee));"></div>
             </div>
         </div>
     </div>

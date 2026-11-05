@@ -137,7 +137,7 @@
                                     <span class="text-2xl font-black font-mono {{ $prog == 100 ? 'text-brand-primary' : 'text-white' }}">{{ $prog }}%</span>
                                     <span class="text-[10px] text-slate-500 block uppercase font-mono">{{ $prog == 100 ? 'Completed' : 'In Progress' }}</span>
                                 </div>
-                                <a href="{{ route('student.courses.learn', $course->id) }}" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5 shrink-0">
+                                <a href="{{ route('student.courses.learn', $course->id) }}" class="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center gap-1.5 shrink-0">
                                     <i class="fa fa-play"></i>
                                     <span>Resume</span>
                                 </a>
@@ -190,7 +190,7 @@
             <p class="text-xs text-slate-400 mb-6 leading-relaxed">
                 You haven't enrolled in any courses yet. Once you enroll and start lessons, your progress and milestones will display here.
             </p>
-            <a href="{{ route('student.courses.browse') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-slate-950 font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
+            <a href="{{ route('student.courses.browse') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary text-white font-bold text-xs uppercase tracking-wider shadow-glow-emerald">
                 <i class="fa fa-search"></i>
                 <span>Explore Available Courses</span>
             </a>

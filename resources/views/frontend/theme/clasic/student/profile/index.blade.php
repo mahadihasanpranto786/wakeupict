@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('student.profile.edit') }}" class="px-5 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center justify-center gap-2">
+            <a href="{{ route('student.profile.edit') }}" class="px-5 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-bold text-xs uppercase tracking-wider transition-all shadow-glow-emerald flex items-center justify-center gap-2">
                 <i class="fa fa-pencil"></i>
                 <span>Edit Profile / Change Password</span>
             </a>

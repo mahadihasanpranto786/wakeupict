@@ -37,15 +37,15 @@
     <!-- Filters Bar -->
     <div class="flex flex-wrap items-center gap-2">
         <a href="{{ route('student.notifications.index') }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ !request('filter') ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ !request('filter') ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             All Notifications
         </a>
         <a href="{{ route('student.notifications.index', ['filter' => 'unread']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('filter') === 'unread' ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('filter') === 'unread' ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             Unread ({{ $unreadCount }})
         </a>
         <a href="{{ route('student.notifications.index', ['filter' => 'announcements']) }}" 
-           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('filter') === 'announcements' ? 'bg-brand-primary text-slate-950 font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
+           class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ request('filter') === 'announcements' ? 'bg-brand-primary text-white font-bold shadow-glow-emerald' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white' }}">
             Institutional Announcements
         </a>
     </div>
@@ -101,7 +101,7 @@
                             <div class="pt-2 flex flex-wrap items-center justify-between gap-3">
                                 <div>
                                     @if($notif->action_url)
-                                        <a href="{{ $notif->action_url }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary text-brand-primary hover:text-slate-950 font-semibold text-xs transition-all border border-brand-primary/20">
+                                        <a href="{{ $notif->action_url }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary text-brand-primary hover:text-white font-semibold text-xs transition-all border border-brand-primary/20">
                                             <span>View Details</span>
                                             <i class="fa fa-arrow-right text-[10px]"></i>
                                         </a>
