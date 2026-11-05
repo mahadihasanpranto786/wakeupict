@@ -373,9 +373,9 @@
                                     </div>
 
                                     <!-- 10MS Full-Width Action Button -->
-                                    <a href="{{ route('course-details', $course->course_slug ?: $course->id) }}" class="w-full py-2.5 px-4 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group-hover:shadow-lg">
-                                        <span>বিস্তারিত ও সিলেবাস</span>
-                                        <i class="fa fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                    <a href="{{ route('course-details', $course->course_slug ?: $course->id) }}" class="w-full py-2.5 px-4 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 group-hover:shadow-lg" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                        <span style="color: #FFFFFF !important;">বিস্তারিত ও সিলেবাস</span>
+                                        <i class="fa fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1" style="color: #FFFFFF !important;"></i>
                                     </a>
                                 </div>
 
@@ -482,14 +482,14 @@
                         </p>
                         <div class="pt-2 flex flex-wrap items-center gap-4">
                             @if(function_exists('is_student_logged_in') && is_student_logged_in())
-                                <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
-                                    <i class="fa fa-tachometer"></i>
-                                    <span>ড্যাশবোর্ডে প্রবেশ করুন</span>
+                                <a href="{{ route('student.dashboard') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                    <i class="fa fa-tachometer" style="color: #FFFFFF !important;"></i>
+                                    <span style="color: #FFFFFF !important;">ড্যাশবোর্ডে প্রবেশ করুন</span>
                                 </a>
                             @else
-                                <a href="{{ route('student.login') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
-                                    <i class="fa fa-sign-in"></i>
-                                    <span>স্টুডেন্ট লগইন</span>
+                                <a href="{{ route('student.login') }}" class="px-6 py-3.5 rounded-xl btn-brand-primary text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2" style="background-color: #F26522 !important; color: #FFFFFF !important;">
+                                    <i class="fa fa-sign-in" style="color: #FFFFFF !important;"></i>
+                                    <span style="color: #FFFFFF !important;">স্টুডেন্ট লগইন</span>
                                 </a>
                                 <a href="{{ route('student.register') }}" class="px-5 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-all flex items-center gap-2 shadow-sm">
                                     <i class="fa fa-user-plus text-brand-primary dark:text-brand-primary"></i>
@@ -507,9 +507,9 @@
                         <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                             কোন কোর্সটি আপনার ক্যারিয়ারের জন্য উপযুক্ত তা নির্ধারণে আমাদের এক্সপার্টদের সাথে কথা বলুন।
                         </p>
-                        <a href="tel:01791612121" class="btn-brand-primary flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl text-white font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg" style="background-color: #F26522 !important; background: #F26522 !important; color: #FFFFFF !important; border: 1px solid #F26522 !important;">
-                            <i class="fa fa-phone text-white text-sm"></i>
-                            <span class="text-white font-black text-sm tracking-wide">০১৭৯১-৬১২১২১</span>
+                        <a href="tel:01791612121" id="counseling-hotline-btn" class="counseling-hotline-btn btn-brand-primary flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl text-white font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg" style="background-color: #F26522 !important; background: #F26522 !important; color: #FFFFFF !important; border: 1px solid #F26522 !important;">
+                            <i class="fa fa-phone" style="color: #FFFFFF !important;"></i>
+                            <span style="color: #FFFFFF !important; font-weight: 800; font-size: 14px;">০১৭৯১-৬১২১২১</span>
                         </a>
                     </div>
                 </div>

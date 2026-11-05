@@ -72,10 +72,16 @@
   
   /* active sidebar  */
   
-  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active,
+  .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
       background-color: #F26522 !important;
-      color: #172033 !important;
+      color: #FFFFFF !important;
       font-weight: 800 !important;
+  }
+  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active *,
+  .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active * {
+      color: #FFFFFF !important;
+      fill: #FFFFFF !important;
   }
   
   /* card-header  */

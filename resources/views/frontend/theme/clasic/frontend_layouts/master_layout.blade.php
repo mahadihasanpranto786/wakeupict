@@ -269,7 +269,7 @@
         /* Universal Text-White Override in Light Mode */
         html.light .text-white:not([class*="bg-rose"]):not([class*="bg-emerald"]):not([class*="bg-blue"]):not([class*="bg-teal"]):not([class*="bg-indigo"]):not([class*="bg-brand"]):not([class*="bg-amber"]):not([class*="bg-purple"]):not([class*="bg-red"]):not([class*="bg-green"]):not(.text-white-force):not(button):not(button *):not(.btn):not(.btn *):not(.badge):not(.badge *):not(.hero-slide *):not(#top-announcement-strip *):not(.btn-shimmer *):not([class*="btn-"]):not([class*="btn-"] *),
         html.light div.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
-        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *),
+        html.light span.text-white:not([class*="bg-"]):not([class*="badge"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *):not(.counseling-hotline-btn *):not(.btn-brand-primary *),
         html.light p.text-white:not([class*="bg-"]):not(button *):not(a.btn *):not(.hero-slide *):not(#top-announcement-strip *) {
             color: #0f172a !important;
         }
@@ -413,8 +413,10 @@
         html.light a.btn-brand-primary,
         button.btn-brand-primary,
         html.light button.btn-brand-primary,
-        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn),
-        a[href*="tel:01791612121"].btn-brand-primary {
+        .counseling-hotline-btn,
+        html.light .counseling-hotline-btn,
+        #counseling-hotline-btn,
+        html.light #counseling-hotline-btn {
             background-color: #F26522 !important;
             background: #F26522 !important;
             color: #ffffff !important;
@@ -430,8 +432,18 @@
         html.light a.btn-brand-primary *,
         button.btn-brand-primary *,
         html.light button.btn-brand-primary *,
-        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn) *,
-        a[href*="tel:01791612121"].btn-brand-primary *,
+        .counseling-hotline-btn *,
+        .counseling-hotline-btn span,
+        .counseling-hotline-btn i,
+        html.light .counseling-hotline-btn *,
+        html.light .counseling-hotline-btn span,
+        html.light .counseling-hotline-btn i,
+        #counseling-hotline-btn *,
+        #counseling-hotline-btn span,
+        #counseling-hotline-btn i,
+        html.light #counseling-hotline-btn *,
+        html.light #counseling-hotline-btn span,
+        html.light #counseling-hotline-btn i,
         html.light .course-item-card a .inline-flex,
         html.light .course-item-card a .inline-flex * {
             color: #ffffff !important;
@@ -444,13 +456,43 @@
         html.light a.btn-brand-primary:hover,
         button.btn-brand-primary:hover,
         html.light button.btn-brand-primary:hover,
-        html.light a[href*="tel:01791612121"]:not(.header-hotline-btn):hover,
-        a[href*="tel:01791612121"].btn-brand-primary:hover {
+        .counseling-hotline-btn:hover,
+        html.light .counseling-hotline-btn:hover,
+        #counseling-hotline-btn:hover,
+        html.light #counseling-hotline-btn:hover {
             background-color: #E95420 !important;
             background: #E95420 !important;
             border-color: #E95420 !important;
             color: #ffffff !important;
             box-shadow: 0 6px 20px -2px rgba(242, 101, 34, 0.60) !important;
+        }
+
+        /* Top Announcement Strip Hotline: STRICTLY NO BACKGROUND COLOR */
+        #top-announcement-strip a[href*="tel:01791612121"],
+        html.light #top-announcement-strip a[href*="tel:01791612121"],
+        #top-hotline-link,
+        html.light #top-hotline-link {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            color: #ffffff !important;
+        }
+        #top-announcement-strip a[href*="tel:01791612121"] *,
+        html.light #top-announcement-strip a[href*="tel:01791612121"] *,
+        #top-hotline-link *,
+        html.light #top-hotline-link * {
+            color: #ffffff !important;
+            background: transparent !important;
+        }
+        #top-announcement-strip a[href*="tel:01791612121"]:hover,
+        html.light #top-announcement-strip a[href*="tel:01791612121"]:hover,
+        #top-hotline-link:hover,
+        html.light #top-hotline-link:hover,
+        #top-hotline-link:hover * {
+            color: #FCD34D !important;
+            background: transparent !important;
         }
 
         /* Course Filter Buttons Active State */
@@ -1038,7 +1080,7 @@
         html.light .dark-pagination .page-item.active .page-link,
         html.light .pagination .page-item.active .page-link {
             background-color: var(--brand-primary, #F26522) !important;
-            color: #030712 !important;
+            color: #FFFFFF !important;
             border-color: var(--brand-primary, #F26522) !important;
             font-weight: bold;
         }
@@ -1544,6 +1586,123 @@
         html.light #international-works .card-overlay-text span:not([class*="text-cyan"]) {
             color: #ffffff !important;
         }
+
+
+/* ============================================================================
+   UNIVERSAL BRAND ORANGE BACKGROUND => PURE WHITE TEXT GUARANTEE
+   Ensures WCAG AAA contrast whenever #F26522 or #E95420 is used as background
+   ============================================================================ */
+[style*="background-color: #F26522"],
+[style*="background-color:#F26522"],
+[style*="background: #F26522"],
+[style*="background:#F26522"],
+[style*="background-color: #E95420"],
+[style*="background-color:#E95420"],
+[style*="background: #E95420"],
+[style*="background:#E95420"],
+[style*="background-color: rgb(242, 101, 34)"],
+[style*="background: rgb(242, 101, 34)"],
+[style*="background-color: rgb(233, 84, 32)"],
+[style*="background: rgb(233, 84, 32)"],
+.bg-brand-primary,
+a.bg-brand-primary,
+button.bg-brand-primary,
+.btn-brand-primary,
+a.btn-brand-primary,
+button.btn-brand-primary,
+.btn-brand-action,
+.course-filter-btn.active,
+.category-pill.active,
+.counseling-hotline-btn,
+#counseling-hotline-btn,
+html.light .btn-brand-primary,
+html.light a.btn-brand-primary,
+html.light button.btn-brand-primary,
+html.light .course-item a.btn-brand-primary,
+html.light .course-item-card a.btn-brand-primary,
+html.light .counseling-hotline-btn,
+html.light #counseling-hotline-btn {
+    color: #FFFFFF !important;
+}
+
+[style*="background-color: #F26522"] *,
+[style*="background-color:#F26522"] *,
+[style*="background: #F26522"] *,
+[style*="background:#F26522"] *,
+[style*="background-color: #E95420"] *,
+[style*="background-color:#E95420"] *,
+[style*="background: #E95420"] *,
+[style*="background:#E95420"] *,
+[style*="background-color: rgb(242, 101, 34)"] *,
+[style*="background: rgb(242, 101, 34)"] *,
+[style*="background-color: rgb(233, 84, 32)"] *,
+[style*="background: rgb(233, 84, 32)"] *,
+.bg-brand-primary *,
+a.bg-brand-primary *,
+button.bg-brand-primary *,
+.btn-brand-primary *,
+a.btn-brand-primary *,
+button.btn-brand-primary *,
+.btn-brand-action *,
+.course-filter-btn.active *,
+.category-pill.active *,
+.counseling-hotline-btn *,
+#counseling-hotline-btn *,
+html.light .btn-brand-primary *,
+html.light a.btn-brand-primary *,
+html.light button.btn-brand-primary *,
+html.light .course-item a.btn-brand-primary *,
+html.light .course-item-card a.btn-brand-primary *,
+html.light .counseling-hotline-btn *,
+html.light #counseling-hotline-btn * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
+/* Hover, Focus, Active states */
+[style*="background-color: #F26522"]:hover,
+[style*="background: #F26522"]:hover,
+.bg-brand-primary:hover,
+.btn-brand-primary:hover,
+a.btn-brand-primary:hover,
+button.btn-brand-primary:hover,
+.btn-brand-action:hover,
+.course-item:hover a.btn-brand-primary,
+.course-item-card:hover a.btn-brand-primary,
+.course-item a.btn-brand-primary:hover,
+.course-item-card a.btn-brand-primary:hover,
+html.light .course-item:hover a.btn-brand-primary,
+html.light .course-item-card:hover a.btn-brand-primary,
+html.light .course-item a.btn-brand-primary:hover,
+html.light .course-item-card a.btn-brand-primary:hover,
+.counseling-hotline-btn:hover,
+#counseling-hotline-btn:hover {
+    color: #FFFFFF !important;
+    background-color: #E95420 !important;
+    background: #E95420 !important;
+}
+
+[style*="background-color: #F26522"]:hover *,
+[style*="background: #F26522"]:hover *,
+.bg-brand-primary:hover *,
+.btn-brand-primary:hover *,
+a.btn-brand-primary:hover *,
+button.btn-brand-primary:hover *,
+.btn-brand-action:hover *,
+.course-item:hover a.btn-brand-primary *,
+.course-item-card:hover a.btn-brand-primary *,
+.course-item a.btn-brand-primary:hover *,
+.course-item-card a.btn-brand-primary:hover *,
+html.light .course-item:hover a.btn-brand-primary *,
+html.light .course-item-card:hover a.btn-brand-primary *,
+html.light .course-item a.btn-brand-primary:hover *,
+html.light .course-item-card a.btn-brand-primary:hover *,
+.counseling-hotline-btn:hover *,
+#counseling-hotline-btn:hover * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
     </style>
 
     <!-- Tailwind CSS (v3 with Forms, Typography, Aspect-Ratio plugins) -->

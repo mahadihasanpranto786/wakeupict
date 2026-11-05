@@ -34,7 +34,7 @@
         <div class="flex items-center gap-2 sm:gap-3 shrink-0 text-[11px] font-sans font-semibold tracking-wide z-10 text-white/95">
             
             <!-- Hotline Helpline -->
-            <a href="tel:01791612121" class="hidden md:inline-flex hover:text-amber-300 transition-colors items-center gap-1.5 font-mono text-[11px] font-bold">
+            <a href="tel:01791612121" id="top-hotline-link" class="hidden md:inline-flex hover:text-amber-300 transition-colors items-center gap-1.5 font-mono text-[11px] font-bold" style="background: transparent !important; background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important;">
                 <i class="fa fa-phone text-white"></i>
                 <span>01791-612121</span>
             </a>
