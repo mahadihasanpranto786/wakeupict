@@ -32,27 +32,18 @@
     }
 
     $pct = $attempt->percentage;
-    $grade = 'F';
-    $gradeColor = 'text-rose-600 dark:text-rose-400';
-    $gradeBg = 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400';
-    if ($pct >= 80) {
-        $grade = 'A+';
+    $grade = $attempt->getGrade();
+    if (!$isPassed || $grade === 'F') {
+        $grade = 'F';
+        $gradeColor = 'text-rose-600 dark:text-rose-400';
+        $gradeBg = 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400';
+    } elseif ($grade === 'A+' || $grade === 'A') {
         $gradeColor = 'text-emerald-600 dark:text-emerald-400';
         $gradeBg = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
-    } elseif ($pct >= 70) {
-        $grade = 'A';
-        $gradeColor = 'text-emerald-600 dark:text-emerald-400';
-        $gradeBg = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
-    } elseif ($pct >= 60) {
-        $grade = 'A-';
+    } elseif ($grade === 'A-') {
         $gradeColor = 'text-blue-600 dark:text-blue-400';
         $gradeBg = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400';
-    } elseif ($pct >= 50) {
-        $grade = 'B';
-        $gradeColor = 'text-amber-600 dark:text-amber-400';
-        $gradeBg = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
-    } elseif ($pct >= 40) {
-        $grade = 'C';
+    } else {
         $gradeColor = 'text-amber-600 dark:text-amber-400';
         $gradeBg = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
     }

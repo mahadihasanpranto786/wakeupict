@@ -181,6 +181,8 @@ class AdminQuizController extends Controller
             'max_attempts'     => 'nullable|integer|min:0|max:100',
             'shuffle_questions'=> 'nullable|boolean',
             'shuffle_options'  => 'nullable|boolean',
+            'start_time'       => 'nullable|date',
+            'end_time'         => 'nullable|date',
             'result_release_policy' => 'nullable|in:immediate,after_deadline,admin_publish',
             'locking_policy'   => 'nullable|in:mode_default,instant_lock,confirm_lock',
         ]);
@@ -205,6 +207,8 @@ class AdminQuizController extends Controller
             'result_release_policy' => $request->input('result_release_policy', 'immediate'),
             'locking_policy'        => $request->input('locking_policy', 'mode_default'),
             'allow_question_flagging' => true,
+            'start_time'            => $this->parseDateTimeInput($request->input('start_time')),
+            'end_time'              => $this->parseDateTimeInput($request->input('end_time')),
         ]);
 
         return redirect()->back()->with('success', "Quiz '{$quiz->title}' created successfully! You can now import MCQs via Excel.");
@@ -318,6 +322,8 @@ class AdminQuizController extends Controller
             'max_attempts'     => 'nullable|integer|min:0|max:100',
             'shuffle_questions'=> 'nullable|boolean',
             'shuffle_options'  => 'nullable|boolean',
+            'start_time'       => 'nullable|date',
+            'end_time'         => 'nullable|date',
         ]);
 
         $quiz->update([
@@ -333,9 +339,27 @@ class AdminQuizController extends Controller
             'max_attempts'     => (int)$request->input('max_attempts', 0),
             'shuffle_questions'=> $request->has('shuffle_questions') ? (bool)$request->shuffle_questions : false,
             'shuffle_options'  => $request->has('shuffle_options') ? (bool)$request->shuffle_options : false,
+            'start_time'       => $this->parseDateTimeInput($request->input('start_time')),
+            'end_time'         => $this->parseDateTimeInput($request->input('end_time')),
         ]);
 
         return redirect()->back()->with('success', "কুইজ '{$quiz->title}' এর তথ্য সফলভাবে হালনাগাদ করা হয়েছে!");
+    }
+
+    /**
+     * Safely parse datetime string from HTML5 datetime-local inputs
+     */
+    protected function parseDateTimeInput($value)
+    {
+        if (empty($value) || (is_string($value) && trim($value) === '')) {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**

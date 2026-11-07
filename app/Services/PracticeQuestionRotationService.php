@@ -513,9 +513,11 @@ class PracticeQuestionRotationService
             $passMarks = (float)$passMarksCustom;
         } else {
             // Look up matching tier pass marks
-            $matchedTier = collect($settings['tiers'])->firstWhere('questions', $count);
+            $matchedTier = collect($settings['tiers'])->first(function($t) use ($count) {
+                return (int)self::toEnglishDigits($t['questions']) === (int)$count;
+            });
             if ($matchedTier && isset($matchedTier['pass_marks'])) {
-                $passMarks = (float)$matchedTier['pass_marks'];
+                $passMarks = (float)self::toEnglishDigits($matchedTier['pass_marks']);
             } else {
                 $passPct = isset($settings['pass_percentage']) && (float)$settings['pass_percentage'] > 0 ? (float)$settings['pass_percentage'] : 40.0;
                 $passMarks = round($totalMarks * ($passPct / 100), 2);

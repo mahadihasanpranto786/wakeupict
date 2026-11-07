@@ -269,9 +269,41 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge badge-light border text-capitalize px-2 py-1">
-                                    {{ $quiz->quiz_type }}
-                                </span>
+                                @if($quiz->quiz_type === 'exam')
+                                    <span class="badge badge-danger text-xs px-2 py-1 text-white font-weight-bold">
+                                        <i class="fas fa-bolt mr-1"></i> লাইভ পরীক্ষা (Exam)
+                                    </span>
+                                    @if($quiz->start_time)
+                                        @if($quiz->isUpcoming())
+                                            <div class="mt-1">
+                                                <span class="badge badge-warning text-xs font-weight-bold" style="color: #000000 !important;" title="শুরু: {{ $quiz->start_time->format('d M Y, h:i A') }}">
+                                                    <i class="far fa-calendar-alt mr-1"></i> {{ $quiz->start_time->format('d M, h:i A') }}
+                                                </span>
+                                                <div class="text-[11px] font-weight-bold text-primary mt-0.5">
+                                                    <i class="fas fa-hourglass-start mr-1"></i> {{ $quiz->getRemainingTimeForHumans() }}
+                                                </div>
+                                            </div>
+                                        @elseif($quiz->isLiveNow())
+                                            <div class="mt-1">
+                                                <span class="badge badge-success text-xs px-2 py-0.5 font-weight-bold text-white shadow-xs">
+                                                    <i class="fas fa-play-circle mr-1"></i> লাইভ চলমান (Live Now)
+                                                </span>
+                                            </div>
+                                        @elseif($quiz->isExpired())
+                                            <div class="mt-1">
+                                                <span class="badge badge-secondary text-xs">
+                                                    <i class="fas fa-calendar-times mr-1"></i> সমাপ্ত (Ended)
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="text-xs text-muted mt-0.5">তাৎক্ষণিক উন্মুক্ত (Open)</div>
+                                    @endif
+                                @else
+                                    <span class="badge badge-light border text-capitalize px-2 py-1">
+                                        {{ $quiz->quiz_type }}
+                                    </span>
+                                @endif
                                 <div class="text-xs text-muted mt-1">
                                     <i class="far fa-clock mr-1"></i> {{ $quiz->duration_minutes }} মিনিট
                                 </div>
@@ -931,6 +963,27 @@ document.addEventListener('keydown', function(e) {
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm text-dark">
+                                        <i class="far fa-calendar-alt text-primary mr-1"></i> পরীক্ষা শুরুর তারিখ ও সময় (Start Time)
+                                    </label>
+                                    <input type="datetime-local" name="start_time" id="editQuizStartTime" class="form-control">
+                                    <small class="text-muted d-block mt-1">লাইভ পরীক্ষা নির্ধারিত এই তারিখ ও সময়ের পর শিক্ষার্থীরা শুরু করতে পারবে। নির্ধারিত সময়ের পূর্বে কার্ডে কাউন্টডাউন প্রদর্শিত হবে।</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-sm text-dark">
+                                        <i class="far fa-calendar-check text-danger mr-1"></i> পরীক্ষা সমাপ্তির সময় (End Time - ঐচ্ছিক)
+                                    </label>
+                                    <input type="datetime-local" name="end_time" id="editQuizEndTime" class="form-control">
+                                    <small class="text-muted d-block mt-1">ফাঁকা রাখলে সময়সীমা উন্মুক্ত থাকবে।</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group mb-0">
                             <label class="font-weight-bold text-sm">বর্ণনা / নির্দেশাবলী</label>
                             <textarea name="description" id="editQuizDescription" class="form-control" rows="2"></textarea>
@@ -1189,6 +1242,23 @@ document.addEventListener('keydown', function(e) {
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">
+                                <i class="far fa-calendar-alt text-primary mr-1"></i> পরীক্ষা শুরুর তারিখ ও সময় (Scheduled Start Time)
+                            </label>
+                            <input type="datetime-local" name="start_time" class="form-control">
+                            <small class="text-muted d-block mt-1">লাইভ পরীক্ষা (Live Exam) এর জন্য: শিক্ষার্থীরা এই তারিখ ও সময়ের পর পরীক্ষায় বসতে পারবে এবং আগে কার্ডে রিমেইনিং কাউন্টডাউন দেখবে।</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-sm text-dark">
+                                <i class="far fa-calendar-check text-danger mr-1"></i> পরীক্ষা সমাপ্তির সময় (Deadline / End Time - ঐচ্ছিক)
+                            </label>
+                            <input type="datetime-local" name="end_time" class="form-control">
+                            <small class="text-muted d-block mt-1">ঐচ্ছিক, ফাঁকা রাখলে উন্মুক্ত থাকবে।</small>
+                        </div>
+                    </div>
+
                     <div class="p-3 bg-light rounded border">
                         <div class="row align-items-center">
                             <div class="col-md-6 mb-2 mb-md-0">
@@ -1329,6 +1399,25 @@ function toggleImportMode() {
     }
 }
 
+function formatForDateTimeLocal(rawDate) {
+    if (!rawDate) return '';
+    try {
+        var str = String(rawDate).trim();
+        if (str.length >= 16 && str.indexOf('T') === 10) {
+            return str.substring(0, 16);
+        }
+        if (str.length >= 16 && str.indexOf(' ') === 10) {
+            return str.substring(0, 10) + 'T' + str.substring(11, 16);
+        }
+        var d = new Date(rawDate);
+        if (!isNaN(d.getTime())) {
+            var pad = function(n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+    } catch (e) {}
+    return '';
+}
+
 function openEditQuizModal(quiz) {
     document.getElementById('editQuizForm').action = "/admin/quizzes/" + quiz.id;
     document.getElementById('editQuizCourseId').value = quiz.course_id;
@@ -1342,6 +1431,10 @@ function openEditQuizModal(quiz) {
     document.getElementById('editQuizMaxAttempts').value = (quiz.max_attempts !== undefined && quiz.max_attempts !== null) ? quiz.max_attempts : 0;
     document.getElementById('editQuizShuffleQuestions').checked = (quiz.shuffle_questions !== false && quiz.shuffle_questions !== 0);
     document.getElementById('editQuizShuffleOptions').checked = (quiz.shuffle_options !== false && quiz.shuffle_options !== 0);
+    var startInput = document.getElementById('editQuizStartTime');
+    if (startInput) startInput.value = formatForDateTimeLocal(quiz.start_time);
+    var endInput = document.getElementById('editQuizEndTime');
+    if (endInput) endInput.value = formatForDateTimeLocal(quiz.end_time);
     $('#editQuizModal').modal('show');
 }
 

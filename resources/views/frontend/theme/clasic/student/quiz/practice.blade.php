@@ -280,8 +280,19 @@
                         ২. প্রশ্নের সংখ্যা ও সময় (Questions & Time)
                     </label>
                     @php
-                        $firstTier = !empty($practiceSettings['tiers']) ? $practiceSettings['tiers'][0] : null;
-                        $firstPassMark = $firstTier ? (float)\App\Services\PracticeQuestionRotationService::toEnglishDigits($firstTier['pass_marks'] ?? round($practiceSettings['question_count'] * 0.4, 1)) : 4.0;
+                        $selectedTier = null;
+                        if (!empty($practiceSettings['tiers'])) {
+                            foreach ($practiceSettings['tiers'] as $t) {
+                                if ((int)\App\Services\PracticeQuestionRotationService::toEnglishDigits($t['questions']) === (int)$practiceSettings['question_count']) {
+                                    $selectedTier = $t;
+                                    break;
+                                }
+                            }
+                            if (!$selectedTier) {
+                                $selectedTier = $practiceSettings['tiers'][0];
+                            }
+                        }
+                        $firstPassMark = $selectedTier ? (float)\App\Services\PracticeQuestionRotationService::toEnglishDigits($selectedTier['pass_marks'] ?? round($selectedTier['questions'] * 0.4, 1)) : 6.0;
                     @endphp
                     <select name="question_count" id="tierSelect" {{ $isAttemptLimitReached ? 'disabled' : '' }} onchange="syncPracticeTier(this)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                         @foreach($practiceSettings['tiers'] as $tier)

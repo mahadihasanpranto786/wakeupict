@@ -601,4 +601,59 @@ class PracticeQuestionRotationSystemTest extends TestCase
         $this->assertEquals(30, count($attempt->questions_snapshot));
         $this->assertEquals(30, $attempt->total_marks);
     }
+
+    /**
+     * Test practice exam pass mark strictly matches tier and failing student gets Grade F (never B)
+     */
+    public function testPracticeExamPassMarkMatchesTierAndFailingStudentGetsGradeF()
+    {
+        // 1. Configure tiers where 10 questions has pass mark 6.0
+        PracticeQuestionRotationService::saveSettings([
+            'question_count'     => 10,
+            'duration_minutes'   => 5,
+            'view_mode'          => 'all_questions',
+            'attempt_limit_type' => 'unlimited',
+            'tiers'              => [
+                ['questions' => 10, 'duration' => 5, 'pass_marks' => 6, 'label' => '10 টি প্রশ্ন (5 মিনিট — পাস: 6)'],
+                ['questions' => 15, 'duration' => 8, 'pass_marks' => 8, 'label' => '15 টি প্রশ্ন (8 মিনিট — পাস: 8)'],
+            ],
+            'mark_per_question'  => 1,
+            'pass_percentage'    => 40,
+        ]);
+
+        // 2. Student starts 10-question practice test
+        $res = $this->actingAs($this->student, 'student')
+            ->post(route('student.practice.start'), [
+                'question_count' => 10,
+            ]);
+
+        $attempt = LmsQuizAttempt::where('student_account_id', $this->student->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($attempt);
+        // Verify pass_marks on attempt matches tier (6.0), not 4.0!
+        $this->assertEquals(6.0, (float)$attempt->pass_marks);
+
+        // 3. Score 5 out of 10 (50%, below pass mark 6)
+        $attempt->score = 5.0;
+        $attempt->percentage = 50.0;
+        $attempt->status = 'graded';
+        $attempt->save();
+
+        // 4. Must be marked as Failed
+        $this->assertFalse($attempt->isPassed());
+        $this->assertEquals('F', $attempt->getGrade());
+
+        // 5. Result page must show Pass Mark 6 and Grade F
+        $resultRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.results', $attempt->id));
+
+        $resultRes->assertStatus(200);
+        $resultRes->assertSee('পাস মার্ক: ৬');
+        $resultRes->assertSee('অনুত্তীর্ণ (Assessment Not Passed)');
+        $resultRes->assertSee('F');
+        // Must NOT show Passed or Grade B when failed
+        $resultRes->assertDontSee('উত্তীর্ণ (Assessment Passed)');
+    }
 }

@@ -300,6 +300,7 @@ class StudentQuizController extends Controller
             ->count() + 1;
 
         $totalMarks = round(count($questions) * $markPerQ, 2);
+        $finalPassMarks = $passMarksReq !== null ? (float)$passMarksReq : (float)$quiz->pass_marks;
 
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id'              => $quiz->id,
@@ -307,6 +308,7 @@ class StudentQuizController extends Controller
             'attempt_number'       => $attemptNumber,
             'started_at'           => Carbon::now(),
             'total_marks'          => $totalMarks,
+            'pass_marks'           => $finalPassMarks,
             'status'               => 'in_progress',
             'view_mode'            => $viewMode,
             'question_set'         => "Cycle {$cycle}",
@@ -377,6 +379,20 @@ class StudentQuizController extends Controller
             }
 
             return redirect()->route('student.quiz.take', $activeAttempt->id);
+        }
+
+        if ($quiz->isUpcoming()) {
+            $formattedStart = $quiz->getFormattedStartTime();
+            $remaining = $quiz->getRemainingTimeForHumans();
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => "এই পরীক্ষাটি এখনও শুরু হয়নি। পরীক্ষা শুরু হবে {$formattedStart} তারিখে ({$remaining})।",
+            ]);
+        }
+
+        if ($quiz->isExpired()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষার নির্ধারিত সময়সীমা সমাপ্ত হয়েছে। নতুন করে পরীক্ষায় অংশগ্রহণ করা যাবে না।',
+            ]);
         }
 
         if (!$quiz->canAttempt($student->id)) {
@@ -554,6 +570,7 @@ class StudentQuizController extends Controller
             'attempt_number' => $attemptNumber,
             'started_at' => Carbon::now(),
             'total_marks' => $quiz->total_marks,
+            'pass_marks' => (float)$quiz->pass_marks,
             'status' => 'in_progress',
             'view_mode' => $viewMode,
             'question_set' => $assignedSet,
@@ -1055,6 +1072,18 @@ class StudentQuizController extends Controller
             }
         }
 
+        if ($quiz->isUpcoming()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষাটি এখনও শুরু হয়নি।',
+            ]);
+        }
+
+        if ($quiz->isExpired()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষার নির্ধারিত সময়সীমা সমাপ্ত হয়েছে।',
+            ]);
+        }
+
         // Check attempt limit
         if ($quiz->max_attempts > 0) {
             $finishedCount = LmsQuizAttempt::where('quiz_id', $quiz->id)
@@ -1134,6 +1163,7 @@ class StudentQuizController extends Controller
             'attempt_number'       => $nextNumber,
             'started_at'           => Carbon::now(),
             'total_marks'          => $previousAttempt->total_marks ?: $quiz->total_marks,
+            'pass_marks'           => $previousAttempt->pass_marks ?: $quiz->pass_marks,
             'status'               => 'in_progress',
             'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
             'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',

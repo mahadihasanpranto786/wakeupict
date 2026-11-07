@@ -24,6 +24,40 @@ class LmsQuiz extends Model
         'end_time' => 'datetime',
     ];
 
+    /**
+     * Set the start_time attribute safely supporting HTML5 datetime-local formats
+     */
+    public function setStartTimeAttribute($value)
+    {
+        if (empty($value) || (is_string($value) && trim($value) === '')) {
+            $this->attributes['start_time'] = null;
+            return;
+        }
+
+        try {
+            $this->attributes['start_time'] = \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            $this->attributes['start_time'] = null;
+        }
+    }
+
+    /**
+     * Set the end_time attribute safely supporting HTML5 datetime-local formats
+     */
+    public function setEndTimeAttribute($value)
+    {
+        if (empty($value) || (is_string($value) && trim($value) === '')) {
+            $this->attributes['end_time'] = null;
+            return;
+        }
+
+        try {
+            $this->attributes['end_time'] = \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            $this->attributes['end_time'] = null;
+        }
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
@@ -90,11 +124,146 @@ class LmsQuiz extends Model
     }
 
     /**
+     * Check if quiz is a formal live exam
+     */
+    public function isLiveExam()
+    {
+        return $this->quiz_type === 'exam';
+    }
+
+    /**
+     * Check if quiz has a scheduled start time
+     */
+    public function isScheduled()
+    {
+        return !empty($this->start_time);
+    }
+
+    /**
+     * Check if exam is scheduled for future
+     */
+    public function isUpcoming()
+    {
+        return $this->start_time && \Carbon\Carbon::now()->lt($this->start_time);
+    }
+
+    /**
+     * Check if exam has expired (passed end_time)
+     */
+    public function isExpired()
+    {
+        return $this->end_time && \Carbon\Carbon::now()->gt($this->end_time);
+    }
+
+    /**
+     * Check if exam is active and can be taken right now
+     */
+    public function isLiveNow()
+    {
+        if (!$this->is_published) {
+            return false;
+        }
+
+        $now = \Carbon\Carbon::now();
+        if ($this->start_time && $now->lt($this->start_time)) {
+            return false;
+        }
+        if ($this->end_time && $now->gt($this->end_time)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Remaining seconds until exam starts
+     */
+    public function getRemainingSeconds()
+    {
+        if (!$this->start_time) {
+            return 0;
+        }
+        $now = \Carbon\Carbon::now();
+        return $now->lt($this->start_time) ? $now->diffInSeconds($this->start_time) : 0;
+    }
+
+    /**
+     * Remaining full days count
+     */
+    public function getRemainingDaysCount()
+    {
+        if (!$this->start_time) {
+            return 0;
+        }
+        $now = \Carbon\Carbon::now();
+        if ($now->gte($this->start_time)) {
+            return 0;
+        }
+        return (int)$now->diffInDays($this->start_time);
+    }
+
+    /**
+     * Human-friendly remaining time text (Bengali + English)
+     */
+    public function getRemainingTimeForHumans()
+    {
+        if (!$this->start_time) {
+            return 'যেকোনো সময় উন্মুক্ত (Open)';
+        }
+
+        $now = \Carbon\Carbon::now();
+        if ($now->gte($this->start_time)) {
+            if ($this->end_time && $now->gt($this->end_time)) {
+                return 'সময় সমাপ্ত (Closed)';
+            }
+            return 'লাইভ চলমান (Live Now)';
+        }
+
+        $diff = $now->diff($this->start_time);
+        $parts = [];
+        if ($diff->days > 0) {
+            $parts[] = self::toBengaliNumber($diff->days) . ' দিন';
+        }
+        if ($diff->h > 0) {
+            $parts[] = self::toBengaliNumber($diff->h) . ' ঘণ্টা';
+        }
+        if ($diff->days == 0 && $diff->i > 0) {
+            $parts[] = self::toBengaliNumber($diff->i) . ' মিনিট';
+        }
+        if (empty($parts)) {
+            $parts[] = self::toBengaliNumber(max(1, $diff->s)) . ' সেকেন্ড';
+        }
+
+        return implode(' ', $parts) . ' বাকি (' . ($diff->days > 0 ? $diff->days . 'd ' : '') . ($diff->h > 0 ? $diff->h . 'h ' : '') . ($diff->days == 0 && $diff->i > 0 ? $diff->i . 'm ' : '') . 'remaining)';
+    }
+
+    /**
+     * Get formatted start time in English and Bengali
+     */
+    public function getFormattedStartTime()
+    {
+        if (!$this->start_time) {
+            return 'সময় নির্ধারণ করা নেই';
+        }
+        return $this->start_time->format('d M Y, h:i A');
+    }
+
+    /**
      * Check if student can take/retake this quiz
      */
     public function canAttempt($studentAccountId)
     {
         if (!$this->is_published) {
+            return false;
+        }
+
+        // If exam is scheduled for future, cannot attempt yet
+        if ($this->isUpcoming()) {
+            return false;
+        }
+
+        // If exam deadline has passed, cannot attempt
+        if ($this->isExpired()) {
             return false;
         }
 
