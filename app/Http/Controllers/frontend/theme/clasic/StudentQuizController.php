@@ -379,6 +379,20 @@ class StudentQuizController extends Controller
             return redirect()->route('student.quiz.take', $activeAttempt->id);
         }
 
+        if ($quiz->isUpcoming()) {
+            $formattedStart = $quiz->getFormattedStartTime();
+            $remaining = $quiz->getRemainingTimeForHumans();
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => "এই পরীক্ষাটি এখনও শুরু হয়নি। পরীক্ষা শুরু হবে {$formattedStart} তারিখে ({$remaining})।",
+            ]);
+        }
+
+        if ($quiz->isExpired()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষার নির্ধারিত সময়সীমা সমাপ্ত হয়েছে। নতুন করে পরীক্ষায় অংশগ্রহণ করা যাবে না।',
+            ]);
+        }
+
         if (!$quiz->canAttempt($student->id)) {
             return redirect()->route('student.quiz.lobby', $quiz->id)->with([
                 'error' => 'You have reached the maximum allowed attempts for this assessment.',
@@ -1053,6 +1067,18 @@ class StudentQuizController extends Controller
             } else {
                 $this->finalizeGrading($activeAttempt);
             }
+        }
+
+        if ($quiz->isUpcoming()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষাটি এখনও শুরু হয়নি।',
+            ]);
+        }
+
+        if ($quiz->isExpired()) {
+            return redirect()->route('student.quiz.lobby', $quiz->id)->with([
+                'error' => 'এই পরীক্ষার নির্ধারিত সময়সীমা সমাপ্ত হয়েছে।',
+            ]);
         }
 
         // Check attempt limit

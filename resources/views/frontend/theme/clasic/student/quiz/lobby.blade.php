@@ -76,6 +76,28 @@
 
         <div class="space-y-3 relative z-10">
             <div class="flex flex-wrap items-center gap-2">
+                @if($quiz->isUpcoming())
+                    <span class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-mono text-xs font-extrabold flex items-center gap-1.5 shadow-xs">
+                        <i class="fa fa-calendar-check-o text-amber-600 dark:text-amber-400"></i>
+                        <span>নির্ধারিত লাইভ পরীক্ষা (Scheduled Exam)</span>
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-mono text-xs font-extrabold flex items-center gap-1.5 shadow-xs">
+                        <i class="fa fa-hourglass-start animate-pulse text-indigo-600 dark:text-indigo-400"></i>
+                        <span>শুরু হতে বাকি: {{ $quiz->getRemainingTimeForHumans() }}</span>
+                    </span>
+                @elseif($quiz->isLiveNow() && $quiz->quiz_type === 'exam')
+                    <span class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-mono text-xs font-extrabold flex items-center gap-1.5 shadow-xs">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                        </span>
+                        <span>লাইভ পরীক্ষা চলমান (LIVE NOW)</span>
+                    </span>
+                @elseif($quiz->isExpired())
+                    <span class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-xs font-bold">
+                        <i class="fa fa-calendar-times-o mr-1"></i> সময় সমাপ্ত (Closed)
+                    </span>
+                @endif
                 <span class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono text-xs font-bold">
                     {{ $quiz->class_level ?: ($quiz->course ? $quiz->course->course_title : 'General Training') }}
                 </span>
@@ -112,6 +134,46 @@
                 <span class="text-xl font-black text-amber-500">{{ (int)$quiz->pass_marks }}</span>
             </div>
         </div>
+
+        @if($quiz->isUpcoming())
+            <!-- Dedicated Live Countdown Box for Upcoming Scheduled Exam -->
+            <div class="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-indigo-500/10 border-2 border-amber-500/30 text-center space-y-4 relative z-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-200 font-extrabold text-xs uppercase tracking-wider">
+                    <i class="fa fa-calendar-check-o text-amber-600 dark:text-amber-400"></i>
+                    <span>নির্ধারিত লাইভ পরীক্ষা (Scheduled Live Exam)</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    পরীক্ষা শুরু হতে বাকি (Time Remaining Until Start)
+                </h2>
+                <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-bold">
+                    নির্ধারিত শুরুর সময়: <span class="text-blue-600 dark:text-blue-400 font-mono text-sm sm:text-base">{{ $quiz->start_time->format('d M Y, h:i A') }}</span> ({{ \App\model\LmsQuiz::toBengaliNumber($quiz->start_time->format('d/m/Y h:i A')) }})
+                </div>
+
+                <!-- Real-Time Countdown Blocks -->
+                <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-lg mx-auto pt-2" id="lobbyCountdownGrid" data-countdown-target="{{ $quiz->start_time->toIso8601String() }}">
+                    <div class="p-3 sm:p-4 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-2xl sm:text-4xl font-black text-amber-600 dark:text-amber-400 font-mono" id="lobbyDays">00</div>
+                        <div class="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 uppercase font-bold mt-1">দিন (Days)</div>
+                    </div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-2xl sm:text-4xl font-black text-amber-600 dark:text-amber-400 font-mono" id="lobbyHours">00</div>
+                        <div class="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 uppercase font-bold mt-1">ঘণ্টা (Hours)</div>
+                    </div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-2xl sm:text-4xl font-black text-amber-600 dark:text-amber-400 font-mono" id="lobbyMins">00</div>
+                        <div class="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 uppercase font-bold mt-1">মিনিট (Mins)</div>
+                    </div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-2xl sm:text-4xl font-black text-rose-600 dark:text-rose-400 font-mono" id="lobbySecs">00</div>
+                        <div class="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 uppercase font-bold mt-1">সেকেন্ড (Secs)</div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto font-medium">
+                    নির্ধারিত তারিখ ও সময়ের পূর্বে এই পরীক্ষায় অংশগ্রহণ করা সম্ভব নয়। কাউন্টডাউন শেষ হওয়া মাত্রই পেজটি স্বয়ংক্রিয়ভাবে উন্মুক্ত হবে।
+                </p>
+            </div>
+        @endif
 
         <!-- Instructions Box -->
         <div class="quiz-card-inner p-5 sm:p-6 rounded-2xl border space-y-3 relative z-10">
@@ -180,6 +242,16 @@
                         <span>প্রশ্ন প্রস্তুত হচ্ছে (No Questions Yet)</span>
                     </button>
                 @endif
+            @elseif($quiz->isUpcoming())
+                <button type="button" disabled class="px-8 py-3.5 rounded-2xl bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-extrabold text-xs uppercase tracking-wider cursor-not-allowed flex items-center gap-2 shadow-xs" title="নির্ধারিত সময়ের পূর্বে পরীক্ষা শুরু করা যাবে না">
+                    <i class="fa fa-lock text-sm"></i>
+                    <span>পরীক্ষা শুরুর অপেক্ষা (Locked Until Scheduled Start)</span>
+                </button>
+            @elseif($quiz->isExpired())
+                <button type="button" disabled class="px-6 py-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 font-bold text-xs uppercase tracking-wider cursor-not-allowed flex items-center gap-2">
+                    <i class="fa fa-times-circle text-sm"></i>
+                    <span>সময় সমাপ্ত (Exam Deadline Ended)</span>
+                </button>
             @else
                 <button disabled class="px-6 py-3 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-400 font-bold text-xs uppercase tracking-wider cursor-not-allowed">
                     <i class="fa fa-ban mr-1"></i> Maximum Attempts Reached
@@ -342,5 +414,60 @@
                 }
             }
         }
+
+        // Live Countdown Ticker for Lobby
+        document.addEventListener('DOMContentLoaded', function() {
+            var grid = document.getElementById('lobbyCountdownGrid');
+            if (!grid) return;
+
+            var targetStr = grid.getAttribute('data-countdown-target');
+            if (!targetStr) return;
+
+            var targetTime = new Date(targetStr).getTime();
+            var bngDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            function toBngNum(num) {
+                var pad = (num < 10 ? '0' : '') + num;
+                return pad.replace(/[0-9]/g, function(d) { return bngDigits[d]; });
+            }
+
+            function updateLobbyTicker() {
+                var now = new Date().getTime();
+                var diff = targetTime - now;
+
+                if (diff <= 0) {
+                    var daysEl = document.getElementById('lobbyDays');
+                    var hoursEl = document.getElementById('lobbyHours');
+                    var minsEl = document.getElementById('lobbyMins');
+                    var secsEl = document.getElementById('lobbySecs');
+                    if (daysEl) daysEl.innerText = '০০';
+                    if (hoursEl) hoursEl.innerText = '০০';
+                    if (minsEl) minsEl.innerText = '০০';
+                    if (secsEl) secsEl.innerText = '০০';
+
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1200);
+                    return;
+                }
+
+                var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                var daysEl = document.getElementById('lobbyDays');
+                var hoursEl = document.getElementById('lobbyHours');
+                var minsEl = document.getElementById('lobbyMins');
+                var secsEl = document.getElementById('lobbySecs');
+
+                if (daysEl) daysEl.innerText = toBngNum(days);
+                if (hoursEl) hoursEl.innerText = toBngNum(hours);
+                if (minsEl) minsEl.innerText = toBngNum(mins);
+                if (secsEl) secsEl.innerText = toBngNum(secs);
+            }
+
+            updateLobbyTicker();
+            setInterval(updateLobbyTicker, 1000);
+        });
     </script>
 @endsection

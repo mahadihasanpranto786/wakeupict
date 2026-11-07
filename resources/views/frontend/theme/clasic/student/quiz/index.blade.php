@@ -267,7 +267,12 @@
                                 </div>
 
                                 <!-- Class Level or Status Badge -->
-                                <div class="flex items-center gap-1.5">
+                                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                                    @if($quiz->isUpcoming())
+                                        <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-mono text-[9px] font-bold">
+                                            <i class="fa fa-clock-o mr-1"></i> {{ $quiz->getRemainingTimeForHumans() }}
+                                        </span>
+                                    @endif
                                     @if($hasPassed)
                                         <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold flex items-center gap-1">
                                             <i class="fa fa-check-circle"></i> Passed

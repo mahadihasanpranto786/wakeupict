@@ -329,12 +329,21 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-                        <a href="{{ route('student.quiz.lobby', $quiz->id) }}" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
-                            <i class="fa fa-play-circle text-xs"></i>
-                            <span>পরীক্ষায় অংশ নিন</span>
-                        </a>
-                    </div>
+                    @if($quiz->isUpcoming())
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+                            <a href="{{ route('student.quiz.lobby', $quiz->id) }}" class="w-full py-2 px-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs" title="পরীক্ষা শুরু: {{ $quiz->start_time->format('d M Y, h:i A') }}">
+                                <i class="fa fa-lock text-xs"></i>
+                                <span>শুরু হতে বাকি: {{ $quiz->getRemainingDaysCount() > 0 ? \App\model\LmsQuiz::toBengaliNumber($quiz->getRemainingDaysCount()) . ' দিন' : $quiz->getRemainingTimeForHumans() }}</span>
+                            </a>
+                        </div>
+                    @else
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+                            <a href="{{ route('student.quiz.lobby', $quiz->id) }}" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                <i class="fa fa-play-circle text-xs"></i>
+                                <span>পরীক্ষায় অংশ নিন</span>
+                            </a>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

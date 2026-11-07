@@ -712,4 +712,53 @@ class AdminCertificateAndQuizImportTest extends TestCase
         $res->assertSee('What is computer RAM?');
         $res->assertSee('Random Access Memory');
     }
+
+    /**
+     * Test Admin can update quiz with HTML5 datetime-local formats and empty dates
+     */
+    public function testAdminCanUpdateQuizWithHtml5DateTimeLocalFormat()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id' => $this->course->id,
+            'title' => 'HTML5 Date Test Quiz',
+            'quiz_type' => 'practice',
+            'duration_minutes' => 15,
+            'pass_marks' => 5.0,
+            'is_published' => true,
+        ]);
+
+        // 1. Update with HTML5 datetime-local format '2026-11-15T10:30'
+        $res = $this->actingAs($this->adminUser)
+            ->put(route('admin.quizzes.update', $quiz->id), [
+                'course_id' => $this->course->id,
+                'title' => 'HTML5 Date Test Quiz Updated',
+                'quiz_type' => 'exam',
+                'duration_minutes' => 20,
+                'start_time' => '2026-11-15T10:30',
+                'end_time' => '2026-11-15T12:00',
+            ]);
+
+        $res->assertRedirect();
+        $quiz->refresh();
+        $this->assertEquals('2026-11-15 10:30:00', $quiz->start_time->format('Y-m-d H:i:s'));
+        $this->assertEquals('2026-11-15 12:00:00', $quiz->end_time->format('Y-m-d H:i:s'));
+
+        // 2. Update with empty string dates (clearing date)
+        $res2 = $this->actingAs($this->adminUser)
+            ->put(route('admin.quizzes.update', $quiz->id), [
+                'course_id' => $this->course->id,
+                'title' => 'HTML5 Date Test Quiz Cleared',
+                'quiz_type' => 'practice',
+                'duration_minutes' => 20,
+                'start_time' => '',
+                'end_time' => '',
+            ]);
+
+        $res2->assertRedirect();
+        $quiz->refresh();
+        $this->assertNull($quiz->start_time);
+        $this->assertNull($quiz->end_time);
+
+        $quiz->delete();
+    }
 }

@@ -1097,4 +1097,102 @@ class LmsQuizAndExamTest extends TestCase
             ]);
         $this->assertCount(5, $apiResponsePage2->json('data'));
     }
+
+    /**
+     * Test scheduled live exam date enforcement and remaining start date display
+     */
+    public function testScheduledLiveExamDateEnforcementAndRemainingDaysDisplay()
+    {
+        $futureStartTime = \Carbon\Carbon::now()->addDays(3)->setTime(11, 0, 0);
+
+        // 1. Create a scheduled Live Exam
+        $scheduledExam = LmsQuiz::create([
+            'course_id'        => $this->quiz->course_id,
+            'title'            => 'HSC ICT Final Board Model Exam ' . uniqid(),
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 30,
+            'total_marks'      => 10.0,
+            'pass_marks'       => 5.0,
+            'max_attempts'     => 1,
+            'is_published'     => true,
+            'start_time'       => $futureStartTime,
+        ]);
+
+        $q = LmsQuestion::create([
+            'quiz_id'       => $scheduledExam->id,
+            'question_text' => 'What is the full form of HTML?',
+            'question_type' => 'mcq_single',
+            'marks'         => 10.0,
+            'is_active'     => true,
+        ]);
+
+        LmsQuestionOption::create([
+            'question_id' => $q->id,
+            'option_text' => 'HyperText Markup Language',
+            'is_correct'  => true,
+            'order_index' => 1,
+        ]);
+
+        // 2. Model methods validation
+        $this->assertTrue($scheduledExam->isLiveExam());
+        $this->assertTrue($scheduledExam->isScheduled());
+        $this->assertTrue($scheduledExam->isUpcoming());
+        $this->assertFalse($scheduledExam->isLiveNow());
+        $this->assertFalse($scheduledExam->canAttempt($this->student->id));
+        $this->assertGreaterThan(0, $scheduledExam->getRemainingSeconds());
+        $this->assertStringContainsString('বাকি', $scheduledExam->getRemainingTimeForHumans());
+
+        // 3. Upcoming exams page should display start date & remaining countdown text
+        $upcomingRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.exams.upcoming'));
+
+        $upcomingRes->assertStatus(200);
+        $upcomingRes->assertSee($scheduledExam->title);
+        $upcomingRes->assertSee($futureStartTime->format('d M Y'));
+        $upcomingRes->assertSee('শুরু হতে বাকি');
+        $upcomingRes->assertSee('Locked');
+
+        // 4. Lobby page should show countdown timer and disabled start
+        $lobbyRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.lobby', $scheduledExam->id));
+
+        $lobbyRes->assertStatus(200);
+        $lobbyRes->assertSee('পরীক্ষা শুরু হতে বাকি');
+        $lobbyRes->assertSee('নির্ধারিত লাইভ পরীক্ষা');
+        $lobbyRes->assertSee('Locked Until Scheduled Start');
+
+        // 5. Attempting to start the exam before start_time must be rejected
+        $startRes = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $scheduledExam->id));
+
+        $startRes->assertRedirect(route('student.quiz.lobby', $scheduledExam->id));
+        $startRes->assertSessionHas('error');
+
+        // 6. When exam start date arrives (start_time in the past)
+        $scheduledExam->update([
+            'start_time' => \Carbon\Carbon::now()->subMinutes(5),
+        ]);
+        $scheduledExam->refresh();
+
+        $this->assertFalse($scheduledExam->isUpcoming());
+        $this->assertTrue($scheduledExam->isLiveNow());
+        $this->assertTrue($scheduledExam->canAttempt($this->student->id));
+
+        // 7. Student can now start the exam
+        $validStartRes = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.start', $scheduledExam->id));
+
+        $newAttempt = LmsQuizAttempt::where('quiz_id', $scheduledExam->id)
+            ->where('student_account_id', $this->student->id)
+            ->first();
+
+        $this->assertNotNull($newAttempt);
+        $validStartRes->assertRedirect(route('student.quiz.take', $newAttempt->id));
+
+        // Clean up
+        $newAttempt->delete();
+        $q->options()->delete();
+        $q->delete();
+        $scheduledExam->delete();
+    }
 }
