@@ -300,6 +300,7 @@ class StudentQuizController extends Controller
             ->count() + 1;
 
         $totalMarks = round(count($questions) * $markPerQ, 2);
+        $finalPassMarks = $passMarksReq !== null ? (float)$passMarksReq : (float)$quiz->pass_marks;
 
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id'              => $quiz->id,
@@ -307,6 +308,7 @@ class StudentQuizController extends Controller
             'attempt_number'       => $attemptNumber,
             'started_at'           => Carbon::now(),
             'total_marks'          => $totalMarks,
+            'pass_marks'           => $finalPassMarks,
             'status'               => 'in_progress',
             'view_mode'            => $viewMode,
             'question_set'         => "Cycle {$cycle}",
@@ -568,6 +570,7 @@ class StudentQuizController extends Controller
             'attempt_number' => $attemptNumber,
             'started_at' => Carbon::now(),
             'total_marks' => $quiz->total_marks,
+            'pass_marks' => (float)$quiz->pass_marks,
             'status' => 'in_progress',
             'view_mode' => $viewMode,
             'question_set' => $assignedSet,
@@ -1160,6 +1163,7 @@ class StudentQuizController extends Controller
             'attempt_number'       => $nextNumber,
             'started_at'           => Carbon::now(),
             'total_marks'          => $previousAttempt->total_marks ?: $quiz->total_marks,
+            'pass_marks'           => $previousAttempt->pass_marks ?: $quiz->pass_marks,
             'status'               => 'in_progress',
             'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
             'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',

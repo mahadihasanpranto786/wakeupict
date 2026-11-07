@@ -135,3 +135,55 @@ esbot\\carbon\\src\\Carbon\\Traits\\Creator.php(698): Carbon\\Carbon::rawCreateF
 #8 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\825254f1-4b74-4cda-a3c2-8b1fedf40c29\\scratch\\check_student.php(10): Illuminate\\Database\\Eloquent\\Builder->get()
 #9 {main}
 "} 
+[2026-11-07 11:53:45] local.ERROR: Call to undefined relationship [studentAccount] on model [App\model\LmsQuizAttempt]. {"exception":"[object] (Illuminate\\Database\\Eloquent\\RelationNotFoundException(code: 0): Call to undefined relationship [studentAccount] on model [App\\model\\LmsQuizAttempt]. at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\RelationNotFoundException.php:34)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(588): Illuminate\\Database\\Eloquent\\RelationNotFoundException::make(Object(App\\model\\LmsQuizAttempt), 'studentAccount')
+#1 [internal function]: Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}()
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Relations\\Relation.php(90): call_user_func(Object(Closure))
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(590): Illuminate\\Database\\Eloquent\\Relations\\Relation::noConstraints(Object(Closure))
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(558): Illuminate\\Database\\Eloquent\\Builder->getRelation('studentAccount')
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(538): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelation(Array, 'studentAccount', Object(Closure))
+#6 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(506): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelations(Array)
+#7 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Concerns\\BuildsQueries.php(77): Illuminate\\Database\\Eloquent\\Builder->get(Array)
+#8 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(329): Illuminate\\Database\\Eloquent\\Builder->first(Array)
+#9 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\53ef6b5d-e9a8-403d-a5d3-70dd76560502\\scratch\\check_attempt.php(6): Illuminate\\Database\\Eloquent\\Builder->find(10)
+#10 {main}
+"} 
+[2026-11-07 11:53:57] local.ERROR: Call to undefined method App\model\LmsQuizAttempt::getGrade() {"exception":"[object] (BadMethodCallException(code: 0): Call to undefined method App\\model\\LmsQuizAttempt::getGrade() at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Traits\\ForwardsCalls.php:50)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Traits\\ForwardsCalls.php(36): Illuminate\\Database\\Eloquent\\Model::throwBadMethodCallException('getGrade')
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Model.php(1618): Illuminate\\Database\\Eloquent\\Model->forwardCallTo(Object(Illuminate\\Database\\Eloquent\\Builder), 'getGrade', Array)
+#2 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\53ef6b5d-e9a8-403d-a5d3-70dd76560502\\scratch\\check_attempt.php(17): Illuminate\\Database\\Eloquent\\Model->__call('getGrade', Array)
+#3 {main}
+"} 
+[2026-11-07 11:58:51] local.ERROR: SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'lms_student_question_histories' already exists (SQL: create table `lms_student_question_histories` (`id` bigint unsigned not null auto_increment primary key, `student_account_id` bigint unsigned not null, `question_id` bigint unsigned not null, `attempt_id` bigint unsigned null, `category` varchar(150) null, `course_id` int unsigned null, `rotation_cycle` int unsigned not null default '1', `is_correct` tinyint(1) null, `selected_option_ids` text null, `times_attempted` int unsigned not null default '1', `last_attempted_at` timestamp null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8mb4 collate 'utf8mb4_unicode_ci') {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S01): SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'lms_student_question_histories' already exists (SQL: create table `lms_student_question_histories` (`id` bigint unsigned not null auto_increment primary key, `student_account_id` bigint unsigned not null, `question_id` bigint unsigned not null, `attempt_id` bigint unsigned null, `category` varchar(150) null, `course_id` int unsigned null, `rotation_cycle` int unsigned not null default '1', `is_correct` tinyint(1) null, `selected_option_ids` text null, `times_attempted` int unsigned not null default '1', `last_attempted_at` timestamp null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8mb4 collate 'utf8mb4_unicode_ci') at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S01): SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'lms_student_question_histories' already exists at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:458)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('create table `l...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(459): Illuminate\\Database\\Connection->run('create table `l...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Schema\\Blueprint.php(97): Illuminate\\Database\\Connection->statement('create table `l...')
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Schema\\Builder.php(278): Illuminate\\Database\\Schema\\Blueprint->build(Object(Illuminate\\Database\\MySqlConnection), Object(Illuminate\\Database\\Schema\\Grammars\\MySqlGrammar))
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Schema\\Builder.php(167): Illuminate\\Database\\Schema\\Builder->build(Object(Illuminate\\Database\\Schema\\Blueprint))
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Support\\Facades\\Facade.php(239): Illuminate\\Database\\Schema\\Builder->create('lms_student_que...', Object(Closure))
+#6 C:\\Herd\\wakeupict\\database\\migrations\\2026_11_02_073443_create_lms_student_question_histories_table.php(31): Illuminate\\Support\\Facades\\Facade::__callStatic('create', Array)
+#7 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Migrations\\Migrator.php(387): CreateLmsStudentQuestionHistoriesTable->up()
+#8 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Migrations\\Migrator.php(396): Illuminate\\Database\\Migrations\\Migrator->Illuminate\\Database\\Migrations\\{closure}()
+#9 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Migrations\\Migrator.php(197): Illuminate\\Database\\Migrations\\Migrator->runMigration(Object(CreateLmsStudentQuestionHistoriesTable), 'up')
+#10 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Migrations\\Migrator.php(162): Illuminate\\Database\\Migrations\\Migrator->runUp('C:\\\\Herd\\\\wakeupi...', 83, false)
+#11 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Migrations\\Migrator.php(109): Illuminate\\Database\\Migrations\\Migrator->runPending(Array, Array)
+#12 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Console\\Migrations\\MigrateCommand.php(71): Illuminate\\Database\\Migrations\\Migrator->run(Array, Array)
+#13 [internal function]: Illuminate\\Database\\Console\\Migrations\\MigrateCommand->handle()
+#14 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(32): call_user_func_array(Array, Array)
+#15 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(90): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#16 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(34): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#17 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(576): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#18 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(183): Illuminate\\Container\\Container->call(Array)
+#19 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Command\\Command.php(255): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#20 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(170): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#21 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(1009): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#22 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(273): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Migrations\\MigrateCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#23 C:\\Herd\\wakeupict\\vendor\\symfony\\console\\Application.php(149): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#24 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Application.php(90): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#25 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(133): Illuminate\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#26 C:\\Herd\\wakeupict\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#27 {main}
+"} 
