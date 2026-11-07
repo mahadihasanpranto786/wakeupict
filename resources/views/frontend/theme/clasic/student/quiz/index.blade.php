@@ -102,20 +102,22 @@
 
 @section('content')
 <!-- Full-Wrapper Container spanning edge-to-edge of main canvas -->
-<div class="-m-4 sm:-m-8 p-4 sm:p-8 min-h-[calc(100vh-5rem)] relative overflow-hidden">
+<div class="-m-4 sm:-m-8 p-4 sm:p-8 min-h-[calc(100vh-5rem)] relative overflow-hidden max-w-full">
 
     <!-- =========================================================================
          1. FULL-WRAPPER AMBIENT BACKGROUND GLOWS & FLOATING 3D SHAPES
          ========================================================================= -->
-    <!-- Soft Blue Atmosphere Aura spanning entire top-left from header edge -->
-    <div class="absolute -top-16 -left-20 w-[620px] sm:w-[750px] h-[620px] sm:h-[750px] bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-transparent rounded-full blur-[130px] pointer-events-none -z-10"></div>
-    
-    <!-- Soft Warm Amber/Peach Atmosphere Aura spanning top-right edge -->
-    <div class="absolute -top-10 -right-20 w-[600px] sm:w-[720px] h-[600px] sm:h-[720px] bg-gradient-to-bl from-amber-300/30 via-orange-300/20 to-transparent rounded-full blur-[140px] pointer-events-none -z-10"></div>
+    <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <!-- Soft Blue Atmosphere Aura spanning entire top-left from header edge -->
+        <div class="absolute -top-16 -left-20 w-[620px] sm:w-[750px] h-[620px] sm:h-[750px] bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-transparent rounded-full blur-[130px]"></div>
+        
+        <!-- Soft Warm Amber/Peach Atmosphere Aura spanning top-right edge -->
+        <div class="absolute -top-10 -right-20 w-[600px] sm:w-[720px] h-[600px] sm:h-[720px] bg-gradient-to-bl from-amber-300/30 via-orange-300/20 to-transparent rounded-full blur-[140px]"></div>
 
-    <!-- Mid & Bottom Ambient Auras for complete vertical screen coverage -->
-    <div class="absolute -left-20 top-1/2 -translate-y-1/2 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-blue-500/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
-    <div class="absolute -right-20 bottom-10 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-orange-400/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+        <!-- Mid & Bottom Ambient Auras for complete vertical screen coverage -->
+        <div class="absolute -left-20 top-1/2 -translate-y-1/2 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-blue-500/15 rounded-full blur-[140px]"></div>
+        <div class="absolute -right-20 bottom-10 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-orange-400/15 rounded-full blur-[140px]"></div>
+    </div>
 
     <!-- Floating 3D Geometric Frosted Prism - Left Shape -->
     <div class="hidden lg:block absolute left-4 top-[280px] pointer-events-none animate-float-slow -z-10 opacity-70">
@@ -465,9 +467,9 @@
                     </p>
                 </div>
 
-                <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-center">
                     <a href="{{ route('student.support.index') }}" 
-                       class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/20 hover:scale-105 transition-all flex items-center gap-2">
+                       class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/20 hover:scale-105 transition-all flex items-center justify-center gap-2">
                         <i class="fa fa-comments-o"></i>
                         <span>Contact Instructor</span>
                     </a>

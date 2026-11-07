@@ -92,12 +92,14 @@
 
 @section('content')
 <!-- Full-Wrapper Container spanning edge-to-edge -->
-<div class="-m-4 sm:-m-8 p-4 sm:p-8 min-h-[calc(100vh-5rem)] relative overflow-hidden">
+<div class="-m-4 sm:-m-8 p-4 sm:p-8 min-h-[calc(100vh-5rem)] relative overflow-hidden max-w-full">
 
     <!-- Ambient Atmosphere Aura spanning entire canvas from sidebar to right edge -->
-    <div class="absolute -top-16 -left-20 w-[620px] sm:w-[750px] h-[620px] sm:h-[750px] bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-transparent rounded-full blur-[130px] pointer-events-none -z-10"></div>
-    <div class="absolute -top-10 -right-20 w-[600px] sm:w-[720px] h-[600px] sm:h-[720px] bg-gradient-to-bl from-amber-300/30 via-orange-300/20 to-transparent rounded-full blur-[140px] pointer-events-none -z-10"></div>
-    <div class="absolute -left-20 bottom-10 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-blue-500/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+    <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute -top-16 -left-20 w-[620px] sm:w-[750px] h-[620px] sm:h-[750px] bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-transparent rounded-full blur-[130px]"></div>
+        <div class="absolute -top-10 -right-20 w-[600px] sm:w-[720px] h-[600px] sm:h-[720px] bg-gradient-to-bl from-amber-300/30 via-orange-300/20 to-transparent rounded-full blur-[140px]"></div>
+        <div class="absolute -left-20 bottom-10 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-blue-500/15 rounded-full blur-[140px]"></div>
+    </div>
 
     <!-- Floating 3D Geometric Frosted Prism -->
     <div class="hidden lg:block absolute left-4 top-[280px] pointer-events-none animate-float-slow -z-10 opacity-70">

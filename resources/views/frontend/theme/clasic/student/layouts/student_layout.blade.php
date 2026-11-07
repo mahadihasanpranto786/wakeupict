@@ -53,6 +53,21 @@
     <style>
         html {
             font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
+            max-width: 100vw;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html, body {
+            overflow-x: hidden !important;
+            max-width: 100vw;
         }
 
         :root {
@@ -462,10 +477,34 @@
             color: #0f172a !important;
             background-color: #f1f5f9 !important;
         }
-        html.light .submenu-container a[class*="bg-brand-primary"] {
-            background-color: rgba(var(--brand-primary-rgb, 242, 101, 34), 0.12) !important;
-            color: var(--brand-primary, #F26522) !important;
+
+        /* Active Submenu Link in Light Mode: High-contrast deep amber/orange (WCAG AAA) */
+        html.light .submenu-container a.active,
+        html.light .submenu-container a.student-menu-active,
+        html.light .submenu-container a[class*="bg-brand-primary"],
+        html.light .submenu-container a[class*="text-brand-primary"] {
+            background-color: #FFF1E8 !important;
+            border: 1px solid #FDBA74 !important;
+            color: #9A3412 !important;
             font-weight: 700 !important;
+        }
+        html.light .submenu-container a.active *,
+        html.light .submenu-container a.student-menu-active *,
+        html.light .submenu-container a[class*="bg-brand-primary"] *,
+        html.light .submenu-container a[class*="text-brand-primary"] * {
+            color: #9A3412 !important;
+            font-weight: 700 !important;
+        }
+        html.light .submenu-container a.active:hover,
+        html.light .submenu-container a.student-menu-active:hover,
+        html.light .submenu-container a[class*="bg-brand-primary"]:hover {
+            background-color: #FFE4D6 !important;
+            color: #7C2D12 !important;
+        }
+        html.light .submenu-container a.active:hover *,
+        html.light .submenu-container a.student-menu-active:hover *,
+        html.light .submenu-container a[class*="bg-brand-primary"]:hover * {
+            color: #7C2D12 !important;
         }
 
         /* Student profile card in sidebar */
@@ -477,15 +516,17 @@
             color: #0f172a !important;
         }
 
-        /* Active sidebar link */
-        html.light nav a.bg-brand-primary,
-        html.light .student-sidebar a.bg-brand-primary {
+        /* Active sidebar link (Direct top-level items outside submenu) */
+        html.light .student-sidebar > nav > a.active,
+        html.light .student-sidebar > nav > a.student-menu-active,
+        html.light .student-sidebar > nav > a.bg-brand-primary {
             background-color: var(--brand-primary, #F26522) !important;
             color: #ffffff !important;
             font-weight: 700 !important;
         }
-        html.light nav a.bg-brand-primary *,
-        html.light .student-sidebar a.bg-brand-primary * {
+        html.light .student-sidebar > nav > a.active *,
+        html.light .student-sidebar > nav > a.student-menu-active *,
+        html.light .student-sidebar > nav > a.bg-brand-primary * {
             color: #ffffff !important;
         }
 
@@ -626,6 +667,52 @@
         html.dark a:not(.btn):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):hover {
             color: #ffffff !important;
         }
+
+        /* Dark mode active submenu items */
+        html.dark .submenu-container a.active,
+        html.dark .submenu-container a.student-menu-active,
+        html.dark .submenu-container a[class*="bg-brand-primary"],
+        html.dark .submenu-container a[class*="text-brand-primary"] {
+            background-color: rgba(242, 101, 34, 0.18) !important;
+            border: 1px solid rgba(251, 146, 60, 0.45) !important;
+            color: #FED7AA !important;
+            font-weight: 700 !important;
+        }
+        html.dark .submenu-container a.active *,
+        html.dark .submenu-container a.student-menu-active *,
+        html.dark .submenu-container a[class*="bg-brand-primary"] *,
+        html.dark .submenu-container a[class*="text-brand-primary"] * {
+            color: #FED7AA !important;
+            font-weight: 700 !important;
+        }
+        html.dark .submenu-container a.active:hover,
+        html.dark .submenu-container a.student-menu-active:hover,
+        html.dark .submenu-container a[class*="bg-brand-primary"]:hover {
+            background-color: rgba(242, 101, 34, 0.28) !important;
+            color: #FFFFFF !important;
+        }
+        html.dark .submenu-container a.active:hover *,
+        html.dark .submenu-container a.student-menu-active:hover *,
+        html.dark .submenu-container a[class*="bg-brand-primary"]:hover * {
+            color: #FFFFFF !important;
+        }
+
+        /* 14. Student Portal Footer in Light & Dark Mode */
+        html.light footer {
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+            background-color: rgba(255, 255, 255, 0.6) !important;
+        }
+        html.light footer p {
+            color: #475569 !important;
+        }
+        html.dark footer {
+            border-color: rgba(30, 41, 59, 0.6) !important;
+            color: #94a3b8 !important;
+        }
+        html.dark footer p {
+            color: #94a3b8 !important;
+        }
     </style>
 
     <!-- Tailwind CSS v3 via CDN -->
@@ -677,10 +764,12 @@
 
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-primary selection:text-slate-950">
 
-    <!-- Ambient Grid & Glow -->
-    <div class="fixed inset-0 bg-grid-mesh opacity-20 pointer-events-none z-0"></div>
-    <div class="fixed -top-40 -left-40 w-96 h-96 bg-brand-primary/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
-    <div class="fixed -bottom-40 -right-40 w-96 h-96 bg-brand-cyan/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+    <!-- Ambient Grid & Glow (Contained within overflow-hidden to prevent horizontal scrollbars) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute inset-0 bg-grid-mesh opacity-20"></div>
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-primary/10 rounded-full blur-[140px]"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-brand-cyan/10 rounded-full blur-[140px]"></div>
+    </div>
 
     <div class="relative z-10 flex min-h-screen">
 
@@ -752,9 +841,9 @@
 
                                     @php $childCurrent = $child->isCurrent(); @endphp
                                     <a href="{{ $child->resolveUrl() }}" 
-                                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {{ $childCurrent ? 'bg-brand-primary/10 text-brand-primary font-semibold border border-brand-primary/20' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
-                                        <i class="{{ $child->icon }} text-xs w-3 text-center {{ $childCurrent ? 'text-brand-primary' : 'text-slate-500' }}"></i>
-                                        <span class="truncate">{{ $child->getTitle() }}</span>
+                                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 {{ $childCurrent ? 'active student-menu-active bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 font-bold border border-orange-300 dark:border-orange-800/60 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40' }}">
+                                        <i class="{{ $child->icon }} text-xs w-3 text-center {{ $childCurrent ? 'text-orange-800 dark:text-orange-300 font-bold' : 'text-slate-400 dark:text-slate-500' }}"></i>
+                                        <span class="truncate {{ $childCurrent ? 'text-orange-900 dark:text-orange-200 font-bold' : '' }}">{{ $child->getTitle() }}</span>
                                     </a>
                                 @endforeach
                             </div>
@@ -762,8 +851,8 @@
                     @else
                         <!-- Direct Link -->
                         <a href="{{ $menu->resolveUrl() }}" 
-                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isCurrent ? 'bg-brand-primary text-white shadow-glow-brand font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
-                            <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isCurrent ? 'text-white' : 'text-slate-400' }}"></i>
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ $isCurrent ? 'active student-menu-active bg-brand-primary text-white shadow-glow-brand font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40' }}">
+                            <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isCurrent ? 'text-white' : 'text-slate-400 dark:text-slate-400' }}"></i>
                             <span class="truncate">{{ $menu->getTitle() }}</span>
                         </a>
                     @endif
@@ -789,13 +878,15 @@
         <!-- =========================================================================
              2. MAIN WRAPPER & TOP HEADER
              ========================================================================= -->
-        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative">
+        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative overflow-x-hidden w-full max-w-full">
             
-            <!-- Global Full-Wrapper Ambient Glows (Starts immediately at sidebar border) -->
-            <div class="absolute -top-16 left-0 w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] bg-gradient-to-br from-blue-400/25 via-indigo-400/15 to-transparent rounded-full blur-[140px] pointer-events-none -z-10"></div>
-            <div class="absolute -top-10 -right-20 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] bg-gradient-to-bl from-amber-300/25 via-orange-300/15 to-transparent rounded-full blur-[150px] pointer-events-none -z-10"></div>
-            <div class="absolute top-1/2 left-0 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-blue-500/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
-            <div class="absolute bottom-10 -right-10 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-orange-400/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <!-- Global Full-Wrapper Ambient Glows (Contained within overflow-hidden to prevent horizontal scrollbar) -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+                <div class="absolute -top-16 left-0 w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] bg-gradient-to-br from-blue-400/25 via-indigo-400/15 to-transparent rounded-full blur-[140px]"></div>
+                <div class="absolute -top-10 -right-20 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] bg-gradient-to-bl from-amber-300/25 via-orange-300/15 to-transparent rounded-full blur-[150px]"></div>
+                <div class="absolute top-1/2 left-0 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-blue-500/15 rounded-full blur-[150px]"></div>
+                <div class="absolute bottom-10 -right-10 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] bg-orange-400/15 rounded-full blur-[150px]"></div>
+            </div>
             
             <!-- Top Header Navigation Bar -->
             <header class="student-header sticky top-0 z-20 h-20 bg-slate-900/80 border-b border-slate-800/80 backdrop-blur-2xl px-4 sm:px-8 flex items-center justify-between">
@@ -880,12 +971,12 @@
             <!-- =========================================================================
                  3. MAIN CONTENT INJECTION
                  ========================================================================= -->
-            <main class="flex-1 p-4 sm:p-8">
+            <main class="flex-1 p-4 sm:p-8 min-w-0 overflow-x-hidden w-full max-w-full">
                 @yield('content')
             </main>
 
             <!-- Footer -->
-            <footer class="p-6 border-t border-slate-800/60 text-center text-xs text-slate-400">
+            <footer class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800/60 text-center text-xs text-slate-600 dark:text-slate-400 w-full overflow-hidden bg-white/40 dark:bg-transparent">
                 <p>&copy; {{ date('Y') }} Wake Up ICT — Student Learning Management System. All rights reserved.</p>
             </footer>
 
@@ -925,17 +1016,19 @@
                                     @if($child->menu_key === 'bteb_omr_sheet')
                                         @continue
                                     @endif
-                                    <a href="{{ $child->resolveUrl() }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800">
-                                        <i class="{{ $child->icon }} text-xs w-4 text-center text-brand-primary"></i>
-                                        <span>{{ $child->getTitle() }}</span>
+                                    @php $childCurrent = $child->isCurrent(); @endphp
+                                    <a href="{{ $child->resolveUrl() }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 {{ $childCurrent ? 'active student-menu-active bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 font-bold border border-orange-300 dark:border-orange-800/60 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
+                                        <i class="{{ $child->icon }} text-xs w-4 text-center {{ $childCurrent ? 'text-orange-800 dark:text-orange-300 font-bold' : 'text-brand-primary' }}"></i>
+                                        <span class="{{ $childCurrent ? 'font-bold text-orange-900 dark:text-orange-200' : '' }}">{{ $child->getTitle() }}</span>
                                     </a>
                                 @endforeach
                             </div>
                         </div>
                     @else
-                        <a href="{{ $menu->resolveUrl() }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800">
-                             <i class="{{ $menu->icon }} text-sm w-4 text-center text-brand-primary"></i>
-                            <span>{{ $menu->getTitle() }}</span>
+                        @php $isCurrent = $menu->isCurrent(); @endphp
+                        <a href="{{ $menu->resolveUrl() }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 {{ $isCurrent ? 'active student-menu-active bg-brand-primary text-white shadow-glow-brand font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
+                             <i class="{{ $menu->icon }} text-sm w-4 text-center {{ $isCurrent ? 'text-white' : 'text-brand-primary' }}"></i>
+                            <span class="{{ $isCurrent ? 'font-bold' : '' }}">{{ $menu->getTitle() }}</span>
                         </a>
                     @endif
                 @endforeach
