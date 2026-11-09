@@ -310,7 +310,7 @@
                                 @if(isset($activeCourses))
                                     @foreach($activeCourses as $c)
                                         <option value="{{ $c->id }}" {{ old('course_id') == $c->id ? 'selected' : '' }}>
-                                            {{ $c->course_title }} (Code: {{ $c->course_code }})
+                                            {{ $c->course_title }} (Code: {{ $c->course_code ?: str_pad($c->id, 2, '0', STR_PAD_LEFT) }})
                                         </option>
                                     @endforeach
                                 @endif

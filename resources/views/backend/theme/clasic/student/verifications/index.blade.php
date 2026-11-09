@@ -354,6 +354,69 @@
                                                         <i class="fas fa-times mr-1"></i> Reject
                                                     </button>
                                                 @endif
+
+                                                <!-- Details & Password Modal Trigger -->
+                                                <button type="button" class="btn btn-outline-info btn-sm font-weight-bold ml-1" data-toggle="modal" data-target="#infoModal{{ $item->id }}" title="View Credentials & Password">
+                                                    <i class="fas fa-eye mr-1"></i> Details
+                                                </button>
+                                            </div>
+
+                                            <!-- Student Info & Credentials Modal -->
+                                            <div class="modal fade" id="infoModal{{ $item->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog modal-md" role="document">
+                                                    <div class="modal-content shadow-lg border-0 text-left">
+                                                        <div class="modal-header bg-dark text-white py-3">
+                                                            <h5 class="modal-title font-weight-bold">
+                                                                <i class="fas fa-user-circle mr-1 text-warning"></i> {{ $item->name }}
+                                                            </h5>
+                                                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                        </div>
+                                                        <div class="modal-body p-4 text-left" style="background-color: #F8FAFC;">
+                                                            <!-- Login Credentials Highlight Box -->
+                                                            <div class="p-3 rounded-lg mb-3" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid #FDE68A;">
+                                                                <h6 class="font-weight-bold text-dark mb-2">
+                                                                    <i class="fas fa-key text-warning mr-1"></i> স্টুডেন্ট পোর্টাল লগইন ও পাসওয়ার্ড (Portal Credentials)
+                                                                </h6>
+                                                                <div class="mb-2">
+                                                                    <span class="small text-muted d-block font-weight-bold">Registration / Student ID:</span>
+                                                                    <strong class="font-mono text-primary" style="font-size: 15px;">{{ $item->registration_number ?: 'N/A' }}</strong>
+                                                                </div>
+                                                                <div class="mb-2">
+                                                                    <span class="small text-muted d-block font-weight-bold">Login Phone Number:</span>
+                                                                    <strong class="font-mono text-dark" style="font-size: 14px;">{{ $item->phone }}</strong>
+                                                                </div>
+                                                                <div class="mb-1">
+                                                                    <span class="small text-muted d-block font-weight-bold">Student Password (পাসওয়ার্ড):</span>
+                                                                    <div class="input-group input-group-sm mt-1">
+                                                                        <input type="password" id="verifyModalPass{{ $item->id }}" class="form-control font-mono font-weight-bold bg-white text-dark" value="{{ $item->display_password }}" readonly style="font-size: 14px; letter-spacing: 1px;">
+                                                                        <div class="input-group-append">
+                                                                            <button type="button" class="btn btn-dark" onclick="togglePassView('verifyModalPass{{ $item->id }}', this)" title="Show / Hide Password">
+                                                                                <i class="fas fa-eye"></i>
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-warning font-weight-bold text-dark" onclick="copyPassVal('verifyModalPass{{ $item->id }}', this)" title="Copy Password">
+                                                                                <i class="fas fa-copy"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted d-block mt-1 font-sans">
+                                                                        <i class="fas fa-info-circle mr-1 text-warning"></i>{{ !empty($item->plain_password) ? 'স্টুডেন্টের নিজস্ব সেট করা পাসওয়ার্ড' : 'প্রাথমিক ডিফল্ট পাসওয়ার্ড (মোবাইল নম্বরের শেষ ৬ ডিজিট)' }}
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Other info -->
+                                                            <div class="card border-0 shadow-sm p-3 bg-white">
+                                                                <p class="mb-1 small"><strong>Course:</strong> {{ $primaryCourse ? $primaryCourse->course_title : 'N/A' }}</p>
+                                                                <p class="mb-1 small"><strong>Batch:</strong> {{ $primaryBatch ? $primaryBatch->batch_number . ' (Code: ' . $primaryBatch->batch_code . ')' : 'N/A' }}</p>
+                                                                <p class="mb-1 small"><strong>Email:</strong> {{ $item->email ?: 'N/A' }}</p>
+                                                                <p class="mb-0 small"><strong>Registered On:</strong> {{ $item->created_at ? $item->created_at->format('d M, Y h:i A') : 'N/A' }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light py-2">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <!-- Rejection Modal -->
@@ -544,5 +607,39 @@
     </div>
 
 </div>
+
+<script>
+    function togglePassView(id, btn) {
+        var input = document.getElementById(id);
+        var icon = btn.querySelector('i');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    function copyPassVal(id, btn) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        var originalType = input.type;
+        input.type = 'text';
+        input.select();
+        input.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        input.type = originalType;
+        var icon = btn.querySelector('i');
+        if (icon) {
+            var oldClass = icon.className;
+            icon.className = 'fas fa-check text-success';
+            setTimeout(function() {
+                icon.className = oldClass;
+            }, 1500);
+        }
+    }
+</script>
 @endsection
 

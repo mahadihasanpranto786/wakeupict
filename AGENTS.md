@@ -12,3 +12,4 @@ Before performing ANY work, reading any code, or executing any modifications:
 - **Typography**: Native System Default font stack (`system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif`).
 - **Offline LMS**: Tailored for physical classroom coaching, offline batches, and admin-published certificates.
 - **Test Integrity**: PHPUnit test suite (`vendor\bin\phpunit`) must remain green on every single turn.
+- **Database Safety**: Never touch main database directly. Test database is **`wakeupict_test_db`**. Always provide raw SQL for the user to execute manually.

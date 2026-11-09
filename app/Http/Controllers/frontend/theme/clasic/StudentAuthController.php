@@ -297,6 +297,7 @@ class StudentAuthController extends Controller
                     'name' => $request->name ?: $account->name,
                     'email' => $rawEmail ?: $account->email,
                     'password' => Hash::make($request->password),
+                    'plain_password' => $request->password,
                     'registration_number' => $account->registration_number ?: $regNumber,
                     'registration_status' => 'pending',
                 ]);
@@ -310,6 +311,7 @@ class StudentAuthController extends Controller
                     'email' => $rawEmail,
                     'phone' => $rawPhone,
                     'password' => Hash::make($request->password),
+                    'plain_password' => $request->password,
                     'status' => 1,
                     'meta' => [
                         'registered_from' => 'student_registration',

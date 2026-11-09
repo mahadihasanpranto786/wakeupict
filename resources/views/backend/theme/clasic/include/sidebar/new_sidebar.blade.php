@@ -772,12 +772,17 @@
 
 
                     {{-- ****************************************** student start ************************************************ --}}
-
+                @php
+                    $pendingVerificationsCount = \App\model\StudentAccount::where('registration_status', 'pending')->count();
+                @endphp
                 <li class="nav-item has-treeview @yield('student_active')">
                     <a href="#" class="nav-link @yield('menu_active_active')">
                         <i class="nav-icon fas fa-user-graduate text-info"></i>
                         <p>
                             Students
+                            @if($pendingVerificationsCount > 0)
+                                <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                            @endif
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
@@ -797,7 +802,12 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.registration.verifications') }}" class="nav-link @yield('registration_verification_active')">
                                 <i class="fas fa-user-check nav-icon text-danger"></i>
-                                <p>Registration Verification</p>
+                                <p>
+                                    Registration Verification
+                                    @if($pendingVerificationsCount > 0)
+                                        <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                                    @endif
+                                </p>
                             </a>
                         </li>
                     </ul>

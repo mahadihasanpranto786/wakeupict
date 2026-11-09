@@ -501,6 +501,7 @@ class StudentEnrollmentService
                     'email' => $rawEmail ?: null,
                     'phone' => $cleanPhone ?: $rawPhone,
                     'password' => Hash::make($lastDigits),
+                    'plain_password' => $lastDigits,
                     'avatar' => $savePhotoUrl,
                     'status' => 1,
                     'meta' => [
