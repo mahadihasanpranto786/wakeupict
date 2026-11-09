@@ -22,10 +22,11 @@ class StudentProfileController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
-        $admitted = $student->admitedStudent;
+        $studentMaster = $student->student ?: \App\model\Student::where('personal_call_no', $student->phone)->first();
+        $admitted = $student->admitedStudent ?: \App\model\AdmitedStudent::where('personal_call_no', $student->phone)->first();
         $courses = $student->full_courses_list;
         $enrollments = $student->enrollments()->with(['course', 'batch'])->latest()->get();
-        return view('frontend.theme.clasic.student.profile.index', compact('student', 'admitted', 'courses', 'enrollments'));
+        return view('frontend.theme.clasic.student.profile.index', compact('student', 'studentMaster', 'admitted', 'courses', 'enrollments'));
     }
 
     /**
@@ -34,12 +35,13 @@ class StudentProfileController extends Controller
     public function edit()
     {
         $student = Auth::guard('student')->user();
-        $admitted = $student->admitedStudent;
-        return view('frontend.theme.clasic.student.profile.edit', compact('student', 'admitted'));
+        $studentMaster = $student->student ?: \App\model\Student::where('personal_call_no', $student->phone)->first();
+        $admitted = $student->admitedStudent ?: \App\model\AdmitedStudent::where('personal_call_no', $student->phone)->first();
+        return view('frontend.theme.clasic.student.profile.edit', compact('student', 'studentMaster', 'admitted'));
     }
 
     /**
-     * Update student profile details
+     * Update student profile details & other background information
      */
     public function update(Request $request)
     {
@@ -50,6 +52,19 @@ class StudentProfileController extends Controller
             'email' => 'nullable|email|max:191|unique:student_accounts,email,' . $student->id,
             'phone' => 'required|string|max:25|unique:student_accounts,phone,' . $student->id,
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'fathers_name' => 'nullable|string|max:191',
+            'mothers_name' => 'nullable|string|max:191',
+            'gander' => 'nullable|string|max:20',
+            'nationality' => 'nullable|string|max:50',
+            'national_id_no' => 'nullable|string|max:100',
+            'religion' => 'nullable|string|max:50',
+            'occupation' => 'nullable|string|max:100',
+            'age' => 'nullable|string|max:50',
+            'educational_qualification' => 'nullable|string|max:191',
+            'result' => 'nullable|string|max:50',
+            'passing_year' => 'nullable|string|max:20',
+            'present_address' => 'nullable|string|max:500',
+            'permanent_address' => 'nullable|string|max:500',
         ]);
 
         $updateData = [
@@ -77,29 +92,68 @@ class StudentProfileController extends Controller
             $updateData['avatar'] = 'public/uploads/student/avatars/' . $fileName;
         }
 
+        // Additional profile meta stored directly on student account
+        $meta = is_array($student->meta) ? $student->meta : [];
+        $meta['fathers_name'] = $request->fathers_name;
+        $meta['mothers_name'] = $request->mothers_name;
+        $meta['gander'] = $request->gander;
+        $meta['nationality'] = $request->nationality ?: 'Bangladeshi';
+        $meta['national_id_no'] = $request->national_id_no;
+        $meta['religion'] = $request->religion;
+        $meta['occupation'] = $request->occupation;
+        $meta['age'] = $request->age;
+        $meta['educational_qualification'] = $request->educational_qualification;
+        $meta['result'] = $request->result;
+        $meta['passing_year'] = $request->passing_year;
+        $meta['present_address'] = $request->present_address;
+        $meta['permanent_address'] = $request->permanent_address;
+        $updateData['meta'] = $meta;
+
         $student->update($updateData);
 
+        // Common details payload for student master and admitted records
+        $commonData = [
+            'student_name' => $request->name,
+            'email' => $request->email ?: '',
+            'personal_call_no' => $request->phone,
+            'fathers_name' => $request->fathers_name ?: '',
+            'mothers_name' => $request->mothers_name ?: '',
+            'gander' => $request->gander ?: 'other',
+            'nationality' => $request->nationality ?: 'Bangladeshi',
+            'national_id_no' => $request->national_id_no ?: '',
+            'religion' => $request->religion ?: 'Islam',
+            'occupation' => $request->occupation ?: 'Student',
+            'age' => $request->age ?: '',
+            'educational_qualification' => $request->educational_qualification ?: '',
+            'result' => $request->result ?: '',
+            'passing_year' => $request->passing_year ?: '',
+            'present_address' => $request->present_address ?: '',
+            'permanent_address' => $request->permanent_address ?: '',
+        ];
+        if (isset($updateData['avatar'])) {
+            $commonData['student_photo'] = $updateData['avatar'];
+        }
+
+        // Sync with parent Student master record
+        $studentMaster = $student->student ?: \App\model\Student::where('personal_call_no', $student->phone)->first();
+        if ($studentMaster) {
+            $studentMaster->update($commonData);
+            if (!$student->student_id) {
+                $student->update(['student_id' => $studentMaster->id]);
+            }
+        }
+
         // Sync with linked admitted student record if present
-        if ($student->admitedStudent) {
-            $admittedData = [
-                'student_name' => $request->name,
-                'email' => $request->email,
-                'personal_call_no' => $request->phone,
-            ];
-            if (isset($updateData['avatar'])) {
-                $admittedData['student_photo'] = $updateData['avatar'];
+        $admitted = $student->admitedStudent ?: \App\model\AdmitedStudent::where('personal_call_no', $student->phone)->first();
+        if ($admitted) {
+            $admitted->update($commonData);
+            if (!$student->admited_student_id) {
+                $student->update(['admited_student_id' => $admitted->id]);
             }
-            if ($request->filled('present_address')) {
-                $admittedData['present_address'] = $request->present_address;
-            }
-            if ($request->filled('permanent_address')) {
-                $admittedData['permanent_address'] = $request->permanent_address;
-            }
-            $student->admitedStudent->update($admittedData);
         }
 
         return redirect()->route('student.profile.index')->with([
-            'success' => 'Your profile has been successfully updated.',
+            'success' => 'Your profile and additional information have been successfully updated.',
         ]);
     }
 

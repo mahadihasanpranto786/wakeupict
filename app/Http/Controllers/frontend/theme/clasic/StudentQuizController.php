@@ -52,6 +52,11 @@ class StudentQuizController extends Controller
 
         $quizzes = $query->orderBy('id', 'desc')->paginate(9);
 
+        // Count active published live exams to guide students
+        $liveExamsCount = LmsQuiz::where('is_published', true)
+            ->where('quiz_type', 'exam')
+            ->count();
+
         // Map student attempt statistics for each quiz
         $attemptStats = [];
         foreach ($quizzes as $quiz) {
@@ -67,7 +72,7 @@ class StudentQuizController extends Controller
             ];
         }
 
-        return view('frontend.theme.clasic.student.quiz.index', compact('student', 'quizzes', 'attemptStats'));
+        return view('frontend.theme.clasic.student.quiz.index', compact('student', 'quizzes', 'attemptStats', 'liveExamsCount'));
     }
 
     /**

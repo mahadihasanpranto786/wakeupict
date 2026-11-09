@@ -99,6 +99,23 @@ class StudentAccount extends Authenticatable
     }
 
     /**
+     * Helper to get personal/academic details from admitedStudent, student master, or meta
+     */
+    public function getProfileDetail($field, $default = '')
+    {
+        if ($this->admitedStudent && !empty($this->admitedStudent->$field)) {
+            return $this->admitedStudent->$field;
+        }
+        if ($this->student && !empty($this->student->$field)) {
+            return $this->student->$field;
+        }
+        if (is_array($this->meta) && !empty($this->meta[$field])) {
+            return $this->meta[$field];
+        }
+        return $default;
+    }
+
+    /**
      * LMS enrollments relationship
      */
     public function enrollments()

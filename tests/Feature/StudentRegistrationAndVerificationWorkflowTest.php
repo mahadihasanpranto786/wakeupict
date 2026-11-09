@@ -45,7 +45,11 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
     public function testStudentRegistrationWithActiveBatchAndCourse()
     {
         // Fetch or create an active course and batch
-        $course = Course::where('status', 1)->first();
+        $course = Course::where('status', 1)->whereNotNull('course_code')->where('course_code', '!=', '')->first();
+        if (!$course) {
+            $course = Course::where('status', 1)->first();
+            $course->update(['course_code' => '01']);
+        }
         $this->assertNotNull($course);
         $this->assertNotEmpty($course->course_code);
 
@@ -246,7 +250,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             ]);
         }
 
-        $res = $this->actingAs($admin)->post(route('admin.verification.request.approve', $log->id), [
+        $res = $this->from(route('admin.registration.verifications'))->actingAs($admin)->post(route('admin.verification.request.approve', $log->id), [
             'admin_notes' => 'Identity verified manually via phone call',
         ]);
 

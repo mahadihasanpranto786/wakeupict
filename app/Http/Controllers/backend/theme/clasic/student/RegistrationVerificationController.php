@@ -230,12 +230,21 @@ class RegistrationVerificationController extends Controller
     {
         $verification = RegistrationVerification::findOrFail($id);
 
-        $verification->update([
+        $payload = [
             'status' => 'admin_approved',
-            'admin_id' => Auth::id(),
             'admin_notes' => $request->admin_notes ?: 'Approved by Administrator',
-            'action_at' => Carbon::now(),
-        ]);
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'admin_id')) {
+            $payload['admin_id'] = Auth::id();
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'action_by')) {
+            $payload['action_by'] = Auth::id();
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'action_at')) {
+            $payload['action_at'] = Carbon::now();
+        }
+
+        $verification->update($payload);
 
         return redirect()->back()->with([
             'success' => "Verification request for phone {$verification->phone} has been APPROVED. The student can now retrieve their registration number.",
@@ -249,12 +258,21 @@ class RegistrationVerificationController extends Controller
     {
         $verification = RegistrationVerification::findOrFail($id);
 
-        $verification->update([
+        $payload = [
             'status' => 'admin_rejected',
-            'admin_id' => Auth::id(),
             'admin_notes' => $request->admin_notes ?: 'Rejected by Administrator',
-            'action_at' => Carbon::now(),
-        ]);
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'admin_id')) {
+            $payload['admin_id'] = Auth::id();
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'action_by')) {
+            $payload['action_by'] = Auth::id();
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('registration_verifications', 'action_at')) {
+            $payload['action_at'] = Carbon::now();
+        }
+
+        $verification->update($payload);
 
         return redirect()->back()->with([
             'success' => "Verification request for phone {$verification->phone} has been REJECTED.",
