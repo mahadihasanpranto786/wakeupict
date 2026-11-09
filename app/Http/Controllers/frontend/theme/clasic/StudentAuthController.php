@@ -161,8 +161,11 @@ class StudentAuthController extends Controller
                 $defaultBatch = Batch::where('course_id', $request->course_id)->where('status', 1)->where('active_batch', 1)->first();
             }
             if (!$defaultBatch && $request->filled('course_id')) {
-                $nextBatchCode = (string)((int)Batch::max('id') + 1);
-                $cleanCode = str_pad($nextBatchCode, 2, '0', STR_PAD_LEFT);
+                $maxCode = (int)Batch::max('id') + 1;
+                while (Batch::where('batch_code', str_pad((string)$maxCode, 2, '0', STR_PAD_LEFT))->exists() || Batch::where('batch_number', 'Batch-' . str_pad((string)$maxCode, 2, '0', STR_PAD_LEFT))->exists()) {
+                    $maxCode++;
+                }
+                $cleanCode = str_pad((string)$maxCode, 2, '0', STR_PAD_LEFT);
                 $defaultBatch = Batch::create([
                     'batch_number' => 'Batch-' . $cleanCode,
                     'batch_code' => $cleanCode,
