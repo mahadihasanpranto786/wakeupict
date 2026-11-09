@@ -246,7 +246,8 @@ Route::get('/students-list', 'backend\theme\clasic\student\StudentController@stu
 Route::get('/student-print/{student_id}', 'backend\theme\clasic\student\StudentController@studentPrint')->name('students-view');
 Route::get('/student-view/{student_id}', 'backend\theme\clasic\student\StudentController@studentView')->name('students-view');
 Route::get('/student-edit/{student_id}', 'backend\theme\clasic\student\StudentController@editStudent')->name('student-edit');
-Route::get('/delete-student/{student_id}', 'backend\theme\clasic\student\StudentController@deleteStudent')->name('delete-student');
+Route::match(['get', 'post'], '/delete-student/{student_id}', 'backend\theme\clasic\student\StudentController@deleteStudent')->name('delete-student');
+Route::post('/students/bulk-delete', 'backend\theme\clasic\student\StudentController@bulkDeleteStudents')->name('admin.students.bulk-delete');
 Route::post('/update-student', 'backend\theme\clasic\student\StudentController@updateStudent')->name('update-student');
 Route::post('/store-student', 'backend\theme\clasic\student\StudentController@storeStudent')->name('store-student');
 Route::post('/course_fee_ajax', 'backend\theme\clasic\student\StudentController@courseFeeAjax')->name('course_fee_ajax');
@@ -261,7 +262,8 @@ Route::post('/register-student', 'backend\theme\clasic\student\StudentController
 Route::get('/admited-students-list', 'backend\theme\clasic\student\StudentController@admitedStudentIndex')->name('admited-students-list');
 Route::get('/admited-student-edit/{student_id}', 'backend\theme\clasic\student\StudentController@admitedStudentEdit')->name('admited-student-edit');
 Route::post('/admited-student-update', 'backend\theme\clasic\student\StudentController@updateAdmitedStudent')->name('admited-student-update');
-Route::get('/admited-delete-student/{student_id}', 'backend\theme\clasic\student\StudentController@deleteAdmitedStudent')->name('admited-delete-student');
+Route::match(['get', 'post'], '/admited-delete-student/{student_id}', 'backend\theme\clasic\student\StudentController@deleteAdmitedStudent')->name('admited-delete-student');
+Route::post('/admited-students/bulk-delete', 'backend\theme\clasic\student\StudentController@bulkDeleteAdmitedStudents')->name('admin.admited-students.bulk-delete');
 Route::get('/admited-student-view/{student_id}', 'backend\theme\clasic\student\StudentController@studentAdmitedView')->name('admited-students-view');
 Route::get('/admited-student-print/{student_id}', 'backend\theme\clasic\student\StudentController@studentAdmitedPrint')->name('admited-students-view');
 Route::get('/search-admitted-student', 'backend\theme\clasic\student\StudentController@searchAdmittedStudent')->name('search-admitted-student');
@@ -280,7 +282,9 @@ Route::post('/registrations/{id}/approve', 'backend\theme\clasic\student\Registr
 Route::post('/registrations/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectStudent')->name('admin.registrations.reject');
 Route::post('/verification-requests/{id}/approve', 'backend\theme\clasic\student\RegistrationVerificationController@approveVerificationRequest')->name('admin.verification.request.approve');
 Route::post('/verification-requests/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectVerificationRequest')->name('admin.verification.request.reject');
+Route::match(['get', 'post', 'delete'], '/student-accounts/{id}/delete', 'backend\theme\clasic\student\StudentAccountController@destroy')->name('admin.student-accounts.delete');
 Route::delete('/student-accounts/{id}', 'backend\theme\clasic\student\StudentAccountController@destroy')->name('admin.student-accounts.destroy');
+Route::post('/student-accounts/bulk-delete', 'backend\theme\clasic\student\StudentAccountController@bulkDelete')->name('admin.student-accounts.bulk-delete');
 Route::get('print-searched-student/{student_number}', 'backend\theme\clasic\student\StudentController@printSearchedStudent');
 Route::post('/course-and-batch-wise-student-print', 'backend\theme\clasic\student\StudentController@courseAndBatchWiseStudentPrint')->name('course-and-batch-wise-student-print');
 

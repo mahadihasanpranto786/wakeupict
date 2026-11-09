@@ -172,14 +172,40 @@
                                 </div>
                             @endif
 
+                            <!-- Bulk Actions Toolbar (Hidden by default, shown on select) -->
+                            <form id="bulkAdmitedDeleteForm" action="{{ route('admin.admited-students.bulk-delete') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="delete_type" id="bulkAdmitedDeleteType" value="soft">
+                                <div id="bulkAdmitedActionBar" class="card-header bg-dark text-white py-2 px-3 d-none align-items-center justify-content-between flex-wrap my-2 rounded">
+                                    <div class="my-1">
+                                        <span class="font-weight-bold text-white">
+                                            <i class="fas fa-check-square mr-1 text-warning"></i>
+                                            <span id="selectedAdmitedCount" class="badge badge-warning text-dark font-weight-bold px-2 py-1">0</span>
+                                            Admitted Students Selected
+                                        </span>
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap my-1" style="gap: 8px;">
+                                        <button type="button" class="btn btn-warning btn-sm font-weight-bold text-dark" onclick="triggerAdmitedBulk('soft')">
+                                            <i class="fas fa-user-slash mr-1"></i> Soft Delete (নিষ্ক্রিয় করুন)
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm font-weight-bold text-white" onclick="triggerAdmitedBulk('permanent')">
+                                            <i class="fas fa-trash-alt mr-1"></i> Permanent Delete (চিরতরে মুছে ফেলুন)
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
+                                        <th style="width: 35px;" class="text-center">
+                                            <input type="checkbox" id="selectAllAdmited" title="Select All Admitted Students">
+                                        </th>
                                         <th>SL</th>
                                         <th>Photo</th>
                                         <th>Student Info</th>
                                         <th>Payment Info</th>
-                                        <th class="text-center">Action</th>
+                                        <th class="text-center" style="width: 17%">Action</th>
                                     </tr>
                                 </thead>
 
@@ -189,6 +215,9 @@
                                     @endphp
                                     @foreach ($students as $student)
                                         <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" name="ids[]" value="{{ $student->id }}" class="admited-checkbox" form="bulkAdmitedDeleteForm">
+                                            </td>
                                             <td> {{ $serial++ }}</td>
                                             <td>
                                                 @if ($student->student_photo == null)
@@ -251,35 +280,85 @@
 
                                             </td>
                                             <td class="border">
-                                                <div class="d-flex">
+                                                <div class="d-flex align-items-center" style="gap: 4px;">
                                                     @if ((checkUserType() == 0 && $Add_student != 0) || Auth::user()->type == 'Admin')
                                                         {{-- edit --}}
                                                         <a title="Edit Student"
-                                                            class="btn btn-primary btn-sm flex items-center "
+                                                            class="btn btn-primary btn-sm"
                                                             href="{{ url('admited-student-edit/' . $student->id) }}"><i
                                                                 class="fas fa-pencil-alt text-white"></i>
                                                         </a>
                                                     @endif
+
+                                                    {{-- Delete Dropdown (Soft vs Permanent) --}}
                                                     @if ((checkUserType() == 0 && $Delete_Admitted_Student != 0) || Auth::user()->type == 'Admin')
-                                                        {{-- delete --}}
-                                                        <a title="Delete Student"
-                                                            class="btn btn-danger btn-sm flex items-center " id="delete"
-                                                            href="{{ url('admited-delete-student/' . $student->id) }}"><i
-                                                                class="fas fa-trash  text-white"></i></a>
+                                                        <div class="dropdown d-inline-block">
+                                                            <button class="btn btn-danger btn-sm dropdown-toggle font-weight-bold" type="button" id="deleteAdmitedMenu{{ $student->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Delete Options">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu dropdown-menu-right shadow-lg p-2" aria-labelledby="deleteAdmitedMenu{{ $student->id }}" style="min-width: 220px;">
+                                                                <div class="dropdown-header font-weight-bold text-dark px-2 py-1 border-bottom mb-1">
+                                                                    <i class="fas fa-trash text-danger mr-1"></i> Delete Options
+                                                                </div>
+                                                                <!-- Soft Delete -->
+                                                                <a class="dropdown-item py-2 px-2 rounded font-weight-bold text-dark" href="{{ url('admited-delete-student/' . $student->id . '?type=soft') }}" onclick="return confirm('Are you sure you want to SOFT DELETE (deactivate) this admitted student? Payments and portal access will be marked inactive.')">
+                                                                    <i class="fas fa-user-slash text-warning mr-2"></i> Soft Delete (নিষ্ক্রিয়)
+                                                                </a>
+                                                                <div class="dropdown-divider my-1"></div>
+                                                                <!-- Permanent Delete Trigger -->
+                                                                <a class="dropdown-item py-2 px-2 rounded font-weight-bold text-danger" href="#" data-toggle="modal" data-target="#permDeleteAdmitedModal{{ $student->id }}">
+                                                                    <i class="fas fa-trash-alt text-danger mr-2"></i> Permanent Delete (চিরতরে)
+                                                                </a>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Permanent Deletion Modal -->
+                                                        <div class="modal fade" id="permDeleteAdmitedModal{{ $student->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content border-danger shadow-lg">
+                                                                    <div class="modal-header bg-danger text-white py-3">
+                                                                        <h5 class="modal-title font-weight-bold">
+                                                                            <i class="fas fa-exclamation-triangle mr-1"></i> Permanent Delete Confirmation
+                                                                        </h5>
+                                                                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                                    </div>
+                                                                    <div class="modal-body p-4 text-left font-sans">
+                                                                        <p class="font-weight-bold text-dark mb-2">
+                                                                            Are you sure you want to PERMANENTLY delete admitted student: <span class="text-danger">{{ $student->student_name }}</span>?
+                                                                        </p>
+                                                                        <div class="alert alert-warning text-xs mb-0">
+                                                                            <i class="fas fa-info-circle mr-1"></i> <strong>Cascaded Deletion Notice:</strong> This action will permanently remove:
+                                                                            <ul class="mb-0 mt-1 pl-3 font-weight-bold">
+                                                                                <li>Admitted Student Master Record</li>
+                                                                                <li>All Student Payments &amp; Accounts Income</li>
+                                                                                <li>Student Portal Account &amp; LMS Course Enrollments</li>
+                                                                                <li>Applied Student Profile</li>
+                                                                            </ul>
+                                                                            <strong class="text-danger d-block mt-2">Warning: All payment histories will be permanently wiped out!</strong>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer py-2 bg-light d-flex justify-content-between">
+                                                                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">Cancel</button>
+                                                                        <a href="{{ url('admited-delete-student/' . $student->id . '?type=permanent') }}" class="btn btn-danger font-weight-bold">
+                                                                            <i class="fas fa-trash-alt mr-1"></i> Yes, Permanently Delete
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     @endif
 
                                                     {{-- student invoice --}}
-                                                    <a title="View" class="btn btn-info btn-sm flex items-center "
+                                                    <a title="View" class="btn btn-info btn-sm"
                                                         href="{{ url('admited-student-view/' . $student->id) }}">
                                                         <i class="fas fa-eye text-white"></i>
                                                     </a>
 
-                                                    {{-- view --}}
-                                                    <a title="Print" class="btn btn-dark btn-sm flex items-center "
+                                                    {{-- print --}}
+                                                    <a title="Print" class="btn btn-dark btn-sm"
                                                         href="{{ url('admited-student-print/' . $student->id) }}">
                                                         <i class="fas fa-print text-white"></i>
                                                     </a>
-
                                                 </div>
 
                                                 {{-- <div class="mt-1"> --}}
@@ -316,4 +395,62 @@
         </div>
         <!-- /.col -->
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectAll = document.getElementById('selectAllAdmited');
+            var checkboxes = document.querySelectorAll('.admited-checkbox');
+            var bulkBar = document.getElementById('bulkAdmitedActionBar');
+            var countSpan = document.getElementById('selectedAdmitedCount');
+
+            function updateBulkBar() {
+                var checked = document.querySelectorAll('.admited-checkbox:checked');
+                if (checked.length > 0) {
+                    bulkBar.classList.remove('d-none');
+                    bulkBar.classList.add('d-flex');
+                    countSpan.innerText = checked.length;
+                } else {
+                    bulkBar.classList.remove('d-flex');
+                    bulkBar.classList.add('d-none');
+                    countSpan.innerText = '0';
+                }
+            }
+
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(function(cb) {
+                        cb.checked = selectAll.checked;
+                    });
+                    updateBulkBar();
+                });
+            }
+
+            checkboxes.forEach(function(cb) {
+                cb.addEventListener('change', updateBulkBar);
+            });
+
+            window.triggerAdmitedBulk = function(type) {
+                var form = document.getElementById('bulkAdmitedDeleteForm');
+                var typeInput = document.getElementById('bulkAdmitedDeleteType');
+                var checked = document.querySelectorAll('.admited-checkbox:checked');
+
+                if (checked.length === 0) {
+                    alert('Please select at least one admitted student!');
+                    return;
+                }
+
+                typeInput.value = type;
+
+                if (type === 'permanent') {
+                    if (confirm('CRITICAL WARNING: You are about to PERMANENTLY DELETE ' + checked.length + ' admitted student(s) and ALL their related payments, income, and accounts!\n\nThis action CANNOT be undone. Proceed?')) {
+                        form.submit();
+                    }
+                } else {
+                    if (confirm('Are you sure you want to SOFT DELETE (deactivate) ' + checked.length + ' admitted student(s)?')) {
+                        form.submit();
+                    }
+                }
+            };
+        });
+    </script>
 @endsection
