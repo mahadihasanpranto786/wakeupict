@@ -92,7 +92,7 @@ class StudentController extends Controller
                 ]);
             }
 
-            $batchNumber = $request->filled('batch_number') ? $request->batch_number : ($batch->batch_number ?: ('Batch-' . $cleanBatchCode));
+            $batchNumber = 'Batch-' . $cleanBatchCode;
 
             $batch->update([
                 'batch_number' => $batchNumber,
@@ -112,7 +112,7 @@ class StudentController extends Controller
                 'success' => 'Batch Updated Successfully',
             ]);
         } else {
-            $batchNumber = $request->filled('batch_number') ? $request->batch_number : ('Batch-' . $cleanBatchCode);
+            $batchNumber = 'Batch-' . $cleanBatchCode;
 
             Batch::create([
                 'batch_number' => $batchNumber,

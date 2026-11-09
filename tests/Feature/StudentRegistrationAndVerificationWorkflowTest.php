@@ -50,10 +50,10 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
         $this->assertNotEmpty($course->course_code);
 
         $batch = Batch::firstOrCreate([
-            'batch_number' => 'Test Batch Unit 99',
-            'course_id' => $course->id,
-        ], [
             'batch_code' => '99',
+        ], [
+            'batch_number' => 'Batch-99',
+            'course_id' => $course->id,
             'academic_year' => '2026',
             'batch_type' => 'Local',
             'title_id' => 1,

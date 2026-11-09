@@ -72,9 +72,6 @@
                                         @if($batch->isUsedInRegistration())
                                             <i class="fas fa-lock text-muted ml-1" title="Used in registration (Code locked)"></i>
                                         @endif
-                                        @if($batch->batch_number && $batch->batch_number !== $batch->batch_code && $batch->batch_number !== ('Batch-' . $batch->batch_code))
-                                            <small class="text-muted d-block">{{ $batch->batch_number }}</small>
-                                        @endif
                                     </td>
                                     <td>{{ $batch->academic_year ?: date('Y') }}</td>
                                     <td>{{ $batch->course ? $batch->course->course_title : 'N/A' }}</td>
