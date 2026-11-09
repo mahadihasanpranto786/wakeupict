@@ -5,7 +5,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title font-weight-bold" id="editBatchModalLabel{{ $batch->id }}">
-                    <i class="fas fa-edit mr-1"></i> Edit Batch: {{ $batch->batch_number }}
+                    <i class="fas fa-edit mr-1"></i> Edit Batch: {{ $batch->batch_code }}
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
