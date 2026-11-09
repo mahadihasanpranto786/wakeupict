@@ -225,6 +225,31 @@
 
 
         <!-- =========================================================================
+             3. ACTIVE LIVE EXAM NOTIFICATION BANNER
+             ========================================================================= -->
+        @if(isset($liveExamsCount) && $liveExamsCount > 0)
+            <div class="mb-6 p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-slate-900 dark:text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm relative z-10">
+                <div class="flex items-center gap-3.5 text-center sm:text-left">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl flex-shrink-0 shadow-inner">
+                        <i class="fa fa-fire"></i>
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider mb-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                            <span>Live Examination Active</span>
+                        </div>
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">বর্তমানে {{ $liveExamsCount }}টি নির্ধারিত চলমান পরীক্ষা সক্রিয় রয়েছে</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">আপনার কোর্সের নির্ধারিত অনলাইন পরীক্ষায় অংশ নিতে "আসন্ন পরীক্ষা" পাতায় যান।</p>
+                    </div>
+                </div>
+                <a href="{{ route('student.exams.upcoming') }}" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 font-extrabold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 whitespace-nowrap" style="color: #000000 !important; font-weight: 800;">
+                    <i class="fa fa-play-circle text-sm"></i>
+                    <span>পরীক্ষায় অংশ নিন (Take Live Exam)</span>
+                </a>
+            </div>
+        @endif
+
+        <!-- =========================================================================
              3. QUIZZES GRID (CARDS MATCHING THE REFERENCE IMAGE)
              ========================================================================= -->
         @if($quizzes->count() > 0)
@@ -447,10 +472,28 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
                     No assessments found matching your filter criteria. Please check back soon or reset your filter.
                 </p>
-                <a href="{{ route('student.quiz.index') }}" 
-                   class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-blue-600 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:bg-blue-700 transition-all">
-                    <span>View All Tests</span>
-                </a>
+                @if(isset($liveExamsCount) && $liveExamsCount > 0)
+                    <p class="text-xs text-amber-600 dark:text-amber-400 font-bold mb-4">
+                        <i class="fa fa-info-circle mr-1"></i> বর্তমানে {{ $liveExamsCount }}টি নির্ধারিত লাইভ পরীক্ষা চালু রয়েছে।
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <a href="{{ route('student.exams.upcoming') }}" 
+                           class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 font-extrabold text-xs uppercase tracking-wider shadow-md transition-all" style="color: #000000 !important; font-weight: 800;">
+                            <i class="fa fa-play-circle"></i>
+                            <span>চলমান পরীক্ষায় অংশ নিন</span>
+                        </a>
+                        <a href="{{ route('student.practice.index') }}" 
+                           class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition-all">
+                            <i class="fa fa-flask"></i>
+                            <span>অনুশীলন টেস্ট (Practice)</span>
+                        </a>
+                    </div>
+                @else
+                    <a href="{{ route('student.quiz.index') }}" 
+                       class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-blue-600 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:bg-blue-700 transition-all">
+                        <span>View All Tests</span>
+                    </a>
+                @endif
             </div>
         @endif
 
