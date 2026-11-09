@@ -47,6 +47,18 @@ class StudentAccount extends Authenticatable
         return $this->registration_number ?: $value;
     }
 
+    /**
+     * Get the visible portal password for admin display
+     */
+    public function getDisplayPasswordAttribute()
+    {
+        if (!empty($this->plain_password)) {
+            return $this->plain_password;
+        }
+        $cleanPhone = preg_replace('/[^0-9]/', '', (string)$this->phone);
+        return strlen($cleanPhone) >= 6 ? substr($cleanPhone, -6) : '123456';
+    }
+
     public function verifiedBy()
     {
         return $this->belongsTo(\App\User::class, 'verified_by');

@@ -275,6 +275,13 @@
                                             <a href="mailto:{{ $acc->email }}" class="text-muted">{{ $acc->email }}</a>
                                         </div>
                                     @endif
+                                    <div class="text-xs text-muted mt-1 d-flex align-items-center" style="gap: 4px;">
+                                        <i class="fas fa-key text-warning text-xs" title="পাসওয়ার্ড"></i>
+                                        <span class="font-mono font-weight-bold text-dark" id="accPassText{{ $acc->id }}" data-pass="{{ $acc->display_password }}">••••••</span>
+                                        <button type="button" class="btn btn-xs btn-link text-muted p-0 ml-1" onclick="toggleAccPass('accPassText{{ $acc->id }}', this)" title="পাসওয়ার্ড দেখুন / লুকান">
+                                            <i class="fas fa-eye text-xs"></i>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     @if($isPortal)
@@ -431,6 +438,19 @@
 </div>
 
 <script>
+    function toggleAccPass(id, btn) {
+        var span = document.getElementById(id);
+        var icon = btn.querySelector('i');
+        if (!span) return;
+        if (span.innerText === '••••••') {
+            span.innerText = span.getAttribute('data-pass');
+            if (icon) icon.className = 'fas fa-eye-slash text-xs text-primary';
+        } else {
+            span.innerText = '••••••';
+            if (icon) icon.className = 'fas fa-eye text-xs';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var selectAll = document.getElementById('selectAllAccounts');
         var checkboxes = document.querySelectorAll('.account-checkbox');

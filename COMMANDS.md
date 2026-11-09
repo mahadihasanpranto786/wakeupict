@@ -29,6 +29,10 @@
    - Buttons, badges, and pills with `bg-rose-600` and `bg-emerald-100` MUST have **black font** (`#000000 !important; font-weight: 800;`).
 10. **Database Migrations & Raw SQL Output**:
     - Whenever you create a new migration or modify an existing migration, **ALWAYS provide the exact raw SQL script (`ALTER TABLE`, `CREATE TABLE`, `UPDATE`, etc.) in your response** so the user can directly execute it on their live / cPanel production MySQL database via phpMyAdmin or SQL console without relying on `php artisan migrate`.
+11. **Database Testing & Main DB Protection Directive**:
+    - **Dedicated Test DB**: **`wakeupict_test_db`** is the user's dedicated testing database.
+    - **Testing Isolation**: If any database testing, seeding, or experimentation is needed, it MUST be performed ONLY on **`wakeupict_test_db`**.
+    - **Main DB Zero-Touch Policy**: NEVER touch or directly alter the user's main database. Any database change (schema changes, column additions, data updates) MUST be delivered as exact raw SQL scripts in the chat response so the user can review and manually execute it on their database by hand.
 
 ---
 

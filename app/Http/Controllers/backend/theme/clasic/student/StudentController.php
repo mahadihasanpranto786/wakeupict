@@ -319,6 +319,7 @@ class StudentController extends Controller
                 'email' => $request->email ?: null,
                 'phone' => $cleanPhone ?: $rawPhone,
                 'password' => Hash::make($lastDigits),
+                'plain_password' => $lastDigits,
                 'avatar' => $save_url,
                 'status' => 1,
                 'meta' => [

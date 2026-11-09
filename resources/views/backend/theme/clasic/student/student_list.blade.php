@@ -368,6 +368,62 @@
                                                     </div>
                                                 </div>
 
+                                                <!-- SECTION 1.5: PORTAL ACCESS & LOGIN CREDENTIALS -->
+                                                @php
+                                                    $studentAcc = $student->account ?: \App\model\StudentAccount::where('student_id', $student->id)
+                                                        ->orWhere('phone', $student->personal_call_no)
+                                                        ->orWhere('registration_number', $student->registration_number)
+                                                        ->first();
+                                                    $rawPhoneDigits = preg_replace('/[^0-9]/', '', (string)$student->personal_call_no);
+                                                    $defaultPhonePass = strlen($rawPhoneDigits) >= 6 ? substr($rawPhoneDigits, -6) : '123456';
+                                                    $displayPass = $studentAcc && !empty($studentAcc->plain_password) ? $studentAcc->plain_password : $defaultPhonePass;
+                                                @endphp
+                                                <div class="card border-0 shadow-sm mb-3" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid #FDE68A !important;">
+                                                    <div class="card-header bg-transparent py-2 font-weight-bold text-dark d-flex align-items-center justify-content-between">
+                                                        <span><i class="fas fa-key mr-1 text-warning"></i> স্টুডেন্ট পোর্টাল লগইন ও পাসওয়ার্ড (Portal Credentials)</span>
+                                                        @if($studentAcc && $studentAcc->registration_status === 'approved')
+                                                            <span class="badge badge-success px-2 py-1">Portal Active</span>
+                                                        @elseif($studentAcc && $studentAcc->registration_status === 'rejected')
+                                                            <span class="badge badge-danger px-2 py-1">Rejected</span>
+                                                        @else
+                                                            <span class="badge badge-warning text-dark px-2 py-1 font-weight-bold">Pending Verification</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="card-body py-3">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-4 mb-2">
+                                                                <span class="text-muted small d-block font-weight-bold">Login Username / Reg No:</span>
+                                                                <span class="font-mono font-weight-bold text-primary" style="font-size: 14px;">
+                                                                    {{ $student->registration_number ?: ($studentAcc ? $studentAcc->registration_number : $student->personal_call_no) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-md-3 mb-2">
+                                                                <span class="text-muted small d-block font-weight-bold">Login Phone:</span>
+                                                                <span class="font-mono font-weight-bold text-dark" style="font-size: 14px;">
+                                                                    {{ $student->personal_call_no }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-md-5 mb-2">
+                                                                <span class="text-muted small d-block font-weight-bold">Student Password (পাসওয়ার্ড):</span>
+                                                                <div class="input-group input-group-sm">
+                                                                    <input type="password" id="studentModalPass{{ $student->id }}" class="form-control font-mono font-weight-bold bg-white text-dark" value="{{ $displayPass }}" readonly style="font-size: 13px; letter-spacing: 1px;">
+                                                                    <div class="input-group-append">
+                                                                        <button type="button" class="btn btn-dark" onclick="togglePassView('studentModalPass{{ $student->id }}', this)" title="Show / Hide Password">
+                                                                            <i class="fas fa-eye"></i>
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-warning font-weight-bold text-dark" onclick="copyPassVal('studentModalPass{{ $student->id }}', this)" title="Copy Password">
+                                                                            <i class="fas fa-copy"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <small class="text-muted d-block mt-1 font-sans">
+                                                                    <i class="fas fa-info-circle mr-1 text-warning"></i>{{ $studentAcc && !empty($studentAcc->plain_password) ? 'স্টুডেন্টের নিজস্ব সেট করা পাসওয়ার্ড' : 'প্রাথমিক ডিফল্ট পাসওয়ার্ড (মোবাইল নম্বরের শেষ ৬ ডিজিট)' }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                                 <!-- SECTION 2: PERSONAL & GUARDIAN DETAILS -->
                                                 <div class="card border-0 shadow-sm mb-3">
                                                     <div class="card-header bg-white py-2 font-weight-bold text-dark">
@@ -574,6 +630,38 @@
     </div>
 
     <script>
+        function togglePassView(id, btn) {
+            var input = document.getElementById(id);
+            var icon = btn.querySelector('i');
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'fas fa-eye';
+            }
+        }
+
+        function copyPassVal(id, btn) {
+            var input = document.getElementById(id);
+            if (!input) return;
+            var originalType = input.type;
+            input.type = 'text';
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            input.type = originalType;
+            var icon = btn.querySelector('i');
+            if (icon) {
+                var oldClass = icon.className;
+                icon.className = 'fas fa-check text-success';
+                setTimeout(function() {
+                    icon.className = oldClass;
+                }, 1500);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var selectAll = document.getElementById('selectAllStudents');
             var checkboxes = document.querySelectorAll('.student-checkbox');

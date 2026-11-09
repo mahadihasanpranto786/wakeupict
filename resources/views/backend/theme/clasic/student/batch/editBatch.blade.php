@@ -45,7 +45,7 @@
                                 <option disabled value="">Select Course</option>
                                 @foreach ($courses as $course)
                                     <option value="{{ $course->id }}" {{ $course->id == $batch->course_id ? 'selected' : '' }}>
-                                        {{ $course->course_title }} (Code: {{ $course->course_code }})
+                                        {{ $course->course_title }} (Code: {{ $course->course_code ?: str_pad($course->id, 2, '0', STR_PAD_LEFT) }})
                                     </option>
                                 @endforeach
                             </select>

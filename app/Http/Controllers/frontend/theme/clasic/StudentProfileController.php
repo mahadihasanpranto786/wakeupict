@@ -179,6 +179,7 @@ class StudentProfileController extends Controller
 
         $student->update([
             'password' => Hash::make($request->password),
+            'plain_password' => $request->password,
         ]);
 
         return redirect()->route('student.profile.index')->with([
