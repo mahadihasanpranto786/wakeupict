@@ -34,4 +34,8 @@ return [
         'secret' => env('SPARKPOST_SECRET'),
     ],
 
+    'registration' => [
+        'otp_enabled' => env('REGISTRATION_OTP_ENABLED', false),
+    ],
+
 ];

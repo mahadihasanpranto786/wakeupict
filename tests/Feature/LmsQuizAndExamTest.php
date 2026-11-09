@@ -217,6 +217,8 @@ class LmsQuizAndExamTest extends TestCase
         $resultsResponse->assertSee('Assessment Passed');
         $resultsResponse->assertSee('Byte');
         $resultsResponse->assertSee('Explanation');
+        // Quiz questions & results must never have print or PDF download buttons
+        $resultsResponse->assertDontSee('প্রিন্ট / PDF সংরক্ষণ');
 
         // 6. View All Results History
         $historyResponse = $this->actingAs($this->student, 'student')
@@ -811,7 +813,7 @@ class LmsQuizAndExamTest extends TestCase
             'password_confirmation' => 'secret123',
         ]);
 
-        $regResponse->assertRedirect(route('student.dashboard'));
+        $this->assertTrue($regResponse->isRedirect(route('student.registration.confirmation')) || $regResponse->isRedirect(route('student.dashboard')));
 
         // Verify account exists
         $account = \App\model\StudentAccount::where('phone', $uniquePhone)->first();
@@ -876,7 +878,7 @@ class LmsQuizAndExamTest extends TestCase
             'password_confirmation' => 'newpassword123',
         ]);
 
-        $reRegResponse->assertRedirect(route('student.dashboard'));
+        $this->assertTrue($reRegResponse->isRedirect(route('student.registration.confirmation')) || $reRegResponse->isRedirect(route('student.dashboard')));
         $account->refresh();
         $this->assertEquals($initialAccountId, $account->id);
         $this->assertTrue(Hash::check('newpassword123', $account->password));

@@ -10,6 +10,7 @@
 @section('maincontant')
 <div class="content-header p-2">
     <div class="container-fluid">
+        @include('backend.theme.clasic.student.include.student_directory_nav')
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
                 <h4 class="m-0 font-weight-bold text-dark" style="font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif;">
@@ -210,7 +211,7 @@
                                         <div>
                                             <div class="font-weight-bold text-dark">{{ $acc->name }}</div>
                                             <div class="text-xs text-muted d-flex align-items-center" style="gap: 6px;">
-                                                <span class="badge badge-light border text-dark font-weight-bold" style="font-family: monospace;">{{ $acc->student_id_code }}</span>
+                                                <span class="badge badge-light border text-primary font-weight-bold" style="font-family: monospace;">{{ $acc->registration_number ?: $acc->student_id_code }}</span>
                                                 @if($parentStudent)
                                                     <a href="{{ route('students-view', $parentStudent->id) }}" class="badge badge-info text-white" target="_blank" title="ভিউ স্লিপ #{{ 1000 + $parentStudent->id }}">
                                                         মাস্টার আইডি: #{{ 1000 + $parentStudent->id }}

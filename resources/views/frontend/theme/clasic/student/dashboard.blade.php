@@ -32,7 +32,7 @@
                 <div>
                     <div class="flex flex-wrap items-center gap-2 mb-2.5">
                         <span class="px-3 py-1 rounded-full bg-slate-900 text-white dark:bg-emerald-950/80 dark:text-emerald-300 border border-slate-900 dark:border-emerald-500/50 text-xs font-mono tracking-wider uppercase font-black shadow-sm" style="color: #ffffff !important; font-weight: 800; background-color: #0f172a !important;">
-                            আইডি: {{ $student->student_id_code }}
+                            রেজিস্ট্রেশন: {{ $student->registration_number ?: $student->student_id_code }}
                         </span>
                         <span class="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-500/40 text-blue-950 dark:text-blue-300 text-xs font-black shadow-sm flex items-center gap-1.5" style="color: #1e3a8a !important; font-weight: 800;">
                             <i class="fa fa-graduation-cap text-blue-700 dark:text-blue-400"></i>

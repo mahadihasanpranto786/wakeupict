@@ -57,7 +57,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Student ID Code</label>
-                    <input type="text" value="{{ $student->student_id_code }}" readonly disabled class="w-full px-4 py-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-400 text-sm font-mono cursor-not-allowed">
+                    <input type="text" value="{{ $student->registration_number ?: $student->student_id_code }}" readonly disabled class="w-full px-4 py-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-400 text-sm font-mono cursor-not-allowed">
                 </div>
 
                 @if($admitted)

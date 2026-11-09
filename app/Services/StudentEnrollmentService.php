@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\model\Course;
+use App\model\Batch;
 use App\model\Student;
 use App\model\StudentAccount;
 use App\model\LmsEnrollment;
 use App\model\AdmitedStudent;
+use App\Services\RegistrationNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -420,10 +422,24 @@ class StudentEnrollmentService
                 $existingStudent->save();
                 $studentRecord = $existingStudent;
             } else {
+                // Resolve Course and Batch for Registration Number generation
+                $primaryCourseObj = Course::find($primaryCourseId);
+                $courseCode = $primaryCourseObj && $primaryCourseObj->course_code ? $primaryCourseObj->course_code : '01';
+                $batchObj = !empty($data['batch_id']) 
+                    ? Batch::find($data['batch_id']) 
+                    : Batch::where('course_id', $primaryCourseId)->where('status', 1)->where('active_batch', 1)->first();
+                $batchCode = $batchObj && $batchObj->batch_code ? $batchObj->batch_code : '01';
+                $academicYear = $batchObj && $batchObj->academic_year ? $batchObj->academic_year : date('Y');
+
+                $regNumber = RegistrationNumberService::generate($academicYear, $batchCode, $courseCode);
+
                 // New Student Application Row
                 $finalFee = $totalNewFee > 0 ? (string)$totalNewFee : (string)($data['course_fee'] ?? 0);
                 $studentId = Student::insertGetId([
                     'course_id' => $primaryCourseId,
+                    'batch_id' => $batchObj ? $batchObj->id : null,
+                    'registration_number' => $regNumber,
+                    'registration_status' => 'pending',
                     'course_fee' => $finalFee,
                     'selected_courses' => !empty($newCoursesData) ? json_encode($newCoursesData, JSON_UNESCAPED_UNICODE) : null,
                     'student_name' => $studentNameUpper,
@@ -477,6 +493,10 @@ class StudentEnrollmentService
                 }
             } else {
                 $studentAccount = StudentAccount::create([
+                    'student_id' => $studentId,
+                    'student_id_code' => isset($regNumber) ? $regNumber : StudentAccount::generateUniqueStudentId(),
+                    'registration_number' => isset($regNumber) ? $regNumber : null,
+                    'registration_status' => 'pending',
                     'name' => $studentNameUpper,
                     'email' => $rawEmail ?: null,
                     'phone' => $cleanPhone ?: $rawPhone,

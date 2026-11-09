@@ -23,6 +23,7 @@ class StudentAccount extends Authenticatable
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'verified_at' => 'datetime',
         'status' => 'integer',
     ];
 
@@ -31,10 +32,55 @@ class StudentAccount extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->student_id_code)) {
+            if (!empty($model->registration_number) && empty($model->student_id_code)) {
+                $model->student_id_code = $model->registration_number;
+            } elseif (empty($model->student_id_code)) {
                 $model->student_id_code = static::generateUniqueStudentId();
             }
+            if (empty($model->registration_number) && !empty($model->student_id_code)) {
+                $model->registration_number = $model->student_id_code;
+            }
         });
+    }
+
+    public function getStudentIdCodeAttribute($value)
+    {
+        return $this->registration_number ?: $value;
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(\App\User::class, 'verified_by');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('registration_status', 'pending');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('registration_status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('registration_status', 'rejected');
+    }
+
+    public function isApproved()
+    {
+        return $this->registration_status === 'approved';
+    }
+
+    public function isPending()
+    {
+        return $this->registration_status === 'pending';
+    }
+
+    public function isRejected()
+    {
+        return $this->registration_status === 'rejected';
     }
 
     /**
@@ -177,29 +223,15 @@ class StudentAccount extends Authenticatable
 
     /**
      * Generate unique student identification code
-     * Format: WUICT-YYYY-XXXX (e.g. WUICT-2026-0001)
+     * Standard Registration Number format
      */
     public static function generateUniqueStudentId($year = null)
     {
         $year = $year ?: date('Y');
-        $prefix = "WUICT-{$year}-";
-
-        $lastRecord = self::where('student_id_code', 'LIKE', "{$prefix}%")
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $sequence = 1;
-        if ($lastRecord && preg_match('/WUICT-\d{4}-(\d+)/', $lastRecord->student_id_code, $matches)) {
-            $sequence = intval($matches[1]) + 1;
+        try {
+            return \App\Services\RegistrationNumberService::generate($year, '00', '00');
+        } catch (\Exception $e) {
+            return $year . '0000' . rand(1000, 9999);
         }
-
-        do {
-            $code = $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-            $exists = self::where('student_id_code', $code)->exists();
-            if (!$exists) {
-                return $code;
-            }
-            $sequence++;
-        } while (true);
     }
 }

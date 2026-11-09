@@ -64,12 +64,6 @@
         </a>
 
         <div class="flex items-center gap-2">
-            <!-- Print Official Board Result Sheet Button -->
-            <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm flex items-center gap-1.5">
-                <i class="fa fa-print text-emerald-600 dark:text-emerald-400"></i>
-                <span>প্রিন্ট / PDF সংরক্ষণ</span>
-            </button>
-
             <!-- All Results Archive Link -->
             <a href="{{ route('student.results.index') }}" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 transition-colors shadow-sm flex items-center gap-1.5">
                 <i class="fa fa-history text-slate-400"></i>
@@ -1019,24 +1013,32 @@
             if (btn2Col) btn2Col.className = "px-2.5 py-1 rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 flex items-center gap-1";
         }
     }
+
+    // Strict Print Prevention & Keyboard Shortcut Disabling for Quiz Exam
+    window.print = function() {
+        return false;
+    };
+    window.addEventListener('beforeprint', function(e) {
+        e.preventDefault();
+    });
+    window.addEventListener('keydown', function(e) {
+        const isCtrl = e.ctrlKey || e.metaKey;
+        const key = (e.key || '').toLowerCase();
+        if (isCtrl && (key === 'p' || key === 's')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
 </script>
 
 <style>
     @media print {
-        header, nav, footer, .student-sidebar, .student-header, .print\\:hidden {
+        html, body {
             display: none !important;
-        }
-        body {
-            background: #ffffff !important;
-            color: #000000 !important;
-        }
-        .board-paper-card {
-            border: 1px solid #000000 !important;
-            box-shadow: none !important;
-            padding: 10px !important;
-        }
-        .explanation-content {
-            display: block !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
         }
     }
 </style>

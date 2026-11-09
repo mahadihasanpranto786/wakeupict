@@ -798,7 +798,7 @@
                 <img src="{{ $studentUser->avatar_url }}" alt="{{ $studentUser->name }}" class="w-11 h-11 rounded-xl object-cover border border-slate-700/60">
                 <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold text-white truncate">{{ $studentUser->name }}</p>
-                    <p class="text-[11px] font-mono text-brand-primary font-semibold truncate">{{ $studentUser->student_id_code }}</p>
+                    <p class="text-[11px] font-mono text-brand-primary font-semibold truncate">{{ $studentUser->registration_number ?: $studentUser->student_id_code }}</p>
                 </div>
             </div>
 
@@ -944,7 +944,7 @@
                         <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-2 z-50">
                             <div class="px-3 py-2.5 border-b border-slate-800 mb-1">
                                 <p class="text-xs font-bold text-white">{{ $studentUser->name }}</p>
-                                <p class="text-[11px] font-mono text-brand-primary mt-0.5">{{ $studentUser->student_id_code }}</p>
+                                <p class="text-[11px] font-mono text-brand-primary mt-0.5">{{ $studentUser->registration_number ?: $studentUser->student_id_code }}</p>
                             </div>
                             <a href="{{ route('student.profile.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all">
                                 <i class="fa fa-user-circle-o text-brand-primary w-4"></i>

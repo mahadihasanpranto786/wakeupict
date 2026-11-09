@@ -55,6 +55,7 @@ class CoursesController extends Controller
         $request->validate([
             // 'page_name' => 'required',
             'course_title' => 'required',
+            'course_code' => 'required|string|max:20|unique:courses,course_code',
             'course_slug' => 'required',
             'time_line' => 'required',
             'short_description' => 'required',
@@ -91,8 +92,11 @@ class CoursesController extends Controller
             $save_url = 'public/uploads/course/images/' . $name_gen;
         }
 
+        $cleanCourseCode = str_pad(trim($request->course_code), 2, '0', STR_PAD_LEFT);
+
         Course::insert([
             'course_title' => $request->course_title,
+            'course_code' => $cleanCourseCode,
             'course_slug' => strtolower(str_replace(' ', '-', $request->course_slug)),
             'time_line' => $request->time_line,
             'short_description' => $request->short_description,
@@ -141,9 +145,13 @@ class CoursesController extends Controller
             'page_name' => $request->course_title,
         ]);
 
+        $course_id = $request->id;
+        $course = Course::findOrFail($course_id);
+
         $request->validate([
             // 'page_name' => 'required',
             'course_title' => 'required',
+            'course_code' => 'required|string|max:20|unique:courses,course_code,' . $course_id,
             'time_line' => 'required',
             'short_description' => 'required',
             'course_content' => 'required',
@@ -169,8 +177,15 @@ class CoursesController extends Controller
             
         ]);
 
-        $course_id = $request->id;
-        $course =  Course::findOrFail($course_id);
+        $cleanCourseCode = str_pad(trim($request->course_code), 2, '0', STR_PAD_LEFT);
+
+        // Prevent changing course code if already used in student registrations
+        if ($course->isUsedInRegistration() && $cleanCourseCode !== $course->course_code) {
+            return back()->withInput()->withErrors([
+                'course_code' => 'Course code cannot be modified once it has been used in student registrations.',
+            ]);
+        }
+
         $save_url = $course->image;
         if ($request->file('image')) {
             $old_image = $request->oldImg;
@@ -184,6 +199,7 @@ class CoursesController extends Controller
 
         Course::findOrFail($course_id)->update([
             'course_title' => $request->course_title,
+            'course_code' => $cleanCourseCode,
             'course_slug' => strtolower(str_replace(' ', '-', $request->course_slug)),
             'time_line' => $request->time_line,
             'short_description' => $request->short_description,

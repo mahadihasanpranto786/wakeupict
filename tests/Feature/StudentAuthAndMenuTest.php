@@ -18,7 +18,7 @@ class StudentAuthAndMenuTest extends TestCase
     {
         $year = date('Y');
         $id1 = StudentAccount::generateUniqueStudentId();
-        $this->assertRegExp("/^WUICT-{$year}-\d{4}$/", $id1);
+        $this->assertRegExp("/^{$year}\d{8,}$/", $id1);
 
         // Create temporary account with id1
         $account = StudentAccount::create([
@@ -32,7 +32,7 @@ class StudentAuthAndMenuTest extends TestCase
 
         $id2 = StudentAccount::generateUniqueStudentId();
         $this->assertNotEquals($id1, $id2);
-        $this->assertRegExp("/^WUICT-{$year}-\d{4}$/", $id2);
+        $this->assertRegExp("/^{$year}\d{8,}$/", $id2);
 
         $account->delete();
     }

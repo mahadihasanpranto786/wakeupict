@@ -1085,37 +1085,17 @@
                                 </li>
                             </ul>
                         @endif
-                        @if ($Students_List == 57)
+                        @if ($Students_List == 57 || $Admitted_Students_List == 58)
                             <ul class="nav nav-treeview" style="background-color: transparent;">
                                 <li class="nav-item">
                                     <a href="{{ route('students-list') }}"
-                                        class="nav-link @yield('student_list_active')">
-                                        <i class="fas fa-list  nav-icon"></i>
-                                        <p> Students List</p>
+                                        class="nav-link {{ request()->is('students-list*', 'admited-students-list*', 'student-accounts*') ? 'active' : '' }}">
+                                        <i class="fas fa-users-cog nav-icon text-primary"></i>
+                                        <p>Students Directory</p>
                                     </a>
                                 </li>
                             </ul>
                         @endif
-                        @if ($Admitted_Students_List == 58)
-                            <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
-                                <li class="nav-item">
-                                    <a href="{{ route('admited-students-list') }}"
-                                        class="nav-link @yield('admited_student_list')">
-                                        <i class="fas fa-user-check nav-icon text-success"></i>
-                                        <p>Admited Students List</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        @endif
-                        <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
-                            <li class="nav-item">
-                                <a href="{{ route('admin.student-accounts.index') }}"
-                                    class="nav-link @yield('student_account_list_active')">
-                                    <i class="fas fa-id-badge nav-icon text-warning"></i>
-                                    <p>Student Accounts</p>
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     {{-- ****************************************** student end ************************************************ --}}
                 @endif
