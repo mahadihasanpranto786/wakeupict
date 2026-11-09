@@ -11,6 +11,98 @@
 
 @section('title', ($activeTab === 'register' ? 'Student Registration' : 'Student Login') . ' — Wake Up ICT Portal')
 
+@push('css')
+<link rel="stylesheet" href="{{ safe_asset('admin/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ safe_asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+    /* Select2 Container Integration & Modern UI Styling */
+    .select2-container--bootstrap4 .select2-selection--single {
+        height: 44px !important;
+        border-radius: 0.75rem !important;
+        border: 1px solid #cbd5e1 !important;
+        background-color: #ffffff !important;
+        font-size: 0.875rem !important;
+        padding-left: 2.25rem !important;
+        display: flex !important;
+        align-items: center !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    }
+    html.dark .select2-container--bootstrap4 .select2-selection--single {
+        background-color: rgba(2, 6, 23, 0.8) !important;
+        border-color: #334155 !important;
+        color: #ffffff !important;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        color: #0f172a !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        padding-left: 0 !important;
+        line-height: 42px !important;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+    }
+    html.dark .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+        color: #64748b !important;
+    }
+    html.dark .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        color: #ffffff !important;
+    }
+    .select2-container--bootstrap4.select2-container--focus .select2-selection {
+        border-color: var(--brand-primary, #F26522) !important;
+        box-shadow: 0 0 0 1px var(--brand-primary, #F26522) !important;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        right: 12px !important;
+    }
+    /* Select2 Dropdown Popup */
+    .select2-dropdown {
+        border-radius: 0.75rem !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        z-index: 99999 !important;
+        overflow: hidden !important;
+    }
+    html.dark .select2-dropdown {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #ffffff !important;
+    }
+    .select2-container--bootstrap4 .select2-search--dropdown {
+        padding: 8px !important;
+    }
+    .select2-container--bootstrap4 .select2-search--dropdown .select2-search__field {
+        border-radius: 0.5rem !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 12px !important;
+        font-size: 0.85rem !important;
+        color: #0f172a !important;
+    }
+    html.dark .select2-container--bootstrap4 .select2-search--dropdown .select2-search__field {
+        background-color: #020617 !important;
+        border-color: #334155 !important;
+        color: #ffffff !important;
+    }
+    .select2-container--bootstrap4 .select2-results__option {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+        color: #0f172a !important;
+        font-weight: 500 !important;
+    }
+    html.dark .select2-container--bootstrap4 .select2-results__option {
+        color: #f1f5f9 !important;
+    }
+    .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--brand-primary, #F26522) !important;
+        color: #ffffff !important;
+    }
+</style>
+@endpush
+
 @section('maincontent')
 <div class="relative w-full min-h-screen pt-20 sm:pt-24 pb-12 flex items-center justify-center px-4">
     <!-- Ambient Lights -->
@@ -53,12 +145,12 @@
 
             <!-- Error Alerts -->
             @if($errors->any())
-                <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs mb-6 space-y-1">
+                <div class="auth-error-alert p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/70 border-2 border-rose-400 dark:border-rose-800 text-xs mb-6 space-y-2 shadow-sm font-sans" style="background-color: #FEF2F2 !important; border-color: #F87171 !important;">
                     @foreach($errors->all() as $error)
-                        <p class="flex items-center gap-2 font-medium">
-                            <i class="fa fa-exclamation-circle text-rose-500 flex-shrink-0"></i>
-                            <span>{{ $error }}</span>
-                        </p>
+                        <div class="flex items-start gap-2.5 font-bold leading-relaxed" style="color: #991B1B !important;">
+                            <i class="fa fa-exclamation-circle text-rose-600 flex-shrink-0 text-sm mt-0.5" style="color: #DC2626 !important;"></i>
+                            <span class="text-xs font-bold leading-relaxed" style="color: #991B1B !important; font-weight: 700;">{{ $error }}</span>
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -211,8 +303,8 @@
                             Select Course <span class="text-rose-500">*</span>
                         </label>
                         <div class="relative">
-                            <i class="fa fa-graduation-cap absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                            <select id="reg_course_id" name="course_id" required onchange="filterBatchesForCourse(this.value)"
+                            <i class="fa fa-graduation-cap absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
+                            <select id="reg_course_id" name="course_id" required
                                     class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                                 <option value="" disabled {{ old('course_id') ? '' : 'selected' }}>-- Select Course --</option>
                                 @if(isset($activeCourses))
@@ -232,14 +324,14 @@
                             Select Active Batch <span class="text-rose-500">*</span>
                         </label>
                         <div class="relative">
-                            <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
                             <select id="reg_batch_id" name="batch_id" required
                                     class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                                 <option value="" disabled {{ old('batch_id') ? '' : 'selected' }}>-- Select Batch --</option>
                                 @if(isset($activeBatches))
                                     @foreach($activeBatches as $b)
                                         <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
-                                            batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}]
+                                            Batch-Code-{{ $b->batch_code ?: $b->batch_number }} [{{ $b->academic_year ?: date('Y') }}]
                                         </option>
                                     @endforeach
                                 @endif
@@ -295,7 +387,10 @@
         </div>
     </div>
 </div>
+@endsection
 
+@push('js')
+<script src="{{ safe_asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
     function switchAuthTab(tab) {
         var paneLogin = document.getElementById('authPaneLogin');
@@ -319,6 +414,16 @@
             if (window.history.replaceState) {
                 window.history.replaceState(null, '', '{{ route("student.register") }}');
             }
+
+            // Re-render Select2 once register container is unhidden
+            setTimeout(function() {
+                if (typeof $.fn.select2 === 'function') {
+                    $('#reg_course_id, #reg_batch_id').select2({
+                        theme: 'bootstrap4',
+                        width: '100%'
+                    });
+                }
+            }, 60);
         } else {
             paneRegister.classList.add('hidden');
             paneLogin.classList.remove('hidden');
@@ -337,51 +442,57 @@
     }
 
     function filterBatchesForCourse(courseId) {
-        var batchSelect = document.getElementById('reg_batch_id');
-        if (!batchSelect) return;
+        var $batchSelect = $('#reg_batch_id');
+        if (!$batchSelect.length) return;
 
-        var options = batchSelect.querySelectorAll('option');
-        var firstValid = null;
-
-        options.forEach(function(opt) {
-            if (!opt.value) return; // placeholder
-            var courseAttr = opt.getAttribute('data-course');
-            if (!courseAttr || courseAttr == courseId) {
-                opt.style.display = '';
-                if (!firstValid) firstValid = opt.value;
-            } else {
-                opt.style.display = 'none';
-            }
-        });
-
-        // AJAX fallback to load live batches if needed
         if (courseId) {
             fetch('{{ url("/batches-for-course") }}/' + courseId)
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
+                    $batchSelect.empty();
+                    $batchSelect.append(new Option('-- Select Batch --', '', true, true));
                     if (Array.isArray(data) && data.length > 0) {
-                        batchSelect.innerHTML = '<option value="" disabled selected>-- Select Batch --</option>';
                         data.forEach(function(b) {
-                            var opt = document.createElement('option');
-                            opt.value = b.id;
-                            opt.setAttribute('data-course', courseId);
                             var codeVal = b.batch_code || b.batch_number;
                             var yearVal = b.academic_year || '{{ date("Y") }}';
-                            opt.innerText = 'batch-code-' + codeVal + '[' + yearVal + ']';
-                            batchSelect.appendChild(opt);
+                            var labelText = 'Batch-Code-' + codeVal + ' [' + yearVal + ']';
+                            var opt = new Option(labelText, b.id, false, false);
+                            $(opt).attr('data-course', courseId);
+                            $batchSelect.append(opt);
                         });
                     }
+                    $batchSelect.val('').trigger('change');
                 })
                 .catch(function(err) {
                     console.log('Batch fetch fallback error:', err);
                 });
+        } else {
+            $batchSelect.val('').trigger('change');
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.location.hash === '#register' || window.location.search.indexOf('tab=register') !== -1) {
+    $(document).ready(function() {
+        if (typeof $.fn.select2 === 'function') {
+            $('#reg_course_id').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: '-- Select Course --'
+            });
+
+            $('#reg_batch_id').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: '-- Select Batch --'
+            });
+
+            $('#reg_course_id').on('change', function() {
+                filterBatchesForCourse($(this).val());
+            });
+        }
+
+        if (window.location.hash === '#register' || window.location.search.indexOf('tab=register') !== -1 || '{{ $activeTab }}' === 'register') {
             switchAuthTab('register');
         }
     });
 </script>
-@endsection
+@endpush
