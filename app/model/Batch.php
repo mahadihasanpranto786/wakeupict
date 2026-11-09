@@ -65,4 +65,14 @@ class Batch extends Model
     {
         return $this->hasStudents();
     }
+
+    /**
+     * Standard formatted display label for dropdowns: batch-code-XX[YYYY]
+     */
+    public function getDisplayNameAttribute()
+    {
+        $code = $this->batch_code ?: $this->batch_number;
+        $year = $this->academic_year ?: date('Y');
+        return "batch-code-{$code}[{$year}]";
+    }
 }

@@ -223,7 +223,7 @@
                                 <option value="">All Batches</option>
                                 @foreach($batches as $b)
                                     <option value="{{ $b->id }}" {{ request('batch_id') == $b->id ? 'selected' : '' }}>
-                                        {{ $b->batch_number }} (Code: {{ $b->batch_code }})
+                                        batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}]
                                     </option>
                                 @endforeach
                             </select>
