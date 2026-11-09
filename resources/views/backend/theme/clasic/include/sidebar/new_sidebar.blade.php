@@ -781,7 +781,7 @@
                         <p>
                             Students
                             @if($pendingVerificationsCount > 0)
-                                <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                                <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 3.5rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
                             @endif
                             <i class="right fas fa-angle-left"></i>
                         </p>
