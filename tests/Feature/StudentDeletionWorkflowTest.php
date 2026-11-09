@@ -139,7 +139,7 @@ class StudentDeletionWorkflowTest extends TestCase
         ]);
 
         // Bulk soft delete via HTTP endpoint
-        $response = $this->actingAs($this->adminUser)->post(route('admin.students.bulk-delete'), [
+        $response = $this->from('/students-list')->actingAs($this->adminUser)->post(route('admin.students.bulk-delete'), [
             'ids' => [$st1->id, $st2->id],
             'delete_type' => 'soft',
         ]);
@@ -148,7 +148,7 @@ class StudentDeletionWorkflowTest extends TestCase
         $this->assertEquals(0, $st2->fresh()->status);
 
         // Bulk permanent delete via HTTP endpoint
-        $response2 = $this->actingAs($this->adminUser)->post(route('admin.students.bulk-delete'), [
+        $response2 = $this->from('/students-list')->actingAs($this->adminUser)->post(route('admin.students.bulk-delete'), [
             'ids' => [$st1->id, $st2->id],
             'delete_type' => 'permanent',
         ]);

@@ -44,11 +44,8 @@ class StudentDeletionService
         }
 
         // Deactivate linked Admitted Student
-        if (!empty($phone) || !empty($reg)) {
-            $admitted = AdmitedStudent::where(function ($q) use ($phone, $reg) {
-                if ($phone) $q->where('personal_call_no', $phone);
-                if ($reg) $q->orWhere('registration_number', $reg);
-            })->get();
+        if (!empty($phone)) {
+            $admitted = AdmitedStudent::where('personal_call_no', $phone)->get();
 
             foreach ($admitted as $adm) {
                 $adm->update(['status' => 0]);
@@ -95,11 +92,8 @@ class StudentDeletionService
             }
 
             // 2. Delete associated Admitted Students & Payments & Income
-            if (!empty($phone) || !empty($reg)) {
-                $admitted = AdmitedStudent::where(function ($q) use ($phone, $reg) {
-                    if ($phone) $q->where('personal_call_no', $phone);
-                    if ($reg) $q->orWhere('registration_number', $reg);
-                })->get();
+            if (!empty($phone)) {
+                $admitted = AdmitedStudent::where('personal_call_no', $phone)->get();
 
                 foreach ($admitted as $adm) {
                     $payments = StudentPayment::where('student_id', $adm->id)->get();
@@ -137,7 +131,8 @@ class StudentDeletionService
     {
         $admited = AdmitedStudent::findOrFail($admittedId);
         $phone = $admited->personal_call_no;
-        $reg = $admited->registration_number;
+        $student = !empty($phone) ? Student::where('personal_call_no', $phone)->first() : null;
+        $reg = $student ? $student->registration_number : null;
 
         // Deactivate Admitted Student
         $admited->update(['status' => 0]);
@@ -187,7 +182,8 @@ class StudentDeletionService
             }
 
             $phone = $admited->personal_call_no;
-            $reg = $admited->registration_number;
+            $student = !empty($phone) ? Student::where('personal_call_no', $phone)->first() : null;
+            $reg = $student ? $student->registration_number : null;
 
             // 1. Delete payments & incomes
             $payments = StudentPayment::where('student_id', $admittedId)->get();
@@ -276,17 +272,16 @@ class StudentDeletionService
             if ($cascadeMasterRecords) {
                 if (!empty($phone) || !empty($reg)) {
                     // Admitted
-                    $admitted = AdmitedStudent::where(function ($q) use ($phone, $reg) {
-                        if ($phone) $q->where('personal_call_no', $phone);
-                        if ($reg) $q->orWhere('registration_number', $reg);
-                    })->get();
-                    foreach ($admitted as $adm) {
-                        $payments = StudentPayment::where('student_id', $adm->id)->get();
-                        foreach ($payments as $p) {
-                            if ($p->income_id) Income::where('id', $p->income_id)->delete();
-                            $p->delete();
+                    if (!empty($phone)) {
+                        $admitted = AdmitedStudent::where('personal_call_no', $phone)->get();
+                        foreach ($admitted as $adm) {
+                            $payments = StudentPayment::where('student_id', $adm->id)->get();
+                            foreach ($payments as $p) {
+                                if ($p->income_id) Income::where('id', $p->income_id)->delete();
+                                $p->delete();
+                            }
+                            $adm->delete();
                         }
-                        $adm->delete();
                     }
 
                     // Applied Student

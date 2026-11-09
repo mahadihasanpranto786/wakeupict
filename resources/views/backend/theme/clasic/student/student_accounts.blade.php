@@ -8,15 +8,28 @@
 @section('student_account_list_active', 'active')
 
 @section('maincontant')
+<style>
+    .pagination {
+        margin-bottom: 0 !important;
+        justify-content: flex-end !important;
+    }
+    .bg-rose-600, .bg-emerald-100 {
+        color: #000000 !important;
+        font-weight: 800 !important;
+    }
+</style>
 <div class="content-header p-2">
     <div class="container-fluid">
         @include('backend.theme.clasic.student.include.student_directory_nav')
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h4 class="m-0 font-weight-bold text-dark" style="font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif;">
+            <div class="d-flex align-items-center flex-wrap">
+                <h4 class="m-0 font-weight-bold text-dark mr-2" style="font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif;">
                     <i class="fas fa-id-badge text-primary mr-2"></i> শিক্ষার্থী অ্যাকাউন্ট তালিকা (Student Accounts)
                 </h4>
-                <p class="text-muted text-xs mb-0 mt-1">
+                <span class="badge badge-info px-3 py-1 font-weight-bold shadow-sm" style="font-size: 13px;">
+                    <i class="fas fa-users mr-1"></i> Total Accounts: {{ $accounts->total() }}
+                </span>
+                <p class="text-muted text-xs mb-0 mt-1 w-100">
                     স্টুডেন্ট পোর্টাল ও কোর্স অ্যাপ্লিকেশন থেকে নিবন্ধিত সকল শিক্ষার্থীর তথ্য ও অ্যাকাউন্ট ব্যবস্থাপনা।
                 </p>
             </div>

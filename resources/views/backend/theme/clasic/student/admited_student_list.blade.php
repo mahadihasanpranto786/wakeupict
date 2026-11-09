@@ -12,17 +12,31 @@
 
 
 @section('maincontant')
+    <style>
+        .pagination {
+            margin-bottom: 0 !important;
+            justify-content: flex-end !important;
+        }
+        .bg-rose-600, .bg-emerald-100 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+        }
+    </style>
     <div class="p-3">
         @include('backend.theme.clasic.student.include.student_directory_nav')
     </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header p-2">
-                    <h3 class="card-title p-2">
-                        List Of Admited Students</h3>
-
-                </div>
+                <div class="card-header p-2 d-flex justify-content-between align-items-center flex-wrap">
+                    <div class="d-flex align-items-center flex-wrap p-2">
+                        <h3 class="card-title font-weight-bold mb-0 text-dark mr-2">
+                            <i class="fas fa-user-check text-success mr-1"></i> List Of Admitted Students
+                        </h3>
+                        <span class="badge badge-success px-3 py-2 font-weight-bold shadow-sm" style="font-size: 13px;">
+                            <i class="fas fa-users mr-1"></i> Total Admitted Students: {{ $students->total() }}
+                        </span>
+                    </div>
 
                 @php
                     $Add_student = 0;

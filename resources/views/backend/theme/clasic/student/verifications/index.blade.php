@@ -12,6 +12,14 @@
         margin-bottom: 0 !important;
         margin-left: auto !important;
         justify-content: flex-end !important;
+        float: right;
+    }
+    .custom-select, .form-control {
+        min-width: 120px;
+    }
+    .bg-rose-600, .bg-emerald-100 {
+        color: #000000 !important;
+        font-weight: 800 !important;
     }
 </style>
 <div class="content-wrapper-inner p-3">
@@ -169,76 +177,78 @@
 
                 <!-- Filter & Search Bar -->
                 <div class="card-header bg-white py-3 border-bottom">
-                    <form method="GET" action="{{ route('admin.registration.verifications') }}" class="form-row align-items-end">
-                        <!-- Search Box -->
-                        <div class="col-xl-3 col-lg-3 col-md-6 mb-2">
-                            <label class="small text-muted font-weight-bold mb-1">Search Student</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                    <form method="GET" action="{{ route('admin.registration.verifications') }}">
+                        <div class="row align-items-end">
+                            <!-- Search Box -->
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-2">
+                                <label class="small text-muted font-weight-bold mb-1">Search Student</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                                    </div>
+                                    <input type="text" name="search" class="form-control" placeholder="Reg No, Student Name, Phone..." value="{{ request('search') }}">
                                 </div>
-                                <input type="text" name="search" class="form-control" placeholder="Reg No, Student Name, Phone..." value="{{ request('search') }}">
                             </div>
-                        </div>
 
-                        <!-- Status Filter -->
-                        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 mb-2">
-                            <label class="small text-muted font-weight-bold mb-1">Approval Status</label>
-                            <select name="status" class="form-control">
-                                <option value="">All Statuses</option>
-                                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            </select>
-                        </div>
+                            <!-- Status Filter -->
+                            <div class="col-xl-2 col-lg-4 col-md-3 col-6 mb-2">
+                                <label class="small text-muted font-weight-bold mb-1">Approval Status</label>
+                                <select name="status" class="form-control custom-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                </select>
+                            </div>
 
-                        <!-- Year Filter -->
-                        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 mb-2">
-                            <label class="small text-muted font-weight-bold mb-1">Year</label>
-                            <select name="year" class="form-control">
-                                <option value="">All Years</option>
-                                @foreach($years as $yr)
-                                    <option value="{{ $yr }}" {{ request('year') == $yr ? 'selected' : '' }}>{{ $yr }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Year Filter -->
+                            <div class="col-xl-2 col-lg-4 col-md-3 col-6 mb-2">
+                                <label class="small text-muted font-weight-bold mb-1">Year</label>
+                                <select name="year" class="form-control custom-select">
+                                    <option value="">All Years</option>
+                                    @foreach($years as $yr)
+                                        <option value="{{ $yr }}" {{ request('year') == $yr ? 'selected' : '' }}>{{ $yr }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Course Filter -->
-                        <div class="col-xl-2 col-lg-2 col-md-4 mb-2">
-                            <label class="small text-muted font-weight-bold mb-1">Course</label>
-                            <select name="course_id" class="form-control" style="width: 100% !important;">
-                                <option value="">All Courses</option>
-                                @foreach($courses as $c)
-                                    <option value="{{ $c->id }}" {{ request('course_id') == $c->id ? 'selected' : '' }}>
-                                        {{ $c->course_title }} ({{ $c->course_code }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Course Filter -->
+                            <div class="col-xl-2 col-lg-5 col-md-6 col-12 mb-2">
+                                <label class="small text-muted font-weight-bold mb-1">Course</label>
+                                <select name="course_id" class="form-control custom-select">
+                                    <option value="">All Courses</option>
+                                    @foreach($courses as $c)
+                                        <option value="{{ $c->id }}" {{ request('course_id') == $c->id ? 'selected' : '' }}>
+                                            {{ $c->course_title }} ({{ $c->course_code }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Batch Filter -->
-                        <div class="col-xl-2 col-lg-2 col-md-4 mb-2">
-                            <label class="small text-muted font-weight-bold mb-1">Batch</label>
-                            <select name="batch_id" class="form-control" style="width: 100% !important;">
-                                <option value="">All Batches</option>
-                                @foreach($batches as $b)
-                                    <option value="{{ $b->id }}" {{ request('batch_id') == $b->id ? 'selected' : '' }}>
-                                        batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}]
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Batch Filter -->
+                            <div class="col-xl-2 col-lg-5 col-md-4 col-8 mb-2">
+                                <label class="small text-muted font-weight-bold mb-1">Batch</label>
+                                <select name="batch_id" class="form-control custom-select">
+                                    <option value="">All Batches</option>
+                                    @foreach($batches as $b)
+                                        <option value="{{ $b->id }}" {{ request('batch_id') == $b->id ? 'selected' : '' }}>
+                                            batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}]
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Action Buttons -->
-                        <div class="col-xl-1 col-lg-1 col-md-4 mb-2 d-flex">
-                            <button type="submit" class="btn btn-primary btn-block font-weight-bold" title="Filter Records">
-                                <i class="fas fa-filter"></i>
-                            </button>
-                            @if(request()->hasAny(['search', 'status', 'year', 'course_id', 'batch_id']))
-                                <a href="{{ route('admin.registration.verifications') }}" class="btn btn-outline-secondary ml-1" title="Reset Filters">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            @endif
+                            <!-- Action Buttons -->
+                            <div class="col-xl-1 col-lg-2 col-md-2 col-4 mb-2 d-flex">
+                                <button type="submit" class="btn btn-warning btn-block font-weight-bold text-dark shadow-sm" title="Filter Records">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                                @if(request()->hasAny(['search', 'status', 'year', 'course_id', 'batch_id']))
+                                    <a href="{{ route('admin.registration.verifications') }}" class="btn btn-outline-secondary ml-1" title="Reset Filters">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -398,7 +408,7 @@
                             <div class="small text-muted font-sans font-weight-bold my-1">
                                 Showing {{ $registrations->firstItem() }} to {{ $registrations->lastItem() }} of {{ $registrations->total() }} registrations
                             </div>
-                            <div class="ml-auto my-1 text-right">
+                            <div class="ml-auto my-1 d-flex justify-content-end align-items-center pagination-right-align">
                                 {{ $registrations->links() }}
                             </div>
                         </div>

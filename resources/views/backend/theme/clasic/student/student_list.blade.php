@@ -9,6 +9,18 @@
 {{-- menu active end --}}
 
 @section('maincontant')
+    <style>
+        .card-footer .pagination {
+            margin-bottom: 0 !important;
+            margin-left: auto !important;
+            justify-content: flex-end !important;
+            float: right;
+        }
+        .bg-rose-600, .bg-emerald-100 {
+            color: #000000 !important;
+            font-weight: 800 !important;
+        }
+    </style>
     <div class="content-wrapper-inner p-3">
 
         <!-- Unified Student Management Navigation Tabs -->
