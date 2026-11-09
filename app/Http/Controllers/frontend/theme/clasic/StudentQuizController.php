@@ -1238,6 +1238,23 @@ class StudentQuizController extends Controller
         $totalMarksObtained = 0.0;
         $totalNegativeDeducted = 0.0;
 
+        // Determine whether negative marking is active for this assessment
+        $isNegActive = false;
+        $defaultNegValue = 0.0;
+        if ($quiz && $quiz->quiz_type === 'practice') {
+            $pSettings = \App\Services\PracticeQuestionRotationService::getSettings();
+            if (!empty($pSettings['negative_marking_enabled'])) {
+                $isNegActive = true;
+                $defaultNegValue = (float)($pSettings['negative_mark_value'] ?? 0.25);
+            }
+        } else {
+            // Formal Exam / Assessment: active ONLY if quiz explicitly has negative_marks > 0
+            if ($quiz && (float)$quiz->negative_marks > 0) {
+                $isNegActive = true;
+                $defaultNegValue = (float)$quiz->negative_marks;
+            }
+        }
+
         foreach ($questions as $question) {
             $answer = LmsQuizAnswer::where('attempt_id', $attempt->id)
                 ->where('question_id', $question->id)
@@ -1286,11 +1303,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = ($quiz && $quiz->quiz_type === 'practice')
-                        ? 0.0
-                        : ($question->negative_marks !== null
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
                             ? abs((float)$question->negative_marks)
-                            : abs((float)($quiz ? ($quiz->negative_marks ?: 0.0) : 0.0)));
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -1322,7 +1340,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
+                            ? abs((float)$question->negative_marks)
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -1363,7 +1386,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
+                            ? abs((float)$question->negative_marks)
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;

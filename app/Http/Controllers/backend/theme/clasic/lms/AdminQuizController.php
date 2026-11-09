@@ -75,7 +75,7 @@ class AdminQuizController extends Controller
     {
         // 1. Sanitize all incoming numbers from Bengali numerals to pure English ASCII digits
         $inputs = $request->all();
-        foreach (['tier_questions', 'tier_durations', 'tier_pass_marks', 'question_count', 'duration_minutes', 'max_attempts', 'mark_per_question', 'pass_percentage'] as $numKey) {
+        foreach (['tier_questions', 'tier_durations', 'tier_pass_marks', 'question_count', 'duration_minutes', 'max_attempts', 'mark_per_question', 'pass_percentage', 'negative_mark_value'] as $numKey) {
             if (isset($inputs[$numKey])) {
                 $inputs[$numKey] = PracticeQuestionRotationService::toEnglishDigits($inputs[$numKey]);
             }
@@ -97,7 +97,9 @@ class AdminQuizController extends Controller
             'max_attempts'          => 'nullable|integer|min:1|max:100',
             'allow_category_choice' => 'nullable|boolean',
             'mark_per_question'     => 'nullable|numeric|min:0.1|max:50',
-            'pass_percentage'       => 'nullable|numeric|min:1|max:100',
+            'pass_percentage'          => 'nullable|numeric|min:1|max:100',
+            'negative_marking_enabled' => 'nullable|boolean',
+            'negative_mark_value'      => 'nullable|numeric|min:0|max:10',
         ]);
 
         $attemptLimitType = $request->input('attempt_limit_type', 'unlimited');
@@ -146,7 +148,9 @@ class AdminQuizController extends Controller
             'max_attempts'          => $maxAttempts,
             'allow_category_choice' => $request->has('allow_category_choice') ? 1 : 0,
             'mark_per_question'     => $request->filled('mark_per_question') ? (float)$request->input('mark_per_question') : 1.0,
-            'pass_percentage'       => $request->filled('pass_percentage') ? (float)$request->input('pass_percentage') : 40.0,
+            'pass_percentage'          => $request->filled('pass_percentage') ? (float)$request->input('pass_percentage') : 40.0,
+            'negative_marking_enabled' => $request->has('negative_marking_enabled') ? 1 : 0,
+            'negative_mark_value'      => $request->filled('negative_mark_value') ? (float)$request->input('negative_mark_value') : 0.25,
         ];
 
         if (!empty($tiers)) {

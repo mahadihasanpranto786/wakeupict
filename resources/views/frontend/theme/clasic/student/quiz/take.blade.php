@@ -71,12 +71,17 @@
             overflow: hidden !important;
         }
     }
+
+    /* Smooth Scroll Margin for Sticky Top Exam HUD & Header */
+    [id^="q-item-"], .board-q-row {
+        scroll-margin-top: 180px !important;
+    }
 </style>
 
 <div class="max-w-6xl mx-auto space-y-5 exam-secure-zone" id="exam-container">
 
     <!-- Sticky Exam HUD Bar -->
-    <div class="student-card rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 sticky top-16 z-40 backdrop-blur-xl shadow-lg transition-all">
+    <div id="exam-hud-bar" class="student-card rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 sticky top-20 z-40 backdrop-blur-xl shadow-lg transition-all" style="position: -webkit-sticky; position: sticky; top: 80px;">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
             <!-- Exam Title & Set Badge -->
@@ -694,9 +699,9 @@
         <!-- ========================================================================= -->
         <!-- Right: Question Palette & Real-Time Stats (4 cols) -->
         <!-- ========================================================================= -->
-        <div class="lg:col-span-4 space-y-4">
+        <div class="lg:col-span-4 lg:sticky self-start space-y-4 z-30" style="position: -webkit-sticky; position: sticky; top: 166px;">
             
-            <div class="student-card rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 backdrop-blur-xl shadow-xl sticky top-36 space-y-5">
+            <div class="student-card rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 backdrop-blur-xl shadow-xl space-y-5 max-h-[calc(100vh-185px)] overflow-y-auto custom-scrollbar">
                 
                 <!-- Palette Header & Stats -->
                 <div>

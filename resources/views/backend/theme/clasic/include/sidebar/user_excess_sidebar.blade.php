@@ -1073,10 +1073,10 @@
                             <i class="nav-icon fas fa-user-graduate"></i>
                             <p>
                                 Students
-                                @if($pendingVerificationsCount > 0)
-                                    <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 3.5rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
-                                @endif
                                 <i class="right fas fa-angle-left"></i>
+                                @if($pendingVerificationsCount > 0)
+                                    <span class="badge badge-warning right font-weight-bold" style="background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2; white-space: nowrap !important; display: inline-flex; align-items: center; justify-content: center;">{{ $pendingVerificationsCount }}</span>
+                                @endif
                             </p>
                         </a>
                         @if ($Batch_Number == 56)
@@ -1109,7 +1109,7 @@
                                     <p>
                                         Registration Verification
                                         @if($pendingVerificationsCount > 0)
-                                            <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                                            <span class="badge badge-warning right font-weight-bold" style="background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2; white-space: nowrap !important; display: inline-flex; align-items: center; justify-content: center;">{{ $pendingVerificationsCount }}</span>
                                         @endif
                                     </p>
                                 </a>

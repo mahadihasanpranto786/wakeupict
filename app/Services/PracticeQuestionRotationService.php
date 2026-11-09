@@ -105,17 +105,21 @@ class PracticeQuestionRotationService
 
         $markPerQuestion = (float) AppearanceSetting::getVal('practice_exam_mark_per_question', 1.0);
         $passPercentage = (float) AppearanceSetting::getVal('practice_exam_pass_percentage', 40.0);
+        $negMarkingEnabled = (bool) AppearanceSetting::getVal('practice_exam_negative_marking_enabled', 0);
+        $negMarkValue = (float) AppearanceSetting::getVal('practice_exam_negative_mark_value', 0.25);
 
         return [
-            'question_count'        => $defaultQuestionCount,
-            'duration_minutes'      => $defaultDuration > 0 ? $defaultDuration : 20,
-            'tiers'                 => $tiers,
-            'view_mode'             => AppearanceSetting::getVal('practice_exam_view_mode', 'all_questions'),
-            'attempt_limit_type'    => $attemptLimitType,
-            'max_attempts'          => $maxAttempts,
-            'allow_category_choice' => (bool) AppearanceSetting::getVal('practice_exam_allow_category_choice', 1),
-            'mark_per_question'     => $markPerQuestion > 0 ? $markPerQuestion : 1.0,
-            'pass_percentage'       => $passPercentage > 0 ? $passPercentage : 40.0,
+            'question_count'           => $defaultQuestionCount,
+            'duration_minutes'         => $defaultDuration > 0 ? $defaultDuration : 20,
+            'tiers'                    => $tiers,
+            'view_mode'                => AppearanceSetting::getVal('practice_exam_view_mode', 'all_questions'),
+            'attempt_limit_type'       => $attemptLimitType,
+            'max_attempts'             => $maxAttempts,
+            'allow_category_choice'    => (bool) AppearanceSetting::getVal('practice_exam_allow_category_choice', 1),
+            'mark_per_question'        => $markPerQuestion > 0 ? $markPerQuestion : 1.0,
+            'pass_percentage'          => $passPercentage > 0 ? $passPercentage : 40.0,
+            'negative_marking_enabled' => $negMarkingEnabled,
+            'negative_mark_value'      => $negMarkValue >= 0 ? $negMarkValue : 0.25,
         ];
     }
 
@@ -177,6 +181,12 @@ class PracticeQuestionRotationService
         }
         if (isset($data['pass_percentage'])) {
             AppearanceSetting::setVal('practice_exam_pass_percentage', (float) $data['pass_percentage'], (float) $data['pass_percentage'], 'practice_exam');
+        }
+        if (isset($data['negative_marking_enabled'])) {
+            AppearanceSetting::setVal('practice_exam_negative_marking_enabled', (int) $data['negative_marking_enabled'], (int) $data['negative_marking_enabled'], 'practice_exam');
+        }
+        if (isset($data['negative_mark_value'])) {
+            AppearanceSetting::setVal('practice_exam_negative_mark_value', (float) $data['negative_mark_value'], (float) $data['negative_mark_value'], 'practice_exam');
         }
     }
 

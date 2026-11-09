@@ -959,3 +959,48 @@ unomaduro\\collision\\src\\Handler.php:56)
 #10 C:\\Herd\\wakeupict\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #11 {main}
 "} 
+[2026-11-09 18:50:13] local.ERROR: Call to undefined relationship [studentAccount] on model [App\model\LmsQuizAttempt]. {"exception":"[object] (Illuminate\\Database\\Eloquent\\RelationNotFoundException(code: 0): Call to undefined relationship [studentAccount] on model [App\\model\\LmsQuizAttempt]. at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\RelationNotFoundException.php:34)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(588): Illuminate\\Database\\Eloquent\\RelationNotFoundException::make(Object(App\\model\\LmsQuizAttempt), 'studentAccount')
+#1 [internal function]: Illuminate\\Database\\Eloquent\\Builder->Illuminate\\Database\\Eloquent\\{closure}()
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Relations\\Relation.php(90): call_user_func(Object(Closure))
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(590): Illuminate\\Database\\Eloquent\\Relations\\Relation::noConstraints(Object(Closure))
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(558): Illuminate\\Database\\Eloquent\\Builder->getRelation('studentAccount')
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(538): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelation(Array, 'studentAccount', Object(Closure))
+#6 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Builder.php(506): Illuminate\\Database\\Eloquent\\Builder->eagerLoadRelations(Array)
+#7 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\9e73b842-1b43-4bd5-9e10-2b0dc60ac72e\\scratch\\check_ahad.php(7): Illuminate\\Database\\Eloquent\\Builder->get()
+#8 {main}
+"} 
+[2026-11-09 18:50:54] local.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'full_name' in 'where clause' (SQL: select * from `students` where `full_name` like %Ahad%) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'full_name' in 'where clause' (SQL: select * from `students` where `full_name` like %Ahad%) at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'full_name' in 'where clause' at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:326)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(333): Illuminate\\Database\\Connection->run('select * from `...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2130): Illuminate\\Database\\Connection->select('select * from `...', Array, true)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2118): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2604): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2119): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\9e73b842-1b43-4bd5-9e10-2b0dc60ac72e\\scratch\\check_ahad.php(21): Illuminate\\Database\\Query\\Builder->get()
+#7 {main}
+"} 
+[2026-11-09 18:51:20] local.ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'where clause' (SQL: select * from `students` where `name` like %Ahad% or `phone` like %01940439412%) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'where clause' (SQL: select * from `students` where `name` like %Ahad% or `phone` like %01940439412%) at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S22): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'where clause' at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:326)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(333): Illuminate\\Database\\Connection->run('select * from `...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2130): Illuminate\\Database\\Connection->select('select * from `...', Array, true)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2118): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2604): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2119): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\9e73b842-1b43-4bd5-9e10-2b0dc60ac72e\\scratch\\check_ahad.php(9): Illuminate\\Database\\Query\\Builder->get()
+#7 {main}
+"} 
+[2026-11-09 18:53:29] local.ERROR: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'wakeupict_main_db.lms_student_question_history' doesn't exist (SQL: select * from `lms_student_question_history` where `attempt_id` in (9, 10, 11, 12)) {"exception":"[object] (Illuminate\\Database\\QueryException(code: 42S02): SQLSTATE[42S02]: Base table or view not found: 1146 Table 'wakeupict_main_db.lms_student_question_history' doesn't exist (SQL: select * from `lms_student_question_history` where `attempt_id` in (9, 10, 11, 12)) at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:664, PDOException(code: 42S02): SQLSTATE[42S02]: Base table or view not found: 1146 Table 'wakeupict_main_db.lms_student_question_history' doesn't exist at C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:326)
+[stacktrace]
+#0 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(624): Illuminate\\Database\\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#1 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(333): Illuminate\\Database\\Connection->run('select * from `...', Array, Object(Closure))
+#2 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2130): Illuminate\\Database\\Connection->select('select * from `...', Array, true)
+#3 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2118): Illuminate\\Database\\Query\\Builder->runSelect()
+#4 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2604): Illuminate\\Database\\Query\\Builder->Illuminate\\Database\\Query\\{closure}()
+#5 C:\\Herd\\wakeupict\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(2119): Illuminate\\Database\\Query\\Builder->onceWithColumns(Array, Object(Closure))
+#6 C:\\Users\\Wake Up ICT\\.gemini\\antigravity\\brain\\9e73b842-1b43-4bd5-9e10-2b0dc60ac72e\\scratch\\check_ahad.php(21): Illuminate\\Database\\Query\\Builder->get()
+#7 {main}
+"} 

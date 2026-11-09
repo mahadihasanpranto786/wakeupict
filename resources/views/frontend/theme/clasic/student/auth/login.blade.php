@@ -174,7 +174,7 @@
                         <span>অনলাইন ভর্তি হওয়া শিক্ষার্থীদের জন্য:</span>
                     </div>
                     <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-                        ইউজারনেম হিসেবে আপনার <strong>রেজিস্ট্রেশন নম্বর (Registration Number)</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
+                        ইউজারনেম হিসেবে আপনার <strong>রেজিস্ট্রেশন নম্বর (Registration Number)</strong>, <strong>মোবাইল নম্বর</strong> অথবা <strong>ইমেইল</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
                     </p>
                 </div>
 
@@ -333,8 +333,11 @@
                                 <option value="" disabled {{ old('batch_id') ? '' : 'selected' }}>-- Select Batch --</option>
                                 @if(isset($activeBatches))
                                     @foreach($activeBatches as $b)
+                                        @php
+                                            $cleanCode = preg_replace('/^(batch[-_\s]*code[-_\s]*|batch[-_\s]*)/i', '', $b->batch_code ?: $b->batch_number);
+                                        @endphp
                                         <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
-                                            Batch-Code-{{ $b->batch_code ?: $b->batch_number }} [{{ $b->academic_year ?: date('Y') }}]
+                                            Batch-Code-{{ $cleanCode }} [{{ $b->academic_year ?: date('Y') }}]
                                         </option>
                                     @endforeach
                                 @endif
@@ -481,9 +484,10 @@
                     $batchSelect.append(new Option('-- Select Batch --', '', true, true));
                     if (Array.isArray(data) && data.length > 0) {
                         data.forEach(function(b) {
-                            var codeVal = b.batch_code || b.batch_number;
+                            var rawCode = b.batch_code || b.batch_number || '';
+                            var cleanCode = String(rawCode).replace(/^(batch[-_\s]*code[-_\s]*|batch[-_\s]*)/i, '');
                             var yearVal = b.academic_year || '{{ date("Y") }}';
-                            var labelText = 'Batch-Code-' + codeVal + ' [' + yearVal + ']';
+                            var labelText = 'Batch-Code-' + cleanCode + ' [' + yearVal + ']';
                             var opt = new Option(labelText, b.id, false, false);
                             $(opt).attr('data-course', courseId);
                             $batchSelect.append(opt);

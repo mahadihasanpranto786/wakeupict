@@ -265,8 +265,14 @@
                                     @endif
                                 @elseif($attempt->status === 'submitted')
                                     <span class="badge badge-warning px-2 py-1"><i class="fas fa-hourglass-half mr-1"></i> মূল্যায়নাধীন</span>
+                                @elseif($attempt->status === 'timed_out' || ($attempt->started_at && $attempt->quiz && \Carbon\Carbon::now()->greaterThan($attempt->started_at->copy()->addMinutes($attempt->quiz->duration_minutes + 2))))
+                                    <span class="badge badge-secondary px-2 py-1 font-weight-bold" style="background-color: #64748b; color: #ffffff;" title="নির্ধারিত পরীক্ষার সময় পার হয়েছে">
+                                        <i class="far fa-clock mr-1"></i> সময় সমাপ্ত (Timed Out)
+                                    </span>
                                 @else
-                                    <span class="badge badge-secondary px-2 py-1"><i class="fas fa-spinner fa-spin mr-1"></i> চলমান</span>
+                                    <span class="badge badge-info px-2 py-1 font-weight-bold" style="background-color: #0284c7; color: #ffffff;">
+                                        <i class="fas fa-edit mr-1"></i> চলমান (In Progress)
+                                    </span>
                                 @endif
                             </td>
                             <td class="text-center">
