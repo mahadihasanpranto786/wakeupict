@@ -32,11 +32,13 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
         $this->assertEquals(12, strlen($reg2));
         $this->assertNotEquals($reg1, $reg2);
 
-        // Different course/batch has independent sequence
+        // Sequential digits must be globally unique across all batches and courses (never duplicate 0001)
         $otherBatch = (string)rand(70, 89);
-        \Illuminate\Support\Facades\DB::table('registration_sequences')->where('academic_year', '2026')->where('batch_code', $otherBatch)->delete();
         $reg3 = RegistrationNumberService::generate('2026', $otherBatch, '02');
-        $this->assertEquals("2026{$otherBatch}020001", $reg3);
+        $this->assertEquals(12, strlen($reg3));
+        $this->assertNotEquals(substr($reg1, -4), substr($reg3, -4));
+        $this->assertNotEquals(substr($reg2, -4), substr($reg3, -4));
+        $this->assertEquals("2026{$otherBatch}02", substr($reg3, 0, 8));
     }
 
     /**

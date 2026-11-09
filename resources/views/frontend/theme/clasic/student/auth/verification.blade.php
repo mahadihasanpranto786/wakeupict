@@ -146,6 +146,25 @@
                 </div>
             @endif
 
+            <!-- RESULT: IP BLOCKED BANNER (When visited with 3+ failed attempts) -->
+            @if(isset($isIpBlocked) && $isIpBlocked && (!isset($result) || $result['status'] !== 'blocked'))
+                <div class="mb-6 p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-slate-800 dark:text-slate-200 space-y-3">
+                    <div class="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-400 text-sm">
+                        <i class="fa fa-lock text-lg"></i>
+                        <span>এই ডিভাইস/আইপি থেকে অনুসন্ধান স্থগিত (Blocked)</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+                        নিরাপত্তাজনিত কারণে এই ডিভাইস/আইপি (IP) থেকে সর্বোচ্চ ৩ বার চেষ্টার পর ভেরিফিকেশন বাটনটি নিষ্ক্রিয় করা হয়েছে। অ্যাডমিন পর্যালোচনার পর এটি সক্রিয় করা হবে। তাৎক্ষণিক সহায়তার জন্য হেল্পলাইন <strong>01791612121</strong> নম্বরে যোগাযোগ করুন।
+                    </p>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900 text-xs">
+                        <p class="text-slate-600 dark:text-slate-400 font-sans">
+                            অ্যাডমিন পর্যালোচনার পর এই আইপির অনুমোদন করা হলে পুনরায় চেক করা যাবে। হটলাইন:
+                            <a href="tel:01791612121" class="font-bold text-rose-600 dark:text-rose-400 font-mono">01791612121</a>
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             <!-- Verification Submission Form -->
             <form action="{{ route('student.registration.verification.submit') }}" method="POST" class="space-y-4">
                 @csrf
@@ -157,8 +176,9 @@
                     <div class="relative">
                         <i class="fa fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input type="text" id="phone" name="phone" value="{{ old('phone') }}" required
+                               @if(isset($isIpBlocked) && $isIpBlocked) disabled @endif
                                placeholder="017XXXXXXXX"
-                               class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                               class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all {{ isset($isIpBlocked) && $isIpBlocked ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-900' : '' }}">
                     </div>
                 </div>
 
@@ -170,7 +190,8 @@
                         <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         @if(isset($activeBatches) && count($activeBatches) > 0)
                             <select id="batch_code" name="batch_code" required
-                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                    @if(isset($isIpBlocked) && $isIpBlocked) disabled @endif
+                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all {{ isset($isIpBlocked) && $isIpBlocked ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-900' : '' }}">
                                 <option value="" selected disabled>Select your batch</option>
                                 @foreach($activeBatches as $b)
                                     <option value="{{ $b->batch_code ?: $b->batch_number }}" {{ old('batch_code') == ($b->batch_code ?: $b->batch_number) ? 'selected' : '' }}>
@@ -180,17 +201,24 @@
                             </select>
                         @else
                             <input type="text" id="batch_code" name="batch_code" value="{{ old('batch_code') }}" required
+                                   @if(isset($isIpBlocked) && $isIpBlocked) disabled @endif
                                    placeholder="যেমন: 05 বা Batch-05"
-                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all {{ isset($isIpBlocked) && $isIpBlocked ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-900' : '' }}">
                         @endif
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button type="submit"
-                            class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa fa-search"></i>
-                        <span>রেজিস্ট্রেশন নম্বর অনুসন্ধান করুন (Verify)</span>
+                            @if(isset($isIpBlocked) && $isIpBlocked) disabled style="opacity: 0.6; cursor: not-allowed; pointer-events: none;" @endif
+                            class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest {{ isset($isIpBlocked) && $isIpBlocked ? 'bg-slate-500 cursor-not-allowed' : 'bg-brand-primary hover:bg-brand-accent' }} text-white transition-all shadow-glow-emerald flex items-center justify-center gap-2 cursor-pointer">
+                        @if(isset($isIpBlocked) && $isIpBlocked)
+                            <i class="fa fa-ban text-rose-300"></i>
+                            <span>অনুসন্ধান বাটন নিষ্ক্রিয় (Blocked — ৩ বারের বেশি চেষ্টা)</span>
+                        @else
+                            <i class="fa fa-search"></i>
+                            <span>রেজিস্ট্রেশন নম্বর অনুসন্ধান করুন (Verify)</span>
+                        @endif
                     </button>
                 </div>
             </form>

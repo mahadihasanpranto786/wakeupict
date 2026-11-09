@@ -232,6 +232,24 @@
                                     <i class="fas fa-graduation-cap mr-1"></i>
                                     {{ $attempt->quiz && $attempt->quiz->course ? $attempt->quiz->course->course_title : 'General' }}
                                 </div>
+                                @php
+                                    $retakes = $attempt->retakes ?: collect();
+                                    $retakeCount = $retakes->count();
+                                    $allChain = collect([$attempt])->concat($retakes);
+                                    $passedInChain = $allChain->first(function($a) { return $a->isPassed(); });
+                                @endphp
+                                @if($retakeCount > 0)
+                                    <div class="mt-1">
+                                        <button type="button" class="btn btn-xs btn-outline-info font-weight-bold py-0 px-2" onclick="toggleAdminRetakes({{ $attempt->id }})" id="admin-retake-btn-{{ $attempt->id }}">
+                                            <i class="fas fa-sitemap mr-1"></i> {{ $retakeCount }}টি রিটেক <i class="fas fa-chevron-down ml-0.5"></i>
+                                        </button>
+                                        @if($passedInChain)
+                                            <span class="badge badge-success px-1.5 py-0.5 ml-1 text-xs"><i class="fas fa-check-circle mr-0.5"></i> {{ $passedInChain->attempt_number }}ম বারে ১০০%</span>
+                                        @else
+                                            <span class="badge badge-warning text-dark px-1.5 py-0.5 ml-1 text-xs">পুনঃচেষ্টা চলমান</span>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                             <td class="text-center">
                                 <span class="badge badge-light border font-weight-bold px-2 py-1">
@@ -249,7 +267,7 @@
                                 {{ (float)$attempt->negative_marks_deducted > 0 ? '-' . (float)$attempt->negative_marks_deducted : '০.০০' }}
                             </td>
                             <td class="text-center font-weight-bold">
-                                <span class="badge {{ $attempt->percentage >= 80 ? 'badge-success' : ($attempt->percentage >= 50 ? 'badge-info' : 'badge-danger') }} px-2 py-1 text-xs">
+                                <span class="badge {{ $attempt->percentage >= 100 ? 'badge-success' : ($attempt->percentage >= 50 ? 'badge-info' : 'badge-danger') }} px-2 py-1 text-xs">
                                     {{ (float)$attempt->percentage }}%
                                 </span>
                             </td>
@@ -259,7 +277,7 @@
                             <td class="text-center">
                                 @if($attempt->status === 'graded')
                                     @if($isPassed)
-                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (Pass)</span>
+                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (100% Pass)</span>
                                     @else
                                         <span class="badge badge-danger px-2 py-1"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
                                     @endif
@@ -288,7 +306,7 @@
                                 @endif
                             </td>
                             <td class="text-center text-xs text-muted">
-                                {{ $attempt->submitted_at ? $attempt->submitted_at->format('d M, Y h:i A') : $attempt->updated_at->format('d M, Y') }}
+                                {{ $attempt->submitted_at ? $attempt->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $attempt->updated_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
@@ -301,6 +319,76 @@
                                 </div>
                             </td>
                         </tr>
+
+                        @if($retakeCount > 0)
+                            <tr id="admin-retakes-{{ $attempt->id }}" class="d-none" style="background-color: #f8fafc;">
+                                <td colspan="12" class="p-3">
+                                    <div class="border rounded bg-white p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                            <span class="font-weight-bold text-xs text-primary">
+                                                <i class="fas fa-sitemap mr-1"></i> পুনঃপরীক্ষা ও প্রচেষ্টার ধারাবাহিক ট্র্যাকিং হিস্টোরি (Parent-Child Chain)
+                                            </span>
+                                            <span class="text-xs text-muted">
+                                                মোট অংশগ্রহণ: {{ $retakeCount + 1 }} বার | {{ $passedInChain ? '১০০% সফল উত্তীর্ণ' : '১০০% অর্জনের চেষ্টা চলছে' }}
+                                            </span>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered text-center text-xs mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>চেষ্টা ক্রম</th>
+                                                        <th>তারিখ ও সময় (BD Time)</th>
+                                                        <th>প্রাপ্ত নম্বর (Score)</th>
+                                                        <th>শতকরা (Pct)</th>
+                                                        <th>নেগেটিভ কর্তন</th>
+                                                        <th>ফলাফল</th>
+                                                        <th>অ্যাকশন</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($allChain as $idx => $sub)
+                                                        @php $subPassed = $sub->isPassed(); @endphp
+                                                        <tr class="{{ $subPassed ? 'table-success' : '' }}">
+                                                            <td class="font-weight-bold">
+                                                                @if($idx === 0)
+                                                                    <span class="badge badge-secondary">মূল পরীক্ষা (#1)</span>
+                                                                @else
+                                                                    <span class="badge badge-info">পুনঃপরীক্ষা #{{ $idx }} (Attempt #{{ $sub->attempt_number }})</span>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                {{ $sub->submitted_at ? $sub->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $sub->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
+                                                            </td>
+                                                            <td class="font-weight-bold {{ $subPassed ? 'text-success' : 'text-danger' }}">
+                                                                {{ (float)$sub->score }} / {{ (float)$sub->total_marks }}
+                                                            </td>
+                                                            <td class="font-weight-bold">
+                                                                {{ (float)$sub->percentage }}%
+                                                            </td>
+                                                            <td class="text-danger font-weight-semibold">
+                                                                {{ (float)$sub->negative_marks_deducted > 0 ? '-' . (float)$sub->negative_marks_deducted : '০.০০' }}
+                                                            </td>
+                                                            <td>
+                                                                @if($subPassed)
+                                                                    <span class="badge badge-success px-2 py-0.5"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (100% Pass)</span>
+                                                                @else
+                                                                    <span class="badge badge-danger px-2 py-0.5"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                <a href="{{ route('admin.quizzes.attempt-detail', $sub->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র দেখুন">
+                                                                    <i class="fas fa-eye mr-1"></i> Review
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
                     @empty
                         <tr>
                             <td colspan="12" class="text-center py-5 text-muted">
@@ -551,6 +639,22 @@
                 form.submit();
             }
         }
+        function toggleAdminRetakes(id) {
+            var row = document.getElementById('admin-retakes-' + id);
+            var btn = document.getElementById('admin-retake-btn-' + id);
+            if (!row) return;
+            if (row.classList.contains('d-none')) {
+                row.classList.remove('d-none');
+                if (btn && btn.querySelector('.fa-chevron-down')) {
+                    btn.querySelector('.fa-chevron-down').className = 'fas fa-chevron-up ml-0.5';
+                }
+            } else {
+                row.classList.add('d-none');
+                if (btn && btn.querySelector('.fa-chevron-up')) {
+                    btn.querySelector('.fa-chevron-up').className = 'fas fa-chevron-down ml-0.5';
+                }
+            }
+        }
     </script>
 
     <!-- Violation Logs Modal -->
@@ -641,6 +745,22 @@
                 });
             }
             $('#violationAuditModal').modal('show');
+        }
+        function toggleAdminRetakes(id) {
+            var row = document.getElementById('admin-retakes-' + id);
+            var btn = document.getElementById('admin-retake-btn-' + id);
+            if (!row) return;
+            if (row.classList.contains('d-none')) {
+                row.classList.remove('d-none');
+                if (btn && btn.querySelector('.fa-chevron-down')) {
+                    btn.querySelector('.fa-chevron-down').className = 'fas fa-chevron-up ml-0.5';
+                }
+            } else {
+                row.classList.add('d-none');
+                if (btn && btn.querySelector('.fa-chevron-up')) {
+                    btn.querySelector('.fa-chevron-up').className = 'fas fa-chevron-down ml-0.5';
+                }
+            }
         }
     </script>
 
@@ -818,6 +938,22 @@
                     document.getElementById('pqModalLoading').style.display = 'none';
                     alert('ত্রুটি: ' + err);
                 });
+        }
+        function toggleAdminRetakes(id) {
+            var row = document.getElementById('admin-retakes-' + id);
+            var btn = document.getElementById('admin-retake-btn-' + id);
+            if (!row) return;
+            if (row.classList.contains('d-none')) {
+                row.classList.remove('d-none');
+                if (btn && btn.querySelector('.fa-chevron-down')) {
+                    btn.querySelector('.fa-chevron-down').className = 'fas fa-chevron-up ml-0.5';
+                }
+            } else {
+                row.classList.add('d-none');
+                if (btn && btn.querySelector('.fa-chevron-up')) {
+                    btn.querySelector('.fa-chevron-up').className = 'fas fa-chevron-down ml-0.5';
+                }
+            }
         }
     </script>
 @endsection

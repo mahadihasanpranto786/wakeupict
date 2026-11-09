@@ -13,17 +13,39 @@ use Carbon\Carbon;
 class StudentRegistrationVerificationController extends Controller
 {
     /**
+     * Check if a client IP address has exceeded 3 failed verification attempts
+     */
+    protected function checkIpBlocked($ip)
+    {
+        $windowStart = Carbon::now()->subMinutes(RegistrationVerificationService::ATTEMPTS_WINDOW_MINUTES);
+
+        $failedAttempts = RegistrationVerification::where('ip_address', $ip)
+            ->where('created_at', '>=', $windowStart)
+            ->whereIn('status', ['failed', 'blocked'])
+            ->sum('attempts_count');
+
+        $hasAdminApproval = RegistrationVerification::where('ip_address', $ip)
+            ->where('created_at', '>=', $windowStart)
+            ->where('status', 'admin_approved')
+            ->exists();
+
+        return ($failedAttempts >= RegistrationVerificationService::MAX_ATTEMPTS) && !$hasAdminApproval;
+    }
+
+    /**
      * Show the public Registration Verification & Forgot Registration Number page
      */
-    public function showVerificationForm()
+    public function showVerificationForm(Request $request)
     {
+        $isIpBlocked = $this->checkIpBlocked($request->ip());
+
         $activeBatches = Batch::where('status', 1)
             ->where('active_batch', 1)
             ->with('course')
             ->orderBy('id', 'desc')
             ->get();
 
-        return view('frontend.theme.clasic.student.auth.verification', compact('activeBatches'));
+        return view('frontend.theme.clasic.student.auth.verification', compact('activeBatches', 'isIpBlocked'));
     }
 
     /**
@@ -31,6 +53,26 @@ class StudentRegistrationVerificationController extends Controller
      */
     public function verify(Request $request)
     {
+        $ip = $request->ip();
+        $isIpBlocked = $this->checkIpBlocked($ip);
+
+        if ($isIpBlocked) {
+            $result = [
+                'status' => 'blocked',
+                'is_blocked' => true,
+                'message' => 'নিরাপত্তাজনিত কারণে এই ডিভাইস/আইপি (IP) থেকে সর্বোচ্চ ৩ বার চেষ্টার পর ভেরিফিকেশন বাটনটি নিষ্ক্রিয় করা হয়েছে। অ্যাডমিন পর্যালোচনার পর এটি সক্রিয় করা হবে। তাৎক্ষণিক সহায়তার জন্য হেল্পলাইন 01791612121 নম্বরে যোগাযোগ করুন।',
+                'student' => null,
+            ];
+
+            $activeBatches = Batch::where('status', 1)
+                ->where('active_batch', 1)
+                ->with('course')
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return view('frontend.theme.clasic.student.auth.verification', compact('activeBatches', 'result', 'isIpBlocked'));
+        }
+
         $request->validate([
             'phone' => 'required|string|max:30',
             'batch_code' => 'required|string|max:50',
@@ -41,10 +83,10 @@ class StudentRegistrationVerificationController extends Controller
 
         $phone = $request->input('phone');
         $batchCode = $request->input('batch_code');
-        $ip = $request->ip();
         $userAgent = $request->userAgent();
 
         $result = RegistrationVerificationService::processVerification($phone, $batchCode, $ip, $userAgent);
+        $isIpBlocked = $this->checkIpBlocked($ip) || ($result['is_blocked'] ?? false);
 
         $activeBatches = Batch::where('status', 1)
             ->where('active_batch', 1)
@@ -52,7 +94,7 @@ class StudentRegistrationVerificationController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return view('frontend.theme.clasic.student.auth.verification', compact('activeBatches', 'result'));
+        return view('frontend.theme.clasic.student.auth.verification', compact('activeBatches', 'result', 'isIpBlocked'));
     }
 
     /**

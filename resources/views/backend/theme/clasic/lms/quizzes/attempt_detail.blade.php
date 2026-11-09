@@ -129,8 +129,8 @@
                             <span class="font-weight-bold text-dark ml-1 font-mono">{{ $attempt->formatted_time_spent }}</span>
                         </div>
                         <div class="col-sm-6 mb-1">
-                            <span class="text-muted">জমার সময়:</span>
-                            <span class="text-dark ml-1">{{ $attempt->submitted_at ? $attempt->submitted_at->format('d M, Y h:i A') : $attempt->updated_at->format('d M, Y') }}</span>
+                            <span class="text-muted">জমার সময় (BD Time):</span>
+                            <span class="text-dark ml-1 font-weight-bold">{{ $attempt->submitted_at ? $attempt->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $attempt->updated_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
                         </div>
                         <div class="col-sm-6 mb-1">
                             <span class="text-muted">প্রচেষ্টা নং:</span>
@@ -285,133 +285,231 @@
             @endif
         </div>
     </div>
-    <!-- Questions & Student Answers Sheet -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="card-title font-weight-bold text-dark mb-0">
-                <i class="fas fa-tasks text-primary mr-2"></i> প্রশ্নপত্র ও শিক্ষার্থীর উত্তরপত্র বিশদ মূল্যায়ন (Answer Sheet)
-            </h5>
-            <span class="badge badge-light border text-xs">মোট প্রশ্ন: {{ $totalQ }}টি</span>
+    <!-- Questions & Student Answers Sheet (Matching Student Review UI & Colors) -->
+    <div class="card shadow-sm border-0 mb-4" id="admin-questions-wrapper">
+        <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="card-title font-weight-bold text-dark mb-0">
+                    <i class="fas fa-tasks text-primary mr-2"></i> প্রশ্নপত্র ও শিক্ষার্থীর উত্তরপত্র বিশদ মূল্যায়ন (Answer Sheet)
+                </h5>
+                <small class="text-muted">প্রতিটি প্রশ্নের শিক্ষার্থীর প্রদত্ত উত্তর ও সঠিক সমাধান বিবরণী</small>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <span class="badge badge-light border text-xs px-2.5 py-1.5 font-weight-bold">মোট প্রশ্ন: {{ $totalQ }}টি</span>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <div class="row">
+        <div class="card-body p-3 p-md-4">
+            
+            <!-- Filter Pills & Layout Controls Toolbar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-3 mb-3 border-bottom">
+                <!-- Status Filter Pills -->
+                <div class="d-flex flex-wrap align-items-center gap-1.5" style="gap: 6px;">
+                    <button type="button" onclick="adminFilterQuestions('all')" id="admin-btn-filter-all" class="btn btn-sm btn-primary font-weight-bold shadow-sm d-flex align-items-center" style="border-radius: 10px;">
+                        <span>সব প্রশ্ন</span>
+                        <span class="badge badge-light text-primary ml-1.5 font-mono">{{ $totalQ }}</span>
+                    </button>
+                    <button type="button" onclick="adminFilterQuestions('wrong')" id="admin-btn-filter-wrong" class="btn btn-sm btn-outline-danger font-weight-bold d-flex align-items-center" style="border-radius: 10px;">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        <span>ভুল উত্তর</span>
+                        <span class="badge badge-danger ml-1.5 font-mono" style="background-color: #fee2e2; color: #dc2626 !important; font-weight: 800;">{{ $incorrectCount }}</span>
+                    </button>
+                    <button type="button" onclick="adminFilterQuestions('correct')" id="admin-btn-filter-correct" class="btn btn-sm btn-outline-success font-weight-bold d-flex align-items-center" style="border-radius: 10px;">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>সঠিক উত্তর</span>
+                        <span class="badge badge-success ml-1.5 font-mono" style="background-color: #dcfce7; color: #16a34a !important; font-weight: 800;">{{ $correctCount }}</span>
+                    </button>
+                    <button type="button" onclick="adminFilterQuestions('unanswered')" id="admin-btn-filter-unanswered" class="btn btn-sm btn-outline-secondary font-weight-bold d-flex align-items-center" style="border-radius: 10px;">
+                        <span>উত্তরহীন</span>
+                        <span class="badge badge-secondary ml-1.5 font-mono">{{ $unansweredCount }}</span>
+                    </button>
+                </div>
+
+                <!-- Right View Controls: Search & Toggle Explanations & Layout Switch -->
+                <div class="d-flex align-items-center flex-wrap gap-2" style="gap: 8px;">
+                    <!-- Real-Time Question Search Filter -->
+                    <div class="input-group input-group-sm" style="max-width: 220px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-search text-muted"></i></span>
+                        </div>
+                        <input type="text" id="admin-question-search" oninput="adminSearchQuestions(this.value)" placeholder="প্রশ্ন অনুসন্ধান..." class="form-control border-left-0" style="border-radius: 0 8px 8px 0; font-size: 12px;">
+                    </div>
+
+                    <!-- Toggle All Explanations Button -->
+                    <button type="button" onclick="adminToggleAllExplanations()" id="admin-btn-toggle-all-exp" class="btn btn-sm btn-outline-info font-weight-bold d-flex align-items-center" style="border-radius: 10px; font-size: 11px;">
+                        <i class="fas fa-lightbulb text-warning mr-1"></i>
+                        <span id="admin-text-toggle-all-exp">সকল ব্যাখ্যা খুলুন</span>
+                    </button>
+
+                    <!-- 2-Col vs 1-Col Layout Switcher -->
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" onclick="adminSetQuestionLayout('2-col')" id="admin-btn-layout-2col" class="btn btn-light border font-weight-bold active" title="২-কলাম গ্রিড ভিউ" style="border-radius: 8px 0 0 8px;">
+                            <i class="fas fa-th-large mr-1"></i> ২-কলাম
+                        </button>
+                        <button type="button" onclick="adminSetQuestionLayout('1-col')" id="admin-btn-layout-1col" class="btn btn-light border font-weight-bold" title="১-কলাম তালিকা ভিউ" style="border-radius: 0 8px 8px 0;">
+                            <i class="fas fa-bars mr-1"></i> ১-কলাম
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Grid Container (2-Column on Desktop) -->
+            <div class="row" id="admin-questions-container">
                 @forelse($questions as $index => $q)
                     @php
                         $ans = isset($answers[$q->id]) ? $answers[$q->id] : null;
                         $selectedIds = $ans ? $ans->selected_option_ids_array : [];
                         $qType = $q->question_type;
+                        $isPending = $ans && $ans->grading_status === 'pending_review';
+                        $isAnswered = !empty($selectedIds) || ($ans && (!empty($ans->text_answer) || !empty($ans->cq_answers)));
+                        $isCorrect = $ans ? (bool)$ans->is_correct : false;
 
-                        $statusBadge = 'badge-secondary';
-                        $statusText = 'অনুত্তর (Not Answered)';
-                        if ($ans && $ans->grading_status === 'pending_review') {
-                            $statusBadge = 'badge-warning';
-                            $statusText = 'মূল্যায়নাধীন (Pending Review)';
-                        } elseif ($ans && $ans->is_correct === true) {
-                            $statusBadge = 'badge-success';
-                            $statusText = 'সঠিক উত্তর (+'.(float)$q->marks.')';
-                        } elseif ($ans && $ans->is_correct === false) {
-                            $neg = (float)($q->negative_marks ?: (($quiz && $quiz->negative_marks) ? $quiz->negative_marks : 0.0));
-                            $statusBadge = 'badge-danger';
-                            $statusText = 'ভুল উত্তর' . ($neg > 0 ? " (-{$neg})" : '');
+                        $filterType = 'unanswered';
+                        if ($isAnswered) {
+                            $filterType = $isPending ? 'pending' : ($isCorrect ? 'correct' : 'wrong');
+                        }
+
+                        // Text color directive: "obossoi text er color sothik hole green color hbe vul hole red color"
+                        if ($isAnswered && $isCorrect) {
+                            $cardBorder = 'border-color: #86efac !important; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);';
+                            $qTextColor = 'color: #15803d !important;'; // GREEN
+                            $pillBadge = '<span class="badge badge-success px-2.5 py-1 font-weight-bold" style="background-color: #16a34a !important; color: #ffffff !important; border-radius: 8px; font-size: 11px;"><i class="fas fa-check mr-1"></i> ' . $toBng($index + 1) . ' | সঠিক উত্তর (+'.(float)$q->marks.') মান: '.(float)$q->marks.'</span>';
+                        } elseif ($isAnswered && !$isCorrect) {
+                            $cardBorder = 'border-color: #fca5a5 !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);';
+                            $qTextColor = 'color: #dc2626 !important;'; // RED
+                            $pillBadge = '<span class="badge badge-danger px-2.5 py-1 font-weight-bold" style="background-color: #dc2626 !important; color: #ffffff !important; border-radius: 8px; font-size: 11px;"><i class="fas fa-times mr-1"></i> ' . $toBng($index + 1) . ' | ভুল উত্তর (০) মান: '.(float)$q->marks.'</span>';
+                        } else {
+                            $cardBorder = 'border-color: #e2e8f0 !important;';
+                            $qTextColor = 'color: #0f172a !important;'; // NEUTRAL DARK
+                            $pillBadge = '<span class="badge badge-secondary px-2.5 py-1 font-weight-bold" style="background-color: #64748b !important; color: #ffffff !important; border-radius: 8px; font-size: 11px;"><i class="far fa-circle mr-1"></i> ' . $toBng($index + 1) . ' | উত্তর দেওয়া হয়নি মান: '.(float)$q->marks.'</span>';
                         }
                     @endphp
 
-                    <div class="col-12 col-lg-6 d-flex flex-column mb-3">
-                        <div class="card border shadow-none flex-fill h-100 mb-0 {{ $ans && $ans->is_correct ? 'border-success' : ($ans && $ans->is_correct === false ? 'border-danger' : 'border-secondary') }}">
-                            <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center flex-wrap">
-                                <div>
-                                    <span class="badge badge-dark mr-1">প্রশ্ন {{ $index + 1 }}</span>
-                                    <span class="badge badge-light border text-xs text-uppercase">{{ $qType }}</span>
-                                </div>
-                                <div>
-                                    <span class="badge {{ $statusBadge }} px-2 py-1 text-xs font-weight-bold">{{ $statusText }}</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-3 d-flex flex-column">
-                                <!-- Question Text -->
-                                <div class="font-weight-bold text-dark mb-3" style="font-size: 1.05rem;">
-                                    {{ $q->question_text }}
+                    <div class="col-12 col-lg-6 mb-3 admin-question-col admin-q-card" data-filter-type="{{ $filterType }}" id="admin-q-{{ $q->id }}">
+                        <div class="card rounded-2xl border-2 h-100 mb-0 shadow-none d-flex flex-column" style="border-radius: 16px !important; {{ $cardBorder }} background-color: #ffffff;">
+                            <div class="card-body p-3 p-sm-3.5 d-flex flex-column h-100">
+                                
+                                <!-- Header Badge & Type Tag -->
+                                <div class="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom" style="border-color: #f1f5f9 !important;">
+                                    <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                        {!! $pillBadge !!}
+                                    </div>
+                                    <span class="badge badge-light border text-uppercase font-mono text-muted" style="font-size: 10px;">{{ $qType }}</span>
                                 </div>
 
-                                <!-- MCQ Options -->
+                                <!-- Question Title (Green if correct, Red if wrong) -->
+                                <div class="font-weight-bold mb-3 admin-q-title-text" style="{{ $qTextColor }} font-size: 1.02rem; line-height: 1.55;">
+                                    <span class="mr-1">{{ $toBng($index + 1) }}।</span>
+                                    {!! nl2br(e($q->question_text)) !!}
+                                </div>
+
+                                <!-- Stimulus Context (if present) -->
+                                @if(!empty($q->stimulus))
+                                    <div class="p-2.5 rounded mb-2.5 text-xs text-dark" style="background-color: #f8fafc; border-left: 4px solid #10b981; line-height: 1.6;">
+                                        <div class="font-weight-bold text-success text-uppercase mb-0.5" style="font-size: 10px;">নিচের উদ্দীপকটি পড়ুন :</div>
+                                        {!! nl2br(e($q->stimulus)) !!}
+                                    </div>
+                                @endif
+
+                                <!-- TYPE 1: MCQ Options (Matching Student Result View in Image 2) -->
                                 @if($q->options && $q->options->count() > 0)
-                                    <div class="row">
+                                    <div class="d-flex flex-column mb-3" style="gap: 6px;">
                                         @foreach($q->options as $optIdx => $opt)
                                             @php
-                                                $isStudentChoice = in_array($opt->id, $selectedIds);
-                                                $isCorrectOption = (bool)$opt->is_correct;
+                                                $wasSelected = in_array($opt->id, $selectedIds);
+                                                $isOfficialCorrect = (bool)$opt->is_correct;
+                                                $bngLetter = \App\model\LmsQuestion::getBengaliOptionLetter($optIdx);
 
-                                                // High-contrast, crystal clear styling guaranteed for light and dark surfaces
-                                                $boxStyle = 'background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; color: #0f172a !important;';
-                                                $optIcon = '<i class="far fa-circle mr-1.5 text-muted"></i>';
-
-                                                if ($isCorrectOption && $isStudentChoice) {
-                                                    $boxStyle = 'background-color: #ecfdf5 !important; border: 2px solid #F26522 !important; color: #0f172a !important; font-weight: 700;';
-                                                    $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #F26522 !important;"></i>';
-                                                } elseif ($isCorrectOption) {
-                                                    $boxStyle = 'background-color: #f0fdf4 !important; border: 2px solid #F26522 !important; color: #0f172a !important; font-weight: 700;';
-                                                    $optIcon = '<i class="fas fa-check-circle mr-1.5 text-success font-weight-bold" style="color: #F26522 !important;"></i>';
-                                                } elseif ($isStudentChoice) {
-                                                    $boxStyle = 'background-color: #fef2f2 !important; border: 2px solid #dc2626 !important; color: #0f172a !important; font-weight: 700;';
-                                                    $optIcon = '<i class="fas fa-times-circle mr-1.5 text-danger font-weight-bold" style="color: #dc2626 !important;"></i>';
+                                                if ($isOfficialCorrect) {
+                                                    $optBoxStyle = 'background-color: #f0fdf4 !important; border: 1.5px solid #22c55e !important; color: #14532d !important; font-weight: 700;';
+                                                    $optBubbleStyle = 'background-color: #16a34a !important; color: #ffffff !important; border: 1px solid #16a34a;';
+                                                    $badgeHtml = '<span class="badge ml-2 font-weight-bold text-nowrap" style="color: #15803d !important; font-size: 11px; font-weight: 800;"><i class="fas fa-check mr-1"></i> সঠিক উত্তর</span>';
+                                                } elseif ($wasSelected && !$isOfficialCorrect) {
+                                                    $optBoxStyle = 'background-color: #fef2f2 !important; border: 1.5px solid #ef4444 !important; color: #7f1d1d !important; font-weight: 700;';
+                                                    $optBubbleStyle = 'background-color: #dc2626 !important; color: #ffffff !important; border: 1px solid #dc2626;';
+                                                    $badgeHtml = '<span class="badge ml-2 font-weight-bold text-nowrap" style="color: #dc2626 !important; font-size: 11px; font-weight: 800;"><i class="fas fa-times mr-1"></i> শিক্ষার্থীর ভুল উত্তর</span>';
+                                                } else {
+                                                    $optBoxStyle = 'background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; color: #334155 !important;';
+                                                    $optBubbleStyle = 'background-color: #f1f5f9 !important; color: #64748b !important; border: 1px solid #cbd5e1;';
+                                                    $badgeHtml = '';
                                                 }
                                             @endphp
-                                            <div class="col-12 col-sm-6 mb-2.5">
-                                                <div class="p-2 rounded shadow-sm d-flex align-items-center text-sm h-100" style="{{ $boxStyle }}">
-                                                    <span class="mr-2 font-weight-bold text-dark" style="color: #0f172a !important;">{{ chr(65 + $optIdx) }}.</span>
-                                                    <span class="flex-grow-1 font-weight-bold text-dark" style="color: #0f172a !important;">{!! $optIcon !!} {{ $opt->option_text }}</span>
-                                                    @if($isStudentChoice)
-                                                        <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: {{ $isCorrectOption ? '#F26522' : '#dc2626' }} !important; padding: 3px 6px;">
-                                                            <i class="fas fa-user-check mr-1"></i> পছন্দ
-                                                        </span>
-                                                    @endif
-                                                    @if($isCorrectOption)
-                                                        <span class="badge text-white text-xs ml-1 font-weight-bold shadow-sm" style="background-color: #F26522 !important; padding: 3px 6px;">
-                                                            <i class="fas fa-check mr-1"></i> সঠিক
-                                                        </span>
-                                                    @endif
+
+                                            <div class="p-2 px-3 rounded-xl d-flex align-items-center justify-content-between" style="border-radius: 12px; {{ $optBoxStyle }}">
+                                                <div class="d-flex align-items-center gap-2 min-w-0" style="gap: 8px;">
+                                                    <span class="rounded-circle d-flex align-items-center justify-content-center shrink-0 font-weight-bold" style="width: 24px; height: 24px; font-size: 11px; {{ $optBubbleStyle }}">
+                                                        ({{ $bngLetter }})
+                                                    </span>
+                                                    <span class="font-weight-medium text-break" style="font-size: 13px;">{{ $opt->option_text }}</span>
                                                 </div>
+                                                {!! $badgeHtml !!}
                                             </div>
                                         @endforeach
                                     </div>
                                 @elseif($qType === 'true_false')
-                                    <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">
-                                        <div class="mb-1.5"><strong class="text-dark" style="color: #0f172a !important;">শিক্ষার্থীর প্রদত্ত উত্তর:</strong> <span class="font-weight-bold {{ $ans && $ans->is_correct ? 'text-success' : 'text-danger' }}" style="font-size: 1rem;">{{ $ans ? ($ans->text_answer ?: 'কোনো উত্তর দেওয়া হয়নি') : 'কোনো উত্তর দেওয়া হয়নি' }}</span></div>
-                                        <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত সঠিক উত্তর:</strong> <span class="font-weight-bold text-success" style="color: #F26522 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text ?: ($q->getFormattedCorrectAnswer() ?: 'N/A') }}</span></div>
+                                    <!-- TYPE 2: True / False Review -->
+                                    <div class="p-2.5 rounded-xl border mb-3 text-xs" style="border-color: #e2e8f0; background-color: #f8fafc;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="text-muted d-block" style="font-size: 10px;">শিক্ষার্থীর প্রদত্ত উত্তর:</span>
+                                                <strong class="{{ $isCorrect ? 'text-success' : 'text-danger' }}" style="font-size: 13px;">{{ $ans ? ($ans->text_answer ?: 'উত্তর দেওয়া হয়নি') : 'উত্তর দেওয়া হয়নি' }}</strong>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-muted d-block" style="font-size: 10px;">বোর্ড সঠিক উত্তর:</span>
+                                                <strong class="text-success" style="font-size: 13px;"><i class="fas fa-check mr-0.5"></i> {{ $q->correct_answer_text ?: 'সত্য' }}</strong>
+                                            </div>
+                                        </div>
                                     </div>
-                                @elseif($qType === 'fill_blanks')
-                                    <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">
-                                        <div class="mb-1.5"><strong class="text-dark" style="color: #0f172a !important;">শিক্ষার্থীর লিখিত উত্তর:</strong> <span class="font-weight-bold {{ $ans && $ans->is_correct ? 'text-success' : 'text-danger' }}" style="font-size: 1rem;">{{ $ans && $ans->text_answer ? $ans->text_answer : 'ফাঁকা রাখা হয়েছিল' }}</span></div>
-                                        <div><strong class="text-dark" style="color: #0f172a !important;">প্রত্যাশিত শব্দ / ক্লু:</strong> <span class="font-weight-bold text-success" style="color: #F26522 !important; font-size: 1rem;"><i class="fas fa-check-circle mr-1"></i> {{ $q->correct_answer_text }}</span></div>
+                                @elseif(in_array($qType, ['fill_blanks', 'fill_in_the_blanks']))
+                                    <!-- TYPE 3: Fill in Blanks Review -->
+                                    <div class="p-2.5 rounded-xl border mb-3 text-xs" style="border-color: #e2e8f0; background-color: #f8fafc;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="text-muted d-block" style="font-size: 10px;">শিক্ষার্থীর লিখিত উত্তর:</span>
+                                                <strong class="{{ $isCorrect ? 'text-success' : 'text-danger' }}" style="font-size: 13px;">{{ $ans && $ans->text_answer ? $ans->text_answer : 'ফাঁকা রাখা হয়েছিল' }}</strong>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-muted d-block" style="font-size: 10px;">প্রত্যাশিত শব্দ / ক্লু:</span>
+                                                <strong class="text-success" style="font-size: 13px;"><i class="fas fa-check mr-0.5"></i> {{ $q->correct_answer_text }}</strong>
+                                            </div>
+                                        </div>
                                     </div>
                                 @elseif($ans && (!empty($ans->text_answer) || !empty($ans->cq_answers)))
-                                    <div class="p-3 bg-white rounded border-2 text-sm mb-2 shadow-sm" style="border-color: #cbd5e1 !important; color: #0f172a !important;">
-                                        <div><strong class="text-dark" style="color: #0f172a !important;">শিক্ষার্থীর লিখিত উত্তর:</strong></div>
-                                        <div class="p-2.5 bg-light rounded border mt-1.5 text-dark font-weight-bold" style="color: #0f172a !important;">{{ $ans->text_answer ?: json_encode($ans->cq_answers, JSON_UNESCAPED_UNICODE) }}</div>
+                                    <!-- TYPE 4: Subjective / CQ -->
+                                    <div class="p-2.5 rounded-xl border mb-3 text-xs" style="border-color: #e2e8f0; background-color: #f8fafc;">
+                                        <div class="font-weight-bold text-dark mb-1">শিক্ষার্থীর লিখিত উত্তর:</div>
+                                        <div class="p-2 bg-white rounded border text-dark font-weight-bold">{{ $ans->text_answer ?: json_encode($ans->cq_answers, JSON_UNESCAPED_UNICODE) }}</div>
                                     </div>
                                 @endif
 
-                                <!-- Explanation / Conceptual Logic (High-Contrast Guaranteed) -->
-                                @if($q->hasEducationalExplanation())
-                                    <div class="p-3 rounded mt-auto text-sm shadow-sm" style="background-color: #f8fafc !important; border: 2px solid #0284c7 !important;">
-                                        <div class="font-weight-bold mb-1.5" style="color: #0369a1 !important; font-size: 0.95rem;">
-                                            <i class="fas fa-lightbulb mr-1.5 text-warning"></i> মূল কনসেপ্ট ও সঠিক উত্তরের যুক্তি:
-                                        </div>
-                                        <div class="font-weight-medium mb-1.5" style="color: #0f172a !important; line-height: 1.6; font-size: 0.92rem;">
-                                            {{ $q->getEffectiveConceptExplanation() ?: $q->explanation }}
-                                        </div>
-                                        @if($q->getEffectiveMemoryAid())
-                                            <div class="mt-2 pt-2 border-top font-weight-semibold" style="border-color: #e2e8f0 !important; color: #334155 !important;">
-                                                <i class="fas fa-key text-info mr-1"></i> <strong>মনে রাখার শর্টকাট:</strong> {{ $q->getEffectiveMemoryAid() }}
+                                <!-- Collapsible Explanation Box (Matching Student View in Image 2) -->
+                                @if($q->hasEducationalExplanation() || $q->explanation)
+                                    <div class="mt-auto pt-2">
+                                        <button type="button" class="btn btn-block text-left p-2 px-3 rounded-xl border d-flex align-items-center justify-content-between font-weight-bold admin-exp-toggle-btn" 
+                                                onclick="adminToggleSingleExp({{ $q->id }})" 
+                                                id="admin-exp-btn-{{ $q->id }}"
+                                                style="background-color: #f8fafc; border-color: #e2e8f0; color: #b45309; font-size: 12px; border-radius: 10px;">
+                                            <span class="d-flex align-items-center truncate" style="gap: 6px;">
+                                                <i class="fas fa-lightbulb text-warning"></i>
+                                                <span>কনসেপ্টভিত্তিক বিশদ ব্যাখ্যা ও শিখন ↓ | {{ Str::limit($q->question_text, 38) }}</span>
+                                            </span>
+                                            <i class="fas fa-chevron-down text-muted" id="admin-exp-icon-{{ $q->id }}" style="font-size: 10px;"></i>
+                                        </button>
+                                        <div class="admin-exp-content p-3 mt-1.5 rounded-xl border" id="admin-exp-content-{{ $q->id }}" style="display: none; background-color: #fffbeb; border-color: #fde68a !important; color: #92400e; font-size: 12px; line-height: 1.6; border-radius: 10px;">
+                                            <div class="font-weight-bold mb-1 text-dark">
+                                                <i class="fas fa-info-circle text-warning mr-1"></i> মূল কনসেপ্ট ও সঠিক উত্তরের যুক্তি:
                                             </div>
-                                        @endif
-                                    </div>
-                                @elseif($q->explanation)
-                                    <div class="p-3 rounded mt-auto text-sm shadow-sm" style="background-color: #f8fafc !important; border: 2px solid #0284c7 !important;">
-                                        <strong style="color: #0369a1 !important;"><i class="fas fa-info-circle mr-1"></i> ব্যাখ্যা:</strong>
-                                        <span class="font-weight-bold ml-1" style="color: #0f172a !important;">{{ $q->explanation }}</span>
+                                            <div style="color: #451a03 !important; font-weight: 500;">
+                                                {{ $q->getEffectiveConceptExplanation() ?: $q->explanation }}
+                                            </div>
+                                            @if($q->getEffectiveMemoryAid())
+                                                <div class="mt-2 pt-2 border-top font-weight-bold" style="border-color: #fcd34d !important; color: #b45309 !important;">
+                                                    <i class="fas fa-key text-info mr-1"></i> মনে রাখার শর্টকাট: {{ $q->getEffectiveMemoryAid() }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 @endif
+
                             </div>
                         </div>
                     </div>
@@ -559,5 +657,111 @@
             });
         }
     })();
+
+    // ==========================================
+    // Admin Question Filtering & View Functions
+    // ==========================================
+    var adminActiveFilter = 'all';
+
+    function adminFilterQuestions(type) {
+        adminActiveFilter = type;
+        var btnAll = document.getElementById('admin-btn-filter-all');
+        var btnWrong = document.getElementById('admin-btn-filter-wrong');
+        var btnCorrect = document.getElementById('admin-btn-filter-correct');
+        var btnUnans = document.getElementById('admin-btn-filter-unanswered');
+
+        // Reset button classes
+        if (btnAll) btnAll.className = 'btn btn-sm btn-outline-primary font-weight-bold d-flex align-items-center';
+        if (btnWrong) btnWrong.className = 'btn btn-sm btn-outline-danger font-weight-bold d-flex align-items-center';
+        if (btnCorrect) btnCorrect.className = 'btn btn-sm btn-outline-success font-weight-bold d-flex align-items-center';
+        if (btnUnans) btnUnans.className = 'btn btn-sm btn-outline-secondary font-weight-bold d-flex align-items-center';
+
+        // Set active class
+        if (type === 'all' && btnAll) btnAll.className = 'btn btn-sm btn-primary font-weight-bold shadow-sm d-flex align-items-center';
+        else if (type === 'wrong' && btnWrong) btnWrong.className = 'btn btn-sm btn-danger font-weight-bold shadow-sm d-flex align-items-center';
+        else if (type === 'correct' && btnCorrect) btnCorrect.className = 'btn btn-sm btn-success font-weight-bold shadow-sm d-flex align-items-center';
+        else if (type === 'unanswered' && btnUnans) btnUnans.className = 'btn btn-sm btn-secondary font-weight-bold shadow-sm d-flex align-items-center';
+
+        applyAdminQuestionFilters();
+    }
+
+    function adminSearchQuestions(term) {
+        applyAdminQuestionFilters();
+    }
+
+    function applyAdminQuestionFilters() {
+        var searchInput = document.getElementById('admin-question-search');
+        var searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        var cards = document.querySelectorAll('.admin-q-card');
+
+        cards.forEach(function(card) {
+            var cardType = card.getAttribute('data-filter-type');
+            var matchesType = (adminActiveFilter === 'all' || cardType === adminActiveFilter);
+            var matchesSearch = true;
+            if (searchTerm !== '') {
+                var cardText = (card.innerText || '').toLowerCase();
+                matchesSearch = cardText.indexOf(searchTerm) !== -1;
+            }
+
+            if (matchesType && matchesSearch) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function adminToggleSingleExp(qId) {
+        var content = document.getElementById('admin-exp-content-' + qId);
+        var icon = document.getElementById('admin-exp-icon-' + qId);
+        if (!content) return;
+        if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            if (icon) icon.className = 'fas fa-chevron-up text-muted';
+        } else {
+            content.style.display = 'none';
+            if (icon) icon.className = 'fas fa-chevron-down text-muted';
+        }
+    }
+
+    var adminAllExpOpen = false;
+    function adminToggleAllExplanations() {
+        adminAllExpOpen = !adminAllExpOpen;
+        var contents = document.querySelectorAll('.admin-exp-content');
+        var icons = document.querySelectorAll('[id^="admin-exp-icon-"]');
+        var textEl = document.getElementById('admin-text-toggle-all-exp');
+
+        contents.forEach(function(el) {
+            el.style.display = adminAllExpOpen ? 'block' : 'none';
+        });
+        icons.forEach(function(ic) {
+            ic.className = adminAllExpOpen ? 'fas fa-chevron-up text-muted' : 'fas fa-chevron-down text-muted';
+        });
+        if (textEl) {
+            textEl.innerText = adminAllExpOpen ? 'সকল ব্যাখ্যা লুকান' : 'সকল ব্যাখ্যা খুলুন';
+        }
+    }
+
+    function adminSetQuestionLayout(layout) {
+        var cols = document.querySelectorAll('.admin-question-col');
+        var btn2Col = document.getElementById('admin-btn-layout-2col');
+        var btn1Col = document.getElementById('admin-btn-layout-1col');
+
+        if (layout === '2-col') {
+            cols.forEach(function(col) {
+                col.classList.remove('col-12');
+                col.classList.add('col-12', 'col-lg-6');
+            });
+            if (btn2Col) btn2Col.classList.add('active');
+            if (btn1Col) btn1Col.classList.remove('active');
+        } else {
+            cols.forEach(function(col) {
+                col.classList.remove('col-lg-6');
+                col.classList.add('col-12');
+            });
+            if (btn1Col) btn1Col.classList.add('active');
+            if (btn2Col) btn2Col.classList.remove('active');
+        }
+    }
 </script>
 @endsection

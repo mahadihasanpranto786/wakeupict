@@ -72,6 +72,11 @@
         }
     }
 
+    /* Fix sticky viewport positioning so scrolling down keeps HUD and Palette firmly fixed */
+    main, .overflow-x-clip, .overflow-hidden {
+        overflow-x: visible !important;
+    }
+
     /* Smooth Scroll Margin for Sticky Top Exam HUD & Header */
     [id^="q-item-"], .board-q-row {
         scroll-margin-top: 180px !important;

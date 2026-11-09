@@ -688,7 +688,34 @@ class AdminQuizController extends Controller
      */
     public function reports(Request $request)
     {
-        $query = \App\model\LmsQuizAttempt::with(['quiz.course', 'student'])->orderBy('id', 'desc');
+        // Auto-finalize & grade any expired in-progress attempts older than duration + 2 min grace
+        $staleAttempts = \App\model\LmsQuizAttempt::where('status', 'in_progress')
+            ->with(['quiz', 'student'])
+            ->get();
+
+        $gradingController = new \App\Http\Controllers\frontend\theme\clasic\StudentQuizController();
+
+        foreach ($staleAttempts as $stale) {
+            $duration = $stale->quiz ? ($stale->quiz->duration_minutes ?: 30) : 30;
+            $startTime = $stale->started_at ? \Carbon\Carbon::parse($stale->started_at) : ($stale->created_at ? \Carbon\Carbon::parse($stale->created_at) : null);
+            if ($startTime && \Carbon\Carbon::now()->greaterThan($startTime->copy()->addMinutes($duration + 2))) {
+                try {
+                    $gradingController->finalizeGrading($stale);
+                    $stale->refresh();
+                    if ($stale->status === 'in_progress') {
+                        $stale->update(['status' => 'timed_out']);
+                    }
+                } catch (\Exception $e) {
+                    $stale->update(['status' => 'timed_out']);
+                }
+            }
+        }
+
+        $query = \App\model\LmsQuizAttempt::whereNull('parent_attempt_id')
+            ->with(['quiz.course', 'student', 'retakes' => function ($rq) {
+                $rq->with(['quiz.course', 'student'])->orderBy('id', 'asc');
+            }])
+            ->orderBy('id', 'desc');
 
         if ($request->filled('quiz_id')) {
             $query->where('quiz_id', $request->quiz_id);
@@ -721,13 +748,13 @@ class AdminQuizController extends Controller
         $quizzes = LmsQuiz::with('course')->orderBy('title', 'asc')->get();
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
-        // High-level KPI Stats for quick glance
+        // High-level KPI Stats for quick glance (100% Pass requirement)
         $totalAttempts = \App\model\LmsQuizAttempt::count();
         $passedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
-            ->whereRaw('score >= (SELECT pass_marks FROM lms_quizzes WHERE lms_quizzes.id = lms_quiz_attempts.quiz_id)')
+            ->whereRaw('score >= total_marks AND total_marks > 0')
             ->count();
         $failedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
-            ->whereRaw('score < (SELECT pass_marks FROM lms_quizzes WHERE lms_quizzes.id = lms_quiz_attempts.quiz_id)')
+            ->whereRaw('score < total_marks OR total_marks = 0')
             ->count();
         $avgScore = round(\App\model\LmsQuizAttempt::where('status', 'graded')->avg('percentage') ?: 0, 1);
 
