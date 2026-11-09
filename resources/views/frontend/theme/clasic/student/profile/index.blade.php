@@ -103,7 +103,7 @@
         <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-8 backdrop-blur-xl space-y-5">
             <h2 class="text-base font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
                 <i class="fa fa-user-circle text-brand-primary"></i>
-                <span>Personal Information</span>
+                <span>Personal &amp; Family Information (ব্যক্তিগত তথ্য)</span>
             </h2>
 
             <div class="space-y-3.5 text-xs">
@@ -119,24 +119,30 @@
                     <span class="text-slate-400">Email Address</span>
                     <span class="text-white font-mono">{{ $student->email ?: 'Not provided' }}</span>
                 </div>
-                @if($admitted)
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">Father's Name</span>
-                        <span class="text-white font-medium">{{ $admitted->fathers_name ?: 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">Mother's Name</span>
-                        <span class="text-white font-medium">{{ $admitted->mothers_name ?: 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">Gender / Nationality</span>
-                        <span class="text-white">{{ $admitted->gander }} / {{ $admitted->nationality }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">National ID / Birth Cert</span>
-                        <span class="text-white font-mono">{{ $admitted->national_id_no ?: 'N/A' }}</span>
-                    </div>
-                @endif
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Father's Name</span>
+                    <span class="text-white font-medium">{{ $student->getProfileDetail('fathers_name') ?: 'Not provided' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Mother's Name</span>
+                    <span class="text-white font-medium">{{ $student->getProfileDetail('mothers_name') ?: 'Not provided' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Gender / Nationality</span>
+                    <span class="text-white capitalize">{{ $student->getProfileDetail('gander', 'Not set') }} / {{ $student->getProfileDetail('nationality', 'Bangladeshi') }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Age / Date of Birth</span>
+                    <span class="text-white">{{ $student->getProfileDetail('age') ?: 'Not provided' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Religion / Occupation</span>
+                    <span class="text-white">{{ $student->getProfileDetail('religion', 'Islam') }} / {{ $student->getProfileDetail('occupation', 'Student') }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">National ID / Birth Cert</span>
+                    <span class="text-white font-mono">{{ $student->getProfileDetail('national_id_no') ?: 'Not provided' }}</span>
+                </div>
             </div>
         </div>
 
@@ -144,30 +150,32 @@
         <div class="student-card rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-8 backdrop-blur-xl space-y-5">
             <h2 class="text-base font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
                 <i class="fa fa-graduation-cap text-brand-cyan"></i>
-                <span>Academic & Address Details</span>
+                <span>Academic &amp; Address Details (ঠিকানা ও শিক্ষা)</span>
             </h2>
 
             <div class="space-y-3.5 text-xs">
-                @if($admitted)
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">Highest Qualification</span>
-                        <span class="text-white font-medium">{{ $admitted->educational_qualification ?: 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400">Passing Year & Result</span>
-                        <span class="text-white">{{ $admitted->passing_year }} ({{ $admitted->result }})</span>
-                    </div>
-                    <div class="py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400 block mb-1">Present Address</span>
-                        <span class="text-white leading-relaxed">{{ $admitted->present_address ?: 'N/A' }}</span>
-                    </div>
-                    <div class="py-1 border-b border-slate-800/60">
-                        <span class="text-slate-400 block mb-1">Permanent Address</span>
-                        <span class="text-white leading-relaxed">{{ $admitted->permanent_address ?: 'N/A' }}</span>
-                    </div>
-                @else
-                    <p class="text-slate-400 text-xs py-4">No additional background details recorded yet. You can update your address under Account Settings.</p>
-                @endif
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Highest Qualification</span>
+                    <span class="text-white font-medium">{{ $student->getProfileDetail('educational_qualification') ?: 'Not provided' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400">Passing Year &amp; Result</span>
+                    <span class="text-white">
+                        @if($student->getProfileDetail('passing_year') || $student->getProfileDetail('result'))
+                            {{ $student->getProfileDetail('passing_year') ?: 'Year N/A' }} ({{ $student->getProfileDetail('result') ?: 'Result N/A' }})
+                        @else
+                            Not provided
+                        @endif
+                    </span>
+                </div>
+                <div class="py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400 block mb-1">Present Address (বর্তমান ঠিকানা)</span>
+                    <span class="text-white leading-relaxed">{{ $student->getProfileDetail('present_address') ?: 'Not provided yet. Update via Edit Profile.' }}</span>
+                </div>
+                <div class="py-1 border-b border-slate-800/60">
+                    <span class="text-slate-400 block mb-1">Permanent Address (স্থায়ী ঠিকানা)</span>
+                    <span class="text-white leading-relaxed">{{ $student->getProfileDetail('permanent_address') ?: 'Not provided yet. Update via Edit Profile.' }}</span>
+                </div>
                 <div class="flex justify-between py-1">
                     <span class="text-slate-400">Account Created</span>
                     <span class="text-white font-mono">{{ $student->created_at ? $student->created_at->format('d M, Y') : 'N/A' }}</span>

@@ -39,38 +39,139 @@
                 </div>
             </div>
 
+            <!-- 1. Core Profile Details -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Full Name</label>
+                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                        Full Name (পূর্ণ নাম) <span class="text-rose-500">*</span>
+                    </label>
                     <input type="text" name="name" value="{{ old('name', $student->name) }}" required class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Phone Number</label>
+                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                        Phone Number (মোবাইল নম্বর) <span class="text-rose-500">*</span>
+                    </label>
                     <input type="text" name="phone" value="{{ old('phone', $student->phone) }}" required class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary font-mono">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Email Address</label>
+                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                        Email Address (ইমেইল ঠিকানা)
+                    </label>
                     <input type="email" name="email" value="{{ old('email', $student->email) }}" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary font-mono">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Student ID Code</label>
+                    <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                        Registration Number / Student ID (অপরিবর্তনীয়)
+                    </label>
                     <input type="text" value="{{ $student->registration_number ?: $student->student_id_code }}" readonly disabled class="w-full px-4 py-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-400 text-sm font-mono cursor-not-allowed">
                 </div>
+            </div>
 
-                @if($admitted)
-                    <div class="sm:col-span-2">
-                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Present Address</label>
-                        <textarea name="present_address" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">{{ old('present_address', $admitted->present_address) }}</textarea>
+            <!-- 2. Personal & Family Information (ব্যক্তিগত ও পারিবারিক তথ্য) -->
+            <div class="pt-6 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
+                    <i class="fa fa-id-card text-brand-cyan"></i>
+                    <span>Personal &amp; Family Information (ব্যক্তিগত ও পারিবারিক তথ্য)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Father's Name (পিতার নাম)</label>
+                        <input type="text" name="fathers_name" value="{{ old('fathers_name', $student->getProfileDetail('fathers_name')) }}" placeholder="যেমন: MD. ABDUR RAHIM" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
                     </div>
 
-                    <div class="sm:col-span-2">
-                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Permanent Address</label>
-                        <textarea name="permanent_address" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">{{ old('permanent_address', $admitted->permanent_address) }}</textarea>
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Mother's Name (মাতার নাম)</label>
+                        <input type="text" name="mothers_name" value="{{ old('mothers_name', $student->getProfileDetail('mothers_name')) }}" placeholder="যেমন: RAHIMA BEGUM" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
                     </div>
-                @endif
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Gender (লিঙ্গ)</label>
+                        @php $genderVal = old('gander', strtolower($student->getProfileDetail('gander', 'male'))); @endphp
+                        <select name="gander" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white text-sm focus:outline-none focus:border-brand-primary">
+                            <option value="male" {{ $genderVal === 'male' ? 'selected' : '' }}>Male (পুরুষ)</option>
+                            <option value="female" {{ $genderVal === 'female' ? 'selected' : '' }}>Female (মহিলা)</option>
+                            <option value="other" {{ $genderVal === 'other' ? 'selected' : '' }}>Other (অন্যান্য)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Date of Birth / Age (জন্মতারিখ বা বয়স)</label>
+                        <input type="text" name="age" value="{{ old('age', $student->getProfileDetail('age')) }}" placeholder="যেমন: 22 Years বা DD/MM/YYYY" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Religion (ধর্ম)</label>
+                        @php $relVal = old('religion', $student->getProfileDetail('religion', 'Islam')); @endphp
+                        <select name="religion" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white text-sm focus:outline-none focus:border-brand-primary">
+                            <option value="Islam" {{ $relVal === 'Islam' ? 'selected' : '' }}>Islam (ইসলাম)</option>
+                            <option value="Hinduism" {{ $relVal === 'Hinduism' ? 'selected' : '' }}>Hinduism (হিন্দু)</option>
+                            <option value="Christianity" {{ $relVal === 'Christianity' ? 'selected' : '' }}>Christianity (খ্রিস্টান)</option>
+                            <option value="Buddhism" {{ $relVal === 'Buddhism' ? 'selected' : '' }}>Buddhism (বৌদ্ধ)</option>
+                            <option value="Other" {{ $relVal === 'Other' ? 'selected' : '' }}>Other (অন্যান্য)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Occupation (পেশা)</label>
+                        <input type="text" name="occupation" value="{{ old('occupation', $student->getProfileDetail('occupation', 'Student')) }}" placeholder="যেমন: Student, Job, Freelancer" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Nationality (জাতীয়তা)</label>
+                        <input type="text" name="nationality" value="{{ old('nationality', $student->getProfileDetail('nationality', 'Bangladeshi')) }}" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">National ID / Birth Cert (এনআইডি / জন্ম নিবন্ধন নম্বর)</label>
+                        <input type="text" name="national_id_no" value="{{ old('national_id_no', $student->getProfileDetail('national_id_no')) }}" placeholder="জাতীয় পরিচয়পত্র বা জন্ম সনদ নম্বর" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary font-mono">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Address Details (ঠিকানা সংক্রান্ত তথ্য) -->
+            <div class="pt-6 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
+                    <i class="fa fa-map-marker text-emerald-400"></i>
+                    <span>Address Details (ঠিকানা সংক্রান্ত তথ্য)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Present Address (বর্তমান ঠিকানা)</label>
+                        <textarea name="present_address" rows="3" placeholder="গ্রাম/রোড, ডাকঘর, উপজেলা, জেলা..." class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">{{ old('present_address', $student->getProfileDetail('present_address')) }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Permanent Address (স্থায়ী ঠিকানা)</label>
+                        <textarea name="permanent_address" rows="3" placeholder="গ্রাম/রোড, ডাকঘর, উপজেলা, জেলা..." class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">{{ old('permanent_address', $student->getProfileDetail('permanent_address')) }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Educational & Academic Background (শিক্ষাগত যোগ্যতা) -->
+            <div class="pt-6 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
+                    <i class="fa fa-graduation-cap text-violet-400"></i>
+                    <span>Educational Qualification (শিক্ষাগত যোগ্যতা)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Highest Qualification (ডিগ্রি / স্তর)</label>
+                        <input type="text" name="educational_qualification" value="{{ old('educational_qualification', $student->getProfileDetail('educational_qualification')) }}" placeholder="যেমন: SSC, HSC, Graduate, Diploma" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Result / GPA / Division (ফলাফল)</label>
+                        <input type="text" name="result" value="{{ old('result', $student->getProfileDetail('result')) }}" placeholder="যেমন: GPA 5.00 বা 1st Class" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-300 uppercase tracking-wider mb-2">Passing Year (পাসের সাল)</label>
+                        <input type="text" name="passing_year" value="{{ old('passing_year', $student->getProfileDetail('passing_year')) }}" placeholder="যেমন: 2024" class="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-primary font-mono">
+                    </div>
+                </div>
             </div>
 
             <div class="flex justify-end pt-4 border-t border-slate-800">
