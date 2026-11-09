@@ -52,7 +52,6 @@
                         <thead class="thead-dark">
                             <tr>
                                 <th style="width: 5%">SL</th>
-                                <th>Batch Name / Number</th>
                                 <th>Batch Code</th>
                                 <th>Year</th>
                                 <th>Course</th>
@@ -69,12 +68,12 @@
                                 <tr>
                                     <td>{{ $serial++ }}</td>
                                     <td>
-                                        <strong>{{ $batch->batch_number }}</strong>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-info font-weight-bold font-mono">{{ $batch->batch_code }}</span>
+                                        <span class="badge badge-info font-weight-bold font-mono" style="font-size: 13px;">{{ $batch->batch_code }}</span>
                                         @if($batch->isUsedInRegistration())
                                             <i class="fas fa-lock text-muted ml-1" title="Used in registration (Code locked)"></i>
+                                        @endif
+                                        @if($batch->batch_number && $batch->batch_number !== $batch->batch_code && $batch->batch_number !== ('Batch-' . $batch->batch_code))
+                                            <small class="text-muted d-block">{{ $batch->batch_number }}</small>
                                         @endif
                                     </td>
                                     <td>{{ $batch->academic_year ?: date('Y') }}</td>
@@ -153,12 +152,6 @@
                             <form method="POST" action="{{ route('insert-batch') }}" enctype="multipart/form-data">
                                 @csrf
                                 <div class="card-body p-3">
-                                    <div class="form-group">
-                                        <label for="batch_number">Batch Name / Batch Number <span class="text-danger">*</span></label>
-                                        <input class="form-control" id="batch_number" name="batch_number" type="text"
-                                            placeholder="e.g. Batch-05 or 05" value="{{ old('batch_number') }}" required>
-                                    </div>
-
                                     <div class="form-group">
                                         <label for="batch_code">Batch Code (Unique) <span class="text-danger">*</span></label>
                                         <input class="form-control font-weight-bold" id="batch_code" name="batch_code" type="text"

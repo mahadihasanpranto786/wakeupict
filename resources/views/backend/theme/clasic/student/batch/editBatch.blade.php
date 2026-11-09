@@ -18,12 +18,6 @@
                     <input type="hidden" name="batch_id" value="{{ $batch->id }}">
                     <div class="p-2">
                         <div class="form-group">
-                            <label for="batch_number{{ $batch->id }}">Batch Name / Batch Number <span class="text-danger">*</span></label>
-                            <input class="form-control" id="batch_number{{ $batch->id }}" name="batch_number" type="text"
-                                placeholder="Enter Batch Number" required value="{{ $batch->batch_number }}">
-                        </div>
-
-                        <div class="form-group">
                             <label for="batch_code{{ $batch->id }}">Batch Code (Unique) <span class="text-danger">*</span></label>
                             <input class="form-control font-weight-bold" id="batch_code{{ $batch->id }}" name="batch_code" type="text"
                                 placeholder="e.g. 05, 105, B01" required maxlength="20" value="{{ $batch->batch_code }}"
