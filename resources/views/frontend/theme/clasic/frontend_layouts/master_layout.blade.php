@@ -285,8 +285,8 @@
         html.light .text-white-force,
         html.light #top-announcement-strip,
         html.light #top-announcement-strip *,
-        html.light [class*="bg-rose-500"]:not([class*="bg-rose-600"]),
-        html.light [class*="bg-rose-500"]:not([class*="bg-rose-600"]) *,
+        html.light [class~="bg-rose-500"],
+        html.light [class~="bg-rose-500"] *,
         html.light [class*="bg-emerald-600"],
         html.light [class*="bg-emerald-600"] *,
         html.light [class*="bg-emerald-700"],
@@ -296,6 +296,14 @@
         html.light .hero-slide *,
         html.light .btn-shimmer * {
             color: #ffffff !important;
+        }
+
+        /* High contrast for auth error alerts in both Light and Dark mode */
+        html.light .auth-error-alert,
+        html.light .auth-error-alert *,
+        .auth-error-alert,
+        .auth-error-alert * {
+            color: #991B1B !important;
         }
 
         /* User Directive: Buttons, badges, and elements with bg-rose-600 and bg-emerald-100 MUST have black font */

@@ -136,12 +136,12 @@
 
             <!-- Errors -->
             @if($errors->any())
-                <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs mb-5 space-y-1">
+                <div class="auth-error-alert p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/70 border-2 border-rose-400 dark:border-rose-800 text-xs mb-5 space-y-2 shadow-sm font-sans" style="background-color: #FEF2F2 !important; border-color: #F87171 !important;">
                     @foreach($errors->all() as $error)
-                        <p class="flex items-center gap-1.5">
-                            <i class="fa fa-times-circle flex-shrink-0"></i>
-                            <span>{{ $error }}</span>
-                        </p>
+                        <div class="flex items-start gap-2.5 font-bold leading-relaxed" style="color: #991B1B !important;">
+                            <i class="fa fa-times-circle flex-shrink-0 text-sm mt-0.5" style="color: #DC2626 !important;"></i>
+                            <span class="text-xs font-bold leading-relaxed" style="color: #991B1B !important; font-weight: 700;">{{ $error }}</span>
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -174,7 +174,7 @@
                                 <option value="" selected disabled>Select your batch</option>
                                 @foreach($activeBatches as $b)
                                     <option value="{{ $b->batch_code ?: $b->batch_number }}" {{ old('batch_code') == ($b->batch_code ?: $b->batch_number) ? 'selected' : '' }}>
-                                        batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}] — {{ $b->course ? $b->course->course_title : 'Local' }}
+                                        Batch-Code-{{ $b->batch_code ?: $b->batch_number }} [{{ $b->academic_year ?: date('Y') }}] — {{ $b->course ? $b->course->course_title : 'Local' }}
                                     </option>
                                 @endforeach
                             </select>
