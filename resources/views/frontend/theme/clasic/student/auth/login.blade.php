@@ -125,7 +125,7 @@
                     {{ $activeTab === 'register' ? 'Create Student Account' : 'Student Login' }}
                 </h1>
                 <p id="authSubHeading" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5">
-                    {{ $activeTab === 'register' ? 'Activate your student portal access using your admission phone number.' : 'Enter your Student ID, Email, or Phone to access your courses.' }}
+                    {{ $activeTab === 'register' ? 'Activate your student portal access using your admission phone number.' : 'Enter your Registration Number, Email, or Phone to access your courses.' }}
                 </p>
             </div>
 
@@ -174,7 +174,7 @@
                         <span>অনলাইন ভর্তি হওয়া শিক্ষার্থীদের জন্য:</span>
                     </div>
                     <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-                        ইউজারনেম হিসেবে আপনার <strong>Student ID</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
+                        ইউজারনেম হিসেবে আপনার <strong>রেজিস্ট্রেশন নম্বর (Registration Number)</strong> অথবা <strong>মোবাইল নম্বর</strong> লিখুন। প্রাথমিক ডিফল্ট পাসওয়ার্ড হলো আপনার <strong>মোবাইল নম্বরের শেষ ৬ ডিজিট</strong>।
                     </p>
                 </div>
 
@@ -203,7 +203,10 @@
                             <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="password" id="password" name="password" required
                                    placeholder="••••••••"
-                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                   class="w-full pl-11 pr-11 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                            <button type="button" onclick="toggleAuthPasswordVisibility('password', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
+                                <i class="fa fa-eye text-sm"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -348,7 +351,10 @@
                                 <i class="fa fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                                 <input type="password" id="reg_password" name="password" required minlength="6"
                                        placeholder="কমপক্ষে ৬ ডিজিট"
-                                       class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                       class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                <button type="button" onclick="toggleAuthPasswordVisibility('reg_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
+                                    <i class="fa fa-eye text-xs"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -360,7 +366,10 @@
                                 <i class="fa fa-check-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                                 <input type="password" id="reg_password_confirmation" name="password_confirmation" required minlength="6"
                                        placeholder="পুনরায় পাসওয়ার্ড দিন"
-                                       class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                       class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                <button type="button" onclick="toggleAuthPasswordVisibility('reg_password_confirmation', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
+                                    <i class="fa fa-eye text-xs"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -432,11 +441,30 @@
             btnLogin.className = 'auth-tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-brand-primary text-white shadow-md font-extrabold';
 
             heading.innerText = 'Student Login';
-            subheading.innerText = 'Enter your Student ID, Email, or Phone to access your courses.';
+            subheading.innerText = 'Enter your Registration Number, Email, or Phone to access your courses.';
             document.title = 'Student Login — Wake Up ICT Portal';
 
             if (window.history.replaceState) {
                 window.history.replaceState(null, '', '{{ route("student.login") }}');
+            }
+        }
+    }
+
+    function toggleAuthPasswordVisibility(inputId, btn) {
+        var input = document.getElementById(inputId);
+        if (!input) return;
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        } else {
+            input.type = 'password';
+            if (icon) {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
     }
