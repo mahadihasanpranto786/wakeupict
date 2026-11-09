@@ -426,12 +426,42 @@ class StudentController extends Controller
         return view('backend.theme.clasic.student.student_edit', compact('student', 'batches', 'courses'));
     }
 
-    //delete student
-    function deleteStudent($student_id)
+    //delete student (supports both soft delete and permanent cascaded delete)
+    function deleteStudent($student_id, Request $request = null)
     {
-        $student = Student::findOrFail($student_id)->update(['status'=> 0]);
+        if (!$request) $request = request();
+        $type = $request->input('type', 'soft');
 
-        return redirect()->back();
+        if ($type === 'permanent') {
+            \App\Services\StudentDeletionService::permanentDeleteStudent($student_id);
+            $notification = ['success' => 'Student and all related records (Account, Enrollments, Admissions) permanently deleted!'];
+        } else {
+            \App\Services\StudentDeletionService::softDeleteStudent($student_id);
+            $notification = ['success' => 'Student soft-deleted (deactivated) successfully.'];
+        }
+
+        return redirect()->back()->with($notification);
+    }
+
+    //bulk delete applied students
+    function bulkDeleteStudents(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $deleteType = $request->input('delete_type', 'soft');
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with(['error' => 'Please select at least one student to delete.']);
+        }
+
+        if ($deleteType === 'permanent') {
+            $count = \App\Services\StudentDeletionService::bulkPermanentDelete('applied', $ids);
+            $notification = ['success' => "{$count} students and all related data permanently deleted!"];
+        } else {
+            $count = \App\Services\StudentDeletionService::bulkSoftDelete('applied', $ids);
+            $notification = ['success' => "{$count} students soft-deleted (deactivated) successfully."];
+        }
+
+        return redirect()->back()->with($notification);
     }
     //update student
     function updateStudent(Request $request)
@@ -845,19 +875,42 @@ class StudentController extends Controller
     //delete admited student
 
 
-    //delete student
-    function deleteAdmitedStudent($student_id)
+    //delete admited student (supports both soft and permanent cascaded delete)
+    function deleteAdmitedStudent($student_id, Request $request = null)
     {
-        $studentPayments = StudentPayment::where("student_id",$student_id)->get();
-        if (count($studentPayments) > 0) {   
-            foreach ($studentPayments as $payment) {
-                Income::findOrFail($payment->income_id)->update(['status'=> 0]);
-                $payment->update(['status'=> 0]);
-            }
+        if (!$request) $request = request();
+        $type = $request->input('type', 'soft');
+
+        if ($type === 'permanent') {
+            \App\Services\StudentDeletionService::permanentDeleteAdmitedStudent($student_id);
+            $notification = ['success' => 'Admitted student and all related payments, incomes, and accounts permanently deleted!'];
+        } else {
+            \App\Services\StudentDeletionService::softDeleteAdmitedStudent($student_id);
+            $notification = ['success' => 'Admitted student soft-deleted (deactivated) successfully.'];
         }
-        $student = AdmitedStudent::findOrFail($student_id)->update(['status'=> 0]);
-        return redirect()->back();
-    
+
+        return redirect()->back()->with($notification);
+    }
+
+    //bulk delete admitted students
+    function bulkDeleteAdmitedStudents(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $deleteType = $request->input('delete_type', 'soft');
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with(['error' => 'Please select at least one admitted student to delete.']);
+        }
+
+        if ($deleteType === 'permanent') {
+            $count = \App\Services\StudentDeletionService::bulkPermanentDelete('admitted', $ids);
+            $notification = ['success' => "{$count} admitted students and all related records permanently deleted!"];
+        } else {
+            $count = \App\Services\StudentDeletionService::bulkSoftDelete('admitted', $ids);
+            $notification = ['success' => "{$count} admitted students soft-deleted (deactivated) successfully."];
+        }
+
+        return redirect()->back()->with($notification);
     }
 
     //admited student view

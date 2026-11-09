@@ -32,13 +32,12 @@ class StudentAccount extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-            if (!empty($model->registration_number) && empty($model->student_id_code)) {
-                $model->student_id_code = $model->registration_number;
-            } elseif (empty($model->student_id_code)) {
-                $model->student_id_code = static::generateUniqueStudentId();
+            if (empty($model->attributes['student_id_code'])) {
+                $code = !empty($model->registration_number) ? $model->registration_number : static::generateUniqueStudentId();
+                $model->attributes['student_id_code'] = $code;
             }
-            if (empty($model->registration_number) && !empty($model->student_id_code)) {
-                $model->registration_number = $model->student_id_code;
+            if (empty($model->attributes['registration_number'])) {
+                $model->attributes['registration_number'] = $model->attributes['student_id_code'];
             }
         });
     }

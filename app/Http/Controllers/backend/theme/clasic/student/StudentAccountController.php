@@ -124,16 +124,49 @@ class StudentAccountController extends Controller
     }
 
     /**
-     * Delete student account
+     * Delete student account (supports both soft delete and permanent cascaded delete)
      */
-    public function destroy($id)
+    public function destroy($id, Request $request = null)
     {
+        if (!$request) $request = request();
         $account = StudentAccount::findOrFail($id);
         $name = $account->name;
-        $account->enrollments()->delete();
-        $account->delete();
+        $type = $request->input('type', 'soft');
+        $cascade = $request->has('cascade') ? (bool)$request->cascade : true;
 
-        return redirect()->back()->with('success', "শিক্ষার্থী অ্যাকাউন্ট ({$name}) সফলভাবে মুছে ফেলা হয়েছে।");
+        if ($type === 'permanent') {
+            \App\Services\StudentDeletionService::permanentDeleteStudentAccount($id, $cascade);
+            $msg = "শিক্ষার্থী অ্যাকাউন্ট ({$name}) এবং সংশ্লিষ্ট তথ্য স্থায়ীভাবে মুছে ফেলা হয়েছে।";
+        } else {
+            \App\Services\StudentDeletionService::softDeleteStudentAccount($id);
+            $msg = "শিক্ষার্থী অ্যাকাউন্ট ({$name}) নিষ্ক্রিয় (Soft Deleted) করা হয়েছে।";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Bulk delete student accounts
+     */
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $deleteType = $request->input('delete_type', 'soft');
+        $cascade = $request->has('cascade') ? (bool)$request->cascade : true;
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'দয়া করে অন্তত একটি অ্যাকাউন্ট সিলেক্ট করুন।');
+        }
+
+        if ($deleteType === 'permanent') {
+            $count = \App\Services\StudentDeletionService::bulkPermanentDelete('account', $ids, $cascade);
+            $msg = "{$count} টি শিক্ষার্থী অ্যাকাউন্ট এবং সংশ্লিষ্ট সকল তথ্য স্থায়ীভাবে মুছে ফেলা হয়েছে।";
+        } else {
+            $count = \App\Services\StudentDeletionService::bulkSoftDelete('account', $ids);
+            $msg = "{$count} টি শিক্ষার্থী অ্যাকাউন্ট নিষ্ক্রিয় (Soft Deleted) করা হয়েছে।";
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
 }
 

@@ -174,7 +174,7 @@
                                 <option value="" selected disabled>Select your batch</option>
                                 @foreach($activeBatches as $b)
                                     <option value="{{ $b->batch_code ?: $b->batch_number }}" {{ old('batch_code') == ($b->batch_code ?: $b->batch_number) ? 'selected' : '' }}>
-                                        {{ $b->batch_number }} (Code: {{ $b->batch_code }}) — {{ $b->course ? $b->course->course_title : 'Local' }}
+                                        batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}] — {{ $b->course ? $b->course->course_title : 'Local' }}
                                     </option>
                                 @endforeach
                             </select>

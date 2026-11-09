@@ -8,15 +8,28 @@
 @section('student_account_list_active', 'active')
 
 @section('maincontant')
+<style>
+    .pagination {
+        margin-bottom: 0 !important;
+        justify-content: flex-end !important;
+    }
+    .bg-rose-600, .bg-emerald-100 {
+        color: #000000 !important;
+        font-weight: 800 !important;
+    }
+</style>
 <div class="content-header p-2">
     <div class="container-fluid">
         @include('backend.theme.clasic.student.include.student_directory_nav')
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h4 class="m-0 font-weight-bold text-dark" style="font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif;">
+            <div class="d-flex align-items-center flex-wrap">
+                <h4 class="m-0 font-weight-bold text-dark mr-2" style="font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', sans-serif;">
                     <i class="fas fa-id-badge text-primary mr-2"></i> শিক্ষার্থী অ্যাকাউন্ট তালিকা (Student Accounts)
                 </h4>
-                <p class="text-muted text-xs mb-0 mt-1">
+                <span class="badge badge-info px-3 py-1 font-weight-bold shadow-sm" style="font-size: 13px;">
+                    <i class="fas fa-users mr-1"></i> Total Accounts: {{ $accounts->total() }}
+                </span>
+                <p class="text-muted text-xs mb-0 mt-1 w-100">
                     স্টুডেন্ট পোর্টাল ও কোর্স অ্যাপ্লিকেশন থেকে নিবন্ধিত সকল শিক্ষার্থীর তথ্য ও অ্যাকাউন্ট ব্যবস্থাপনা।
                 </p>
             </div>
@@ -172,11 +185,38 @@
                 পেজ {{ $accounts->currentPage() }} এর {{ $accounts->lastPage() }}
             </div>
         </div>
+
+        <!-- Bulk Actions Toolbar (Hidden by default, shown on select) -->
+        <form id="bulkAccountDeleteForm" action="{{ route('admin.student-accounts.bulk-delete') }}" method="POST">
+            @csrf
+            <input type="hidden" name="delete_type" id="bulkAccountDeleteType" value="soft">
+            <div id="bulkAccountActionBar" class="card-header bg-dark text-white py-2 px-3 d-none align-items-center justify-content-between flex-wrap">
+                <div class="my-1">
+                    <span class="font-weight-bold text-white">
+                        <i class="fas fa-check-square mr-1 text-warning"></i>
+                        <span id="selectedAccountCount" class="badge badge-warning text-dark font-weight-bold px-2 py-1">0</span>
+                        অ্যাকাউন্ট নির্বাচিত
+                    </span>
+                </div>
+                <div class="d-flex align-items-center flex-wrap my-1" style="gap: 8px;">
+                    <button type="button" class="btn btn-warning btn-sm font-weight-bold text-dark" onclick="triggerAccountBulk('soft')">
+                        <i class="fas fa-user-slash mr-1"></i> Soft Delete (নিষ্ক্রিয় করুন)
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm font-weight-bold text-white" onclick="triggerAccountBulk('permanent')">
+                        <i class="fas fa-trash-alt mr-1"></i> Permanent Delete (চিরতরে মুছে ফেলুন)
+                    </button>
+                </div>
+            </div>
+        </form>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-striped mb-0" style="vertical-align: middle;">
                     <thead style="background-color: #F8FAFC; color: #0F172A; border-bottom: 2px solid #E2E8F0;">
                         <tr class="text-xs font-weight-bold text-uppercase">
+                            <th style="width: 35px;" class="text-center">
+                                <input type="checkbox" id="selectAllAccounts" title="Select All Accounts">
+                            </th>
                             <th style="width: 50px;" class="text-center">#</th>
                             <th>শিক্ষার্থীর পরিচয়</th>
                             <th>যোগাযোগ (Contact)</th>
@@ -196,6 +236,9 @@
                                 $isPortal = ($source === 'portal_registration' || (empty($source) && empty($acc->admited_student_id)));
                             @endphp
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ids[]" value="{{ $acc->id }}" class="account-checkbox" form="bulkAccountDeleteForm">
+                                </td>
                                 <td class="text-center font-weight-bold text-muted">
                                     {{ $accounts->firstItem() + $index }}
                                 </td>
@@ -295,25 +338,74 @@
                                     @endif
                                 </td>
                                 <td class="text-right">
-                                    <div class="btn-group btn-group-sm">
+                                    <div class="d-flex align-items-center justify-content-end" style="gap: 4px;">
                                         @if($parentStudent)
-                                            <a href="{{ route('students-view', $parentStudent->id) }}" class="btn btn-outline-info" title="স্লিপ / সম্পূর্ণ প্রোফাইল দেখুন" target="_blank">
+                                            <a href="{{ route('students-view', $parentStudent->id) }}" class="btn btn-outline-info btn-sm" title="স্লিপ / সম্পূর্ণ প্রোফাইল দেখুন" target="_blank">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endif
                                         <form action="{{ route('admin.student-accounts.toggle-status', $acc->id) }}" method="POST" class="d-inline" onsubmit="return confirm('আপনি কি এই অ্যাকাউন্টের স্ট্যাটাস পরিবর্তন করতে চান?')">
                                             @csrf
-                                            <button type="submit" class="btn btn-outline-{{ $acc->status == 1 ? 'warning' : 'success' }}" title="{{ $acc->status == 1 ? 'অ্যাকাউন্ট স্থগিত করুন' : 'অ্যাকাউন্ট সক্রিয় করুন' }}">
+                                            <button type="submit" class="btn btn-outline-{{ $acc->status == 1 ? 'warning' : 'success' }} btn-sm" title="{{ $acc->status == 1 ? 'অ্যাকাউন্ট স্থগিত করুন' : 'অ্যাকাউন্ট সক্রিয় করুন' }}">
                                                 <i class="fas fa-{{ $acc->status == 1 ? 'ban' : 'check' }}"></i>
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.student-accounts.destroy', $acc->id) }}" method="POST" class="d-inline" onsubmit="return confirm('সতর্কতা: এই শিক্ষার্থী অ্যাকাউন্টটি মুছে ফেলতে চান?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="মুছে ফেলুন">
+
+                                        <!-- Delete Dropdown (Soft vs Permanent) -->
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-outline-danger btn-sm dropdown-toggle font-weight-bold" type="button" id="deleteAccMenu{{ $acc->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Delete Options">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </form>
+                                            <div class="dropdown-menu dropdown-menu-right shadow-lg p-2" aria-labelledby="deleteAccMenu{{ $acc->id }}" style="min-width: 220px;">
+                                                <div class="dropdown-header font-weight-bold text-dark px-2 py-1 border-bottom mb-1">
+                                                    <i class="fas fa-trash text-danger mr-1"></i> ডিলিট অপশন
+                                                </div>
+                                                <!-- Soft Delete -->
+                                                <a class="dropdown-item py-2 px-2 rounded font-weight-bold text-dark" href="{{ route('admin.student-accounts.delete', ['id' => $acc->id, 'type' => 'soft']) }}" onclick="return confirm('আপনি কি এই অ্যাকাউন্টটি Soft Delete (নিষ্ক্রিয়) করতে চান? পোর্টাল অ্যাক্সেস বন্ধ হয়ে যাবে।')">
+                                                    <i class="fas fa-user-slash text-warning mr-2"></i> Soft Delete (নিষ্ক্রিয়)
+                                                </a>
+                                                <div class="dropdown-divider my-1"></div>
+                                                <!-- Permanent Delete Trigger -->
+                                                <a class="dropdown-item py-2 px-2 rounded font-weight-bold text-danger" href="#" data-toggle="modal" data-target="#permDeleteAccModal{{ $acc->id }}">
+                                                    <i class="fas fa-trash-alt text-danger mr-2"></i> Permanent Delete (চিরতরে)
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Permanent Deletion Modal -->
+                                        <div class="modal fade" id="permDeleteAccModal{{ $acc->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content border-danger shadow-lg text-left">
+                                                    <div class="modal-header bg-danger text-white py-3">
+                                                        <h5 class="modal-title font-weight-bold">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i> Permanent Delete Confirmation
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-left font-sans">
+                                                        <p class="font-weight-bold text-dark mb-2">
+                                                            আপনি কি নিশ্চিতভাবে এই শিক্ষার্থী অ্যাকাউন্টটি (<span class="text-danger">{{ $acc->name }}</span>) চিরতরে মুছে ফেলতে চান?
+                                                        </p>
+                                                        <div class="alert alert-warning text-xs mb-0">
+                                                            <i class="fas fa-info-circle mr-1"></i> <strong>সংশ্লিষ্ট ডাটা ডিলিট সতর্কতা:</strong>
+                                                            <ul class="mb-0 mt-1 pl-3 font-weight-bold">
+                                                                <li>পোর্টাল লগইন ক্রেডেনশিয়াল ও প্রোফাইল ডাটা</li>
+                                                                <li>সকল LMS কোর্স এনরোলমেন্ট ও কুইজ হিস্ট্রি</li>
+                                                                <li>কোর্স আবেদন ও সংশ্লিষ্ট পেমেন্ট রেকর্ড</li>
+                                                            </ul>
+                                                            <strong class="text-danger d-block mt-2">সতর্কতা: এই অ্যাকশনটি রিভার্স করা সম্ভব নয়!</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer py-2 bg-light d-flex justify-content-between">
+                                                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">বাতিল</button>
+                                                        <a href="{{ route('admin.student-accounts.delete', ['id' => $acc->id, 'type' => 'permanent']) }}" class="btn btn-danger font-weight-bold">
+                                                            <i class="fas fa-trash-alt mr-1"></i> হ্যাঁ, চিরতরে মুছে ফেলুন
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </td>
                             </tr>
@@ -337,5 +429,63 @@
         @endif
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectAll = document.getElementById('selectAllAccounts');
+        var checkboxes = document.querySelectorAll('.account-checkbox');
+        var bulkBar = document.getElementById('bulkAccountActionBar');
+        var countSpan = document.getElementById('selectedAccountCount');
+
+        function updateBulkBar() {
+            var checked = document.querySelectorAll('.account-checkbox:checked');
+            if (checked.length > 0) {
+                bulkBar.classList.remove('d-none');
+                bulkBar.classList.add('d-flex');
+                countSpan.innerText = checked.length;
+            } else {
+                bulkBar.classList.remove('d-flex');
+                bulkBar.classList.add('d-none');
+                countSpan.innerText = '0';
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(function(cb) {
+                    cb.checked = selectAll.checked;
+                });
+                updateBulkBar();
+            });
+        }
+
+        checkboxes.forEach(function(cb) {
+            cb.addEventListener('change', updateBulkBar);
+        });
+
+        window.triggerAccountBulk = function(type) {
+            var form = document.getElementById('bulkAccountDeleteForm');
+            var typeInput = document.getElementById('bulkAccountDeleteType');
+            var checked = document.querySelectorAll('.account-checkbox:checked');
+
+            if (checked.length === 0) {
+                alert('দয়া করে অন্তত একটি অ্যাকাউন্ট সিলেক্ট করুন!');
+                return;
+            }
+
+            typeInput.value = type;
+
+            if (type === 'permanent') {
+                if (confirm('সতর্কতা: আপনি ' + checked.length + ' টি অ্যাকাউন্ট এবং তাদের সংশ্লিষ্ট সকল তথ্য (কোর্স, কুইজ, পেমেন্ট) চিরতরে মুছে ফেলতে যাচ্ছেন!\n\nএই অ্যাকশন রিভার্স করা সম্ভব নয়। নিশ্চিত?')) {
+                    form.submit();
+                }
+            } else {
+                if (confirm('আপনি কি ' + checked.length + ' টি অ্যাকাউন্ট Soft Delete (নিষ্ক্রিয়) করতে চান?')) {
+                    form.submit();
+                }
+            }
+        };
+    });
+</script>
 @endsection
 

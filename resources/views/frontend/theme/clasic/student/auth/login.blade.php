@@ -239,7 +239,7 @@
                                 @if(isset($activeBatches))
                                     @foreach($activeBatches as $b)
                                         <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
-                                            {{ $b->batch_number }} (Code: {{ $b->batch_code }}) [{{ $b->academic_year ?: date('Y') }}]
+                                            batch-code-{{ $b->batch_code ?: $b->batch_number }}[{{ $b->academic_year ?: date('Y') }}]
                                         </option>
                                     @endforeach
                                 @endif
@@ -365,7 +365,9 @@
                             var opt = document.createElement('option');
                             opt.value = b.id;
                             opt.setAttribute('data-course', courseId);
-                            opt.innerText = b.batch_number + ' (Code: ' + (b.batch_code || 'N/A') + ') [' + (b.academic_year || '{{ date("Y") }}') + ']';
+                            var codeVal = b.batch_code || b.batch_number;
+                            var yearVal = b.academic_year || '{{ date("Y") }}';
+                            opt.innerText = 'batch-code-' + codeVal + '[' + yearVal + ']';
                             batchSelect.appendChild(opt);
                         });
                     }
