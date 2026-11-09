@@ -50,6 +50,7 @@
                                 <thead>
                                     <tr>
                                         <th>SL</th>
+                                        <th>Code</th>
                                         <th>Course Title</th>
                                         <th>Time Line</th>
                                         <th>Student Quantity</th>
@@ -65,6 +66,7 @@
                                     @foreach ($courses as $course)
                                         <tr>
                                             <td> {{ $serial++ }}</td>
+                                            <td><span class="badge badge-info font-weight-bold">{{ $course->course_code ?? 'N/A' }}</span></td>
                                             <td>{{ $course->course_title }}
                                             </td>
                                             <td>{{ $course->time_line }} </td>

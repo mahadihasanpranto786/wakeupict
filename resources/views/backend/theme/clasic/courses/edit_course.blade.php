@@ -36,6 +36,19 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="course_code">কোর্স কোড (Course Code - Unique 2-digit code e.g. 01, 02)</label>
+                            <input type="text" name="course_code" id="course_code" class="form-control font-weight-bold"
+                                placeholder="e.g. 01, 02" value="{{ old('course_code', $courses->course_code) }}" required maxlength="10"
+                                {{ $courses->isUsedInRegistration() ? 'readonly' : '' }}>
+                            @if($courses->isUsedInRegistration())
+                                <small class="text-muted d-block mt-1"><i class="fa fa-lock"></i> এই কোর্সে শিক্ষার্থী নিবন্ধিত থাকায় কোর্স কোড লক করা রয়েছে (Immutable)।</small>
+                            @endif
+                            @error('course_code')
+                                <span class="text-danger font-weight-bold d-block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
                             <label for="course_slug">কোর্স স্লাগ(Slug)</label>
 
                             <a href="javascript:;" data-toggle="modal" data-target="#title"

@@ -33,6 +33,15 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="course_code">কোর্স কোড (Course Code - Unique 2-digit code e.g. 01, 02)</label>
+                            <input type="text" name="course_code" id="course_code" class="form-control"
+                                placeholder="e.g. 01, 02, 10" value="{{ old('course_code') }}" required maxlength="10">
+                            @error('course_code')
+                                <span class="text-danger font-weight-bold">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
                             <label for="course_slug">কোর্স স্লাগ(Slug)</label>
 
                             <a href="javascript:;" data-toggle="modal" data-target="#title"

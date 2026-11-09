@@ -91,12 +91,12 @@
 
                     <div>
                         <label for="login_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
-                            Student ID / Email / Phone <span class="text-rose-500">*</span>
+                            Registration No / Phone / Email <span class="text-rose-500">*</span>
                         </label>
                         <div class="relative">
                             <i class="fa fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" required
-                                   placeholder="যেমন: WUICT-2026-0001 বা 017XXXXXXXX"
+                                   placeholder="যেমন: 202605010001 বা 017XXXXXXXX"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
                         </div>
                     </div>
@@ -123,6 +123,13 @@
                         <a href="tel:01791612121" class="text-emerald-700 dark:text-brand-primary hover:underline font-semibold flex items-center gap-1">
                             <i class="fa fa-phone"></i>
                             <span>Helpline 01791612121</span>
+                        </a>
+                    </div>
+
+                    <div class="text-right pt-0.5">
+                        <a href="{{ route('student.registration.verification') }}" class="text-[11px] text-emerald-700 dark:text-brand-primary hover:underline font-semibold inline-flex items-center gap-1">
+                            <i class="fa fa-question-circle"></i>
+                            <span>রেজিস্ট্রেশন নম্বর ভুলে গেছেন? (Forgot Registration Number)</span>
                         </a>
                     </div>
 
@@ -195,6 +202,48 @@
                             <input type="email" id="reg_email" name="email" value="{{ old('email') }}"
                                    placeholder="student@example.com"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Course Selection -->
+                    <div>
+                        <label for="reg_course_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Select Course <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa fa-graduation-cap absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <select id="reg_course_id" name="course_id" required onchange="filterBatchesForCourse(this.value)"
+                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                <option value="" disabled {{ old('course_id') ? '' : 'selected' }}>-- Select Course --</option>
+                                @if(isset($activeCourses))
+                                    @foreach($activeCourses as $c)
+                                        <option value="{{ $c->id }}" {{ old('course_id') == $c->id ? 'selected' : '' }}>
+                                            {{ $c->course_title }} (Code: {{ $c->course_code }})
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Active Batch Selection -->
+                    <div>
+                        <label for="reg_batch_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Select Active Batch <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <select id="reg_batch_id" name="batch_id" required
+                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                <option value="" disabled {{ old('batch_id') ? '' : 'selected' }}>-- Select Batch --</option>
+                                @if(isset($activeBatches))
+                                    @foreach($activeBatches as $b)
+                                        <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
+                                            {{ $b->batch_number }} (Code: {{ $b->batch_code }}) [{{ $b->academic_year ?: date('Y') }}]
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
                     </div>
 
@@ -284,6 +333,46 @@
             if (window.history.replaceState) {
                 window.history.replaceState(null, '', '{{ route("student.login") }}');
             }
+        }
+    }
+
+    function filterBatchesForCourse(courseId) {
+        var batchSelect = document.getElementById('reg_batch_id');
+        if (!batchSelect) return;
+
+        var options = batchSelect.querySelectorAll('option');
+        var firstValid = null;
+
+        options.forEach(function(opt) {
+            if (!opt.value) return; // placeholder
+            var courseAttr = opt.getAttribute('data-course');
+            if (!courseAttr || courseAttr == courseId) {
+                opt.style.display = '';
+                if (!firstValid) firstValid = opt.value;
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+
+        // AJAX fallback to load live batches if needed
+        if (courseId) {
+            fetch('{{ url("/batches-for-course") }}/' + courseId)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        batchSelect.innerHTML = '<option value="" disabled selected>-- Select Batch --</option>';
+                        data.forEach(function(b) {
+                            var opt = document.createElement('option');
+                            opt.value = b.id;
+                            opt.setAttribute('data-course', courseId);
+                            opt.innerText = b.batch_number + ' (Code: ' + (b.batch_code || 'N/A') + ') [' + (b.academic_year || '{{ date("Y") }}') + ']';
+                            batchSelect.appendChild(opt);
+                        });
+                    }
+                })
+                .catch(function(err) {
+                    console.log('Batch fetch fallback error:', err);
+                });
         }
     }
 

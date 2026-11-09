@@ -147,8 +147,8 @@
                                     <div class="font-weight-bold text-dark">{{ $cert->student->name }}</div>
                                     <div class="text-xs text-muted">
                                         <i class="fas fa-phone-alt mr-1"></i> {{ $cert->student->phone }}
-                                        @if($cert->student->student_id_code)
-                                            | <span class="badge badge-light border">ID: {{ $cert->student->student_id_code }}</span>
+                                        @if($cert->student->registration_number || $cert->student->student_id_code)
+                                            | <span class="badge badge-light border">Reg: {{ $cert->student->registration_number ?: $cert->student->student_id_code }}</span>
                                         @endif
                                     </div>
                                 @else
@@ -329,7 +329,7 @@
                                     <option value="">-- শিক্ষার্থী নির্বাচন করুন --</option>
                                     @foreach($students as $st)
                                         <option value="{{ $st->id }}">
-                                            {{ $st->name }} ({{ $st->phone }}{{ $st->student_id_code ? ' | ' . $st->student_id_code : '' }})
+                                            {{ $st->name }} ({{ $st->phone }}{{ ($st->registration_number ?: $st->student_id_code) ? ' | ' . ($st->registration_number ?: $st->student_id_code) : '' }})
                                         </option>
                                     @endforeach
                                 </select>

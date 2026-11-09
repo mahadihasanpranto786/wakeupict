@@ -12,6 +12,9 @@
 
 
 @section('maincontant')
+    <div class="p-3">
+        @include('backend.theme.clasic.student.include.student_directory_nav')
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">

@@ -1,6 +1,6 @@
 @extends('backend.theme.clasic.admin_layouts.admin-master')
 @section('title')
-    Student Batch Number
+    Student Batch Management
 @endsection
 {{-- menu active start --}}
 @section('student_active', 'menu-open')
@@ -13,24 +13,52 @@
 
 @section('maincontant')
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">
-                Student Batch Number
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title font-weight-bold">
+                <i class="fas fa-layer-group mr-2"></i> Dynamic Batch Management
             </h3>
         </div>
         <!-- /.card-header -->
         <div class="card-body">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="row">
                 <div class="col-md-8">
-                    <table id="example1" class="table table-bordered table-striped">
-                        <thead>
+                    <table id="example1" class="table table-bordered table-striped table-hover">
+                        <thead class="thead-dark">
                             <tr>
-                                <th style="width: 2%">SL</th>
-                                <th style="width: 5%">Batch Number</th>
-                                <th style="width: 20%">Course</th>
-                                <th style="width: 3%">Type</th>
-                                <th style="width: 10%">Status</th>
-                                <th style="width: 20%">Action</th>
+                                <th style="width: 5%">SL</th>
+                                <th>Batch Name / Number</th>
+                                <th>Batch Code</th>
+                                <th>Year</th>
+                                <th>Course</th>
+                                <th>Batch Duration</th>
+                                <th>Status</th>
+                                <th style="width: 22%">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -39,137 +67,156 @@
                             @endphp
                             @foreach ($batches as $batch)
                                 <tr>
-                                    <td style="width: 10%"> {{ $serial++ }}</td>
-                                    <td style="width: 20%">{{ $batch->batch_number }}
+                                    <td>{{ $serial++ }}</td>
+                                    <td>
+                                        <strong>{{ $batch->batch_number }}</strong>
                                     </td>
-                                    <td style="width: 30%">{{ $batch->course->course_title }}
+                                    <td>
+                                        <span class="badge badge-info font-weight-bold font-mono">{{ $batch->batch_code }}</span>
+                                        @if($batch->isUsedInRegistration())
+                                            <i class="fas fa-lock text-muted ml-1" title="Used in registration (Code locked)"></i>
+                                        @endif
                                     </td>
-                                    <td style="width: 30%">{{ $batch->category->title }}
+                                    <td>{{ $batch->academic_year ?: date('Y') }}</td>
+                                    <td>{{ $batch->course ? $batch->course->course_title : 'N/A' }}</td>
+                                    <td>
+                                        @if($batch->start_date || $batch->end_date)
+                                            <div class="small font-weight-bold">
+                                                {{ $batch->start_date ? $batch->start_date->format('d M Y') : 'Start' }}
+                                                <i class="fas fa-arrow-right mx-1 text-muted text-xs"></i>
+                                                {{ $batch->end_date ? $batch->end_date->format('d M Y') : 'Ongoing' }}
+                                            </div>
+                                            @if($batch->end_date && \Carbon\Carbon::parse($batch->end_date)->endOfDay()->isPast())
+                                                <span class="badge badge-danger text-xs mt-1"><i class="fas fa-clock mr-1"></i> Expired (Access Closed)</span>
+                                            @else
+                                                <span class="badge badge-success text-xs mt-1"><i class="fas fa-check-circle mr-1"></i> Running Batch</span>
+                                            @endif
+                                        @else
+                                            <span class="text-muted small">Not set</span>
+                                        @endif
                                     </td>
-                                    <td style="width: 10%">
+                                    <td>
                                         @if ($batch->active_batch == 1)
                                             <span class="badge bg-success">Active</span>
                                         @else
                                             <span class="badge bg-danger">Inactive</span>
                                         @endif
                                     </td>
-                                    <td class="border" style="width: 30%">
-                                        {{-- status --}}
+                                    <td class="border">
                                         @if (checkUserType() == 0)
+                                            {{-- Active / Inactive Toggle --}}
                                             @if ($batch->active_batch == 1)
-                                                <button title="Inactive" class="btn btn-danger btn-sm"> <a
-                                                        class="flex items-center "
-                                                        href="{{ url('batch-inactive/' . $batch->id) }}"> <i
-                                                            class="fas fa-arrow-circle-down text-white"></i></a>
-                                                </button>
+                                                <a class="btn btn-warning btn-sm" title="Deactivate Batch" href="{{ url('batch-inactive/' . $batch->id) }}">
+                                                    <i class="fas fa-pause text-dark"></i>
+                                                </a>
                                             @else
-                                                <button title="Active" class="btn btn-success btn-sm"> <a
-                                                        class="flex items-center "
-                                                        href="{{ url('batch-active/' . $batch->id) }}"> <i
-                                                            class="fas fa-arrow-circle-up text-white"></i></a>
-                                                </button>
+                                                <a class="btn btn-success btn-sm" title="Activate Batch" href="{{ url('batch-active/' . $batch->id) }}">
+                                                    <i class="fas fa-play text-white"></i>
+                                                </a>
                                             @endif
-                                            {{-- edit --}}
-                                            <button title="Edit" data-toggle="modal" data-target="#editBatchModal"
-                                                class="btn btn-primary btn-sm flex items-center">
-                                                <i class="fas fa-pencil-alt text-white"></i>
 
+                                            {{-- Edit modal button --}}
+                                            <button title="Edit Batch" data-toggle="modal" data-target="#editBatchModal{{ $batch->id }}"
+                                                class="btn btn-primary btn-sm">
+                                                <i class="fas fa-pencil-alt text-white"></i>
                                             </button>
+
+                                            {{-- Delete button (Prevented if has registered students) --}}
+                                            <a class="btn btn-danger btn-sm" title="Delete Batch" onclick="return confirm('Are you sure you want to delete this batch?')" href="{{ url('batch-delete/' . $batch->id) }}">
+                                                <i class="fas fa-trash text-white"></i>
+                                            </a>
                                         @endif
-                                        {{-- delete --}}
-                                        {{-- <button title="Delete" class="btn btn-danger btn-sm"><a class="flex items-center "
-                                                id="delete" href="{{ url('batch-delete/' . $batch->id) }}"><i
-                                                    class="fas fa-trash  text-white"></i></a>
-                                        </button> --}}
 
                                         <button title="Details" data-id='{{ $batch->id }}'
                                             data-course_id='{{ $batch->course_id }}' data-toggle="modal"
                                             data-target="#admitted-student-details"
-                                            class="btn btn-info btn-sm flex items-center batchDetails">Details
+                                            class="btn btn-info btn-sm batchDetails">
+                                            <i class="fas fa-info-circle"></i> Details
                                         </button>
-
                                     </td>
                                 </tr>
-                                @include(
-                                    'backend.theme.clasic.student.batch.editBatch'
-                                )
+                                @include('backend.theme.clasic.student.batch.editBatch')
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
                 @if (checkUserType() == 0)
                     <div class="col-md-4">
-                        <div class="card card-primary">
-                            <div class="card-header">
-                                <h3 class="card-title text-center"> Insert Batch Number</h3>
+                        <div class="card card-primary card-outline shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="card-title font-weight-bold mb-0">
+                                    <i class="fas fa-plus-circle mr-1"></i> Create New Batch
+                                </h3>
                             </div>
-                            <!-- /.card-header -->
                             <!-- form start -->
                             <form method="POST" action="{{ route('insert-batch') }}" enctype="multipart/form-data">
                                 @csrf
-                                <div class="p-2">
+                                <div class="card-body p-3">
                                     <div class="form-group">
-                                        <label for="batch_number"> Batch Number </label>
+                                        <label for="batch_number">Batch Name / Batch Number <span class="text-danger">*</span></label>
                                         <input class="form-control" id="batch_number" name="batch_number" type="text"
-                                            placeholder="Enter Batch Number" data-validation='required'>
+                                            placeholder="e.g. Batch-05 or 05" value="{{ old('batch_number') }}" required>
                                     </div>
+
                                     <div class="form-group">
-                                        <label>Select Course</label>
-                                        <select name="course_id" id="course_id" data-validation='required'
-                                            class="form-control select2" style="width: 100%;">
-                                            <option selected disabled>Select Course</option>
+                                        <label for="batch_code">Batch Code (Unique) <span class="text-danger">*</span></label>
+                                        <input class="form-control font-weight-bold" id="batch_code" name="batch_code" type="text"
+                                            placeholder="e.g. 05, 105, B01" value="{{ old('batch_code') }}" required maxlength="20">
+                                        <small class="text-muted">Can be 2 or more digits. Used in student registration numbers.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="academic_year">Academic Year <span class="text-danger">*</span></label>
+                                        <input class="form-control" id="academic_year" name="academic_year" type="text"
+                                            placeholder="e.g. {{ date('Y') }}" value="{{ old('academic_year', date('Y')) }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Select Course <span class="text-danger">*</span></label>
+                                        <select name="course_id" id="course_id" required class="form-control select2" style="width: 100%;">
+                                            <option selected disabled value="">Select Course</option>
                                             @foreach ($courses as $course)
-                                                <option value="{{ $course->id }}">{{ $course->course_title }}</option>
+                                                <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                    {{ $course->course_title }} (Code: {{ $course->course_code }})
+                                                </option>
                                             @endforeach
                                         </select>
-                                        @error('course_id')
-                                            <span class="text-danger font-weight-bold">{{ $message }}</span>
-                                        @enderror
                                     </div>
-                                    @if (user(Auth::id()) == 1)
-                                        <input type="hidden" name="batch_type" class="batch_type" value="Local">
-                                    @elseif (user(Auth::id()) == 2)
-                                        <input type="hidden" name="batch_type" class="batch_type" value="Global">
-                                    @else
-                                        <div class="form-group">
-                                            <label>Select Course Type</label>
-                                            <select id="batch_type" name="batch_type" data-validation='required'
-                                                class="form-control select2 batch_type" style="width: 100%;">
-                                                <option label="Choose type" selected disabled>Select One</option>
-                                                <option value="Local">Local</option>
-                                                <option value="Global">Global</option>
-                                            </select>
-                                            @error('batch_type')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="start_date">Start Date <span class="text-danger">*</span></label>
+                                                <input class="form-control" id="start_date" name="start_date" type="date" value="{{ old('start_date') }}" required>
+                                            </div>
                                         </div>
-                                    @endif
-                                    <div class="form-group">
-                                        <label>Select Category</label>
-                                        <select name="title_id" id="title_id" data-validation='required'
-                                            class="form-control select2 title_id" style="width: 100%;">
-                                            <option label="Choose category" selected disabled>Select One</option>
-                                        </select>
-                                        @error('title_id')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="end_date">End Date <span class="text-danger">*</span></label>
+                                                <input class="form-control" id="end_date" name="end_date" type="date" value="{{ old('end_date') }}" required>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-primary btn-block align-top">
-                                            Save</button>
+                                    <small class="text-muted d-block mb-3">
+                                        <i class="fas fa-info-circle text-info"></i> ব্যাচের End Date পার হয়ে গেলে শিক্ষার্থীদের স্টুডেন্ট পোর্টাল অ্যাক্সেস স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।
+                                    </small>
+
+                                    <div class="form-group mb-0">
+                                        <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                                            <i class="fas fa-save mr-1"></i> Save Batch
+                                        </button>
                                     </div>
                                 </div>
-
                             </form>
                         </div>
                     </div>
-
                 @endif
             </div>
         </div>
     </div>
     @include('backend.theme.clasic.student.batch.DetailsModal')
-    {{-- @include('backend.theme.clasic.student.batch.batchAndCourseWiseStudent') --}}
+
     <!-- jQuery -->
     <script src="{{ safe_asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <script>
@@ -190,7 +237,6 @@
             $('.batchDetails').click(function() {
                 var batchId = $(this).data("id");
                 var course_id = $(this).data("course_id");
-                // sessionStorage.setItem("batch_id", batchId);
                 $('#courseName').empty();
                 $('#batchNong').empty();
                 $('#totalStuent').empty();
@@ -212,8 +258,7 @@
                         $('#courseName').append(':  ' + response.courseName);
                         $('#batchNong').append(':  ' + response.batchNong);
                         $('#totalStuent').append(':  ' + response.totalStudent);
-                        $('#totalAmount').append(':  ' + response.total_course_after_discount +
-                            ' tk');
+                        $('#totalAmount').append(':  ' + response.total_course_after_discount + ' tk');
                         $('#totalPaid').append(':  ' + response.totalPaid + ' tk');
                         $('#totalDue').append(':  ' + response.totalDue + ' tk');
                         $('#CourseId').attr('value', course_id);
@@ -248,18 +293,12 @@
                                 `<option value="${value.id}">${value.title}</option>`
                             );
                         });
-                    },
-                    error: function(error) {
-
                     }
+                });
+            });
 
-                })
-            })
-        })
-    </script>
-    <script>
-        $(document).ready(function() {
-            var incomeType = $('.batch_type').val();
+            // Initial load
+            var incomeType = $('.batch_type').val() || 'Local';
             $.ajax({
                 method: 'POST',
                 type: 'json',
@@ -280,12 +319,8 @@
                             `<option value="${value.id}">${value.title}</option>`
                         );
                     });
-                },
-                error: function(error) {
-
                 }
-
-            })
-        })
+            });
+        });
     </script>
 @endsection

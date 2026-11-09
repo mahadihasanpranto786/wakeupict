@@ -273,6 +273,13 @@ Route::get('/print-all-student', 'backend\theme\clasic\student\StudentController
 // Student Accounts Management (Unified registered students list)
 Route::get('/student-accounts', 'backend\theme\clasic\student\StudentAccountController@index')->name('admin.student-accounts.index');
 Route::post('/student-accounts/{id}/toggle-status', 'backend\theme\clasic\student\StudentAccountController@toggleStatus')->name('admin.student-accounts.toggle-status');
+
+// Registration Verification & Access Control Center
+Route::get('/registration-verifications', 'backend\theme\clasic\student\RegistrationVerificationController@index')->name('admin.registration.verifications');
+Route::post('/registrations/{id}/approve', 'backend\theme\clasic\student\RegistrationVerificationController@approveStudent')->name('admin.registrations.approve');
+Route::post('/registrations/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectStudent')->name('admin.registrations.reject');
+Route::post('/verification-requests/{id}/approve', 'backend\theme\clasic\student\RegistrationVerificationController@approveVerificationRequest')->name('admin.verification.request.approve');
+Route::post('/verification-requests/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectVerificationRequest')->name('admin.verification.request.reject');
 Route::delete('/student-accounts/{id}', 'backend\theme\clasic\student\StudentAccountController@destroy')->name('admin.student-accounts.destroy');
 Route::get('print-searched-student/{student_number}', 'backend\theme\clasic\student\StudentController@printSearchedStudent');
 Route::post('/course-and-batch-wise-student-print', 'backend\theme\clasic\student\StudentController@courseAndBatchWiseStudentPrint')->name('course-and-batch-wise-student-print');

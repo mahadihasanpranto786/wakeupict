@@ -14,7 +14,7 @@
                 <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}" class="w-20 h-20 rounded-2xl object-cover border-2 border-brand-primary shadow-glow-emerald">
                 <div>
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs font-mono font-bold uppercase mb-2">
-                        <span>ID: {{ $student->student_id_code }}</span>
+                        <span>Reg: {{ $student->registration_number ?: $student->student_id_code }}</span>
                         <span class="text-slate-600">·</span>
                         <span class="text-emerald-400 font-sans normal-case font-bold">One Student Account</span>
                     </div>

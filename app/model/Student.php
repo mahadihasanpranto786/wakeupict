@@ -8,6 +8,26 @@ class Student extends Model
 {
     protected $guarded = [];
 
+    public function verifiedBy()
+    {
+        return $this->belongsTo(\App\User::class, 'verified_by');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('registration_status', 'pending');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('registration_status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('registration_status', 'rejected');
+    }
+
     public function batch()
     {
         return $this->belongsTo('App\model\Batch', 'batch_id');
@@ -26,6 +46,11 @@ class Student extends Model
     public function studentAccount()
     {
         return $this->belongsTo('App\model\StudentAccount', 'personal_call_no', 'phone');
+    }
+
+    public function getStudentIdCodeAttribute()
+    {
+        return $this->registration_number;
     }
 
     /**

@@ -61,6 +61,16 @@
         color: #000000 !important;
         font-weight: 800 !important;
     }
+
+    /* Total Print & PDF Download Block */
+    @media print {
+        html, body {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+    }
 </style>
 
 <div class="max-w-6xl mx-auto space-y-5 exam-secure-zone" id="exam-container">
@@ -1521,6 +1531,16 @@
             e.preventDefault();
             triggerSecurityViolation('paste_attempt', 'অননুমোদিত পেস্ট করার চেষ্টা');
         }
+    });
+
+    // Print Prevention overrides
+    window.print = function() {
+        triggerSecurityViolation('print_attempt', 'প্রিন্ট ডায়ালগ খোলার চেষ্টা');
+        return false;
+    };
+    window.addEventListener('beforeprint', function(e) {
+        e.preventDefault();
+        triggerSecurityViolation('print_attempt', 'ব্রাউজার মেনু থেকে প্রিন্ট করার চেষ্টা');
     });
 
     document.addEventListener('selectstart', function(e) {

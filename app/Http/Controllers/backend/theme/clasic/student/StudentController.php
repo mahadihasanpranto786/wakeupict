@@ -58,53 +58,76 @@ class StudentController extends Controller
 
     function storeBatch(Request $request)
     {
-        
+        $batch_id = $request->batch_id;
+
         $request->validate([
             'batch_number' => 'required',
+            'batch_code' => 'required|string|max:20|unique:batches,batch_code,' . ($batch_id ?: 'NULL') . ',id',
+            'academic_year' => 'required|string|max:10',
             'course_id' => 'required',
-            'batch_type' => 'required',
-            'title_id' => 'required',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ], [
-            'batch_number.required' => 'Please Enter This Field!',
-            'course_id.required' => 'Please Enter This Field!',
-            'batch_type.required' => 'Please Enter This Field!',
-            'title_id.required' => 'Please Enter This Field!',
+            'batch_number.required' => 'Please enter batch number / name!',
+            'batch_code.required' => 'Please enter unique batch code!',
+            'batch_code.unique' => 'This batch code already exists. Please choose a unique code.',
+            'academic_year.required' => 'Please enter academic year (e.g. ' . date('Y') . ')!',
+            'course_id.required' => 'Please select course!',
+            'start_date.required' => 'Start date is mandatory.',
+            'end_date.required' => 'End date is mandatory.',
+            'end_date.after_or_equal' => 'End date must be on or after start date.',
         ]);
 
-        $batch_id = $request->batch_id;
-        if ($batch_id) {
+        $rawCode = trim($request->batch_code);
+        $cleanBatchCode = strlen($rawCode) === 1 ? str_pad($rawCode, 2, '0', STR_PAD_LEFT) : $rawCode;
+        $batchType = $request->batch_type ?: 'Local';
+        $titleId = $request->title_id ?: 1;
 
-            Batch::findOrFail($batch_id)->update([
+        if ($batch_id) {
+            $batch = Batch::findOrFail($batch_id);
+
+            // Prevent changing batch code once used in student registrations
+            if ($batch->isUsedInRegistration() && $cleanBatchCode !== $batch->batch_code) {
+                return back()->withInput()->withErrors([
+                    'batch_code' => 'Batch code cannot be changed once it has been used in student registrations.',
+                ]);
+            }
+
+            $batch->update([
                 'batch_number' => $request->batch_number,
+                'batch_code' => $cleanBatchCode,
+                'academic_year' => $request->academic_year,
                 'course_id' => $request->course_id,
-                'batch_type' => $request->batch_type,
-                'title_id' => $request->title_id,
-                'active_batch' => 1,
+                'batch_type' => $batchType,
+                'title_id' => $titleId,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'active_batch' => $request->has('active_batch') ? (int)$request->active_batch : $batch->active_batch,
                 'status' => 1,
                 'updated_at' => Carbon::now(),
             ]);
 
-
-            $notification = ([
+            return redirect()->route('batch-list')->with([
                 'success' => 'Batch Updated Successfully',
             ]);
-            return redirect()->route('batch-list')->with($notification);
         } else {
-            Batch::insert([
+            Batch::create([
                 'batch_number' => $request->batch_number,
+                'batch_code' => $cleanBatchCode,
+                'academic_year' => $request->academic_year,
                 'course_id' => $request->course_id,
-                'batch_type' => $request->batch_type,
-                'title_id' => $request->title_id,
+                'batch_type' => $batchType,
+                'title_id' => $titleId,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
                 'active_batch' => 1,
                 'status' => 1,
                 'created_at' => Carbon::now(),
             ]);
 
-
-            $notification = ([
+            return redirect()->route('batch-list')->with([
                 'success' => 'Batch Created Successfully',
             ]);
-            return redirect()->route('batch-list')->with($notification);
         }
     }
 
@@ -112,10 +135,20 @@ class StudentController extends Controller
 
     function deleteBatch($batch_id)
     {
+        $batch = Batch::findOrFail($batch_id);
 
-        Batch::findOrFail($batch_id)->update(['status'=> 0]);
+        // Prevent deletion of batches that already have registered students
+        if ($batch->hasStudents()) {
+            return redirect()->route('batch-list')->with([
+                'error' => 'Cannot delete batch "' . $batch->batch_number . '" because registered students are assigned to it. You can deactivate the batch instead.',
+            ]);
+        }
 
-        return redirect()->route('batch-list');
+        $batch->update(['status' => 0]);
+
+        return redirect()->route('batch-list')->with([
+            'success' => 'Batch Deleted Successfully',
+        ]);
     }
 
     //inactive batch

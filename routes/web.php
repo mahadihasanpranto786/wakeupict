@@ -719,10 +719,15 @@ Route::group(['prefix' => 'student', 'as' => 'student.'], function () {
     Route::post('/login', 'frontend\theme\clasic\StudentAuthController@login')->name('login.submit');
     Route::get('/register', 'frontend\theme\clasic\StudentAuthController@showRegisterForm')->name('register');
     Route::post('/register', 'frontend\theme\clasic\StudentAuthController@register')->name('register.submit');
+    Route::get('/registration-confirmation', 'frontend\theme\clasic\StudentAuthController@showRegistrationConfirmation')->name('registration.confirmation');
+    Route::get('/registration-verification', 'frontend\theme\clasic\StudentRegistrationVerificationController@showVerificationForm')->name('registration.verification');
+    Route::post('/registration-verification', 'frontend\theme\clasic\StudentRegistrationVerificationController@verify')->name('registration.verification.submit');
+    Route::post('/registration-verification/otp', 'frontend\theme\clasic\StudentRegistrationVerificationController@verifyOtp')->name('registration.verification.otp');
+    Route::get('/batches-for-course/{course_id}', 'frontend\theme\clasic\StudentAuthController@getBatchesForCourse')->name('batches.for.course');
     Route::post('/logout', 'frontend\theme\clasic\StudentAuthController@logout')->name('logout');
 
-    // Authenticated student routes
-    Route::group(['middleware' => ['auth:student']], function () {
+    // Authenticated student routes (Strict Admin Approval Enforced)
+    Route::group(['middleware' => ['auth:student', 'student.approved']], function () {
         Route::get('/dashboard', 'frontend\theme\clasic\StudentDashboardController@index')->name('dashboard');
 
         // Profile routes
