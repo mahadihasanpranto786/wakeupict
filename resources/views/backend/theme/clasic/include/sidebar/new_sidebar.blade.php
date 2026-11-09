@@ -778,12 +778,12 @@
                 <li class="nav-item has-treeview @yield('student_active')">
                     <a href="#" class="nav-link @yield('menu_active_active')">
                         <i class="nav-icon fas fa-user-graduate text-info"></i>
-                        <p>
+                        <p style="position: relative;">
                             Students
                             @if($pendingVerificationsCount > 0)
-                                <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 3.5rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                                <span class="badge badge-warning sidebar-pill font-weight-bold" style="background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2; white-space: nowrap !important; position: absolute; right: 3.2rem; top: 50%; transform: translateY(-50%) !important;">{{ $pendingVerificationsCount }}</span>
                             @endif
-                            <i class="right fas fa-angle-left"></i>
+                            <i style="top: 0.1rem;" class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview ml-1" style="background-color: transparent;">
@@ -802,10 +802,10 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.registration.verifications') }}" class="nav-link @yield('registration_verification_active')">
                                 <i class="fas fa-user-check nav-icon text-danger"></i>
-                                <p>
+                                <p style="position: relative;">
                                     Registration Verification
                                     @if($pendingVerificationsCount > 0)
-                                        <span class="badge badge-warning font-weight-bold" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%) !important; -webkit-transform: translateY(-50%) !important; background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2;">{{ $pendingVerificationsCount }}</span>
+                                        <span class="badge badge-warning sidebar-pill font-weight-bold" style="background-color: #f59e0b; color: #000000 !important; font-weight: 800; border-radius: 10px; padding: 2px 7px; font-size: 11px; line-height: 1.2; white-space: nowrap !important; position: absolute; right: 0px; top: 50%; transform: translateY(-50%) !important;">{{ $pendingVerificationsCount }}</span>
                                     @endif
                                 </p>
                             </a>

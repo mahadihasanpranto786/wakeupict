@@ -924,6 +924,19 @@ class StudentQuizController extends Controller
 
         $quiz = $attempt->quiz;
 
+        // Fallback for null or deleted quiz
+        if (!$quiz) {
+            $quiz = new \App\model\LmsQuiz([
+                'title'                 => 'Assessment #' . ($attempt->quiz_id ?: $attempt->id),
+                'quiz_type'              => 'practice',
+                'duration_minutes'       => 30,
+                'total_marks'            => $attempt->total_marks ?: 10,
+                'pass_marks'             => $attempt->pass_marks ?: 10,
+                'result_release_policy'  => 'immediate',
+            ]);
+            $quiz->id = $attempt->quiz_id ?: 0;
+        }
+
         // Check result release policy
         $now = Carbon::now();
         $resultsLocked = false;
@@ -933,8 +946,9 @@ class StudentQuizController extends Controller
             $resultsLocked = true;
             $resultsLockedMessage = 'পরীক্ষার ফলাফল পর্যালোচনার জন্য কর্তৃপক্ষের অনুমোদনের অপেক্ষায় রয়েছে। ফলাফল প্রকাশিত হলে সম্পূর্ণ উত্তরপত্র দেখতে পাবেন।';
         } elseif ($quiz->result_release_policy === 'after_deadline' && $quiz->end_time && $now->lessThan($quiz->end_time)) {
+            $endTimeFormatted = $quiz->end_time instanceof Carbon ? $quiz->end_time->format('d M, Y h:i A') : date('d M, Y h:i A', strtotime($quiz->end_time));
             $resultsLocked = true;
-            $resultsLockedMessage = 'পরীক্ষার নির্ধারিত সমাপ্তি সময় (' . $quiz->end_time->format('d M, Y h:i A') . ') এর পর সম্পূর্ণ ব্যাখ্যা ও ফলাফল দেখতে পাবেন।';
+            $resultsLockedMessage = 'পরীক্ষার নির্ধারিত সমাপ্তি সময় (' . $endTimeFormatted . ') এর পর সম্পূর্ণ ব্যাখ্যা ও ফলাফল দেখতে পাবেন।';
         }
 
         if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
@@ -971,10 +985,10 @@ class StudentQuizController extends Controller
             }
 
             if ($questions->isEmpty()) {
-                $questions = $quiz->getExamQuestions();
+                $questions = method_exists($quiz, 'getExamQuestions') ? $quiz->getExamQuestions() : collect();
             }
         } else {
-            $questions = $quiz->getExamQuestions();
+            $questions = method_exists($quiz, 'getExamQuestions') ? $quiz->getExamQuestions() : collect();
         }
 
         $answers = $attempt->answers->keyBy('question_id');
@@ -1158,17 +1172,18 @@ class StudentQuizController extends Controller
             ]);
         }
 
-        $nextNumber = LmsQuizAttempt::where('quiz_id', $quiz->id)
-            ->where('student_account_id', $student->id)
-            ->count() + 1;
+        $rootParentId = $previousAttempt->parent_attempt_id ?: $previousAttempt->id;
+        $retakesSoFar = LmsQuizAttempt::where('parent_attempt_id', $rootParentId)->count();
+        $nextNumber = $retakesSoFar + 2; // Original is 1, next is 2, 3...
 
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id'              => $quiz->id,
             'student_account_id'   => $student->id,
+            'parent_attempt_id'    => $rootParentId,
             'attempt_number'       => $nextNumber,
-            'started_at'           => Carbon::now(),
+            'started_at'           => Carbon::now('Asia/Dhaka'),
             'total_marks'          => $previousAttempt->total_marks ?: $quiz->total_marks,
-            'pass_marks'           => $previousAttempt->pass_marks ?: $quiz->pass_marks,
+            'pass_marks'           => $previousAttempt->total_marks ?: ($previousAttempt->pass_marks ?: $quiz->total_marks),
             'status'               => 'in_progress',
             'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
             'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',
@@ -1181,24 +1196,72 @@ class StudentQuizController extends Controller
         ]);
     }
 
-    public function allResults()
+    public function allResults(Request $request)
     {
         $student = Auth::guard('student')->user();
-        $attempts = LmsQuizAttempt::where('student_account_id', $student->id)
+        
+        // Load root attempts (attempts without a parent) with all nested retakes
+        $query = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->whereNull('parent_attempt_id')
             ->whereIn('status', ['submitted', 'graded', 'timed_out'])
-            ->with(['quiz.course'])
-            ->orderBy('submitted_at', 'desc')
-            ->paginate(12);
+            ->with(['quiz.course', 'retakes' => function($q) {
+                $q->whereIn('status', ['submitted', 'graded', 'timed_out'])->orderBy('id', 'asc');
+            }])
+            ->orderBy('id', 'desc');
 
-        return view('frontend.theme.clasic.student.quiz.history', compact('student', 'attempts'));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($subQ) use ($search) {
+                $subQ->whereHas('quiz', function($quizQ) use ($search) {
+                    $quizQ->where('title', 'like', "%{$search}%")
+                          ->orWhere('class_level', 'like', "%{$search}%")
+                          ->orWhereHas('course', function($cQ) use ($search) {
+                              $cQ->where('course_title', 'like', "%{$search}%");
+                          });
+                })->orWhere('id', 'like', "%{$search}%")
+                  ->orWhere('question_set', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'passed') {
+                $query->where(function($q) {
+                    $q->where('percentage', '>=', 100)
+                      ->orWhereHas('retakes', function($rq) {
+                          $rq->where('percentage', '>=', 100);
+                      });
+                });
+            } elseif ($request->status === 'failed') {
+                $query->where(function($q) {
+                    $q->where('percentage', '<', 100)
+                      ->whereDoesntHave('retakes', function($rq) {
+                          $rq->where('percentage', '>=', 100);
+                      });
+                });
+            }
+        }
+
+        $attempts = $query->paginate(10)->appends($request->all());
+
+        // Global stats for KPI cards across all attempts
+        $allAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
+            ->whereIn('status', ['submitted', 'graded', 'timed_out'])
+            ->get();
+
+        $totalAttemptsCount = $allAttempts->count();
+        $passedAttemptsCount = $allAttempts->filter(function($a) { return $a->isPassed(); })->count();
+        $avgPctVal = (int) round($allAttempts->avg('percentage') ?: 0);
+        $maxScoreVal = $allAttempts->max('score') ?: 0;
+
+        return view('frontend.theme.clasic.student.quiz.history', compact('student', 'attempts', 'totalAttemptsCount', 'passedAttemptsCount', 'avgPctVal', 'maxScoreVal'));
     }
 
     /**
      * Exam History Archive
      */
-    public function examHistory()
+    public function examHistory(Request $request)
     {
-        return $this->allResults();
+        return $this->allResults($request);
     }
 
     /**
@@ -1237,6 +1300,23 @@ class StudentQuizController extends Controller
 
         $totalMarksObtained = 0.0;
         $totalNegativeDeducted = 0.0;
+
+        // Determine whether negative marking is active for this assessment
+        $isNegActive = false;
+        $defaultNegValue = 0.0;
+        if ($quiz && $quiz->quiz_type === 'practice') {
+            $pSettings = \App\Services\PracticeQuestionRotationService::getSettings();
+            if (!empty($pSettings['negative_marking_enabled'])) {
+                $isNegActive = true;
+                $defaultNegValue = (float)($pSettings['negative_mark_value'] ?? 0.25);
+            }
+        } else {
+            // Formal Exam / Assessment: active ONLY if quiz explicitly has negative_marks > 0
+            if ($quiz && (float)$quiz->negative_marks > 0) {
+                $isNegActive = true;
+                $defaultNegValue = (float)$quiz->negative_marks;
+            }
+        }
 
         foreach ($questions as $question) {
             $answer = LmsQuizAnswer::where('attempt_id', $attempt->id)
@@ -1286,11 +1366,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = ($quiz && $quiz->quiz_type === 'practice')
-                        ? 0.0
-                        : ($question->negative_marks !== null
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
                             ? abs((float)$question->negative_marks)
-                            : abs((float)($quiz ? ($quiz->negative_marks ?: 0.0) : 0.0)));
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -1322,7 +1403,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
+                            ? abs((float)$question->negative_marks)
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -1363,7 +1449,12 @@ class StudentQuizController extends Controller
                     $marks = (float)$question->marks;
                     $totalMarksObtained += $marks;
                 } else {
-                    $negMark = $question->negative_marks !== null ? abs((float)$question->negative_marks) : 0.0;
+                    $negMark = 0.0;
+                    if ($isNegActive) {
+                        $negMark = ($question->negative_marks !== null && (float)$question->negative_marks > 0)
+                            ? abs((float)$question->negative_marks)
+                            : abs((float)$defaultNegValue);
+                    }
                     $marks = -$negMark;
                     $totalNegativeDeducted += $negMark;
                     $totalMarksObtained += $marks;
@@ -1402,7 +1493,7 @@ class StudentQuizController extends Controller
             ? round(($finalScore / $attemptTotalMarks) * 100, 2) 
             : 0;
         $attempt->status = 'graded';
-        $attempt->submitted_at = Carbon::now();
+        $attempt->submitted_at = Carbon::now('Asia/Dhaka');
 
         if ($attempt->time_spent_seconds <= 0 && $attempt->started_at) {
             $attempt->time_spent_seconds = min(

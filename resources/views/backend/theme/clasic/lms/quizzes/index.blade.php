@@ -572,7 +572,24 @@
                             </div>
                         </div>
 
-                        <!-- 7. Mark per Question -->
+                        <!-- 7. Negative Marking Active/Inactive Toggle -->
+                        <div class="col-md-6 mb-3">
+                            <div class="p-2.5 rounded border bg-white" style="border-color: #cbd5e1 !important;">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="negative_marking_enabled" name="negative_marking_enabled" value="1" {{ !empty($practiceSettings['negative_marking_enabled']) ? 'checked' : '' }} onchange="document.getElementById('negative_mark_val_box').style.display = this.checked ? 'block' : 'none';">
+                                    <label class="custom-control-label font-weight-bold text-dark text-sm" for="negative_marking_enabled">
+                                        নেগেটিভ মার্কিং সক্রিয় করুন (Negative Marking)
+                                    </label>
+                                    <small class="text-muted d-block" style="font-size: 11px;">সক্রিয় না থাকলে ভুল উত্তরে কোনো নম্বর কাটা যাবে না (০.০০)।</small>
+                                </div>
+                                <div id="negative_mark_val_box" class="mt-2" style="{{ !empty($practiceSettings['negative_marking_enabled']) ? '' : 'display: none;' }}">
+                                    <label class="font-weight-bold text-xs text-muted mb-1">ভুল উত্তরে কর্তনকৃত মার্ক (ডিফল্ট: ০.২৫)</label>
+                                    <input type="text" inputmode="decimal" name="negative_mark_value" class="form-control form-control-sm font-weight-bold eng-number-float" value="{{ (float)($practiceSettings['negative_mark_value'] ?? 0.25) }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. Mark per Question -->
                         <div class="col-md-6 mb-3">
                             <label class="font-weight-bold text-dark text-sm">
                                  প্রতি প্রশ্নে মার্ক (Marks per Question) <span class="text-danger">*</span>

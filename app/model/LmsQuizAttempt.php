@@ -11,6 +11,7 @@ class LmsQuizAttempt extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'parent_attempt_id' => 'integer',
         'attempt_number' => 'integer',
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
@@ -34,6 +35,16 @@ class LmsQuizAttempt extends Model
     public function student()
     {
         return $this->belongsTo(StudentAccount::class, 'student_account_id');
+    }
+
+    public function parentAttempt()
+    {
+        return $this->belongsTo(LmsQuizAttempt::class, 'parent_attempt_id');
+    }
+
+    public function retakes()
+    {
+        return $this->hasMany(LmsQuizAttempt::class, 'parent_attempt_id')->orderBy('id', 'asc');
     }
 
     public function answers()

@@ -72,4 +72,15 @@ class Course extends Model
     {
         return $this->hasStudents();
     }
+
+    /**
+     * Ensure course_code is never null or empty
+     */
+    public function getCourseCodeAttribute($value)
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+        return str_pad((string)$this->id, 2, '0', STR_PAD_LEFT);
+    }
 }

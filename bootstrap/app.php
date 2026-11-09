@@ -1,5 +1,8 @@
 <?php
 
+// Force Bangladesh Timezone (Asia/Dhaka, UTC+6) globally
+date_default_timezone_set('Asia/Dhaka');
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application

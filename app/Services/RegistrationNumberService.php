@@ -16,7 +16,7 @@ class RegistrationNumberService
      * - YYYY = Academic Year (4 digits)
      * - BB   = Batch Code (2 digits)
      * - CC   = Course Code (2 digits)
-     * - NNNN = 4-digit Sequential number for this (Year + Batch + Course)
+     * - NNNN = 4-digit Sequential number globally unique across ALL students
      *
      * @param string|int $academicYear
      * @param string|int $batchCode
@@ -40,48 +40,56 @@ class RegistrationNumberService
         $courseFormatted = !empty($cleanCourseCode) ? (strlen($cleanCourseCode) < 2 ? str_pad($cleanCourseCode, 2, '0', STR_PAD_LEFT) : $cleanCourseCode) : '01';
 
         return DB::transaction(function () use ($year, $batchFormatted, $courseFormatted) {
-            // 1. Ensure sequence record exists (concurrency-safe)
+            // Global sequence tracker for this academic year across all batches and courses
+            $globalKeyBatch = 'GLOBAL';
+            $globalKeyCourse = 'ALL';
+
             $existing = DB::table('registration_sequences')
                 ->where('academic_year', $year)
-                ->where('batch_code', $batchFormatted)
-                ->where('course_code', $courseFormatted)
+                ->where('batch_code', $globalKeyBatch)
+                ->where('course_code', $globalKeyCourse)
                 ->first();
 
             if (!$existing) {
+                // Determine base starting serial from total existing students
+                $totalExisting = DB::table('student_accounts')->count() + DB::table('students')->count();
                 try {
                     DB::table('registration_sequences')->insert([
                         'academic_year' => $year,
-                        'batch_code' => $batchFormatted,
-                        'course_code' => $courseFormatted,
-                        'last_serial' => 0,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'batch_code'    => $globalKeyBatch,
+                        'course_code'   => $globalKeyCourse,
+                        'last_serial'   => $totalExisting,
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
                     ]);
                 } catch (\Exception $e) {
-                    // In case another simultaneous worker inserted it
+                    // Handled if concurrent insert
                 }
             }
 
-            // 2. Lock sequence row for exclusive update
+            // Lock global sequence row
             $sequence = DB::table('registration_sequences')
                 ->where('academic_year', $year)
-                ->where('batch_code', $batchFormatted)
-                ->where('course_code', $courseFormatted)
+                ->where('batch_code', $globalKeyBatch)
+                ->where('course_code', $globalKeyCourse)
                 ->lockForUpdate()
                 ->first();
 
             $nextSerial = ($sequence ? (int)$sequence->last_serial : 0) + 1;
 
-            // 3. Collision-safe verification against existing records in student_accounts & students
+            // Ensure uniqueness across the entire system: no two students share the same sequential suffix or registration number
             do {
-                $registrationNumber = sprintf('%s%s%s%04d', $year, $batchFormatted, $courseFormatted, $nextSerial);
+                $suffix = sprintf('%04d', $nextSerial);
+                $registrationNumber = sprintf('%s%s%s%s', $year, $batchFormatted, $courseFormatted, $suffix);
 
                 $takenInAccounts = DB::table('student_accounts')
                     ->where('registration_number', $registrationNumber)
+                    ->orWhere('registration_number', 'LIKE', '%' . $suffix)
                     ->exists();
 
                 $takenInStudents = DB::table('students')
                     ->where('registration_number', $registrationNumber)
+                    ->orWhere('registration_number', 'LIKE', '%' . $suffix)
                     ->exists();
 
                 if (!$takenInAccounts && !$takenInStudents) {
@@ -91,18 +99,17 @@ class RegistrationNumberService
                 $nextSerial++;
             } while (true);
 
-            // 4. Update sequence counter atomically
+            // Update atomic sequence counter
             DB::table('registration_sequences')
                 ->where('academic_year', $year)
-                ->where('batch_code', $batchFormatted)
-                ->where('course_code', $courseFormatted)
+                ->where('batch_code', $globalKeyBatch)
+                ->where('course_code', $globalKeyCourse)
                 ->update([
                     'last_serial' => $nextSerial,
-                    'updated_at' => now(),
+                    'updated_at'  => now(),
                 ]);
 
             return $registrationNumber;
         });
     }
 }
-

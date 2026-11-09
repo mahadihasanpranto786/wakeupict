@@ -1,6 +1,6 @@
 @extends('frontend.theme.clasic.student.layouts.student_layout')
 
-@section('title', 'পরীক্ষার ফলাফল ও মূল্যায়ন বিবরণী: ' . $quiz->title . ' — Wake Up ICT')
+@section('title', 'পরীক্ষার ফলাফল ও মূল্যায়ন বিবরণী: ' . ($quiz ? $quiz->title : 'Assessment') . ' — Wake Up ICT')
 @section('page_title', 'পরীক্ষার ফলাফল বিবরণী')
 @section('page_crumb', 'ফলাফল ও ওএমআর মূল্যায়ন')
 
@@ -48,9 +48,9 @@
         $gradeBg = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
     }
 
-    $assignedSet = $attempt->question_set ?: ($quiz->question_set ?: 'Set A');
+    $assignedSet = $attempt->question_set ?: (($quiz && $quiz->question_set) ? $quiz->question_set : 'Set A');
     $bngSet = \App\model\LmsQuiz::getBengaliSetCode($assignedSet);
-    $subjectCode = $quiz->subject_code ?: '101';
+    $subjectCode = ($quiz && $quiz->subject_code) ? $quiz->subject_code : '101';
     $codeDigits = str_split((string)$subjectCode);
 @endphp
 
@@ -71,7 +71,7 @@
             </a>
 
             <!-- Retake This Exam with exact submitted questions -->
-            @if($quiz->canAttempt($student->id))
+            @if($quiz && method_exists($quiz, 'canAttempt') && $quiz->canAttempt($student->id))
                 <form id="form-retake-exam" action="{{ route('student.quiz.retake', $attempt->id) }}" method="POST" class="inline-block">
                     @csrf
                     <button type="button" onclick="confirmRetakeExam()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer" title="এই সেটের প্রশ্নগুলো নিয়ে পুনরায় পরীক্ষা দিন">
@@ -81,7 +81,7 @@
                 </form>
             @endif
 
-            @if(!empty($practiceProgress) || $quiz->quiz_type === 'practice')
+            @if(!empty($practiceProgress) || ($quiz && $quiz->quiz_type === 'practice'))
                 <form id="form-fresh-practice-1" action="{{ route('student.practice.start') }}" method="POST" class="inline-block">
                     @csrf
                     <input type="hidden" name="question_count" value="{{ min(20, $totalQ > 0 ? $totalQ : 20) }}">
@@ -204,8 +204,8 @@
                     <strong class="font-mono text-slate-950 dark:text-white font-bold">{{ $student->student_id_code }}</strong>
                 </div>
                 <div>
-                    <span class="text-slate-500 dark:text-slate-400 text-[11px] block">পরীক্ষার তারিখ :</span>
-                    <strong class="font-mono">{{ $attempt->submitted_at ? $attempt->submitted_at->format('d M, Y h:i A') : $attempt->updated_at->format('d M, Y') }}</strong>
+                    <span class="text-slate-500 dark:text-slate-400 text-[11px] block">পরীক্ষার তারিখ (BD Time) :</span>
+                    <strong class="font-mono">{{ $attempt->submitted_at ? $attempt->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $attempt->updated_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</strong>
                 </div>
                 <div>
                     <span class="text-slate-500 dark:text-slate-400 text-[11px] block">ব্যয়িত সময় :</span>

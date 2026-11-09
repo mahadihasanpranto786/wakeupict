@@ -53,20 +53,20 @@
     <style>
         html {
             font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow-x: hidden;
+            overflow-x: clip;
             max-width: 100vw;
         }
 
         body {
             background-color: #f8fafc;
             color: #0f172a;
-            overflow-x: hidden;
+            overflow-x: clip;
             max-width: 100vw;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         html, body {
-            overflow-x: hidden !important;
+            overflow-x: clip !important;
             max-width: 100vw;
         }
 
@@ -878,7 +878,7 @@
         <!-- =========================================================================
              2. MAIN WRAPPER & TOP HEADER
              ========================================================================= -->
-        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative overflow-x-hidden w-full max-w-full">
+        <div class="flex-1 lg:pl-72 flex flex-col min-w-0 relative overflow-x-clip w-full max-w-full">
             
             <!-- Global Full-Wrapper Ambient Glows (Contained within overflow-hidden to prevent horizontal scrollbar) -->
             <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
@@ -971,7 +971,7 @@
             <!-- =========================================================================
                  3. MAIN CONTENT INJECTION
                  ========================================================================= -->
-            <main class="flex-1 p-4 sm:p-8 min-w-0 overflow-x-hidden w-full max-w-full">
+            <main class="flex-1 p-4 sm:p-8 min-w-0 overflow-x-clip w-full max-w-full">
                 @yield('content')
             </main>
 

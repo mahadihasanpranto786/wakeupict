@@ -71,7 +71,8 @@ class Batch extends Model
      */
     public function getDisplayNameAttribute()
     {
-        $code = $this->batch_code ?: $this->batch_number;
+        $raw = $this->batch_code ?: $this->batch_number;
+        $code = preg_replace('/^(batch[-_\s]*code[-_\s]*|batch[-_\s]*)/i', '', (string)$raw);
         $year = $this->academic_year ?: date('Y');
         return "Batch-Code-{$code} [{$year}]";
     }
