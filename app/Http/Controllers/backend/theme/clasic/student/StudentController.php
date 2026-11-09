@@ -61,14 +61,13 @@ class StudentController extends Controller
         $batch_id = $request->batch_id;
 
         $request->validate([
-            'batch_number' => 'required',
+            'batch_number' => 'nullable',
             'batch_code' => 'required|string|max:20|unique:batches,batch_code,' . ($batch_id ?: 'NULL') . ',id',
             'academic_year' => 'required|string|max:10',
             'course_id' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ], [
-            'batch_number.required' => 'Please enter batch number / name!',
             'batch_code.required' => 'Please enter unique batch code!',
             'batch_code.unique' => 'This batch code already exists. Please choose a unique code.',
             'academic_year.required' => 'Please enter academic year (e.g. ' . date('Y') . ')!',
@@ -93,8 +92,10 @@ class StudentController extends Controller
                 ]);
             }
 
+            $batchNumber = $request->filled('batch_number') ? $request->batch_number : ($batch->batch_number ?: ('Batch-' . $cleanBatchCode));
+
             $batch->update([
-                'batch_number' => $request->batch_number,
+                'batch_number' => $batchNumber,
                 'batch_code' => $cleanBatchCode,
                 'academic_year' => $request->academic_year,
                 'course_id' => $request->course_id,
@@ -111,8 +112,10 @@ class StudentController extends Controller
                 'success' => 'Batch Updated Successfully',
             ]);
         } else {
+            $batchNumber = $request->filled('batch_number') ? $request->batch_number : ('Batch-' . $cleanBatchCode);
+
             Batch::create([
-                'batch_number' => $request->batch_number,
+                'batch_number' => $batchNumber,
                 'batch_code' => $cleanBatchCode,
                 'academic_year' => $request->academic_year,
                 'course_id' => $request->course_id,
