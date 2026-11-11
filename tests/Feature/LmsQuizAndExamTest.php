@@ -682,8 +682,199 @@ class LmsQuizAndExamTest extends TestCase
 
         $this->assertNotNull($newAttempt);
         $this->assertEquals('in_progress', $newAttempt->status);
-        $this->assertEquals($snapshot, $newAttempt->questions_snapshot);
+
+        // Exact same set of questions and options must be reused, but re-shuffled
+        $newSnapshot = $newAttempt->questions_snapshot;
+        $this->assertCount(count($snapshot), $newSnapshot);
+
+        $origQIds = array_column($snapshot, 'id');
+        $newQIds = array_column($newSnapshot, 'id');
+        $this->assertNotEquals($origQIds, $newQIds);
+        sort($origQIds);
+        sort($newQIds);
+        $this->assertEquals($origQIds, $newQIds);
+
+        $origOptsByQ = collect($snapshot)->keyBy('id');
+        foreach ($newSnapshot as $qItem) {
+            $origQ = $origOptsByQ->get($qItem['id']);
+            $origOptIds = array_column($origQ['options'], 'id');
+            $newOptIds = array_column($qItem['options'], 'id');
+            $this->assertNotEquals($origOptIds, $newOptIds);
+            sort($origOptIds);
+            sort($newOptIds);
+            $this->assertEquals($origOptIds, $newOptIds);
+            $this->assertEquals([0, 1], array_column($qItem['options'], 'order'));
+        }
+
         $response->assertRedirect(route('student.quiz.take', $newAttempt->id));
+    }
+
+    /**
+     * Test Retake Re-shuffles Question Serial and Correct Answer Option Position Every Time
+     */
+    public function testRetakeAlwaysReshufflesQuestionSerialAndOptionAnswerPositionsEverytime()
+    {
+        $extraOptQ1A = LmsQuestionOption::create([
+            'question_id' => $this->q1->id,
+            'option_text' => 'Kilobyte',
+            'is_correct'  => false,
+            'order_index' => 3,
+        ]);
+        $extraOptQ1B = LmsQuestionOption::create([
+            'question_id' => $this->q1->id,
+            'option_text' => 'Megabyte',
+            'is_correct'  => false,
+            'order_index' => 4,
+        ]);
+
+        $extraOptQ2A = LmsQuestionOption::create([
+            'question_id' => $this->q2->id,
+            'option_text' => 'Random Access',
+            'is_correct'  => false,
+            'order_index' => 2,
+        ]);
+        $extraOptQ2B = LmsQuestionOption::create([
+            'question_id' => $this->q2->id,
+            'option_text' => 'Optical Drive',
+            'is_correct'  => false,
+            'order_index' => 3,
+        ]);
+        $extraOptQ2C = LmsQuestionOption::create([
+            'question_id' => $this->q2->id,
+            'option_text' => 'Cache Memory',
+            'is_correct'  => false,
+            'order_index' => 4,
+        ]);
+
+        $q3 = LmsQuestion::create([
+            'quiz_id'       => $this->quiz->id,
+            'question_text' => 'Which protocol transfers web pages?',
+            'question_type' => 'mcq_single',
+            'marks'         => 10.00,
+            'order_index'   => 3,
+            'is_active'     => true,
+        ]);
+        $q3Correct = LmsQuestionOption::create(['question_id' => $q3->id, 'option_text' => 'HTTP', 'is_correct' => true, 'order_index' => 1]);
+        $q3W1 = LmsQuestionOption::create(['question_id' => $q3->id, 'option_text' => 'FTP', 'is_correct' => false, 'order_index' => 2]);
+        $q3W2 = LmsQuestionOption::create(['question_id' => $q3->id, 'option_text' => 'SMTP', 'is_correct' => false, 'order_index' => 3]);
+        $q3W3 = LmsQuestionOption::create(['question_id' => $q3->id, 'option_text' => 'SSH', 'is_correct' => false, 'order_index' => 4]);
+
+        $initialSnapshot = [
+            [
+                'id' => $this->q1->id,
+                'question_text' => $this->q1->question_text,
+                'question_type' => 'mcq_single',
+                'marks' => 10.0,
+                'options' => [
+                    ['id' => $this->q1CorrectOpt->id, 'text' => $this->q1CorrectOpt->option_text, 'order' => 0],
+                    ['id' => $this->q1WrongOpt->id, 'text' => $this->q1WrongOpt->option_text, 'order' => 1],
+                    ['id' => $extraOptQ1A->id, 'text' => $extraOptQ1A->option_text, 'order' => 2],
+                    ['id' => $extraOptQ1B->id, 'text' => $extraOptQ1B->option_text, 'order' => 3],
+                ],
+            ],
+            [
+                'id' => $this->q2->id,
+                'question_text' => $this->q2->question_text,
+                'question_type' => 'mcq_single',
+                'marks' => 10.0,
+                'options' => [
+                    ['id' => $this->q2CorrectOpt->id, 'text' => $this->q2CorrectOpt->option_text, 'order' => 0],
+                    ['id' => $extraOptQ2A->id, 'text' => $extraOptQ2A->option_text, 'order' => 1],
+                    ['id' => $extraOptQ2B->id, 'text' => $extraOptQ2B->option_text, 'order' => 2],
+                    ['id' => $extraOptQ2C->id, 'text' => $extraOptQ2C->option_text, 'order' => 3],
+                ],
+            ],
+            [
+                'id' => $q3->id,
+                'question_text' => $q3->question_text,
+                'question_type' => 'mcq_single',
+                'marks' => 10.0,
+                'options' => [
+                    ['id' => $q3Correct->id, 'text' => $q3Correct->option_text, 'order' => 0],
+                    ['id' => $q3W1->id, 'text' => $q3W1->option_text, 'order' => 1],
+                    ['id' => $q3W2->id, 'text' => $q3W2->option_text, 'order' => 2],
+                    ['id' => $q3W3->id, 'text' => $q3W3->option_text, 'order' => 3],
+                ],
+            ],
+        ];
+
+        $correctByQuestion = [
+            $this->q1->id => $this->q1CorrectOpt->id,
+            $this->q2->id => $this->q2CorrectOpt->id,
+            $q3->id       => $q3Correct->id,
+        ];
+
+        $previousAttempt = LmsQuizAttempt::create([
+            'quiz_id'            => $this->quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 1,
+            'started_at'         => \Carbon\Carbon::now()->subMinutes(10),
+            'total_marks'        => 30.0,
+            'pass_marks'         => 10.0,
+            'status'             => 'graded',
+            'view_mode'          => 'all_questions',
+            'question_set'       => 'Set A',
+            'questions_snapshot' => $initialSnapshot,
+        ]);
+
+        // Perform 3 consecutive retakes and verify every retake reshuffles both question serial & option answer positions
+        for ($retakeRun = 1; $retakeRun <= 3; $retakeRun++) {
+            $res = $this->actingAs($this->student, 'student')
+                ->post(route('student.quiz.retake', $previousAttempt->id));
+
+            $retakeAttempt = LmsQuizAttempt::where('quiz_id', $this->quiz->id)
+                ->where('student_account_id', $this->student->id)
+                ->latest('id')
+                ->first();
+
+            $this->assertNotNull($retakeAttempt);
+            $this->assertNotEquals($previousAttempt->id, $retakeAttempt->id);
+            $res->assertRedirect(route('student.quiz.take', $retakeAttempt->id));
+
+            $prevSnap = $previousAttempt->questions_snapshot;
+            $curSnap = $retakeAttempt->questions_snapshot;
+
+            // 1. Same questions, different serial order
+            $prevQOrder = array_column($prevSnap, 'id');
+            $curQOrder = array_column($curSnap, 'id');
+            $this->assertNotEquals($prevQOrder, $curQOrder, "Retake #{$retakeRun} must reshuffle question serial order");
+
+            $sortedPrevQ = $prevQOrder;
+            $sortedCurQ = $curQOrder;
+            sort($sortedPrevQ);
+            sort($sortedCurQ);
+            $this->assertEquals($sortedPrevQ, $sortedCurQ);
+
+            // 2. For every question, options order and correct option index must shift
+            $prevSnapMap = collect($prevSnap)->keyBy('id');
+            foreach ($curSnap as $qItem) {
+                $qId = $qItem['id'];
+                $prevQItem = $prevSnapMap->get($qId);
+                $prevOptIds = array_column($prevQItem['options'], 'id');
+                $curOptIds = array_column($qItem['options'], 'id');
+
+                $this->assertNotEquals($prevOptIds, $curOptIds, "Retake #{$retakeRun} Q#{$qId} must reshuffle option order");
+                $this->assertEquals([0, 1, 2, 3], array_column($qItem['options'], 'order'));
+
+                $correctId = $correctByQuestion[$qId];
+                $prevCorrectPos = array_search($correctId, $prevOptIds, true);
+                $curCorrectPos = array_search($correctId, $curOptIds, true);
+                $this->assertNotEquals($prevCorrectPos, $curCorrectPos, "Retake #{$retakeRun} Q#{$qId} correct option letter/position must shift");
+            }
+
+            // 3. Submit retake with correct option IDs and verify grading works regardless of shuffled order
+            $submitRes = $this->actingAs($this->student, 'student')
+                ->post(route('student.quiz.submit', $retakeAttempt->id), [
+                    'answers' => $correctByQuestion,
+                ]);
+            $submitRes->assertRedirect(route('student.quiz.results', $retakeAttempt->id));
+
+            $retakeAttempt->refresh();
+            $this->assertEquals('graded', $retakeAttempt->status);
+            $this->assertEquals(30.0, (float)$retakeAttempt->score);
+
+            $previousAttempt = $retakeAttempt;
+        }
     }
 
     /**
