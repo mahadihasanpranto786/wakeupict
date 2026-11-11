@@ -261,7 +261,7 @@ class StudentQuizController extends Controller
             if ($h) {
                 $seenSnapshotHashes[$h] = true;
             }
-            $opts = $q->options;
+            $opts = $q->options->shuffle()->values();
             $optsArray = [];
             $optIdx = 0;
             foreach ($opts as $o) {
@@ -565,6 +565,22 @@ class StudentQuizController extends Controller
                     'options'         => $optsArray,
                 ];
             }
+        }
+
+        if ($attemptNumber > 1 && ($quiz->shuffle_questions || $quiz->shuffle_options)) {
+            $lastAttempt = LmsQuizAttempt::where('quiz_id', $quiz->id)
+                ->where('student_account_id', $student->id)
+                ->orderBy('id', 'desc')
+                ->first();
+            $prevSnapshot = ($lastAttempt && is_array($lastAttempt->questions_snapshot))
+                ? $lastAttempt->questions_snapshot
+                : [];
+            $snapshot = $this->shuffleSnapshotItems(
+                $snapshot,
+                $prevSnapshot,
+                (bool)$quiz->shuffle_questions,
+                (bool)$quiz->shuffle_options
+            );
         }
 
         $viewMode = $request->input('view_mode', $quiz->view_mode ?: 'all_questions');
@@ -1176,6 +1192,22 @@ class StudentQuizController extends Controller
         $retakesSoFar = LmsQuizAttempt::where('parent_attempt_id', $rootParentId)->count();
         $nextNumber = $retakesSoFar + 2; // Original is 1, next is 2, 3...
 
+        // Compare against the latest attempt in this retake chain so every retake re-shuffles
+        // both question serial order and option answer positions distinctly.
+        $latestInChain = LmsQuizAttempt::where(function ($q) use ($rootParentId) {
+                $q->where('id', $rootParentId)
+                  ->orWhere('parent_attempt_id', $rootParentId);
+            })
+            ->where('student_account_id', $student->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $referenceSnapshot = ($latestInChain && is_array($latestInChain->questions_snapshot) && !empty($latestInChain->questions_snapshot))
+            ? $latestInChain->questions_snapshot
+            : (is_array($previousAttempt->questions_snapshot) ? $previousAttempt->questions_snapshot : []);
+
+        $snapshot = $this->shuffleSnapshotItems($snapshot, $referenceSnapshot, true, true);
+
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id'              => $quiz->id,
             'student_account_id'   => $student->id,
@@ -1187,13 +1219,173 @@ class StudentQuizController extends Controller
             'status'               => 'in_progress',
             'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
             'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',
-            'questions_snapshot'   => $snapshot, // REUSE THE EXACT SUBMITTED QUESTIONS!
+            'questions_snapshot'   => $snapshot,
             'flagged_question_ids' => [],
         ]);
 
         return redirect()->route('student.quiz.take', $newAttempt->id)->with([
-            'success' => 'পুনরায় পরীক্ষা শুরু হয়েছে! পূর্ববর্তী সেটের প্রশ্নগুলোর সঠিক উত্তর দিয়ে নিজেকে যাচাই করুন।',
+            'success' => 'পুনরায় পরীক্ষা শুরু হয়েছে! পূর্ববর্তী সেটের প্রশ্নগুলো নতুন ক্রম ও অপশন বিন্যাসে সাজানো হয়েছে।',
         ]);
+    }
+
+    /**
+     * Re-shuffle question serial order and each question's option order for retakes,
+     * ensuring every retake gets a randomized sequence distinct from the previous attempt.
+     */
+    protected function shuffleSnapshotItems(
+        array $snapshot,
+        array $previousSnapshot = [],
+        bool $shuffleQuestions = true,
+        bool $shuffleOptions = true
+    ): array {
+        $items = array_values($snapshot);
+        if (empty($items)) {
+            return [];
+        }
+
+        $prevQuestionIds = array_column($previousSnapshot, 'id');
+        if (empty($prevQuestionIds)) {
+            $prevQuestionIds = array_column($items, 'id');
+        }
+
+        if ($shuffleQuestions && count($items) > 1 && count(array_unique(array_column($items, 'id'))) > 1) {
+            for ($try = 0; $try < 10; $try++) {
+                shuffle($items);
+                if (array_column($items, 'id') !== $prevQuestionIds) {
+                    break;
+                }
+            }
+            if (array_column($items, 'id') === $prevQuestionIds) {
+                $firstId = $items[0]['id'] ?? null;
+                $swapCandidates = [];
+                for ($i = 1; $i < count($items); $i++) {
+                    if (($items[$i]['id'] ?? null) !== $firstId) {
+                        $swapCandidates[] = $i;
+                    }
+                }
+                if (!empty($swapCandidates)) {
+                    $swapIdx = $swapCandidates[array_rand($swapCandidates)];
+                    $tmp = $items[0];
+                    $items[0] = $items[$swapIdx];
+                    $items[$swapIdx] = $tmp;
+                }
+            }
+        }
+
+        if (!$shuffleOptions) {
+            return array_values($items);
+        }
+
+        // Load correct option IDs so answer positions also shift to a different option letter when possible
+        $questionIds = array_values(array_filter(array_column($items, 'id')));
+        $correctOptionsByQuestion = [];
+        if (!empty($questionIds)) {
+            $correctRows = LmsQuestionOption::whereIn('question_id', $questionIds)
+                ->where('is_correct', true)
+                ->get(['question_id', 'id']);
+            foreach ($correctRows as $row) {
+                $correctOptionsByQuestion[(int)$row->question_id][] = (int)$row->id;
+            }
+        }
+
+        $prevOptionsByQuestion = [];
+        foreach ($previousSnapshot as $prevQ) {
+            if (isset($prevQ['id']) && !empty($prevQ['options']) && is_array($prevQ['options'])) {
+                $prevOptionsByQuestion[(int)$prevQ['id']] = array_values($prevQ['options']);
+            }
+        }
+
+        foreach ($items as &$qItem) {
+            if (empty($qItem['options']) || !is_array($qItem['options'])) {
+                continue;
+            }
+
+            $qId = isset($qItem['id']) ? (int)$qItem['id'] : 0;
+            $opts = array_values($qItem['options']);
+            $prevOpts = ($qId > 0 && isset($prevOptionsByQuestion[$qId])) ? $prevOptionsByQuestion[$qId] : $opts;
+            $prevOptIds = array_column($prevOpts, 'id');
+
+            $correctIds = isset($correctOptionsByQuestion[$qId]) ? $correctOptionsByQuestion[$qId] : [];
+            $prevCorrectIndices = [];
+            if (!empty($correctIds)) {
+                foreach ($prevOpts as $pIdx => $pOpt) {
+                    if (isset($pOpt['id']) && in_array((int)$pOpt['id'], $correctIds, true)) {
+                        $prevCorrectIndices[] = $pIdx;
+                    }
+                }
+            }
+
+            $hasMultipleDistinctOptions = count($opts) > 1 && count(array_unique(array_column($opts, 'id'))) > 1;
+            $shouldShiftCorrectPos = $hasMultipleDistinctOptions
+                && !empty($prevCorrectIndices)
+                && count($correctIds) < count($opts);
+
+            if ($hasMultipleDistinctOptions) {
+                for ($try = 0; $try < 10; $try++) {
+                    shuffle($opts);
+                    if (array_column($opts, 'id') === $prevOptIds) {
+                        continue;
+                    }
+                    if ($shouldShiftCorrectPos && $this->getCorrectOptionIndices($opts, $correctIds) === $prevCorrectIndices) {
+                        continue;
+                    }
+                    break;
+                }
+
+                if (array_column($opts, 'id') === $prevOptIds) {
+                    $firstOptId = $opts[0]['id'] ?? null;
+                    for ($i = 1; $i < count($opts); $i++) {
+                        if (($opts[$i]['id'] ?? null) !== $firstOptId) {
+                            $tmp = $opts[0];
+                            $opts[0] = $opts[$i];
+                            $opts[$i] = $tmp;
+                            break;
+                        }
+                    }
+                }
+
+                if ($shouldShiftCorrectPos && $this->getCorrectOptionIndices($opts, $correctIds) === $prevCorrectIndices) {
+                    $curCorrectIndices = $this->getCorrectOptionIndices($opts, $correctIds);
+                    $nonCorrectIndices = [];
+                    foreach ($opts as $cIdx => $cOpt) {
+                        if (!isset($cOpt['id']) || !in_array((int)$cOpt['id'], $correctIds, true)) {
+                            $nonCorrectIndices[] = $cIdx;
+                        }
+                    }
+                    if (!empty($curCorrectIndices) && !empty($nonCorrectIndices)) {
+                        $fromIdx = $curCorrectIndices[0];
+                        $toIdx = $nonCorrectIndices[array_rand($nonCorrectIndices)];
+                        $tmp = $opts[$fromIdx];
+                        $opts[$fromIdx] = $opts[$toIdx];
+                        $opts[$toIdx] = $tmp;
+                    }
+                }
+            }
+
+            foreach ($opts as $optIdx => &$opt) {
+                $opt['order'] = $optIdx;
+            }
+            unset($opt);
+
+            $qItem['options'] = array_values($opts);
+        }
+        unset($qItem);
+
+        return array_values($items);
+    }
+
+    /**
+     * Collect indices of correct option IDs within an ordered options array.
+     */
+    protected function getCorrectOptionIndices(array $options, array $correctIds): array
+    {
+        $indices = [];
+        foreach ($options as $idx => $opt) {
+            if (isset($opt['id']) && in_array((int)$opt['id'], $correctIds, true)) {
+                $indices[] = $idx;
+            }
+        }
+        return $indices;
     }
 
     public function allResults(Request $request)
