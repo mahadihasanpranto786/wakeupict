@@ -141,6 +141,22 @@
                     <div class="text-dark">
                         <i class="fas fa-check-circle text-success mr-1"></i> প্রতি প্রশ্নে: <strong class="text-success font-weight-bold">{{ $practiceSettings['mark_per_question'] ?? 1 }} মার্ক</strong> (পাস: {{ $practiceSettings['pass_percentage'] ?? 40 }}%)
                     </div>
+                    @if(!empty($practiceSettings['fixed_category']))
+                    <div class="text-dark">
+                        <i class="fas fa-folder text-primary mr-1"></i> বিষয়: <strong class="text-dark font-weight-bold">{{ $practiceSettings['fixed_category'] }}</strong>
+                        @if(empty($practiceSettings['allow_category_choice']))
+                            <span class="badge badge-warning ml-1">লকড</span>
+                        @endif
+                    </div>
+                    @endif
+                    @if(!empty($practiceSettings['fixed_chapter']) || empty($practiceSettings['allow_chapter_choice']))
+                    <div class="text-dark">
+                        <i class="fas fa-book-open text-warning mr-1"></i> অধ্যায়: <strong class="text-dark font-weight-bold">{{ !empty($practiceSettings['fixed_chapter']) ? $practiceSettings['fixed_chapter'] : 'সকল অধ্যায়' }}</strong>
+                        @if(empty($practiceSettings['allow_chapter_choice']))
+                            <span class="badge badge-warning ml-1">লকড</span>
+                        @endif
+                    </div>
+                    @endif
                     <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold px-3 py-1 shadow-sm" data-toggle="modal" data-target="#practiceSettingsModal">
                         <i class="fas fa-sliders-h mr-1"></i> সেটিংস পরিবর্তন করুন
                     </button>
@@ -561,14 +577,75 @@
                             <small class="text-muted text-xs">শিক্ষার্থী মোট কতবার এই অনুশীলন পরীক্ষা দিতে পারবে।</small>
                         </div>
 
-                        <!-- 6. Allow Category Choice -->
-                        <div class="col-md-6 mb-3 d-flex align-items-center">
-                            <div class="custom-control custom-switch mt-2">
-                                <input type="checkbox" class="custom-control-input" id="allow_category_choice" name="allow_category_choice" value="1" {{ $practiceSettings['allow_category_choice'] ? 'checked' : '' }}>
-                                <label class="custom-control-label font-weight-bold text-dark text-sm" for="allow_category_choice">
-                                    শিক্ষার্থীদের বিষয়/অধ্যায় নির্বাচনের সুযোগ দিন
-                                </label>
-                                <small class="text-muted d-block">আনচেক থাকলে শিক্ষার্থীরা সবসময় সম্পূর্ণ প্রশ্ন ব্যাংক থেকে পরীক্ষা দেবে।</small>
+                        <!-- 6. Category & Chapter Access Control (Admin Set vs Student Permission) -->
+                        <div class="col-md-12 mb-3">
+                            <div class="p-3 rounded border bg-white" style="border-color: #cbd5e1 !important;">
+                                <div class="d-flex align-items-center mb-2.5">
+                                    <i class="fas fa-user-shield text-primary mr-2"></i>
+                                    <span class="font-weight-bold text-dark text-sm">বিষয় ও অধ্যায় নির্বাচন নিয়ন্ত্রণ (Category &amp; Chapter Access Control)</span>
+                                </div>
+                                <div class="row">
+                                    <!-- Category Access -->
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <div class="p-2.5 rounded border bg-light" style="border-color: #e2e8f0 !important;">
+                                            <div class="custom-control custom-switch mb-2">
+                                                <input type="checkbox" class="custom-control-input" id="allow_category_choice" name="allow_category_choice" value="1" {{ $practiceSettings['allow_category_choice'] ? 'checked' : '' }}>
+                                                <label class="custom-control-label font-weight-bold text-dark text-sm" for="allow_category_choice">
+                                                    শিক্ষার্থীদের বিষয় (Category) নির্বাচনের সুযোগ দিন
+                                                </label>
+                                                <small class="text-muted d-block" style="font-size: 11px;">চালু থাকলে শিক্ষার্থীরা নিজে বিষয় বাছাই করবে; বন্ধ থাকলে শুধু অ্যাডমিনের সেট করা বিষয়ে পরীক্ষা হবে।</small>
+                                            </div>
+                                            @php
+                                                $currentFixedCategory = $practiceSettings['fixed_category'] ?? '';
+                                            @endphp
+                                            <label class="font-weight-bold text-dark text-xs mb-1" for="practice_fixed_category">
+                                                নির্ধারিত / ডিফল্ট বিষয় (Category Selection)
+                                            </label>
+                                            <select name="fixed_category" id="practice_fixed_category" class="form-control form-control-sm font-weight-bold">
+                                                <option value="">-- সব বিষয় মিলিয়ে (All Categories) --</option>
+                                                @foreach($categories as $cat)
+                                                    <option value="{{ $cat }}" {{ $currentFixedCategory === $cat ? 'selected' : '' }}>
+                                                        {{ $cat }}
+                                                    </option>
+                                                @endforeach
+                                                @if($currentFixedCategory !== '' && !$categories->contains($currentFixedCategory))
+                                                    <option value="{{ $currentFixedCategory }}" selected>{{ $currentFixedCategory }}</option>
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chapter Access -->
+                                    <div class="col-md-6">
+                                        <div class="p-2.5 rounded border bg-light" style="border-color: #e2e8f0 !important;">
+                                            <div class="custom-control custom-switch mb-2">
+                                                <input type="checkbox" class="custom-control-input" id="allow_chapter_choice" name="allow_chapter_choice" value="1" {{ ($practiceSettings['allow_chapter_choice'] ?? true) ? 'checked' : '' }}>
+                                                <label class="custom-control-label font-weight-bold text-dark text-sm" for="allow_chapter_choice">
+                                                    শিক্ষার্থীদের অধ্যায় (Chapterwise) নির্বাচনের সুযোগ দিন
+                                                </label>
+                                                <small class="text-muted d-block" style="font-size: 11px;">চালু থাকলে শিক্ষার্থীরা অধ্যায় সিলেক্ট করার অনুমতি পাবে; বন্ধ থাকলে শুধু অ্যাডমিনের সেট করা অধ্যায় থেকে পরীক্ষা হবে।</small>
+                                            </div>
+                                            @php
+                                                $currentFixedChapter = $practiceSettings['fixed_chapter'] ?? '';
+                                            @endphp
+                                            <label class="font-weight-bold text-dark text-xs mb-1" for="practice_fixed_chapter">
+                                                নির্ধারিত / ডিফল্ট অধ্যায় (Chapter Selection)
+                                            </label>
+                                            <select name="fixed_chapter" id="practice_fixed_chapter" class="form-control form-control-sm font-weight-bold">
+                                                <option value="">-- সকল অধ্যায় (All Chapters) --</option>
+                                                @foreach($chapters as $chap)
+                                                    @php $chapQty = $chapterCounts[$chap] ?? 0; @endphp
+                                                    <option value="{{ $chap }}" {{ $currentFixedChapter === $chap ? 'selected' : '' }}>
+                                                        {{ $chap }} ({{ $chapQty }} টি)
+                                                    </option>
+                                                @endforeach
+                                                @if($currentFixedChapter !== '' && !$chapters->contains($currentFixedChapter))
+                                                    <option value="{{ $currentFixedChapter }}" selected>{{ $currentFixedChapter }} (0 টি)</option>
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1062,24 +1139,30 @@ document.addEventListener('keydown', function(e) {
                                     </label>
                                 </div>
                                 <div class="col-md-4 mb-2">
+                                    <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcChapter" style="cursor: pointer;">
+                                        <input type="radio" id="srcChapter" name="source_mode" value="chapter" class="mr-2" onchange="toggleLibSourceMode()">
+                                        <span class="font-weight-bold text-sm text-dark"><i class="fas fa-book-open text-success mr-1"></i> অধ্যায় ভিত্তিক</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-4 mb-2">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcType" style="cursor: pointer;">
                                         <input type="radio" id="srcType" name="source_mode" value="type" class="mr-2" onchange="toggleLibSourceMode()">
                                         <span class="font-weight-bold text-sm text-dark"><i class="fas fa-filter text-primary mr-1"></i> প্রশ্নের ধরন ভিত্তিক</span>
                                     </label>
                                 </div>
-                                <div class="col-md-4 mb-2">
+                                <div class="col-md-4 mb-2 mb-md-0">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light border-primary" for="srcPaper" style="cursor: pointer;">
                                         <input type="radio" id="srcPaper" name="source_mode" value="paper" class="mr-2" onchange="toggleLibSourceMode()">
                                         <span class="font-weight-bold text-sm text-primary"><i class="fas fa-scroll text-danger mr-1"></i> পেপার বিল্ডার থেকে</span>
                                     </label>
                                 </div>
-                                <div class="col-md-6 mb-2 mb-md-0">
+                                <div class="col-md-4 mb-2 mb-md-0">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcRandom" style="cursor: pointer;">
                                         <input type="radio" id="srcRandom" name="source_mode" value="random" class="mr-2" onchange="toggleLibSourceMode()">
                                         <span class="font-weight-bold text-sm text-dark"><i class="fas fa-dice text-success mr-1"></i> র‍্যান্ডম লটারি ভিত্তিক</span>
                                     </label>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="d-flex align-items-center p-2.5 border rounded cursor-pointer h-100 bg-light" for="srcAll" style="cursor: pointer;">
                                         <input type="radio" id="srcAll" name="source_mode" value="all" class="mr-2" onchange="toggleLibSourceMode()">
                                         <span class="font-weight-bold text-sm text-dark"><i class="fas fa-layer-group text-info mr-1"></i> সব প্রশ্ন থেকে</span>
@@ -1116,6 +1199,20 @@ document.addEventListener('keydown', function(e) {
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat }}">{{ $cat }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Chapter Selector -->
+                        <div id="libChapterBlock" class="form-group mb-3">
+                            <label class="font-weight-bold text-sm">প্রশ্ন লাইব্রেরির অধ্যায় (Chapter) বেছে নিন:</label>
+                            <select name="chapter" class="form-control">
+                                <option value="">-- যেকোনো অধ্যায় (All Chapters) --</option>
+                                @if(isset($chapters))
+                                    @foreach($chapters as $chap)
+                                        @php $chapQty = $chapterCounts[$chap] ?? 0; @endphp
+                                        <option value="{{ $chap }}">{{ $chap }} ({{ $chapQty }} টি)</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
 
@@ -1474,12 +1571,16 @@ function updateLibFormAction(quizId) {
 function toggleLibSourceMode() {
     var mode = document.querySelector('input[name="source_mode"]:checked').value;
     var catBlock = document.getElementById('libCategoryBlock');
+    var chapBlock = document.getElementById('libChapterBlock');
     var typeBlock = document.getElementById('libTypeBlock');
     var paperBlock = document.getElementById('libPaperBlock');
     var countBlock = document.getElementById('libCountBlock');
 
     if (catBlock) {
-        catBlock.style.display = (mode === 'category') ? 'block' : 'none';
+        catBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    }
+    if (chapBlock) {
+        chapBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
     }
     if (paperBlock) {
         paperBlock.style.display = (mode === 'paper') ? 'block' : 'none';

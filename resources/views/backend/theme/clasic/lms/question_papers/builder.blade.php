@@ -289,6 +289,17 @@
                         </select>
                     </div>
                     <div class="col-6">
+                        <select id="libChapterFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
+                            <option value="">-- অধ্যায় (Chapter) --</option>
+                            @foreach($chapters as $chap)
+                                @php $chapQty = $chapterCounts[$chap] ?? 0; @endphp
+                                <option value="{{ $chap }}">{{ $chap }} ({{ $chapQty }} টি)</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-1 mb-1">
+                    <div class="col-5">
                         <select id="libDiffFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
                             <option value="">-- কঠিন্যতা --</option>
                             <option value="easy">সহজ</option>
@@ -296,18 +307,18 @@
                             <option value="hard">কঠিন</option>
                         </select>
                     </div>
-                </div>
-                <div class="mb-1">
-                    <select id="libTypeFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
-                        <option value="">-- সকল প্রশ্নের ধরন (All Types) --</option>
-                        <option value="mcq">MCQ (বহুনির্বাচনি)</option>
-                        <option value="true_false">সত্য / মিথ্যা (True/False)</option>
-                        <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
-                        <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short)</option>
-                        <option value="creative">সৃজনশীল (CQ)</option>
-                        <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
-                        <option value="descriptive">রচনামূলক (Descriptive)</option>
-                    </select>
+                    <div class="col-7">
+                        <select id="libTypeFilter" class="form-control form-control-sm custom-select text-xs" onchange="loadLibraryQuestionsAJAX()">
+                            <option value="">-- সকল প্রশ্নের ধরন (All Types) --</option>
+                            <option value="mcq">MCQ (বহুনির্বাচনি)</option>
+                            <option value="true_false">সত্য / মিথ্যা (True/False)</option>
+                            <option value="fill_blanks">শূন্যস্থান পূরণ (Fill in Blanks)</option>
+                            <option value="short_answer">অতি সংক্ষেপ / সংক্ষিপ্ত (Short)</option>
+                            <option value="creative">সৃজনশীল (CQ)</option>
+                            <option value="translation">ইংরেজি অনুবাদ (Translation)</option>
+                            <option value="descriptive">রচনামূলক (Descriptive)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -345,7 +356,11 @@
 
                         @if($lq->options->isNotEmpty())
                             <div class="text-xs text-muted">
-                                {{ $lq->options->count() }}টি অপশন | <span class="text-info">{{ $lq->category ?: 'General' }}</span>
+                                {{ $lq->options->count() }}টি অপশন | <span class="text-info">{{ $lq->category ?: 'General' }}</span>@if($lq->chapter) | <span class="text-success font-weight-bold">{{ $lq->chapter }}</span>@endif
+                            </div>
+                        @elseif($lq->chapter || $lq->category)
+                            <div class="text-xs text-muted">
+                                <span class="text-info">{{ $lq->category ?: 'General' }}</span>@if($lq->chapter) | <span class="text-success font-weight-bold">{{ $lq->chapter }}</span>@endif
                             </div>
                         @endif
                     </div>
@@ -1350,6 +1365,7 @@
             var search = document.getElementById('libSearchInput').value;
             var course = document.getElementById('libCourseFilter') ? document.getElementById('libCourseFilter').value : '';
             var cat = document.getElementById('libCategoryFilter').value;
+            var chap = document.getElementById('libChapterFilter') ? document.getElementById('libChapterFilter').value : '';
             var diff = document.getElementById('libDiffFilter').value;
             var type = document.getElementById('libTypeFilter') ? document.getElementById('libTypeFilter').value : '';
 
@@ -1357,6 +1373,7 @@
             if (search) params.append('search', search);
             if (course) params.append('course_id', course);
             if (cat) params.append('category', cat);
+            if (chap) params.append('chapter', chap);
             if (diff) params.append('difficulty', diff);
             if (type) params.append('type', type);
 
@@ -1405,7 +1422,7 @@
                                     </div>
 
                                     <div class="text-xs text-muted">
-                                        ${lq.options_count}টি অপশন | <span class="text-info">${lq.category}</span>
+                                        ${lq.options_count}টি অপশন | <span class="text-info">${lq.category}</span>${lq.chapter ? ' | <span class="text-success font-weight-bold">' + escapeHtml(lq.chapter) + '</span>' : ''}
                                     </div>
                                 </div>
                             `;
@@ -1568,6 +1585,12 @@
             var modalCat = document.getElementById('autoPickCategory');
             if (libCat && modalCat && libCat.value) {
                 modalCat.value = libCat.value;
+            }
+
+            var libChap = document.getElementById('libChapterFilter');
+            var modalChap = document.getElementById('autoPickChapter');
+            if (libChap && modalChap && libChap.value) {
+                modalChap.value = libChap.value;
             }
 
             var libDiff = document.getElementById('libDiffFilter');

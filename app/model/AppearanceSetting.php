@@ -35,11 +35,14 @@ class AppearanceSetting extends Model
         $item = $settings[$key];
         $locale = $locale ?: App::getLocale();
 
+        $bnVal = ($item->value_bn !== null && $item->value_bn !== '') ? $item->value_bn : null;
+        $enVal = ($item->value_en !== null && $item->value_en !== '') ? $item->value_en : null;
+
         if ($locale === 'bn') {
-            return (!empty($item->value_bn)) ? $item->value_bn : (!empty($item->value_en) ? $item->value_en : $default);
+            return $bnVal !== null ? $bnVal : ($enVal !== null ? $enVal : $default);
         }
 
-        return (!empty($item->value_en)) ? $item->value_en : (!empty($item->value_bn) ? $item->value_bn : $default);
+        return $enVal !== null ? $enVal : ($bnVal !== null ? $bnVal : $default);
     }
 
     /**

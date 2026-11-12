@@ -125,14 +125,21 @@ class QuestionBookController extends Controller
         // Dropdown data
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
-        $chapters = LmsQuestion::whereNotNull('chapter')->where('chapter', '!=', '')->distinct()->pluck('chapter')->sort()->values();
+        $chapterCounts = LmsQuestion::whereNotNull('chapter')
+            ->where('chapter', '!=', '')
+            ->select('chapter', DB::raw('count(*) as total'))
+            ->groupBy('chapter')
+            ->orderBy('total', 'desc')
+            ->orderBy('chapter', 'asc')
+            ->pluck('total', 'chapter');
+        $chapters = $chapterCounts->keys()->values();
         $papers = LmsQuestionPaper::whereIn('status', ['draft', 'review', 'approved'])->orderBy('title', 'asc')->get();
         $quizzes = LmsQuiz::with('course')->withCount('questions')->latest('id')->get();
 
         $viewStyle = $request->input('view', 'book'); // 'book' or 'list'
 
         return view('backend.theme.clasic.lms.question_book.index', compact(
-            'questions', 'stats', 'courses', 'categories', 'chapters', 'papers', 'quizzes', 'viewStyle'
+            'questions', 'stats', 'courses', 'categories', 'chapters', 'chapterCounts', 'papers', 'quizzes', 'viewStyle'
         ));
     }
 
@@ -745,6 +752,14 @@ class QuestionBookController extends Controller
             if ($newCat !== '') {
                 LmsQuestion::whereIn('id', $selectedIds)->update(['category' => $newCat]);
                 return redirect()->back()->with('success', 'নির্বাচিত প্রশ্নসমূহের ক্যাটাগরি সফলভাবে হালনাগাদ হয়েছে!');
+            }
+        }
+
+        if ($action === 'set_chapter') {
+            $newChapter = trim($request->input('bulk_chapter'));
+            if ($newChapter !== '') {
+                LmsQuestion::whereIn('id', $selectedIds)->update(['chapter' => $newChapter]);
+                return redirect()->back()->with('success', 'নির্বাচিত প্রশ্নসমূহের অধ্যায় সফলভাবে হালনাগাদ হয়েছে!');
             }
         }
 

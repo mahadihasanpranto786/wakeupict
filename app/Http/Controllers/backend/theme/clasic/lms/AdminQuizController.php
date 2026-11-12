@@ -61,7 +61,7 @@ class AdminQuizController extends Controller
         // Dropdown Courses
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
-        // Question Library Categories
+        // Question Library Categories & Chapters
         $categories = LmsQuestion::libraryQuestions()
             ->whereNotNull('category')
             ->where('category', '!=', '')
@@ -69,11 +69,20 @@ class AdminQuizController extends Controller
             ->pluck('category')
             ->sort()
             ->values();
+        $chapterCounts = LmsQuestion::libraryQuestions()
+            ->whereNotNull('chapter')
+            ->where('chapter', '!=', '')
+            ->select('chapter', DB::raw('count(*) as total'))
+            ->groupBy('chapter')
+            ->orderBy('total', 'desc')
+            ->orderBy('chapter', 'asc')
+            ->pluck('total', 'chapter');
+        $chapters = $chapterCounts->keys()->values();
         $questionPapers = \App\model\LmsQuestionPaper::withCount('items')->latest()->get();
         $practiceSettings = PracticeQuestionRotationService::getSettings();
 
         return view('backend.theme.clasic.lms.quizzes.index', compact(
-            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'totalLibraryMcqQuestions', 'questionPapers', 'practiceSettings'
+            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'chapters', 'chapterCounts', 'totalLibraryQuestions', 'totalLibraryMcqQuestions', 'questionPapers', 'practiceSettings'
         ));
     }
 
@@ -105,6 +114,9 @@ class AdminQuizController extends Controller
             'attempt_limit_type'    => 'required|in:unlimited,single,custom',
             'max_attempts'          => 'nullable|integer|min:1|max:100',
             'allow_category_choice' => 'nullable|boolean',
+            'allow_chapter_choice'  => 'nullable|boolean',
+            'fixed_category'        => 'nullable|string|max:150',
+            'fixed_chapter'         => 'nullable|string|max:150',
             'mark_per_question'     => 'nullable|numeric|min:0.1|max:50',
             'pass_percentage'          => 'nullable|numeric|min:1|max:100',
             'negative_marking_enabled' => 'nullable|boolean',
@@ -156,6 +168,9 @@ class AdminQuizController extends Controller
             'attempt_limit_type'    => $attemptLimitType,
             'max_attempts'          => $maxAttempts,
             'allow_category_choice' => $request->has('allow_category_choice') ? 1 : 0,
+            'allow_chapter_choice'  => $request->has('allow_chapter_choice') ? 1 : 0,
+            'fixed_category'        => $request->filled('fixed_category') ? trim($request->input('fixed_category')) : '',
+            'fixed_chapter'         => $request->filled('fixed_chapter') ? trim($request->input('fixed_chapter')) : '',
             'mark_per_question'     => $request->filled('mark_per_question') ? (float)$request->input('mark_per_question') : 1.0,
             'pass_percentage'          => $request->filled('pass_percentage') ? (float)$request->input('pass_percentage') : 40.0,
             'negative_marking_enabled' => $request->has('negative_marking_enabled') ? 1 : 0,
@@ -383,9 +398,10 @@ class AdminQuizController extends Controller
         $quiz = LmsQuiz::findOrFail($id);
 
         $request->validate([
-            'source_mode'   => 'required|in:all,category,random,type,paper',
+            'source_mode'   => 'required|in:all,category,chapter,random,type,paper',
             'count'         => 'nullable|integer|min:1|max:200',
             'category'      => 'nullable|string',
+            'chapter'       => 'nullable|string',
             'question_type' => 'nullable|string',
             'paper_id'      => 'nullable|integer',
         ]);
@@ -445,11 +461,15 @@ class AdminQuizController extends Controller
                 // Also associate quiz with this paper
                 $quiz->update(['paper_id' => $paper->id]);
             } else {
-                // MODE 2: Question Library (Category, Type, Random, All)
+                // MODE 2: Question Library (Category, Chapter, Type, Random, All)
                 $query = LmsQuestion::with('options')->libraryQuestions();
 
                 if ($request->filled('category')) {
                     $query->where('category', $request->category);
+                }
+
+                if ($request->filled('chapter')) {
+                    $query->where('chapter', $request->chapter);
                 }
 
                 if ($request->filled('question_type')) {
