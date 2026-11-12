@@ -312,4 +312,102 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
         $batch->refresh();
         $this->assertEquals(1, $batch->status);
     }
+
+    /**
+     * Test 10: Registration Verifications list & serial (#) column render in descending order
+     */
+    public function testRegistrationVerificationsListDisplaysDescendingSerialNumbers()
+    {
+        $admin = User::first() ?: User::create([
+            'name' => 'Admin Test',
+            'email' => 'admin_serial_' . rand(1000, 9999) . '@test.com',
+            'password' => Hash::make('secret'),
+            'type' => 'Admin',
+        ]);
+
+        $createdAccounts = [];
+        $createdLogs = [];
+
+        try {
+            // Ensure at least 16 accounts exist so page 1 and page 2 pagination serials are exercised
+            $existingCount = StudentAccount::count();
+            $needed = max(2, 16 - $existingCount);
+
+            for ($i = 0; $i < $needed; $i++) {
+                $rand = rand(100000, 999999);
+                $createdAccounts[] = StudentAccount::create([
+                    'name' => 'Serial Desc Student ' . $i . ' ' . $rand,
+                    'phone' => '018' . rand(10000000, 99999999),
+                    'email' => 'serial_desc_' . $i . '_' . $rand . '@test.com',
+                    'registration_number' => '202699' . str_pad((string)rand(100000, 999999), 6, '0', STR_PAD_LEFT),
+                    'student_id_code' => 'SID-' . $rand . '-' . $i,
+                    'password' => Hash::make('secret'),
+                    'registration_status' => 'pending',
+                    'status' => 0,
+                ]);
+            }
+
+            for ($j = 0; $j < 2; $j++) {
+                $createdLogs[] = RegistrationVerification::create([
+                    'phone' => '019' . rand(10000000, 99999999),
+                    'batch_code' => '9' . $j,
+                    'ip_address' => '127.0.0.1',
+                    'attempts_count' => $j + 1,
+                    'status' => 'blocked',
+                ]);
+            }
+
+            $totalRegistrations = StudentAccount::count();
+            $totalLogs = RegistrationVerification::count();
+
+            $newestAccount = end($createdAccounts);
+            $previousAccount = $createdAccounts[count($createdAccounts) - 2];
+            $newestLog = end($createdLogs);
+            $previousLog = $createdLogs[count($createdLogs) - 2];
+
+            $response = $this->actingAs($admin)->get(route('admin.registration.verifications'));
+            $response->assertStatus(200);
+
+            $html = $response->getContent();
+
+            // Newest student registration appears first with the highest serial number (#total -> #total-1)
+            $newestPos = strpos($html, $newestAccount->name);
+            $prevPos = strpos($html, $previousAccount->name);
+            $this->assertNotFalse($newestPos);
+            $this->assertNotFalse($prevPos);
+            $this->assertLessThan($prevPos, $newestPos);
+
+            $this->assertRegExp(
+                '/<tr>\s*<td>' . $totalRegistrations . '<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($newestAccount->name, '/') . '<\/div>/',
+                $html
+            );
+            $this->assertRegExp(
+                '/<tr>\s*<td>' . ($totalRegistrations - 1) . '<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($previousAccount->name, '/') . '<\/div>/',
+                $html
+            );
+
+            // Verification logs tab also displays newest log first with descending serial (#vTotal -> #vTotal-1)
+            $this->assertRegExp(
+                '/<tr>\s*<td>' . $totalLogs . '<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($newestLog->phone, '/') . '<\/strong>/',
+                $html
+            );
+            $this->assertRegExp(
+                '/<tr>\s*<td>' . ($totalLogs - 1) . '<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($previousLog->phone, '/') . '<\/strong>/',
+                $html
+            );
+
+            // Page 2 must continue descending serial from ($totalRegistrations - 15)
+            $page2 = $this->actingAs($admin)->get(route('admin.registration.verifications', ['page' => 2]));
+            $page2->assertStatus(200);
+            $page2Html = $page2->getContent();
+            $this->assertStringContainsString('<td>' . ($totalRegistrations - 15) . '</td>', $page2Html);
+        } finally {
+            foreach ($createdAccounts as $acc) {
+                $acc->delete();
+            }
+            foreach ($createdLogs as $log) {
+                $log->delete();
+            }
+        }
+    }
 }
