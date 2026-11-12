@@ -71,9 +71,9 @@
             <div class="info-box shadow-sm border-0">
                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-question-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text text-muted">মোট সংগৃহীত MCQ প্রশ্ন</span>
+                    <span class="info-box-text text-muted">প্রশ্ন লাইব্রেরি (মোট নেট প্রশ্ন)</span>
                     <span class="info-box-number font-weight-bold text-success" style="font-size: 1.4rem;">{{ number_format($totalQuestions) }}</span>
-                    <span class="text-xs text-muted">বিভিন্ন কোর্সে সক্রিয় প্রশ্নভাণ্ডার</span>
+                    <span class="text-xs text-muted">নেট MCQ: <strong>{{ number_format($totalLibraryMcqQuestions ?? $totalQuestions) }}</strong> টি | কোর্স কুইজের কপি বাদে</span>
                 </div>
             </div>
         </div>

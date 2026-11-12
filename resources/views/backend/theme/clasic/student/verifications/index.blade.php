@@ -276,7 +276,7 @@
                                         $primaryBatch = $item->batch;
                                     @endphp
                                     <tr>
-                                        <td>{{ $registrations->firstItem() + $index }}</td>
+                                        <td>{{ $registrations->total() - (($registrations->firstItem() ?? 1) - 1) - $index }}</td>
                                         <td>
                                             <div class="font-weight-bold text-dark">{{ $item->name }}</div>
                                             <div class="small text-muted">
@@ -513,7 +513,7 @@
                             <tbody>
                                 @forelse($verificationLogs as $vIdx => $vLog)
                                     <tr>
-                                        <td>{{ $verificationLogs->firstItem() + $vIdx }}</td>
+                                        <td>{{ $verificationLogs->total() - (($verificationLogs->firstItem() ?? 1) - 1) - $vIdx }}</td>
                                         <td>
                                             <strong class="font-mono text-dark">{{ $vLog->phone }}</strong>
                                         </td>

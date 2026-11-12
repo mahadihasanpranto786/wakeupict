@@ -49,22 +49,31 @@ class AdminQuizController extends Controller
 
         $quizzes = $query->paginate(20)->appends($request->all());
 
-        // Stats
+        // Stats: strictly reflect net active Question Library counts (exclude cloned/course-quiz copies)
         $totalQuizzes = LmsQuiz::count();
-        $totalQuestions = LmsQuestion::count();
+        $totalLibraryQuestions = LmsQuestion::libraryQuestions()->count();
+        $totalLibraryMcqQuestions = LmsQuestion::libraryQuestions()
+            ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+            ->count();
+        $totalQuestions = $totalLibraryQuestions;
         $publishedQuizzes = LmsQuiz::where('is_published', true)->count();
 
         // Dropdown Courses
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
         // Question Library Categories
-        $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
-        $totalLibraryQuestions = LmsQuestion::whereNull('quiz_id')->orWhere('quiz_id', 0)->count();
+        $categories = LmsQuestion::libraryQuestions()
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->pluck('category')
+            ->sort()
+            ->values();
         $questionPapers = \App\model\LmsQuestionPaper::withCount('items')->latest()->get();
         $practiceSettings = PracticeQuestionRotationService::getSettings();
 
         return view('backend.theme.clasic.lms.quizzes.index', compact(
-            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'questionPapers', 'practiceSettings'
+            'quizzes', 'courses', 'totalQuizzes', 'totalQuestions', 'publishedQuizzes', 'categories', 'totalLibraryQuestions', 'totalLibraryMcqQuestions', 'questionPapers', 'practiceSettings'
         ));
     }
 
@@ -437,7 +446,7 @@ class AdminQuizController extends Controller
                 $quiz->update(['paper_id' => $paper->id]);
             } else {
                 // MODE 2: Question Library (Category, Type, Random, All)
-                $query = LmsQuestion::with('options')->where('is_archived', false);
+                $query = LmsQuestion::with('options')->libraryQuestions();
 
                 if ($request->filled('category')) {
                     $query->where('category', $request->category);

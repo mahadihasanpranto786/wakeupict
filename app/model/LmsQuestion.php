@@ -133,6 +133,20 @@ class LmsQuestion extends Model
         return !is_null($this->parent_question_id);
     }
 
+    /**
+     * Scope to active, non-archived questions residing in the master Question Library
+     * (excludes cloned/quiz-specific copies attached to course quizzes).
+     */
+    public function scopeLibraryQuestions($query)
+    {
+        return $query->where('is_archived', false)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
+    }
+
     public function getCqSubquestionsDecodedAttribute()
     {
         if ($this->cq_subquestions) {

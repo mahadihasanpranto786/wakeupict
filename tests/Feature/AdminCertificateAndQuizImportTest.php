@@ -761,4 +761,69 @@ class AdminCertificateAndQuizImportTest extends TestCase
 
         $quiz->delete();
     }
+
+    /**
+     * Test /admin/quizzes KPI card displays strictly net Question Library counts
+     * and does not inflate when questions are cloned/imported into course quizzes.
+     */
+    public function test_quiz_index_counts_net_library_questions_excluding_quiz_clones()
+    {
+        $baselineTotal = LmsQuestion::libraryQuestions()->count();
+        $baselineMcq = LmsQuestion::libraryQuestions()
+            ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+            ->count();
+
+        // Add 2 new active Question Library items (1 MCQ + 1 short_answer)
+        $libMcq = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Net Library MCQ Test ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+        $libShort = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Net Library Short Test ' . rand(1000, 9999),
+            'question_type' => 'short_answer',
+            'marks'         => 2.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+
+        // Create a course quiz and clone library questions into it
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Course Clone Exclusion Test Quiz',
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 15,
+            'total_marks'      => 0,
+            'pass_marks'       => 1,
+            'is_published'     => true,
+        ]);
+
+        $clonedQuizQ1 = $libMcq->replicate();
+        $clonedQuizQ1->quiz_id = $quiz->id;
+        $clonedQuizQ1->parent_question_id = $libMcq->id;
+        $clonedQuizQ1->save();
+
+        $clonedQuizQ2 = $libShort->replicate();
+        $clonedQuizQ2->quiz_id = $quiz->id;
+        $clonedQuizQ2->parent_question_id = $libShort->id;
+        $clonedQuizQ2->save();
+
+        $response = $this->actingAs($this->adminUser)->get(route('admin.quizzes.index'));
+        $response->assertStatus(200);
+        $response->assertViewHas('totalQuestions', $baselineTotal + 2);
+        $response->assertViewHas('totalLibraryMcqQuestions', $baselineMcq + 1);
+
+        // Clean up
+        $clonedQuizQ1->delete();
+        $clonedQuizQ2->delete();
+        $quiz->delete();
+        $libMcq->delete();
+        $libShort->delete();
+    }
 }
