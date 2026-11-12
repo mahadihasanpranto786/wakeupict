@@ -1388,4 +1388,117 @@ class LmsQuizAndExamTest extends TestCase
         $q->delete();
         $scheduledExam->delete();
     }
+
+    /**
+     * Test retaking a 20-mark exam with admin-configured pass_marks = 18 preserves pass_marks = 18
+     * (never overwrites pass_marks with total_marks = 20) and passes at score 18.
+     */
+    public function testRetakePreservesConfiguredPassMarksInsteadOfTotalMarks()
+    {
+        $admin = \App\User::first() ?: \App\User::create([
+            'name'     => 'Admin PassMark Tester',
+            'email'    => 'admin_passmark_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => \Illuminate\Support\Facades\Hash::make('secret123'),
+        ]);
+
+        $exam = LmsQuiz::create([
+            'course_id'         => $this->quiz->course_id,
+            'title'             => 'Pass Mark 18 of 20 Exam',
+            'quiz_type'         => 'exam',
+            'duration_minutes'  => 20,
+            'total_marks'       => 20.0,
+            'pass_marks'        => 18.0,
+            'shuffle_questions' => true,
+            'shuffle_options'   => true,
+            'max_attempts'      => 0,
+            'is_published'      => true,
+        ]);
+
+        $q = LmsQuestion::create([
+            'quiz_id'       => $exam->id,
+            'question_text' => 'Sample Question for Pass Mark Test',
+            'question_type' => 'mcq_single',
+            'marks'         => 20.0,
+            'is_active'     => true,
+        ]);
+        LmsQuestionOption::create(['question_id' => $q->id, 'option_text' => 'Opt A', 'is_correct' => true, 'order_index' => 1]);
+        LmsQuestionOption::create(['question_id' => $q->id, 'option_text' => 'Opt B', 'is_correct' => false, 'order_index' => 2]);
+
+        $snapshot = [[
+            'id'            => $q->id,
+            'question_text' => $q->question_text,
+            'question_type' => $q->question_type,
+            'marks'         => 20.0,
+            'options'       => $q->options->map(function ($o, $idx) {
+                return ['id' => $o->id, 'text' => $o->option_text, 'order' => $idx];
+            })->toArray(),
+        ]];
+
+        // 1. Initial failed attempt (16 out of 20; pass_marks = 18)
+        $attempt1 = LmsQuizAttempt::create([
+            'quiz_id'            => $exam->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 1,
+            'score'              => 16.0,
+            'total_marks'        => 20.0,
+            'pass_marks'         => 18.0,
+            'percentage'         => 80.0,
+            'status'             => 'graded',
+            'started_at'         => now()->subMinutes(10),
+            'submitted_at'       => now()->subMinutes(5),
+            'questions_snapshot' => $snapshot,
+        ]);
+
+        $this->assertFalse($attempt1->isPassed());
+
+        // 2. Retake the exam
+        $retakeRes = $this->actingAs($this->student, 'student')
+            ->post(route('student.quiz.retake', $attempt1->id));
+
+        $retakeAttempt = LmsQuizAttempt::where('quiz_id', $exam->id)
+            ->where('student_account_id', $this->student->id)
+            ->where('parent_attempt_id', $attempt1->id)
+            ->first();
+
+        $this->assertNotNull($retakeAttempt);
+        $retakeRes->assertRedirect(route('student.quiz.take', $retakeAttempt->id));
+
+        // Critical regression check: pass_marks on retake must stay 18.0, NOT total_marks (20.0)!
+        $this->assertEquals(18.0, (float)$retakeAttempt->pass_marks);
+
+        // 3. Score 18 out of 20 on retake -> must be counted as Passed!
+        $retakeAttempt->update([
+            'score'        => 18.0,
+            'percentage'   => 90.0,
+            'status'       => 'graded',
+            'submitted_at' => now(),
+        ]);
+
+        $this->assertTrue($retakeAttempt->isPassed());
+        $this->assertEquals('A+', $retakeAttempt->getGrade());
+
+        // 4. Result sheet must display Pass Mark 18 and Assessment Passed
+        $resultRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.quiz.results', $retakeAttempt->id));
+        $resultRes->assertStatus(200);
+        $resultRes->assertSee('পাস মার্ক: ১৮');
+        $resultRes->assertSee('উত্তীর্ণ (Assessment Passed)');
+        $resultRes->assertDontSee('পাস মার্ক: ২০');
+
+        // 5. Student passed filter & Admin reports must recognize 18/20 as Passed
+        $passedFilterRes = $this->actingAs($this->student, 'student')
+            ->get(route('student.results.index', ['status' => 'passed']));
+        $passedFilterRes->assertStatus(200);
+        $passedFilterRes->assertSee($exam->title);
+
+        $reportsRes = $this->actingAs($admin)->get(route('admin.quizzes.reports', ['quiz_id' => $exam->id]));
+        $reportsRes->assertStatus(200);
+        $reportsRes->assertSee('উত্তীর্ণ (Passed)');
+
+        // Clean up
+        LmsQuizAttempt::deleteWithRelated([$attempt1->id]);
+        $q->options()->delete();
+        $q->delete();
+        $exam->delete();
+    }
 }

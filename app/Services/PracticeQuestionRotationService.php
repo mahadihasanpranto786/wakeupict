@@ -519,7 +519,7 @@ class PracticeQuestionRotationService
         $totalMarks = round($count * $markPerQ, 2);
 
         // Calculate pass mark: prioritize custom pass marks from selected tier, fallback to tier setting, fallback to %
-        if ($passMarksCustom !== null && (float)$passMarksCustom > 0) {
+        if ($passMarksCustom !== null && is_numeric($passMarksCustom) && (float)$passMarksCustom >= 0) {
             $passMarks = (float)$passMarksCustom;
         } else {
             // Look up matching tier pass marks

@@ -57,6 +57,47 @@ class LmsQuizAttempt extends Model
         return $this->hasMany(LmsExamViolation::class, 'attempt_id');
     }
 
+    public function questionHistories()
+    {
+        return $this->hasMany(LmsStudentQuestionHistory::class, 'attempt_id');
+    }
+
+    /**
+     * Delete the specified attempts along with all descendant retakes
+     * and every related record (answers, violations, practice question histories).
+     *
+     * @param  array  $attemptIds
+     * @return int
+     */
+    public static function deleteWithRelated(array $attemptIds): int
+    {
+        $allIds = [];
+        $frontier = array_values(array_unique(array_filter(array_map('intval', $attemptIds))));
+
+        while (!empty($frontier)) {
+            $frontier = array_values(array_diff($frontier, $allIds));
+            if (empty($frontier)) {
+                break;
+            }
+            $allIds = array_merge($allIds, $frontier);
+            $frontier = static::whereIn('parent_attempt_id', $frontier)
+                ->pluck('id')
+                ->all();
+        }
+
+        if (empty($allIds)) {
+            return 0;
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($allIds) {
+            LmsQuizAnswer::whereIn('attempt_id', $allIds)->delete();
+            LmsExamViolation::whereIn('attempt_id', $allIds)->delete();
+            LmsStudentQuestionHistory::whereIn('attempt_id', $allIds)->delete();
+
+            return static::whereIn('id', $allIds)->delete();
+        });
+    }
+
     public function getPassMarksAttribute($value = null)
     {
         // 1. If explicit pass_marks is stored on attempt, always prioritize it
@@ -68,8 +109,8 @@ class LmsQuizAttempt extends Model
             return (float)$this->attributes['pass_marks'];
         }
 
-        // 2. Tier-based lookup for practice exams from snapshot question count
-        if (!empty($this->questions_snapshot) && is_array($this->questions_snapshot)) {
+        // 2. Tier-based lookup strictly for practice exams from snapshot question count
+        if ((!$this->quiz || $this->quiz->quiz_type === 'practice') && !empty($this->questions_snapshot) && is_array($this->questions_snapshot)) {
             $qCount = count($this->questions_snapshot);
             $settings = \App\Services\PracticeQuestionRotationService::getSettings();
             if (!empty($settings['tiers'])) {

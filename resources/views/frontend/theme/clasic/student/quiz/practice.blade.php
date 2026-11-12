@@ -539,8 +539,8 @@ function syncPracticeTier(select) {
     var p = opt.getAttribute('data-pass-marks');
     var dInput = document.getElementById('practice_duration_minutes');
     var pInput = document.getElementById('practice_pass_marks');
-    if (dInput && d) dInput.value = d;
-    if (pInput && p) pInput.value = p;
+    if (dInput && d !== null && d !== '') dInput.value = d;
+    if (pInput && p !== null && p !== '') pInput.value = p;
 }
 
 var practiceConfirmed = false;
@@ -596,6 +596,8 @@ function closePracticeConfirmModal() {
 
 function proceedPracticeStart() {
     practiceConfirmed = true;
+    var select = document.getElementById('tierSelect');
+    if (select) syncPracticeTier(select);
     var btn = document.getElementById('btn-modal-confirm-start');
     if (btn) {
         btn.disabled = true;

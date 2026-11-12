@@ -198,7 +198,7 @@ class AdminQuizController extends Controller
             'quiz_type'             => $request->quiz_type,
             'duration_minutes'      => (int)$request->duration_minutes,
             'total_marks'           => 0, // auto-calculated from questions
-            'pass_marks'            => $request->pass_marks ?: 5.0,
+            'pass_marks'            => $request->filled('pass_marks') ? (float)$request->pass_marks : 5.0,
             'shuffle_questions'     => $request->has('shuffle_questions') ? (bool)$request->shuffle_questions : true,
             'shuffle_options'       => $request->has('shuffle_options') ? (bool)$request->shuffle_options : true,
             'max_attempts'          => (int)$request->input('max_attempts', 0), // 0 = unlimited
@@ -336,7 +336,7 @@ class AdminQuizController extends Controller
             'description'      => $request->description,
             'quiz_type'        => $request->quiz_type,
             'duration_minutes' => (int)$request->duration_minutes,
-            'pass_marks'       => $request->pass_marks ?: 5.0,
+            'pass_marks'       => $request->filled('pass_marks') ? (float)$request->pass_marks : 5.0,
             'negative_marks'   => $request->input('negative_marks', 0.0),
             'question_set'     => $request->input('question_set', 'Set A'),
             'view_mode'        => $request->input('view_mode', 'all_questions'),
@@ -587,11 +587,10 @@ class AdminQuizController extends Controller
         $title = $quiz->title;
 
         DB::transaction(function () use ($quiz) {
-            // Delete child attempts & answers if any
+            // Delete child attempts & all related data (retakes, answers, violations, practice histories)
             $attemptIds = \App\model\LmsQuizAttempt::where('quiz_id', $quiz->id)->pluck('id')->toArray();
             if (!empty($attemptIds)) {
-                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
-                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::deleteWithRelated($attemptIds);
             }
 
             // Delete child questions options & questions
@@ -711,7 +710,10 @@ class AdminQuizController extends Controller
             }
         }
 
-        $query = \App\model\LmsQuizAttempt::whereNull('parent_attempt_id')
+        $query = \App\model\LmsQuizAttempt::where(function ($q) {
+                $q->whereNull('parent_attempt_id')
+                  ->orWhereDoesntHave('parentAttempt');
+            })
             ->with(['quiz.course', 'student', 'retakes' => function ($rq) {
                 $rq->with(['quiz.course', 'student'])->orderBy('id', 'asc');
             }])
@@ -748,15 +750,14 @@ class AdminQuizController extends Controller
         $quizzes = LmsQuiz::with('course')->orderBy('title', 'asc')->get();
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
-        // High-level KPI Stats for quick glance (100% Pass requirement)
+        // High-level KPI Stats using each attempt's configured pass_marks
         $totalAttempts = \App\model\LmsQuizAttempt::count();
-        $passedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
-            ->whereRaw('score >= total_marks AND total_marks > 0')
-            ->count();
-        $failedAttempts = \App\model\LmsQuizAttempt::where('status', 'graded')
-            ->whereRaw('score < total_marks OR total_marks = 0')
-            ->count();
-        $avgScore = round(\App\model\LmsQuizAttempt::where('status', 'graded')->avg('percentage') ?: 0, 1);
+        $gradedAttempts = \App\model\LmsQuizAttempt::with('quiz')->where('status', 'graded')->get();
+        $passedAttempts = $gradedAttempts->filter(function ($a) {
+            return $a->isPassed();
+        })->count();
+        $failedAttempts = $gradedAttempts->count() - $passedAttempts;
+        $avgScore = round($gradedAttempts->avg('percentage') ?: 0, 1);
 
         // -------------------------------------------------------------
         // Parent Question Tracking & Cross-Attempt Analytics
@@ -1052,12 +1053,9 @@ class AdminQuizController extends Controller
     {
         $attempt = \App\model\LmsQuizAttempt::findOrFail($id);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($attempt) {
-            $attempt->answers()->delete();
-            $attempt->delete();
-        });
+        \App\model\LmsQuizAttempt::deleteWithRelated([$attempt->id]);
 
-        return redirect()->back()->with('success', 'পরীক্ষার ফলাফলটি সফলভাবে মুছে ফেলা হয়েছে!');
+        return redirect()->back()->with('success', 'পরীক্ষার ফলাফল এবং সংশ্লিষ্ট সকল তথ্য সফলভাবে মুছে ফেলা হয়েছে!');
     }
 
     /**
@@ -1077,12 +1075,9 @@ class AdminQuizController extends Controller
         $ids = $request->input('attempt_ids', []);
         $count = count($ids);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
-            \App\model\LmsQuizAnswer::whereIn('attempt_id', $ids)->delete();
-            \App\model\LmsQuizAttempt::whereIn('id', $ids)->delete();
-        });
+        \App\model\LmsQuizAttempt::deleteWithRelated($ids);
 
-        return redirect()->back()->with('success', "নির্বাচিত {$count}টি পরীক্ষার ফলাফল সফলভাবে মুছে ফেলা হয়েছে!");
+        return redirect()->back()->with('success', "নির্বাচিত {$count}টি পরীক্ষার ফলাফল এবং সংশ্লিষ্ট সকল তথ্য সফলভাবে মুছে ফেলা হয়েছে!");
     }
 
     /**
@@ -1103,12 +1098,10 @@ class AdminQuizController extends Controller
         $count = count($ids);
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
-            // 1. Delete quiz attempts and student answers
-            $attempts = \App\model\LmsQuizAttempt::whereIn('quiz_id', $ids)->get();
-            $attemptIds = $attempts->pluck('id')->toArray();
+            // 1. Delete quiz attempts and all related data (retakes, answers, violations, practice histories)
+            $attemptIds = \App\model\LmsQuizAttempt::whereIn('quiz_id', $ids)->pluck('id')->toArray();
             if (!empty($attemptIds)) {
-                \App\model\LmsQuizAnswer::whereIn('attempt_id', $attemptIds)->delete();
-                \App\model\LmsQuizAttempt::whereIn('id', $attemptIds)->delete();
+                \App\model\LmsQuizAttempt::deleteWithRelated($attemptIds);
             }
 
             // 2. Delete questions, options & student answers

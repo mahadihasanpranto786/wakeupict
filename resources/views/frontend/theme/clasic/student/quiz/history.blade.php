@@ -139,7 +139,7 @@
                     <div class="flex items-center gap-2 w-full md:w-auto">
                         <select name="status" class="py-2.5 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs focus:outline-none focus:border-blue-500 font-sans cursor-pointer w-full md:w-auto shadow-sm">
                             <option value="">সকল ফলাফল (All Status)</option>
-                            <option value="passed" {{ request('status') === 'passed' ? 'selected' : '' }}>১০০% পাস (100% Passed)</option>
+                            <option value="passed" {{ request('status') === 'passed' ? 'selected' : '' }}>উত্তীর্ণ (Passed)</option>
                             <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>পুনঃপরীক্ষা আবশ্যক (Failed)</option>
                         </select>
 
@@ -193,7 +193,7 @@
                                                 </span>
                                                 @if($hasPassed100)
                                                     <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                                                        {{ $passedAttempt->attempt_number }} বার চেষ্টায় ১০০% অর্জিত
+                                                        {{ $passedAttempt->attempt_number }} বার চেষ্টায় উত্তীর্ণ
                                                     </span>
                                                 @endif
                                             </div>
@@ -217,7 +217,7 @@
                                     <td class="p-4">
                                         @if($hasPassed100)
                                             <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                                                <i class="fa fa-check-circle mr-1"></i> Passed (১০০%)
+                                                <i class="fa fa-check-circle mr-1"></i> Passed (উত্তীর্ণ)
                                             </span>
                                         @else
                                             <span class="px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
@@ -258,7 +258,7 @@
                                                         পুনঃপরীক্ষা ট্র্যাকিং হিস্টোরি (Parent-Child Retake Chain)
                                                     </span>
                                                     <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                                                        {{ $hasPassed100 ? '১০০% সফল ফলাফল অর্জিত হয়েছে' : '১০০% অর্জনের জন্য পুনরায় চেষ্টা চলমান' }}
+                                                        {{ $hasPassed100 ? 'সফলভাবে উত্তীর্ণ হয়েছে' : 'উত্তীর্ণ হওয়ার জন্য পুনরায় চেষ্টা চলমান' }}
                                                     </span>
                                                 </div>
                                                 <div class="overflow-x-auto">
@@ -302,7 +302,7 @@
                                                                     <td class="py-2.5 px-3">
                                                                         @if($subPassed)
                                                                             <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
-                                                                                উত্তীর্ণ (100% Passed)
+                                                                                উত্তীর্ণ (Passed)
                                                                             </span>
                                                                         @else
                                                                             <span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-[10px]">

@@ -244,7 +244,7 @@
                                             <i class="fas fa-sitemap mr-1"></i> {{ $retakeCount }}টি রিটেক <i class="fas fa-chevron-down ml-0.5"></i>
                                         </button>
                                         @if($passedInChain)
-                                            <span class="badge badge-success px-1.5 py-0.5 ml-1 text-xs"><i class="fas fa-check-circle mr-0.5"></i> {{ $passedInChain->attempt_number }}ম বারে ১০০%</span>
+                                            <span class="badge badge-success px-1.5 py-0.5 ml-1 text-xs"><i class="fas fa-check-circle mr-0.5"></i> {{ $passedInChain->attempt_number }}ম বারে উত্তীর্ণ</span>
                                         @else
                                             <span class="badge badge-warning text-dark px-1.5 py-0.5 ml-1 text-xs">পুনঃচেষ্টা চলমান</span>
                                         @endif
@@ -277,7 +277,7 @@
                             <td class="text-center">
                                 @if($attempt->status === 'graded')
                                     @if($isPassed)
-                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (100% Pass)</span>
+                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (Passed)</span>
                                     @else
                                         <span class="badge badge-danger px-2 py-1"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
                                     @endif
@@ -370,15 +370,20 @@
                                                             </td>
                                                             <td>
                                                                 @if($subPassed)
-                                                                    <span class="badge badge-success px-2 py-0.5"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (100% Pass)</span>
+                                                                    <span class="badge badge-success px-2 py-0.5"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (Passed)</span>
                                                                 @else
                                                                     <span class="badge badge-danger px-2 py-0.5"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                <a href="{{ route('admin.quizzes.attempt-detail', $sub->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র দেখুন">
-                                                                    <i class="fas fa-eye mr-1"></i> Review
-                                                                </a>
+                                                                <div class="btn-group btn-group-xs">
+                                                                    <a href="{{ route('admin.quizzes.attempt-detail', $sub->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র দেখুন">
+                                                                        <i class="fas fa-eye mr-1"></i> Review
+                                                                    </a>
+                                                                    <button type="button" class="btn btn-xs btn-outline-danger" title="শুধু এই প্রচেষ্টার ফলাফল মুছুন" onclick="confirmSingleDelete({{ $sub->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'শিক্ষার্থী') }}')">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     @endforeach
