@@ -22,6 +22,22 @@ class PracticeQuestionRotationSystemTest extends TestCase
     {
         parent::setUp();
 
+        // Reset practice exam settings to clean defaults for test isolation
+        PracticeQuestionRotationService::saveSettings([
+            'question_count'        => 20,
+            'duration_minutes'      => 20,
+            'view_mode'             => 'all_questions',
+            'attempt_limit_type'    => 'unlimited',
+            'max_attempts'          => 0,
+            'allow_category_choice' => 1,
+            'allow_chapter_choice'  => 1,
+            'fixed_category'        => '',
+            'fixed_chapter'         => '',
+            'mark_per_question'     => 1,
+            'pass_percentage'       => 40,
+            'tiers'                 => PracticeQuestionRotationService::getDefaultTiers(),
+        ]);
+
         $this->student = StudentAccount::create([
             'name'     => 'Rotation Test Student',
             'phone'    => '01799' . rand(100000, 999999),
@@ -69,6 +85,21 @@ class PracticeQuestionRotationSystemTest extends TestCase
             LmsQuestionOption::where('question_id', $q->id)->delete();
             $q->delete();
         }
+
+        PracticeQuestionRotationService::saveSettings([
+            'question_count'        => 20,
+            'duration_minutes'      => 20,
+            'view_mode'             => 'all_questions',
+            'attempt_limit_type'    => 'unlimited',
+            'max_attempts'          => 0,
+            'allow_category_choice' => 1,
+            'allow_chapter_choice'  => 1,
+            'fixed_category'        => '',
+            'fixed_chapter'         => '',
+            'mark_per_question'     => 1,
+            'pass_percentage'       => 40,
+            'tiers'                 => PracticeQuestionRotationService::getDefaultTiers(),
+        ]);
 
         parent::tearDown();
     }
@@ -814,5 +845,206 @@ class PracticeQuestionRotationSystemTest extends TestCase
         // Clean up orphan & quiz
         LmsQuizAttempt::deleteWithRelated([$orphan->id]);
         $quiz->delete();
+    }
+
+    /**
+     * Test chapterwise student practice exam selection, dashboard breakdown,
+     * and switching chapters even with an active in-progress attempt of matching count.
+     */
+    public function testChapterwisePracticeExamSelectionDashboardAndSwitchFromInProgress()
+    {
+        $category = $this->testQuestions[0]->category;
+        $chapAlpha = 'ChapAlpha_' . rand(100, 999);
+        $chapBeta = 'ChapBeta_' . rand(100, 999);
+
+        // Assign 2 questions to Alpha and 3 to Beta
+        $this->testQuestions[0]->update(['chapter' => $chapAlpha]);
+        $this->testQuestions[1]->update(['chapter' => $chapAlpha]);
+        $this->testQuestions[2]->update(['chapter' => $chapBeta]);
+        $this->testQuestions[3]->update(['chapter' => $chapBeta]);
+        $this->testQuestions[4]->update(['chapter' => $chapBeta]);
+
+        // 1. Dashboard shows chapter selector and chapterwise coverage cards
+        $dash = $this->actingAs($this->student, 'student')
+            ->get(route('student.practice.index'));
+        $dash->assertStatus(200);
+        $dash->assertSee('name="chapter"', false);
+        $dash->assertSee($chapAlpha);
+        $dash->assertSee($chapBeta);
+        $dash->assertSee('Chapter-Wise Coverage');
+
+        // 2. Start 2-question chapterwise exam for Alpha
+        $resAlpha = $this->actingAs($this->student, 'student')
+            ->post(route('student.practice.start'), [
+                'category'       => $category,
+                'chapter'        => $chapAlpha,
+                'question_count' => 2,
+                'view_mode'      => 'all_questions',
+            ]);
+
+        $alphaAttempt = LmsQuizAttempt::where('student_account_id', $this->student->id)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($alphaAttempt);
+        $resAlpha->assertRedirect(route('student.quiz.take', $alphaAttempt->id));
+        $this->assertCount(2, $alphaAttempt->questions_snapshot);
+        foreach ($alphaAttempt->questions_snapshot as $snap) {
+            $this->assertEquals($chapAlpha, $snap['chapter']);
+        }
+
+        // 3. Immediately start 2-question chapterwise exam for Beta while Alpha is still in_progress (same count!)
+        $resBeta = $this->actingAs($this->student, 'student')
+            ->post(route('student.practice.start'), [
+                'category'       => $category,
+                'chapter'        => $chapBeta,
+                'question_count' => 2,
+                'view_mode'      => 'all_questions',
+            ]);
+
+        $betaAttempt = LmsQuizAttempt::where('student_account_id', $this->student->id)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($betaAttempt);
+        $this->assertNotEquals($alphaAttempt->id, $betaAttempt->id);
+        $resBeta->assertRedirect(route('student.quiz.take', $betaAttempt->id));
+        $this->assertCount(2, $betaAttempt->questions_snapshot);
+        foreach ($betaAttempt->questions_snapshot as $snap) {
+            $this->assertEquals($chapBeta, $snap['chapter']);
+        }
+
+        // Alpha attempt should have been auto-finalized rather than trapping the student
+        $alphaAttempt->refresh();
+        $this->assertNotEquals('in_progress', $alphaAttempt->status);
+
+        // Clean up generated practice quizzes & attempts
+        $quizIds = [$alphaAttempt->quiz_id, $betaAttempt->quiz_id];
+        LmsQuizAttempt::deleteWithRelated([$alphaAttempt->id, $betaAttempt->id]);
+        LmsQuiz::whereIn('id', $quizIds)->delete();
+    }
+
+    /**
+     * Test Admin can configure a fixed/default chapter in Practice Settings
+     * and it governs student practice dashboard & exam question pool.
+     */
+    public function testAdminCanSetFixedChapterInPracticeSettings()
+    {
+        $admin = User::first() ?: User::create([
+            'name'     => 'Settings Admin',
+            'email'    => 'settings_chap_' . rand(100, 999) . '@wakeupict.test',
+            'password' => Hash::make('password'),
+            'type'     => 'Admin',
+        ]);
+
+        $chapAlpha = 'FixedChapAlpha_' . rand(100, 999);
+        $chapBeta = 'FixedChapBeta_' . rand(100, 999);
+
+        $this->testQuestions[0]->update(['chapter' => $chapAlpha]);
+        $this->testQuestions[1]->update(['chapter' => $chapAlpha]);
+        $this->testQuestions[2]->update(['chapter' => $chapBeta]);
+        $this->testQuestions[3]->update(['chapter' => $chapBeta]);
+        $this->testQuestions[4]->update(['chapter' => $chapBeta]);
+
+        $originalSettings = PracticeQuestionRotationService::getSettings();
+
+        try {
+            // 1. /admin/quizzes renders the fixed_chapter dropdown with existing chapters, qty counts, ordered highest count first
+            $adminIndex = $this->actingAs($admin)->get(route('admin.quizzes.index'));
+            $adminIndex->assertStatus(200);
+            $adminIndex->assertSee('name="fixed_chapter"', false);
+            $adminIndex->assertSee($chapAlpha . ' (2 টি)');
+            $adminIndex->assertSee($chapBeta . ' (3 টি)');
+            $html = $adminIndex->getContent();
+            $this->assertLessThan(strpos($html, $chapAlpha . ' (2 টি)'), strpos($html, $chapBeta . ' (3 টি)'));
+
+            // 2. Save settings with allow_category_choice = 0 and fixed_chapter = $chapAlpha
+            $saveRes = $this->actingAs($admin)->post(route('admin.quizzes.practice-settings.update'), [
+                'tier_questions'     => [2],
+                'tier_durations'     => [5],
+                'tier_pass_marks'    => [1],
+                'tier_labels'        => ['২ টি প্রশ্ন (৫ মিনিট)'],
+                'view_mode'          => 'all_questions',
+                'attempt_limit_type' => 'unlimited',
+                'mark_per_question'  => 1,
+                'fixed_chapter'      => $chapAlpha,
+            ]);
+            $saveRes->assertRedirect();
+
+            $saved = PracticeQuestionRotationService::getSettings();
+            $this->assertEquals($chapAlpha, $saved['fixed_chapter']);
+            $this->assertFalse($saved['allow_category_choice']);
+            $this->assertFalse($saved['allow_chapter_choice']);
+
+            // 3. Student dashboard locks to fixed_chapter
+            $studentDash = $this->actingAs($this->student, 'student')
+                ->get(route('student.practice.index'));
+            $studentDash->assertStatus(200);
+            $studentDash->assertSee('নির্ধারিত অধ্যায়: ' . $chapAlpha);
+            $studentDash->assertDontSee('id="practiceChapterSelect"', false);
+
+            // 4. Even if request tries to specify $chapBeta, locked fixed_chapter ($chapAlpha) is enforced
+            $this->actingAs($this->student, 'student')
+                ->post(route('student.practice.start'), [
+                    'chapter'        => $chapBeta,
+                    'question_count' => 2,
+                ])
+                ->assertRedirect();
+
+            $attempt = LmsQuizAttempt::where('student_account_id', $this->student->id)
+                ->latest('id')
+                ->first();
+            $this->assertNotNull($attempt);
+            $this->assertCount(2, $attempt->questions_snapshot);
+            foreach ($attempt->questions_snapshot as $snap) {
+                $this->assertEquals($chapAlpha, $snap['chapter']);
+            }
+
+            $qIdToDelete = $attempt->quiz_id;
+            LmsQuizAttempt::deleteWithRelated([$attempt->id]);
+            LmsQuiz::where('id', $qIdToDelete)->delete();
+
+            $catTarget = $this->testQuestions[0]->category;
+
+            // 5. Admin can independently allow student chapter selection while keeping category locked (fixed_category), or vice versa
+            $this->actingAs($admin)->post(route('admin.quizzes.practice-settings.update'), [
+                'tier_questions'        => [2],
+                'tier_durations'        => [5],
+                'tier_pass_marks'       => [1],
+                'tier_labels'           => ['২ টি প্রশ্ন (৫ মিনিট)'],
+                'view_mode'             => 'all_questions',
+                'attempt_limit_type'    => 'unlimited',
+                'mark_per_question'     => 1,
+                'allow_chapter_choice'  => 1,
+                'fixed_category'        => $catTarget,
+                'fixed_chapter'         => '',
+            ])->assertRedirect();
+
+            $independent = PracticeQuestionRotationService::getSettings();
+            $this->assertFalse($independent['allow_category_choice']);
+            $this->assertTrue($independent['allow_chapter_choice']);
+            $this->assertEquals($catTarget, $independent['fixed_category']);
+
+            $studentIndependent = $this->actingAs($this->student, 'student')
+                ->get(route('student.practice.index'));
+            $studentIndependent->assertStatus(200);
+            $studentIndependent->assertSee('নির্ধারিত বিষয়: ' . $catTarget);
+            $studentIndependent->assertDontSee('id="practiceCategorySelect"', false);
+            $studentIndependent->assertSee('id="practiceChapterSelect"', false);
+        } finally {
+            // Restore original practice settings
+            PracticeQuestionRotationService::saveSettings([
+                'tiers'                 => $originalSettings['tiers'],
+                'question_count'        => $originalSettings['question_count'],
+                'duration_minutes'      => $originalSettings['duration_minutes'],
+                'view_mode'             => $originalSettings['view_mode'],
+                'attempt_limit_type'    => $originalSettings['attempt_limit_type'],
+                'max_attempts'          => $originalSettings['max_attempts'],
+                'allow_category_choice' => $originalSettings['allow_category_choice'] ? 1 : 0,
+                'allow_chapter_choice'  => ($originalSettings['allow_chapter_choice'] ?? true) ? 1 : 0,
+                'fixed_category'        => $originalSettings['fixed_category'] ?? '',
+                'fixed_chapter'         => $originalSettings['fixed_chapter'] ?? '',
+                'mark_per_question'     => $originalSettings['mark_per_question'],
+                'pass_percentage'       => $originalSettings['pass_percentage'],
+            ]);
+        }
     }
 }

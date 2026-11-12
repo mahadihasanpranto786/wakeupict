@@ -116,6 +116,9 @@ class PracticeQuestionRotationService
             'attempt_limit_type'       => $attemptLimitType,
             'max_attempts'             => $maxAttempts,
             'allow_category_choice'    => (bool) AppearanceSetting::getVal('practice_exam_allow_category_choice', 1),
+            'allow_chapter_choice'     => (bool) AppearanceSetting::getVal('practice_exam_allow_chapter_choice', 1),
+            'fixed_category'           => trim((string) AppearanceSetting::getVal('practice_exam_fixed_category', '')),
+            'fixed_chapter'            => trim((string) AppearanceSetting::getVal('practice_exam_fixed_chapter', '')),
             'mark_per_question'        => $markPerQuestion > 0 ? $markPerQuestion : 1.0,
             'pass_percentage'          => $passPercentage > 0 ? $passPercentage : 40.0,
             'negative_marking_enabled' => $negMarkingEnabled,
@@ -176,6 +179,17 @@ class PracticeQuestionRotationService
         if (isset($data['allow_category_choice'])) {
             AppearanceSetting::setVal('practice_exam_allow_category_choice', (int) $data['allow_category_choice'], (int) $data['allow_category_choice'], 'practice_exam');
         }
+        if (isset($data['allow_chapter_choice'])) {
+            AppearanceSetting::setVal('practice_exam_allow_chapter_choice', (int) $data['allow_chapter_choice'], (int) $data['allow_chapter_choice'], 'practice_exam');
+        }
+        if (array_key_exists('fixed_category', $data)) {
+            $catVal = trim((string) ($data['fixed_category'] ?? ''));
+            AppearanceSetting::setVal('practice_exam_fixed_category', $catVal, $catVal, 'practice_exam');
+        }
+        if (array_key_exists('fixed_chapter', $data)) {
+            $chapVal = trim((string) ($data['fixed_chapter'] ?? ''));
+            AppearanceSetting::setVal('practice_exam_fixed_chapter', $chapVal, $chapVal, 'practice_exam');
+        }
         if (isset($data['mark_per_question'])) {
             AppearanceSetting::setVal('practice_exam_mark_per_question', (float) $data['mark_per_question'], (float) $data['mark_per_question'], 'practice_exam');
         }
@@ -203,26 +217,80 @@ class PracticeQuestionRotationService
     }
 
     /**
+     * Apply optional category and chapter filters to an LmsQuestion query
+     */
+    protected function applyQuestionScope($query, $category = null, $chapter = null)
+    {
+        if ($category !== null && $category !== '') {
+            $query->where('category', $category);
+        }
+        if ($chapter !== null && $chapter !== '') {
+            $query->where('chapter', $chapter);
+        }
+        return $query;
+    }
+
+    /**
+     * Apply optional category and chapter filters to a student question history query
+     */
+    protected function applyHistoryScope($query, $category = null, $chapter = null)
+    {
+        if ($category !== null && $category !== '') {
+            $query->where('category', $category);
+        }
+        if ($chapter !== null && $chapter !== '') {
+            $query->whereHas('question', function ($q) use ($chapter) {
+                $q->where('chapter', $chapter);
+            });
+        }
+        return $query;
+    }
+
+    /**
+     * Build consistent practice quiz title for global, category, or chapterwise drills
+     */
+    public static function buildPracticeQuizTitle($category = null, $chapter = null)
+    {
+        $cat = $category !== null ? trim((string)$category) : '';
+        $chap = $chapter !== null ? trim((string)$chapter) : '';
+
+        if ($cat !== '' && $chap !== '') {
+            $title = "Question Bank Practice: {$cat} — {$chap}";
+        } elseif ($cat !== '') {
+            $title = "Question Bank Practice: {$cat}";
+        } elseif ($chap !== '') {
+            $title = "Question Bank Practice: {$chap}";
+        } else {
+            $title = "Question Bank Unlimited Practice Drill";
+        }
+
+        return \Illuminate\Support\Str::limit($title, 250, '');
+    }
+
+    /**
      * Get comprehensive Question Bank practice progress and metrics for a student
      *
      * @param int $studentId
      * @param string|null $category
+     * @param string|null $chapter
      * @return array
      */
-    public function getStudentProgress($studentId, $category = null)
+    public function getStudentProgress($studentId, $category = null, $chapter = null)
     {
         // 1. Total active questions in question bank (strictly MCQ format)
-        $qQuery = self::applyMcqConstraint(LmsQuestion::query());
-        if ($category) {
-            $qQuery->where('category', $category);
-        }
+        $qQuery = $this->applyQuestionScope(
+            self::applyMcqConstraint(LmsQuestion::query()),
+            $category,
+            $chapter
+        );
         $totalQuestions = $qQuery->count();
 
         // 2. Determine current active rotation cycle
-        $hQuery = LmsStudentQuestionHistory::where('student_account_id', $studentId);
-        if ($category) {
-            $hQuery->where('category', $category);
-        }
+        $hQuery = $this->applyHistoryScope(
+            LmsStudentQuestionHistory::where('student_account_id', $studentId),
+            $category,
+            $chapter
+        );
         $maxCycleRecorded = (int)($hQuery->max('rotation_cycle') ?: 1);
 
         // Count distinct questions attempted by student in the latest cycle
@@ -252,10 +320,11 @@ class PracticeQuestionRotationService
             ->whereIn('status', ['submitted', 'graded', 'timed_out'])
             ->count();
 
-        $allHistories = LmsStudentQuestionHistory::where('student_account_id', $studentId);
-        if ($category) {
-            $allHistories->where('category', $category);
-        }
+        $allHistories = $this->applyHistoryScope(
+            LmsStudentQuestionHistory::where('student_account_id', $studentId),
+            $category,
+            $chapter
+        );
 
         $correctCount = (clone $allHistories)->where('is_correct', true)->count();
         $incorrectCount = (clone $allHistories)->where('is_correct', false)->count();
@@ -306,6 +375,73 @@ class PracticeQuestionRotationService
             ];
         }
 
+        // 5. Chapters breakdown with progress per chapter (strictly MCQ format)
+        $rawChapterRows = self::applyMcqConstraint(LmsQuestion::query())
+            ->whereNotNull('chapter')
+            ->where('chapter', '!=', '')
+            ->select('chapter', 'category', DB::raw('count(*) as total'))
+            ->groupBy('chapter', 'category')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        $groupedChapters = [];
+        foreach ($rawChapterRows as $rcRow) {
+            $chapName = trim((string)$rcRow->chapter);
+            if ($chapName === '') {
+                continue;
+            }
+            if (!isset($groupedChapters[$chapName])) {
+                $groupedChapters[$chapName] = [
+                    'total'           => 0,
+                    'categories'      => [],
+                    'category_totals' => [],
+                ];
+            }
+            $rowCount = (int)$rcRow->total;
+            $groupedChapters[$chapName]['total'] += $rowCount;
+            $catLabel = trim((string)($rcRow->category ?? ''));
+            if ($catLabel !== '') {
+                if (!in_array($catLabel, $groupedChapters[$chapName]['categories'], true)) {
+                    $groupedChapters[$chapName]['categories'][] = $catLabel;
+                }
+                $groupedChapters[$chapName]['category_totals'][$catLabel] = ($groupedChapters[$chapName]['category_totals'][$catLabel] ?? 0) + $rowCount;
+            }
+        }
+
+        $chaptersData = [];
+        foreach ($groupedChapters as $chapName => $chapMeta) {
+            $chapTotal = (int)$chapMeta['total'];
+            $chapHQuery = $this->applyHistoryScope(
+                LmsStudentQuestionHistory::where('student_account_id', $studentId),
+                null,
+                $chapName
+            );
+            $chapCycle = (int)($chapHQuery->max('rotation_cycle') ?: 1);
+            $chapAttempted = (clone $chapHQuery)
+                ->where('rotation_cycle', $chapCycle)
+                ->distinct('question_id')
+                ->count('question_id');
+
+            if ($chapTotal > 0 && $chapAttempted >= $chapTotal) {
+                $chapCycle++;
+                $chapAttempted = 0;
+            }
+
+            $chapRemaining = max(0, $chapTotal - $chapAttempted);
+            $chapPct = $chapTotal > 0 ? round(($chapAttempted / $chapTotal) * 100, 1) : 0;
+
+            $chaptersData[] = [
+                'name'            => $chapName,
+                'total'           => $chapTotal,
+                'attempted'       => $chapAttempted,
+                'remaining'       => $chapRemaining,
+                'coverage_pct'    => $chapPct,
+                'cycle'           => $chapCycle,
+                'categories'      => $chapMeta['categories'],
+                'category_totals' => $chapMeta['category_totals'],
+            ];
+        }
+
         return [
             'total_questions'          => $totalQuestions,
             'attempted_questions'      => $attemptedInCurrentCycle,
@@ -317,7 +453,9 @@ class PracticeQuestionRotationService
             'incorrect_count'          => $incorrectCount,
             'accuracy_pct'             => $accuracyPct,
             'categories'               => $categoriesData,
+            'chapters'                 => $chaptersData,
             'active_category'          => $category,
+            'active_chapter'           => $chapter,
         ];
     }
 
@@ -328,17 +466,19 @@ class PracticeQuestionRotationService
      * @param int $studentId
      * @param string|null $category
      * @param int $questionCount
+     * @param string|null $chapter
      * @return array
      */
-    public function selectQuestionsForNewAttempt($studentId, $category = null, $questionCount = 20)
+    public function selectQuestionsForNewAttempt($studentId, $category = null, $questionCount = 20, $chapter = null)
     {
         $questionCount = max(1, min(100, (int)$questionCount));
 
         // 1. Determine active rotation cycle
-        $hQuery = LmsStudentQuestionHistory::where('student_account_id', $studentId);
-        if ($category) {
-            $hQuery->where('category', $category);
-        }
+        $hQuery = $this->applyHistoryScope(
+            LmsStudentQuestionHistory::where('student_account_id', $studentId),
+            $category,
+            $chapter
+        );
         $currentCycle = (int)($hQuery->max('rotation_cycle') ?: 1);
 
         // IDs attempted in this cycle
@@ -348,12 +488,11 @@ class PracticeQuestionRotationService
             ->toArray();
 
         // 2. Query unseen questions in current cycle (strictly MCQ format)
-        $unseenQuery = self::applyMcqConstraint(LmsQuestion::with('options'))
-            ->whereNotIn('id', $attemptedIds);
-
-        if ($category) {
-            $unseenQuery->where('category', $category);
-        }
+        $unseenQuery = $this->applyQuestionScope(
+            self::applyMcqConstraint(LmsQuestion::with('options'))->whereNotIn('id', $attemptedIds),
+            $category,
+            $chapter
+        );
 
         $unseenCount = (clone $unseenQuery)->count();
         $isNewCycle = false;
@@ -375,12 +514,12 @@ class PracticeQuestionRotationService
             $effectiveCycle = $nextCycle;
 
             // Pick remaining questions from the entire bank for the next cycle
-            $poolQuery = self::applyMcqConstraint(LmsQuestion::with('options'))
-                ->whereNotIn('id', $chosenQuestions->pluck('id')->toArray());
-
-            if ($category) {
-                $poolQuery->where('category', $category);
-            }
+            $poolQuery = $this->applyQuestionScope(
+                self::applyMcqConstraint(LmsQuestion::with('options'))
+                    ->whereNotIn('id', $chosenQuestions->pluck('id')->toArray()),
+                $category,
+                $chapter
+            );
 
             $moreQuestions = $poolQuery->inRandomOrder()->take($neededMore)->get();
             $chosenQuestions = $chosenQuestions->concat($moreQuestions);
@@ -391,11 +530,11 @@ class PracticeQuestionRotationService
             $isNewCycle = true;
             $effectiveCycle = $nextCycle;
 
-            $poolQuery = self::applyMcqConstraint(LmsQuestion::with('options'));
-
-            if ($category) {
-                $poolQuery->where('category', $category);
-            }
+            $poolQuery = $this->applyQuestionScope(
+                self::applyMcqConstraint(LmsQuestion::with('options')),
+                $category,
+                $chapter
+            );
 
             $chosenQuestions = $poolQuery->inRandomOrder()->take($questionCount)->get();
         }
@@ -414,11 +553,12 @@ class PracticeQuestionRotationService
         // If duplicate filtering dropped count below requested questionCount, replenish with more unique questions
         if ($distinctQuestions->count() < $questionCount) {
             $shortage = $questionCount - $distinctQuestions->count();
-            $morePool = self::applyMcqConstraint(LmsQuestion::with('options'))
-                ->whereNotIn('id', $distinctQuestions->pluck('id')->toArray());
-            if ($category) {
-                $morePool->where('category', $category);
-            }
+            $morePool = $this->applyQuestionScope(
+                self::applyMcqConstraint(LmsQuestion::with('options'))
+                    ->whereNotIn('id', $distinctQuestions->pluck('id')->toArray()),
+                $category,
+                $chapter
+            );
             $candidates = $morePool->inRandomOrder()->take($shortage * 3)->get();
             foreach ($candidates as $cand) {
                 $ch = $cand->question_hash ?: LmsQuestion::hashText($cand->question_text);
@@ -499,11 +639,13 @@ class PracticeQuestionRotationService
      * Find or create a dedicated system practice quiz instance for practice mode
      *
      * @param string|null $category
-     * @param int $questionCount
+     * @param int|null $questionCount
      * @param int|null $durationMinutes
+     * @param float|null $passMarksCustom
+     * @param string|null $chapter
      * @return LmsQuiz
      */
-    public function getOrCreatePracticeQuiz($category = null, $questionCount = null, $durationMinutes = null, $passMarksCustom = null)
+    public function getOrCreatePracticeQuiz($category = null, $questionCount = null, $durationMinutes = null, $passMarksCustom = null, $chapter = null)
     {
         $settings = self::getSettings();
         $count = $questionCount ? (int)self::toEnglishDigits($questionCount) : ($settings['question_count'] ?: 20);
@@ -511,9 +653,7 @@ class PracticeQuestionRotationService
             ? (int)self::toEnglishDigits($durationMinutes) 
             : ($settings['duration_minutes'] ?: max(10, min(120, (int)($count * 1.5))));
 
-        $title = $category 
-            ? "Question Bank Practice: {$category}" 
-            : "Question Bank Unlimited Practice Drill";
+        $title = self::buildPracticeQuizTitle($category, $chapter);
 
         $markPerQ = isset($settings['mark_per_question']) && (float)$settings['mark_per_question'] > 0 ? (float)$settings['mark_per_question'] : 1.0;
         $totalMarks = round($count * $markPerQ, 2);

@@ -101,10 +101,30 @@ class StudentQuizController extends Controller
     public function practiceTests(Request $request)
     {
         $student = Auth::guard('student')->user();
-        $selectedCategory = $request->filled('category') ? trim($request->input('category')) : null;
+        $practiceSettings = PracticeQuestionRotationService::getSettings();
+        $fixedCategory = !empty($practiceSettings['fixed_category']) ? $practiceSettings['fixed_category'] : null;
+        $fixedChapter  = !empty($practiceSettings['fixed_chapter']) ? $practiceSettings['fixed_chapter'] : null;
+        $allowCategoryChoice = !empty($practiceSettings['allow_category_choice']);
+        $allowChapterChoice  = !empty($practiceSettings['allow_chapter_choice']);
+
+        if ($allowCategoryChoice) {
+            $selectedCategory = $request->has('category')
+                ? (trim((string)$request->input('category')) ?: null)
+                : $fixedCategory;
+        } else {
+            $selectedCategory = $fixedCategory;
+        }
+
+        if ($allowChapterChoice) {
+            $selectedChapter = $request->has('chapter')
+                ? (trim((string)$request->input('chapter')) ?: null)
+                : $fixedChapter;
+        } else {
+            $selectedChapter = $fixedChapter;
+        }
         
         // 1. Comprehensive Question Bank Rotation Progress
-        $progress = $this->rotationService->getStudentProgress($student->id, $selectedCategory);
+        $progress = $this->rotationService->getStudentProgress($student->id, $selectedCategory, $selectedChapter);
 
         // 2. Recent practice attempts taken by student
         $recentAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
@@ -123,8 +143,7 @@ class StudentQuizController extends Controller
             })
             ->first();
 
-        // 4. Practice settings and student attempt limits
-        $practiceSettings = PracticeQuestionRotationService::getSettings();
+        // 4. Student attempt limits
         $completedPracticeAttempts = LmsQuizAttempt::where('student_account_id', $student->id)
             ->whereHas('quiz', function ($q) {
                 $q->where('quiz_type', 'practice');
@@ -140,7 +159,7 @@ class StudentQuizController extends Controller
         }
 
         return view('frontend.theme.clasic.student.quiz.practice', compact(
-            'student', 'progress', 'recentAttempts', 'selectedCategory', 'activePracticeAttempt',
+            'student', 'progress', 'recentAttempts', 'selectedCategory', 'selectedChapter', 'activePracticeAttempt',
             'practiceSettings', 'completedPracticeAttempts', 'isAttemptLimitReached'
         ));
     }
@@ -211,9 +230,25 @@ class StudentQuizController extends Controller
             $viewMode = in_array($practiceSettings['view_mode'], ['all_questions', 'one_by_one']) ? $practiceSettings['view_mode'] : 'all_questions';
         }
 
-        $category = null;
-        if ($practiceSettings['allow_category_choice'] && $request->filled('category')) {
-            $category = trim($request->input('category'));
+        $fixedCategory = !empty($practiceSettings['fixed_category']) ? $practiceSettings['fixed_category'] : null;
+        $fixedChapter  = !empty($practiceSettings['fixed_chapter']) ? $practiceSettings['fixed_chapter'] : null;
+        $allowCategoryChoice = !empty($practiceSettings['allow_category_choice']);
+        $allowChapterChoice  = !empty($practiceSettings['allow_chapter_choice']);
+
+        if ($allowCategoryChoice) {
+            $category = $request->has('category')
+                ? (trim((string)$request->input('category')) ?: null)
+                : $fixedCategory;
+        } else {
+            $category = $fixedCategory;
+        }
+
+        if ($allowChapterChoice) {
+            $chapter = $request->has('chapter')
+                ? (trim((string)$request->input('chapter')) ?: null)
+                : $fixedChapter;
+        } else {
+            $chapter = $fixedChapter;
         }
 
         // Check if existing in-progress attempt exists
@@ -224,14 +259,16 @@ class StudentQuizController extends Controller
             })
             ->first();
 
+        $expectedTitle = PracticeQuestionRotationService::buildPracticeQuizTitle($category, $chapter);
         if ($activeAttempt) {
             $quiz = $activeAttempt->quiz;
             $now = Carbon::now();
             $maxTime = $activeAttempt->started_at->copy()->addMinutes(($quiz ? $quiz->duration_minutes : 30) + 2);
 
             $existingCount = !empty($activeAttempt->questions_snapshot) ? count($activeAttempt->questions_snapshot) : 0;
-            // If time expired OR student starts a newly selected drill with different count:
-            if ($now->greaterThan($maxTime) || $existingCount !== $questionCount) {
+            $matchesTarget = $quiz && $quiz->title === $expectedTitle;
+            // If time expired OR student starts a newly selected drill with different count/category/chapter:
+            if ($now->greaterThan($maxTime) || $existingCount !== $questionCount || !$matchesTarget) {
                 $this->finalizeGrading($activeAttempt);
             } else {
                 return redirect()->route('student.quiz.take', $activeAttempt->id)->with([
@@ -241,14 +278,17 @@ class StudentQuizController extends Controller
         }
 
         // 1. Select rotated questions prioritizing unattempted questions
-        $selection = $this->rotationService->selectQuestionsForNewAttempt($student->id, $category, $questionCount);
+        $selection = $this->rotationService->selectQuestionsForNewAttempt($student->id, $category, $questionCount, $chapter);
         $questions = $selection['questions'];
         $cycle = $selection['cycle'];
         $isNewCycle = $selection['is_new_cycle'];
 
         if ($questions->isEmpty()) {
-            return redirect()->route('student.practice.index')->with([
-                'error' => 'অনুশীলনের জন্য প্রশ্ন ব্যাংকে কোনো সক্রিয় প্রশ্ন পাওয়া যায়নি।',
+            return redirect()->route('student.practice.index', array_filter([
+                'category' => $category,
+                'chapter'  => $chapter,
+            ]))->with([
+                'error' => 'অনুশীলনের জন্য নির্বাচিত বিষয় বা অধ্যায়ে প্রশ্ন ব্যাংকে কোনো সক্রিয় MCQ প্রশ্ন পাওয়া যায়নি।',
             ]);
         }
 
@@ -302,7 +342,7 @@ class StudentQuizController extends Controller
         $passMarksReq = $matchedPassMarks !== null
             ? $matchedPassMarks
             : ($request->filled('pass_marks') ? (float)$this->rotationService->toEnglishDigits($request->input('pass_marks')) : null);
-        $quiz = $this->rotationService->getOrCreatePracticeQuiz($category, count($questions), $durationMinutes, $passMarksReq);
+        $quiz = $this->rotationService->getOrCreatePracticeQuiz($category, count($questions), $durationMinutes, $passMarksReq, $chapter);
 
         $attemptNumber = LmsQuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_account_id', $student->id)

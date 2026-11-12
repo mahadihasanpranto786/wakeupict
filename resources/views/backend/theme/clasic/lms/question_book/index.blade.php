@@ -308,6 +308,19 @@
                         </select>
                     </div>
 
+                    <!-- Chapter Filter -->
+                    <div class="col-md-2 col-6 mb-1.5">
+                        <select name="chapter" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
+                            <option value="">-- সকল অধ্যায় --</option>
+                            @foreach($chapters as $chap)
+                                @php $chapQty = $chapterCounts[$chap] ?? 0; @endphp
+                                <option value="{{ $chap }}" {{ request('chapter') == $chap ? 'selected' : '' }}>
+                                    {{ $chap }} ({{ $chapQty }} টি)
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Question Type -->
                     <div class="col-md-2 col-6 mb-1.5">
                         <select name="question_type" class="form-control form-control-sm custom-select custom-select-sm" onchange="this.form.submit()">
@@ -388,6 +401,7 @@
                         <option value="add_to_quiz">কুইজ / পরীক্ষায় যুক্ত করুন</option>
                         <option value="add_to_paper">প্রশ্নপত্রে যুক্ত করুন</option>
                         <option value="categorize">ক্যাটাগরি পরিবর্তন</option>
+                        <option value="set_chapter">অধ্যায় পরিবর্তন</option>
                         <option value="export_csv">সিএসভি (CSV) এক্সপোর্ট</option>
                         <option value="archive">আর্কাইভে সরান</option>
                     </select>
@@ -418,6 +432,11 @@
                     <!-- New Category Input (shown when categorize selected) -->
                     <div id="bulkCategoryWrapper" class="mr-2" style="display: none;">
                         <input type="text" name="bulk_category" class="form-control form-control-sm" placeholder="নতুন ক্যাটাগরি নাম" style="width: 160px;">
+                    </div>
+
+                    <!-- New Chapter Input (shown when set_chapter selected) -->
+                    <div id="bulkChapterWrapper" class="mr-2" style="display: none;">
+                        <input type="text" name="bulk_chapter" class="form-control form-control-sm" placeholder="নতুন অধ্যায়ের নাম" list="qbChapterDatalist" style="width: 160px;">
                     </div>
 
                     <button type="submit" class="btn btn-sm btn-dark" id="bulkSubmitBtn" disabled>
@@ -1561,6 +1580,7 @@
             var bulkActionSelect = document.getElementById('bulkActionSelect');
             var targetPaperWrapper = document.getElementById('targetPaperWrapper');
             var bulkCategoryWrapper = document.getElementById('bulkCategoryWrapper');
+            var bulkChapterWrapper = document.getElementById('bulkChapterWrapper');
 
             function updateBulkCount() {
                 var checked = document.querySelectorAll('.question-checkbox:checked').length;
@@ -1586,20 +1606,19 @@
             if (bulkActionSelect) {
                 bulkActionSelect.addEventListener('change', function () {
                     var targetQuizWrapper = document.getElementById('targetQuizWrapper');
-                    if (this.value === 'add_to_quiz') {
-                        if (targetQuizWrapper) targetQuizWrapper.style.display = 'block';
-                        if (targetPaperWrapper) targetPaperWrapper.style.display = 'none';
-                        if (bulkCategoryWrapper) bulkCategoryWrapper.style.display = 'none';
-                    } else if (this.value === 'add_to_paper') {
-                        if (targetQuizWrapper) targetQuizWrapper.style.display = 'none';
+                    if (targetQuizWrapper) targetQuizWrapper.style.display = 'none';
+                    if (targetPaperWrapper) targetPaperWrapper.style.display = 'none';
+                    if (bulkCategoryWrapper) bulkCategoryWrapper.style.display = 'none';
+                    if (bulkChapterWrapper) bulkChapterWrapper.style.display = 'none';
+
+                    if (this.value === 'add_to_quiz' && targetQuizWrapper) {
+                        targetQuizWrapper.style.display = 'block';
+                    } else if (this.value === 'add_to_paper' && targetPaperWrapper) {
                         targetPaperWrapper.style.display = 'block';
-                        bulkCategoryWrapper.style.display = 'none';
-                    } else if (this.value === 'categorize') {
-                        targetPaperWrapper.style.display = 'none';
+                    } else if (this.value === 'categorize' && bulkCategoryWrapper) {
                         bulkCategoryWrapper.style.display = 'block';
-                    } else {
-                        targetPaperWrapper.style.display = 'none';
-                        bulkCategoryWrapper.style.display = 'none';
+                    } else if (this.value === 'set_chapter' && bulkChapterWrapper) {
+                        bulkChapterWrapper.style.display = 'block';
                     }
                     updateBulkCount();
                 });

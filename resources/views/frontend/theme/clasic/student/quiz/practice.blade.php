@@ -241,43 +241,97 @@
             @csrf
 
             <div class="grid grid-cols-1 {{ $practiceSettings['view_mode'] === 'student_choice' ? 'md:grid-cols-3' : 'md:grid-cols-2' }} gap-5">
-                <!-- Select Category -->
+                @php
+                    $showCatSelect = !empty($practiceSettings['allow_category_choice']);
+                    $showChapSelect = (bool)($practiceSettings['allow_chapter_choice'] ?? true);
+                @endphp
+                <!-- Select Category & Chapter (Controlled independently by Admin permissions) -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                        ১. বিষয় বা অধ্যায় নির্বাচন করুন
+                        @if($showCatSelect && $showChapSelect)
+                            ১. বিষয় বা অধ্যায় নির্বাচন করুন
+                        @elseif($showCatSelect)
+                            ১. বিষয় নির্বাচন করুন
+                        @elseif($showChapSelect)
+                            ১. অধ্যায় নির্বাচন করুন
+                        @else
+                            ১. নির্ধারিত পরীক্ষার বিষয়/অধ্যায়
+                        @endif
                     </label>
-                    @if($practiceSettings['allow_category_choice'])
-                    <select name="category" {{ $isAttemptLimitReached ? 'disabled' : '' }} class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
-                        <option value="" {{ empty($selectedCategory) ? 'selected' : '' }}>
-                            সব বিষয় মিলিয়ে (সম্পূর্ণ প্রশ্ন ব্যাংক: {{ $progress['total_questions'] }} টি)
-                        </option>
-                        @foreach($progress['categories'] as $cat)
-                        <option value="{{ $cat['name'] }}" {{ $selectedCategory === $cat['name'] ? 'selected' : '' }}>
-                            {{ $cat['name'] }} ({{ $cat['total'] }} টি প্রশ্ন — অবশিষ্ট {{ $cat['remaining'] }} টি)
-                        </option>
-                        @endforeach
-                    </select>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                        নির্দিষ্ট বিষয়ে দুর্বলতা কাটাতে ক্যাটাগরি সিলেক্ট করতে পারেন।
-                    </p>
+
+                    @if($showCatSelect || $showChapSelect)
+                    <div class="grid grid-cols-1 {{ ($showCatSelect && $showChapSelect) ? 'sm:grid-cols-2' : '' }} gap-2.5">
+                        @if($showCatSelect)
+                        <select name="category" id="practiceCategorySelect" {{ $isAttemptLimitReached ? 'disabled' : '' }} onchange="filterPracticeChaptersByCategory()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
+                            <option value="" {{ empty($selectedCategory) ? 'selected' : '' }}>
+                                সব বিষয় মিলিয়ে (সম্পূর্ণ প্রশ্ন ব্যাংক: {{ $progress['total_questions'] }} টি)
+                            </option>
+                            @foreach($progress['categories'] as $cat)
+                            <option value="{{ $cat['name'] }}" {{ $selectedCategory === $cat['name'] ? 'selected' : '' }}>
+                                {{ $cat['name'] }} ({{ $cat['total'] }} টি প্রশ্ন — অবশিষ্ট {{ $cat['remaining'] }} টি)
+                            </option>
+                            @endforeach
+                        </select>
+                        @else
+                        <input type="hidden" name="category" id="practiceCategoryLocked" value="{{ $practiceSettings['fixed_category'] ?? '' }}">
+                        @endif
+
+                        @if($showChapSelect)
+                        <select name="chapter" id="practiceChapterSelect" {{ $isAttemptLimitReached ? 'disabled' : '' }} class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
+                            <option value="" {{ empty($selectedChapter) ? 'selected' : '' }}>
+                                সকল অধ্যায় (Chapterwise)
+                            </option>
+                            @foreach($progress['chapters'] ?? [] as $chap)
+                            <option value="{{ $chap['name'] }}"
+                                    data-categories='@json($chap["categories"] ?? [])'
+                                    data-category-totals='@json($chap["category_totals"] ?? [])'
+                                    data-total="{{ $chap['total'] }}"
+                                    data-remaining="{{ $chap['remaining'] }}"
+                                    {{ ($selectedChapter ?? null) === $chap['name'] ? 'selected' : '' }}>
+                                {{ $chap['name'] }} ({{ $chap['total'] }} টি — অবশিষ্ট {{ $chap['remaining'] }} টি)
+                            </option>
+                            @endforeach
+                        </select>
+                        @else
+                        <input type="hidden" name="chapter" id="practiceChapterLocked" value="{{ $practiceSettings['fixed_chapter'] ?? '' }}">
+                        @endif
+                    </div>
                     @else
-                    <div class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm flex items-center justify-between">
-                        <span>সব বিষয় মিলিয়ে (সম্পূর্ণ প্রশ্ন ব্যাংক)</span>
-                        <span class="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                    <div class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm flex items-center justify-between gap-2">
+                        <span class="truncate">
+                            @if(!empty($practiceSettings['fixed_chapter']))
+                                নির্ধারিত অধ্যায়: {{ $practiceSettings['fixed_chapter'] }}
+                            @elseif(!empty($practiceSettings['fixed_category']))
+                                নির্ধারিত বিষয়: {{ $practiceSettings['fixed_category'] }}
+                            @else
+                                সব বিষয় মিলিয়ে (সম্পূর্ণ প্রশ্ন ব্যাংক)
+                            @endif
+                        </span>
+                        <span class="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 shrink-0">
                             {{ $progress['total_questions'] }} টি প্রশ্ন
                         </span>
                     </div>
-                    <input type="hidden" name="category" value="">
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                        সম্পূর্ণ প্রশ্ন ব্যাংক থেকে স্বয়ংক্রিয় রোটেশন পদ্ধতিতে প্রশ্ন সিলেক্ট হবে।
-                    </p>
+                    <input type="hidden" name="category" id="practiceCategoryLocked" value="{{ $practiceSettings['fixed_category'] ?? '' }}">
+                    <input type="hidden" name="chapter" id="practiceChapterLocked" value="{{ $practiceSettings['fixed_chapter'] ?? '' }}">
                     @endif
+
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                        @if($showCatSelect && $showChapSelect)
+                            নির্দিষ্ট বিষয় বা অধ্যায়ভিত্তিক পরীক্ষা দিতে ক্যাটাগরি/অধ্যায় সিলেক্ট করুন।
+                        @elseif(!$showCatSelect && !$showChapSelect)
+                            অ্যাডমিন কর্তৃক নির্ধারিত বিষয় ও অধ্যায় থেকে স্বয়ংক্রিয় রোটেশন পদ্ধতিতে প্রশ্ন সিলেক্ট হবে।
+                        @elseif($showChapSelect)
+                            {{ !empty($practiceSettings['fixed_category']) ? ('নির্ধারিত বিষয়: ' . $practiceSettings['fixed_category'] . ' — ') : '' }}আপনার পছন্দের অধ্যায় (Chapterwise) বেছে নিতে পারেন।
+                        @else
+                            {{ !empty($practiceSettings['fixed_chapter']) ? ('নির্ধারিত অধ্যায়: ' . $practiceSettings['fixed_chapter'] . ' — ') : '' }}অ্যাডমিনের নির্ধারিত অধ্যায়ের অধীনে পরীক্ষা অনুষ্ঠিত হবে।
+                        @endif
+                    </p>
                 </div>
 
                 <!-- Select Question Count & Duration Tier -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                        ২. প্রশ্নের সংখ্যা ও সময় (Questions & Time)
+                        ২. প্রশ্নের সংখ্যা ও সময় (Questions &amp; Time)
                     </label>
                     @php
                         $selectedTier = null;
@@ -403,6 +457,68 @@
             @endforelse
         </div>
     </div>
+
+    <!-- Chapter-Wise Practice Cards Grid -->
+    @if(!empty($progress['chapters']))
+    <div class="space-y-3.5">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    অধ্যায়ভিত্তিক প্রশ্ন ব্যাংক অগ্রগতি (Chapter-Wise Coverage)
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    যেকোনো নির্দিষ্ট অধ্যায়ের ওপর সরাসরি অধ্যায়ভিত্তিক অনুশীলন পরীক্ষা শুরু করুন।
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            @foreach($progress['chapters'] as $chapterItem)
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate" title="{{ $chapterItem['name'] }}">
+                                {{ $chapterItem['name'] }}
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 shrink-0">
+                                C#{{ $chapterItem['cycle'] }}
+                            </span>
+                        </div>
+                        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 shrink-0">
+                            {{ $chapterItem['coverage_pct'] }}%
+                        </span>
+                    </div>
+
+                    @if(!empty($chapterItem['categories']))
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate mb-2">
+                        বিষয়: {{ implode(', ', $chapterItem['categories']) }}
+                    </div>
+                    @endif
+
+                    <div class="w-full h-2 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA] rounded-full transition-all" style="width: {{ $chapterItem['coverage_pct'] }}%"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    <span>মোট: <strong class="text-slate-800 dark:text-slate-200 font-bold">{{ $chapterItem['total'] }}</strong> | অবশিষ্ট: <strong class="text-amber-600 dark:text-amber-400 font-bold">{{ $chapterItem['remaining'] }}</strong></span>
+                    @if(($practiceSettings['allow_chapter_choice'] ?? true) && !$isAttemptLimitReached && (empty($selectedCategory) || $practiceSettings['allow_category_choice'] || in_array($selectedCategory, $chapterItem['categories'] ?? [])))
+                    <button type="button"
+                            data-chapter="{{ $chapterItem['name'] }}"
+                            data-primary-category="{{ count($chapterItem['categories'] ?? []) === 1 ? $chapterItem['categories'][0] : '' }}"
+                            onclick="startChapterPractice(this)"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-600 hover:text-white text-blue-700 dark:text-blue-300 font-bold transition-all text-[11px] cursor-pointer">
+                        <span>পরীক্ষা দিন</span>
+                        <i class="fa fa-arrow-right text-[10px]"></i>
+                    </button>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <!-- Recent Practice Exam History Table -->
     <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3.5">
@@ -554,6 +670,57 @@ function handlePracticeFormSubmit(e) {
     return true;
 }
 
+function filterPracticeChaptersByCategory() {
+    var catField = document.getElementById('practiceCategorySelect') || document.getElementById('practiceCategoryLocked');
+    var chapSelect = document.getElementById('practiceChapterSelect');
+    if (!catField || !chapSelect) return;
+
+    var selectedCat = catField.value || '';
+    var hasVisibleSelected = false;
+
+    for (var i = 0; i < chapSelect.options.length; i++) {
+        var opt = chapSelect.options[i];
+        if (!opt.value) {
+            opt.style.display = '';
+            opt.disabled = false;
+            continue;
+        }
+        var cats = [];
+        try {
+            cats = JSON.parse(opt.getAttribute('data-categories') || '[]');
+        } catch (err) {
+            cats = [];
+        }
+        var matches = !selectedCat || cats.indexOf(selectedCat) !== -1;
+        opt.style.display = matches ? '' : 'none';
+        opt.disabled = !matches;
+        if (matches && opt.selected) {
+            hasVisibleSelected = true;
+        }
+    }
+
+    if (!hasVisibleSelected && chapSelect.value) {
+        chapSelect.value = '';
+    }
+}
+
+function startChapterPractice(btn) {
+    if (!btn) return;
+    var chapter = btn.getAttribute('data-chapter') || '';
+    var primaryCat = btn.getAttribute('data-primary-category') || '';
+    var catSelect = document.getElementById('practiceCategorySelect');
+    var chapSelect = document.getElementById('practiceChapterSelect');
+
+    if (catSelect) {
+        catSelect.value = primaryCat;
+        filterPracticeChaptersByCategory();
+    }
+    if (chapSelect) {
+        chapSelect.value = chapter;
+    }
+    confirmPracticeStart();
+}
+
 function confirmPracticeStart(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -561,15 +728,28 @@ function confirmPracticeStart(e) {
     var form = document.getElementById('form-practice-start');
     if (!form) return;
 
-    var catSelect = form.querySelector('select[name="category"]');
+    var catField = form.querySelector('[name="category"]');
+    var chapField = form.querySelector('[name="chapter"]');
     var qSelect = form.querySelector('select[name="question_count"]');
 
-    var catText = catSelect && catSelect.selectedIndex >= 0 ? catSelect.options[catSelect.selectedIndex].text : 'সব বিষয় মিলিয়ে';
+    var catText = 'সব বিষয় মিলিয়ে';
+    if (catField) {
+        if (catField.tagName === 'SELECT' && catField.selectedIndex >= 0) {
+            catText = catField.options[catField.selectedIndex].text.split('(')[0].trim();
+        } else if (catField.value) {
+            catText = catField.value;
+        }
+    }
+    var chapVal = chapField ? chapField.value : '';
+    var chapText = chapField && chapField.tagName === 'SELECT' && chapField.selectedIndex >= 0 && chapVal
+        ? chapField.options[chapField.selectedIndex].text.split('(')[0].trim()
+        : chapVal;
+    var scopeSummary = chapText ? (catField && catField.value ? catText + ' — ' + chapText : chapText) : catText;
     var qText = qSelect && qSelect.selectedIndex >= 0 ? qSelect.options[qSelect.selectedIndex].text : '১০ টি প্রশ্ন';
 
     var cEl = document.getElementById('modal-confirm-category');
     var qEl = document.getElementById('modal-confirm-qcount');
-    if (cEl) cEl.innerText = catText.split('(')[0].trim();
+    if (cEl) cEl.innerText = scopeSummary;
     if (qEl) qEl.innerText = qText;
 
     var modal = document.getElementById('practice-start-confirm-modal');
@@ -608,6 +788,7 @@ function proceedPracticeStart() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    filterPracticeChaptersByCategory();
     var select = document.getElementById('tierSelect');
     if (select) {
         syncPracticeTier(select);

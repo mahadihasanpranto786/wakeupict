@@ -826,4 +826,148 @@ class AdminCertificateAndQuizImportTest extends TestCase
         $libMcq->delete();
         $libShort->delete();
     }
+
+    /**
+     * Test Admin can filter and import Question Library items by chapter into a quiz.
+     */
+    public function test_admin_can_import_library_questions_by_chapter()
+    {
+        $chapA = 'ChapterImportA_' . rand(100, 999);
+        $chapB = 'ChapterImportB_' . rand(100, 999);
+
+        $qA = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Chapter Import Q A ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'category'      => 'Office Application',
+            'chapter'       => $chapA,
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+        $qB = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Chapter Import Q B ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'category'      => 'Office Application',
+            'chapter'       => $chapB,
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Chapterwise Quiz ' . $chapA,
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 15,
+            'total_marks'      => 0,
+            'pass_marks'       => 1,
+            'is_published'     => true,
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.quizzes.import-from-library', $quiz->id), [
+                'source_mode' => 'chapter',
+                'chapter'     => $chapA,
+                'count'       => 10,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $imported = LmsQuestion::where('quiz_id', $quiz->id)->get();
+        $this->assertCount(1, $imported);
+        $this->assertEquals($chapA, $imported->first()->chapter);
+        $this->assertEquals($qA->question_text, $imported->first()->question_text);
+
+        // Clean up
+        LmsQuestion::where('quiz_id', $quiz->id)->delete();
+        $quiz->delete();
+        $qA->delete();
+        $qB->delete();
+    }
+
+    /**
+     * Test Paper Builder, Question Book, and Quizzes Library Import modal
+     * all expose and filter/assign by chapter wherever category is supported.
+     */
+    public function test_paper_builder_and_question_book_support_chapter_filtering_and_bulk_update()
+    {
+        $chapAlpha = 'BuilderChapA_' . rand(100, 999);
+        $chapBeta = 'BuilderChapB_' . rand(100, 999);
+
+        $qA = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Builder Chap Alpha Q ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'category'      => 'Networking',
+            'chapter'       => $chapAlpha,
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+        $qB = LmsQuestion::create([
+            'course_id'     => $this->course->id,
+            'quiz_id'       => null,
+            'question_text' => 'Builder Chap Beta Q ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'category'      => 'Networking',
+            'chapter'       => $chapBeta,
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+
+        $paper = \App\model\LmsQuestionPaper::create([
+            'paper_code' => 'TEST-CHAP-' . rand(10000, 99999),
+            'title'      => 'Chapter Filter Paper Test',
+            'course_id'  => $this->course->id,
+            'status'     => 'draft',
+            'created_by' => $this->adminUser->id,
+        ]);
+
+        try {
+            // 1. Paper Builder renders chapter filter & honors library_chapter query
+            $builderRes = $this->actingAs($this->adminUser)
+                ->get(route('admin.question-papers.builder', $paper->id) . '?library_chapter=' . urlencode($chapAlpha));
+            $builderRes->assertStatus(200);
+            $builderRes->assertSee('id="libChapterFilter"', false);
+            $builderRes->assertSee($qA->question_text);
+            $builderRes->assertDontSee($qB->question_text);
+
+            // 2. Paper Builder AJAX library-questions filters by chapter
+            $ajaxRes = $this->actingAs($this->adminUser)
+                ->getJson(route('admin.question-papers.library-questions', $paper->id) . '?chapter=' . urlencode($chapBeta));
+            $ajaxRes->assertStatus(200)
+                ->assertJson(['success' => true, 'total' => 1])
+                ->assertJsonFragment(['question_text' => $qB->question_text])
+                ->assertJsonMissing(['question_text' => $qA->question_text]);
+
+            // 3. Question Book renders chapter filter & supports bulk set_chapter
+            $qbRes = $this->actingAs($this->adminUser)->get(route('admin.question-book.index'));
+            $qbRes->assertStatus(200);
+            $qbRes->assertSee('name="chapter"', false);
+            $qbRes->assertSee('value="set_chapter"', false);
+
+            $updatedChap = 'UpdatedChap_' . rand(100, 999);
+            $this->actingAs($this->adminUser)
+                ->post(route('admin.question-book.bulk-action'), [
+                    'action'       => 'set_chapter',
+                    'selected_ids' => [$qA->id],
+                    'bulk_chapter' => $updatedChap,
+                ])
+                ->assertRedirect();
+
+            $qA->refresh();
+            $this->assertEquals($updatedChap, $qA->chapter);
+        } finally {
+            $paper->delete();
+            $qA->delete();
+            $qB->delete();
+        }
+    }
 }

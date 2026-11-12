@@ -171,6 +171,10 @@ class QuestionPaperBuilderController extends Controller
             $qQuery->where('category', $request->library_category);
         }
 
+        if ($request->filled('library_chapter')) {
+            $qQuery->where('chapter', $request->library_chapter);
+        }
+
         if ($request->filled('library_type')) {
             $qQuery->where('question_type', $request->library_type);
         }
@@ -183,7 +187,14 @@ class QuestionPaperBuilderController extends Controller
 
         // Category & chapter lists for filters and auto-pick
         $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
-        $chapters = LmsQuestion::whereNotNull('chapter')->where('chapter', '!=', '')->distinct()->pluck('chapter')->sort()->values();
+        $chapterCounts = LmsQuestion::whereNotNull('chapter')
+            ->where('chapter', '!=', '')
+            ->select('chapter', DB::raw('count(*) as total'))
+            ->groupBy('chapter')
+            ->orderBy('total', 'desc')
+            ->orderBy('chapter', 'asc')
+            ->pluck('total', 'chapter');
+        $chapters = $chapterCounts->keys()->values();
         $courseCounts = LmsQuestion::where('is_archived', false)
             ->select('course_id', DB::raw('count(*) as q_count'))
             ->groupBy('course_id')
@@ -202,7 +213,7 @@ class QuestionPaperBuilderController extends Controller
         $calculatedMarks = $paper->items->sum('marks');
 
         return view('backend.theme.clasic.lms.question_papers.builder', compact(
-            'paper', 'libraryQuestions', 'categories', 'chapters', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks', 'totalQuestionsInLib'
+            'paper', 'libraryQuestions', 'categories', 'chapters', 'chapterCounts', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks', 'totalQuestionsInLib'
         ));
     }
 
@@ -291,6 +302,10 @@ class QuestionPaperBuilderController extends Controller
 
         if ($request->filled('category')) {
             $qQuery->where('category', $request->category);
+        }
+
+        if ($request->filled('chapter')) {
+            $qQuery->where('chapter', $request->chapter);
         }
 
         $typeParam = $request->input('type') ?: $request->input('question_type');
