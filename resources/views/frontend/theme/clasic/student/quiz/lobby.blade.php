@@ -131,7 +131,7 @@
             </div>
             <div class="quiz-card-inner p-4 rounded-2xl border text-center font-mono">
                 <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-sans">Pass Marks</span>
-                <span class="text-xl font-black text-amber-500">{{ (int)$quiz->pass_marks }}</span>
+                <span class="text-xl font-black text-amber-500">{{ (float)$quiz->pass_marks }}</span>
             </div>
         </div>
 

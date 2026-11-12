@@ -656,4 +656,163 @@ class PracticeQuestionRotationSystemTest extends TestCase
         // Must NOT show Passed or Grade B when failed
         $resultRes->assertDontSee('উত্তীর্ণ (Assessment Passed)');
     }
+
+    /**
+     * Test deleting single or bulk quiz attempts from admin reports cascades to retakes,
+     * answers, violations, and student practice question histories, updating /student/practice counts and list.
+     */
+    public function testDeletingAttemptFromAdminReportsDeletesAllRelatedPracticeData()
+    {
+        $admin = User::first() ?: User::create([
+            'name'     => 'Admin Cascade Test',
+            'email'    => 'admin_cascade_' . rand(1000, 9999) . '@wakeupict.test',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        $category = $this->testQuestions[0]->category;
+        $service = app(PracticeQuestionRotationService::class);
+
+        $quiz = LmsQuiz::create([
+            'title'            => 'Question Bank Practice: ' . $category,
+            'quiz_type'        => 'practice',
+            'duration_minutes' => 10,
+            'total_marks'      => 2,
+            'pass_marks'       => 1,
+            'is_published'     => true,
+        ]);
+
+        // Root attempt 1 (2 questions) + Retake 1 (1 question)
+        $root1 = LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 1,
+            'score'              => 1,
+            'total_marks'        => 2,
+            'percentage'         => 50,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+        $retake1 = LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'parent_attempt_id'  => $root1->id,
+            'attempt_number'     => 2,
+            'score'              => 2,
+            'total_marks'        => 2,
+            'percentage'         => 100,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+
+        // Root attempt 2 (1 question) + Retake 2
+        $root2 = LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'attempt_number'     => 3,
+            'score'              => 1,
+            'total_marks'        => 1,
+            'percentage'         => 100,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+        $retake2 = LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'parent_attempt_id'  => $root2->id,
+            'attempt_number'     => 4,
+            'score'              => 1,
+            'total_marks'        => 1,
+            'percentage'         => 100,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+
+        foreach ([$root1, $retake1, $root2, $retake2] as $att) {
+            \App\model\LmsQuizAnswer::create([
+                'attempt_id'     => $att->id,
+                'question_id'    => $this->testQuestions[0]->id,
+                'marks_obtained' => 1,
+                'is_correct'     => true,
+            ]);
+            \App\model\LmsExamViolation::create([
+                'attempt_id'         => $att->id,
+                'student_account_id' => $this->student->id,
+                'quiz_id'            => $quiz->id,
+                'violation_type'     => 'tab_switch',
+            ]);
+        }
+
+        // Record distinct question histories across root1 (q0, q1), retake1 (q2), root2 (q3), retake2 (q4)
+        $service->recordAttemptQuestions($root1, collect([$this->testQuestions[0], $this->testQuestions[1]]), $this->student->id, 1);
+        $service->recordAttemptQuestions($retake1, collect([$this->testQuestions[2]]), $this->student->id, 1);
+        $service->recordAttemptQuestions($root2, collect([$this->testQuestions[3]]), $this->student->id, 1);
+        $service->recordAttemptQuestions($retake2, collect([$this->testQuestions[4]]), $this->student->id, 1);
+
+        $beforeProgress = $service->getStudentProgress($this->student->id, $category);
+        $this->assertEquals(5, $beforeProgress['total_questions']);
+        $this->assertEquals(4, $beforeProgress['total_exams_completed']);
+        $this->assertEquals(2, $beforeProgress['current_cycle']); // all 5 attempted -> rolled to cycle 2
+
+        // 1. Single delete root1 -> must delete root1, retake1, and their answers, violations, and question histories (q0, q1, q2)
+        $this->actingAs($admin)
+            ->delete(route('admin.quizzes.attempt.destroy', $root1->id))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $root1->id]);
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $retake1->id]);
+        $this->assertDatabaseMissing('lms_quiz_answers', ['attempt_id' => $root1->id]);
+        $this->assertDatabaseMissing('lms_quiz_answers', ['attempt_id' => $retake1->id]);
+        $this->assertDatabaseMissing('lms_exam_violations', ['attempt_id' => $root1->id]);
+        $this->assertDatabaseMissing('lms_exam_violations', ['attempt_id' => $retake1->id]);
+        $this->assertDatabaseMissing('lms_student_question_histories', ['attempt_id' => $root1->id]);
+        $this->assertDatabaseMissing('lms_student_question_histories', ['attempt_id' => $retake1->id]);
+
+        $midProgress = $service->getStudentProgress($this->student->id, $category);
+        $this->assertEquals(1, $midProgress['current_cycle']);
+        $this->assertEquals(2, $midProgress['attempted_questions']);
+        $this->assertEquals(3, $midProgress['remaining_questions']);
+        $this->assertEquals(2, $midProgress['total_exams_completed']);
+
+        // 2. Bulk delete root2 -> must delete root2, retake2, and all remaining related records
+        $this->actingAs($admin)
+            ->post(route('admin.quizzes.reports.bulk-delete'), [
+                'attempt_ids' => [$root2->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $root2->id]);
+        $this->assertDatabaseMissing('lms_quiz_attempts', ['id' => $retake2->id]);
+        $this->assertDatabaseMissing('lms_student_question_histories', ['student_account_id' => $this->student->id]);
+
+        $afterProgress = $service->getStudentProgress($this->student->id, $category);
+        $this->assertEquals(0, $afterProgress['attempted_questions']);
+        $this->assertEquals(5, $afterProgress['remaining_questions']);
+        $this->assertEquals(0, $afterProgress['total_exams_completed']);
+
+        // 3. Verify /admin/quizzes/reports still surfaces any pre-existing orphaned retake whose parent is missing
+        $orphan = LmsQuizAttempt::create([
+            'quiz_id'            => $quiz->id,
+            'student_account_id' => $this->student->id,
+            'parent_attempt_id'  => 99999999,
+            'attempt_number'     => 2,
+            'score'              => 1,
+            'total_marks'        => 1,
+            'percentage'         => 100,
+            'status'             => 'graded',
+            'started_at'         => now(),
+            'submitted_at'       => now(),
+        ]);
+
+        $reportsRes = $this->actingAs($admin)->get(route('admin.quizzes.reports'));
+        $reportsRes->assertStatus(200);
+        $reportsRes->assertSee($this->student->name);
+
+        // Clean up orphan & quiz
+        LmsQuizAttempt::deleteWithRelated([$orphan->id]);
+        $quiz->delete();
+    }
 }

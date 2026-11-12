@@ -68,7 +68,9 @@ class StudentQuizController extends Controller
             $attemptStats[$quiz->id] = [
                 'count' => $attempts->count(),
                 'best_score' => $attempts->max('score'),
-                'passed' => $attempts->where('score', '>=', $quiz->pass_marks)->count() > 0,
+                'passed' => $attempts->contains(function ($att) {
+                    return $att->isPassed();
+                }),
             ];
         }
 
@@ -297,7 +299,9 @@ class StudentQuizController extends Controller
         }
 
         // 3. Resolve or create system practice quiz with custom pass mark
-        $passMarksReq = $matchedPassMarks ?: ($request->filled('pass_marks') ? (float)$this->rotationService->toEnglishDigits($request->input('pass_marks')) : null);
+        $passMarksReq = $matchedPassMarks !== null
+            ? $matchedPassMarks
+            : ($request->filled('pass_marks') ? (float)$this->rotationService->toEnglishDigits($request->input('pass_marks')) : null);
         $quiz = $this->rotationService->getOrCreatePracticeQuiz($category, count($questions), $durationMinutes, $passMarksReq);
 
         $attemptNumber = LmsQuizAttempt::where('quiz_id', $quiz->id)
@@ -1178,6 +1182,19 @@ class StudentQuizController extends Controller
                     ];
                 }
             } elseif ($quiz->quiz_type === 'practice') {
+                if (!$request->filled('question_count')) {
+                    $prevQCount = !empty($previousAttempt->questions_snapshot) && is_array($previousAttempt->questions_snapshot)
+                        ? count($previousAttempt->questions_snapshot)
+                        : ($quiz->questions()->count() ?: (int)$previousAttempt->total_marks);
+                    $mergeData = ['question_count' => $prevQCount];
+                    if ($previousAttempt->pass_marks !== null) {
+                        $mergeData['pass_marks'] = (float)$previousAttempt->pass_marks;
+                    }
+                    if (!$request->filled('category') && $quiz->title && strpos($quiz->title, 'Question Bank Practice: ') === 0) {
+                        $mergeData['category'] = trim(substr($quiz->title, strlen('Question Bank Practice: ')));
+                    }
+                    $request->merge($mergeData);
+                }
                 return $this->startPracticeExam($request);
             }
         }
@@ -1208,14 +1225,22 @@ class StudentQuizController extends Controller
 
         $snapshot = $this->shuffleSnapshotItems($snapshot, $referenceSnapshot, true, true);
 
+        $attemptTotalMarks = $previousAttempt->total_marks ?: $quiz->total_marks;
+        $resolvedPassMarks = is_numeric($quiz->pass_marks)
+            ? (float)$quiz->pass_marks
+            : (float)$previousAttempt->pass_marks;
+        if ($quiz->total_marks > 0 && $attemptTotalMarks > 0 && (float)$attemptTotalMarks !== (float)$quiz->total_marks && is_numeric($quiz->pass_marks)) {
+            $resolvedPassMarks = round($attemptTotalMarks * ((float)$quiz->pass_marks / (float)$quiz->total_marks), 2);
+        }
+
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id'              => $quiz->id,
             'student_account_id'   => $student->id,
             'parent_attempt_id'    => $rootParentId,
             'attempt_number'       => $nextNumber,
             'started_at'           => Carbon::now('Asia/Dhaka'),
-            'total_marks'          => $previousAttempt->total_marks ?: $quiz->total_marks,
-            'pass_marks'           => $previousAttempt->total_marks ?: ($previousAttempt->pass_marks ?: $quiz->total_marks),
+            'total_marks'          => $attemptTotalMarks,
+            'pass_marks'           => $resolvedPassMarks,
             'status'               => 'in_progress',
             'view_mode'            => $previousAttempt->view_mode ?: ($quiz->view_mode ?: 'all_questions'),
             'question_set'         => $previousAttempt->question_set ?: 'Cycle 1',
@@ -1416,20 +1441,13 @@ class StudentQuizController extends Controller
         }
 
         if ($request->filled('status')) {
+            $outerPassExpr = 'COALESCE(lms_quiz_attempts.pass_marks, (SELECT q.pass_marks FROM lms_quizzes q WHERE q.id = lms_quiz_attempts.quiz_id LIMIT 1), 0)';
+            $retakePassedExists = "EXISTS (SELECT 1 FROM lms_quiz_attempts r WHERE r.parent_attempt_id = lms_quiz_attempts.id AND r.status IN ('submitted', 'graded', 'timed_out') AND r.score >= COALESCE(r.pass_marks, (SELECT q.pass_marks FROM lms_quizzes q WHERE q.id = r.quiz_id LIMIT 1), 0))";
+
             if ($request->status === 'passed') {
-                $query->where(function($q) {
-                    $q->where('percentage', '>=', 100)
-                      ->orWhereHas('retakes', function($rq) {
-                          $rq->where('percentage', '>=', 100);
-                      });
-                });
+                $query->whereRaw("(lms_quiz_attempts.score >= {$outerPassExpr} OR {$retakePassedExists})");
             } elseif ($request->status === 'failed') {
-                $query->where(function($q) {
-                    $q->where('percentage', '<', 100)
-                      ->whereDoesntHave('retakes', function($rq) {
-                          $rq->where('percentage', '>=', 100);
-                      });
-                });
+                $query->whereRaw("(lms_quiz_attempts.score < {$outerPassExpr} AND NOT {$retakePassedExists})");
             }
         }
 
