@@ -26,7 +26,7 @@ class AdminQuizController extends Controller
      */
     public function index(Request $request)
     {
-        $query = LmsQuiz::with(['course'])->withCount(['questions', 'attempts'])->latest();
+        $query = LmsQuiz::with(['course', 'paper'])->withCount(['questions', 'attempts'])->latest();
 
         // Filter by course
         if ($request->filled('course_id')) {
@@ -404,6 +404,7 @@ class AdminQuizController extends Controller
             'chapter'       => 'nullable|string',
             'question_type' => 'nullable|string',
             'paper_id'      => 'nullable|integer',
+            'auto_shuffle'  => 'nullable',
         ]);
 
         $order = LmsQuestion::where('quiz_id', $quiz->id)->max('order_index') ?: 0;
@@ -485,11 +486,22 @@ class AdminQuizController extends Controller
                     } else {
                         $query->where('question_type', $qType);
                     }
+                } elseif ($request->source_mode === 'chapter' || $request->filled('chapter')) {
+                    // Auto-filter MCQs when chapter is selected unless specific type chosen
+                    $query->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']);
                 }
 
-                if ($request->source_mode === 'random' && $request->filled('count')) {
-                    $query->inRandomOrder()->take((int)$request->count);
-                } elseif ($request->filled('count')) {
+                $shouldShuffle = $request->source_mode === 'random'
+                    || $request->source_mode === 'chapter'
+                    || $request->filled('chapter')
+                    || $request->input('auto_shuffle') == '1'
+                    || filter_var($request->input('auto_shuffle', false), FILTER_VALIDATE_BOOLEAN);
+
+                if ($shouldShuffle) {
+                    $query->inRandomOrder();
+                }
+
+                if ($request->filled('count')) {
                     $query->take((int)$request->count);
                 }
 
@@ -540,7 +552,8 @@ class AdminQuizController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', "সফলভাবে {$added}টি প্রশ্ন '{$quiz->title}' কুইজে যুক্ত করা হয়েছে!");
+            $shuffleText = $shouldShuffle ? ' (স্বয়ংক্রিয়ভাবে শাফলকৃত)' : '';
+            return redirect()->back()->with('success', "সফলভাবে {$added}টি প্রশ্ন{$shuffleText} '{$quiz->title}' কুইজে যুক্ত করা হয়েছে!");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'প্রশ্ন যুক্ত করতে সমস্যা হয়েছে: ' . $e->getMessage()]);
@@ -549,13 +562,186 @@ class AdminQuizController extends Controller
 
     public function manageQuestions($id)
     {
-        $quiz = LmsQuiz::with(['course'])->findOrFail($id);
+        $quiz = LmsQuiz::with(['course', 'paper.items.masterQuestion.options'])->findOrFail($id);
+
+        // If quiz has linked paper with items, sync any missing questions so table and marks are unified
+        if ($quiz->questions()->count() === 0 && $quiz->paper_id && $quiz->paper && $quiz->paper->items()->exists()) {
+            $this->syncPaperItemsToQuiz($quiz);
+        }
+
         $questions = LmsQuestion::with('options')
             ->where('quiz_id', $quiz->id)
             ->orderBy('order_index', 'asc')
             ->paginate(30);
 
         return view('backend.theme.clasic.lms.quizzes.questions', compact('quiz', 'questions'));
+    }
+
+    /**
+     * Helper to sync items from linked Question Paper into Quiz Questions
+     */
+    protected function syncPaperItemsToQuiz(LmsQuiz $quiz)
+    {
+        if (!$quiz->paper_id || !$quiz->paper) {
+            return;
+        }
+
+        $paperItems = $quiz->paper->items()->with(['masterQuestion.options', 'section'])->orderBy('order_index', 'asc')->get();
+        if ($paperItems->isEmpty()) {
+            return;
+        }
+
+        DB::transaction(function () use ($quiz, $paperItems) {
+            $order = 0;
+            $targetSet = $quiz->question_set ?: ($quiz->paper->paper_set ?: 'Set A');
+
+            foreach ($paperItems as $item) {
+                $sq = $item->masterQuestion;
+                if (!$sq) continue;
+                $order++;
+
+                $newQ = $sq->replicate();
+                $newQ->quiz_id = $quiz->id;
+                $newQ->course_id = $quiz->course_id;
+                $newQ->parent_question_id = $sq->id;
+                $newQ->set_code = $targetSet;
+                $newQ->order_index = $order;
+                $newQ->marks = $item->marks ?: ($sq->marks ?: 1.0);
+                $newQ->negative_marks = $item->negative_marks !== null ? $item->negative_marks : ($sq->negative_marks ?: 0.0);
+                $newQ->question_text = $item->getQuestionText();
+                $newQ->question_type = $item->getQuestionType();
+                $newQ->is_active = true;
+                $newQ->is_archived = false;
+                $newQ->save();
+
+                $options = $item->getQuestionOptions();
+                if (!empty($options)) {
+                    foreach ($options as $opt) {
+                        $optText = is_array($opt) ? $opt['option_text'] : (isset($opt->option_text) ? $opt->option_text : '');
+                        $isCorrect = is_array($opt) ? (!empty($opt['is_correct'])) : (!empty($opt->is_correct));
+                        $optOrder = is_array($opt) ? (isset($opt['order_index']) ? $opt['order_index'] : 0) : (isset($opt->order_index) ? $opt->order_index : 0);
+                        $newQ->options()->create([
+                            'option_text' => $optText,
+                            'is_correct'  => $isCorrect,
+                            'order_index' => $optOrder,
+                        ]);
+                    }
+                } elseif ($sq->options->count() > 0) {
+                    foreach ($sq->options as $opt) {
+                        $newOpt = $opt->replicate();
+                        $newOpt->question_id = $newQ->id;
+                        $newOpt->save();
+                    }
+                }
+            }
+
+            $quiz->update(['total_marks' => $quiz->paper->total_marks]);
+        });
+    }
+
+    /**
+     * Drag-and-Drop Question Paper Builder for Quiz
+     */
+    public function builder($id)
+    {
+        $quiz = LmsQuiz::with(['course', 'paper'])->findOrFail($id);
+
+        $paper = null;
+        if ($quiz->paper_id) {
+            $paper = \App\model\LmsQuestionPaper::find($quiz->paper_id);
+        }
+        if (!$paper) {
+            $paper = \App\model\LmsQuestionPaper::where('linked_quiz_id', $quiz->id)->first();
+        }
+
+        if (!$paper) {
+            $paper = \App\model\LmsQuestionPaper::create([
+                'title'            => $quiz->title,
+                'course_id'        => $quiz->course_id,
+                'total_marks'      => (float)($quiz->total_marks ?: 0.0),
+                'pass_marks'       => (float)($quiz->pass_marks ?: 40.0),
+                'negative_marks'   => (float)($quiz->negative_marks ?: 0.0),
+                'duration_minutes' => (int)($quiz->duration_minutes ?: 30),
+                'paper_set'        => $quiz->question_set ?: 'Set A',
+                'status'           => 'published',
+                'linked_quiz_id'   => $quiz->id,
+                'paper_code'       => \App\model\LmsQuestionPaper::generatePaperCode($quiz->subject_code ?: '101'),
+                'instructions'     => $quiz->description ?: 'কুইজের সকল প্রশ্নের উত্তর প্রদান করতে হবে।',
+            ]);
+            $quiz->update(['paper_id' => $paper->id]);
+        } else {
+            if (!$paper->linked_quiz_id) {
+                $paper->update(['linked_quiz_id' => $quiz->id]);
+            }
+            if (!$quiz->paper_id) {
+                $quiz->update(['paper_id' => $paper->id]);
+            }
+        }
+
+        // Ensure default section exists
+        $section = $paper->sections()->first();
+        if (!$section) {
+            $section = \App\model\LmsQuestionPaperSection::create([
+                'paper_id'           => $paper->id,
+                'title'              => 'কুইজের প্রশ্নাবলি (Quiz Questions)',
+                'order_index'        => 1,
+                'marks_per_question' => 1.0,
+            ]);
+        }
+
+        // If paper has no items yet but quiz has existing questions in lms_questions, import them
+        if ($paper->items()->count() === 0 && $quiz->questions()->count() > 0) {
+            $existingQuestions = $quiz->questions()->orderBy('order_index', 'asc')->get();
+            $itemOrder = 0;
+            foreach ($existingQuestions as $eq) {
+                $itemOrder++;
+                $masterId = $eq->parent_question_id;
+                if (!$masterId || !\App\model\LmsQuestion::where('id', $masterId)->whereNull('quiz_id')->exists()) {
+                    $masterId = $eq->id;
+                }
+
+                $item = \App\model\LmsQuestionPaperItem::create([
+                    'paper_id'       => $paper->id,
+                    'section_id'     => $section->id,
+                    'question_id'    => $masterId,
+                    'order_index'    => $itemOrder,
+                    'marks'          => $eq->marks ?: 1.0,
+                    'negative_marks' => $eq->negative_marks ?: 0.0,
+                ]);
+                $item->freezeSnapshot();
+            }
+            $paper->recalculateTotals();
+            $quiz->update(['total_marks' => $paper->total_marks]);
+        }
+
+        return redirect()->route('admin.question-papers.builder', $paper->id)
+            ->with('info', "কুইজ '{$quiz->title}'-এর ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডার চালু হয়েছে। বাম পাশ থেকে প্রশ্ন ড্র্যাগ করে ডান পাশের ক্যানভাসে ড্রপ করে সাজাতে পারবেন।");
+    }
+
+    /**
+     * AJAX Reorder questions in a Quiz
+     */
+    public function reorderQuestions(Request $request, $id)
+    {
+        $quiz = LmsQuiz::findOrFail($id);
+        $order = $request->input('order', []);
+
+        if (!is_array($order) || empty($order)) {
+            return response()->json(['success' => false, 'message' => 'অর্ডারের তালিকা পাওয়া যায়নি।'], 422);
+        }
+
+        DB::transaction(function () use ($quiz, $order) {
+            foreach ($order as $index => $questionId) {
+                LmsQuestion::where('quiz_id', $quiz->id)
+                    ->where('id', $questionId)
+                    ->update(['order_index' => $index + 1]);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'প্রশ্নের ক্রম সফলভাবে হালনাগাদ করা হয়েছে!',
+        ]);
     }
 
     /**

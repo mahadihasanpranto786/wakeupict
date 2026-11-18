@@ -29,6 +29,9 @@
                     <button type="button" class="btn btn-sm btn-dark shadow-sm font-weight-bold px-2.5" data-toggle="modal" data-target="#practiceSettingsModal" style="white-space: nowrap;">
                         <i class="fas fa-sliders-h mr-1 text-warning"></i> অনুশীলন পরীক্ষা সেটিংস
                     </button>
+                    <a href="{{ route('admin.question-papers.index') }}" class="btn btn-sm btn-indigo shadow-sm font-weight-bold px-2.5 text-white" style="background-color: #4f46e5; border-color: #4f46e5; white-space: nowrap;" title="ড্র্যাগ অ্যান্ড ড্রপ প্রশ্নপত্র বিল্ডারে যান">
+                        <i class="fas fa-hand-pointer mr-1"></i> ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডার
+                    </a>
                     <button type="button" class="btn btn-sm btn-warning shadow-sm font-weight-bold px-2.5" data-toggle="modal" data-target="#libraryImportModal" style="color: #000000 !important; white-space: nowrap;"><i class="fas fa-book-open mr-1"></i> লাইব্রেরি প্রশ্ন যোগ</button>
                     <button type="button" class="btn btn-sm btn-success shadow-sm px-2.5" data-toggle="modal" data-target="#excelImportModal" style="white-space: nowrap;">
                         <i class="fas fa-file-upload mr-1"></i> এক্সেল আপলোড
@@ -257,9 +260,14 @@
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </div>
-                                <a href="{{ route('admin.quizzes.questions', $quiz->id) }}" class="text-xs text-info font-weight-semibold d-inline-block mt-0.5" title="প্রশ্ন তালিকা দেখুন">
-                                    <i class="fas fa-tasks mr-1"></i> প্রশ্ন তালিকা দেখুন ({{ $quiz->questions_count }}টি প্রশ্ন)
-                                </a>
+                                <div class="d-flex align-items-center flex-wrap gap-1 mt-0.5">
+                                    <a href="{{ route('admin.quizzes.questions', $quiz->id) }}" class="text-xs text-info font-weight-semibold d-inline-block" title="প্রশ্ন তালিকা দেখুন">
+                                        <i class="fas fa-tasks mr-1"></i> প্রশ্ন তালিকা দেখুন ({{ $quiz->questions_count ?: ($quiz->paper_id && $quiz->paper ? $quiz->paper->items()->count() : 0) }}টি প্রশ্ন)
+                                    </a>
+                                    <a href="{{ route('admin.quizzes.builder', $quiz->id) }}" class="badge badge-light border text-primary ml-1 py-0.5 px-1.5 font-weight-bold" title="ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডারে প্রশ্ন বাছাই ও সাজান">
+                                        <i class="fas fa-hand-pointer mr-1"></i> ড্র্যাগ অ্যান্ড ড্রপ সেটিং
+                                    </a>
+                                </div>
                                 <div class="text-xs text-primary font-weight-semibold">
                                     <i class="fas fa-graduation-cap mr-1"></i> {{ $quiz->course ? $quiz->course->course_title : 'General / All' }}
                                     @if($quiz->subject_code)
@@ -349,7 +357,7 @@
                             </td>
                             <td class="text-center">
                                 <span class="badge badge-pill badge-info px-2.5 py-1 text-sm">
-                                    {{ $quiz->questions_count }} টি MCQ
+                                    {{ $quiz->questions_count ?: ($quiz->paper_id && $quiz->paper ? $quiz->paper->items()->count() : 0) }} টি MCQ
                                 </span>
                             </td>
                             <td class="text-center font-weight-bold text-dark">
@@ -372,6 +380,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <!-- Drag & Drop Paper Builder for Quiz -->
+                                    <a href="{{ route('admin.quizzes.builder', $quiz->id) }}" class="btn btn-outline-primary" title="ড্র্যাগ অ্যান্ড ড্রপ করে লাইব্রেরি থেকে প্রশ্ন বাছাই ও সাজান (Drag & Drop Builder)">
+                                        <i class="fas fa-hand-pointer"></i>
+                                    </a>
                                     <!-- View/Manage Questions in Quiz -->
                                     <a href="{{ route('admin.quizzes.questions', $quiz->id) }}" class="btn btn-outline-info" title="কুইজের প্রশ্ন তালিকা ও ডিলিট/ম্যানেজ করুন">
                                         <i class="fas fa-tasks"></i>
@@ -1173,9 +1185,14 @@ document.addEventListener('keydown', function(e) {
 
                         <!-- Paper Builder Selector (Active when srcPaper is chosen) -->
                         <div id="libPaperBlock" class="form-group mb-3 p-3 rounded border border-danger shadow-xs" style="display: none; background-color: #FEF2F2;">
-                            <label class="font-weight-bold text-sm text-danger">
-                                <i class="fas fa-file-alt mr-1"></i> পেপার বিল্ডারের প্রশ্নপত্র (Question Paper) বেছে নিন: <span class="text-danger">*</span>
-                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="font-weight-bold text-sm text-danger mb-0">
+                                    <i class="fas fa-file-alt mr-1"></i> পেপার বিল্ডারের প্রশ্নপত্র (Question Paper) বেছে নিন: <span class="text-danger">*</span>
+                                </label>
+                                <a id="libPaperBuilderLink" href="{{ route('admin.question-papers.index') }}" class="btn btn-xs btn-outline-danger font-weight-bold" target="_blank">
+                                    <i class="fas fa-hand-pointer mr-1"></i> ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডার খুলুন
+                                </a>
+                            </div>
                             <select name="paper_id" id="libPaperSelect" class="form-control">
                                 <option value="">-- পেপার বিল্ডার থেকে তৈরি প্রশ্নপত্র বেছে নিন --</option>
                                 @if(isset($questionPapers) && count($questionPapers) > 0)
@@ -1188,7 +1205,12 @@ document.addEventListener('keydown', function(e) {
                                     <option value="" disabled>এখনো কোনো প্রশ্নপত্র তৈরি করা হয়নি (পেপার বিল্ডারে যান)</option>
                                 @endif
                             </select>
-                            <small class="text-muted d-block mt-1">নির্বাচিত প্রশ্নপত্রের সকল প্রশ্ন, সেকশন মার্কস ও অপশনসমূহ স্বয়ংক্রিয়ভাবে এই কুইজে যুক্ত হয়ে যাবে।</small>
+                            <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap">
+                                <small class="text-muted">নির্বাচিত প্রশ্নপত্রের সকল প্রশ্ন ও অপশন স্বয়ংক্রিয়ভাবে এই কুইজে যুক্ত হয়ে যাবে।</small>
+                                <button type="button" class="btn btn-sm btn-primary font-weight-bold text-xs shadow-sm mt-1" onclick="openTargetQuizBuilder()">
+                                    <i class="fas fa-hand-pointer mr-1"></i> এই কুইজের জন্য ড্র্যাগ অ্যান্ড ড্রপ করুন &rarr;
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Category Selector -->
@@ -1204,8 +1226,13 @@ document.addEventListener('keydown', function(e) {
 
                         <!-- Chapter Selector -->
                         <div id="libChapterBlock" class="form-group mb-3">
-                            <label class="font-weight-bold text-sm">প্রশ্ন লাইব্রেরির অধ্যায় (Chapter) বেছে নিন:</label>
-                            <select name="chapter" class="form-control">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="font-weight-bold text-sm mb-0">প্রশ্ন লাইব্রেরির অধ্যায় (Chapter) বেছে নিন:</label>
+                                <span id="chapterShuffleNotice" class="badge badge-success px-2 py-0.5 text-xs font-weight-bold" style="display: none;">
+                                    <i class="fas fa-random mr-1"></i> অটো-শাফলিং সক্রিয়
+                                </span>
+                            </div>
+                            <select name="chapter" id="libChapterSelect" class="form-control" onchange="onChapterSelectChanged()">
                                 <option value="">-- যেকোনো অধ্যায় (All Chapters) --</option>
                                 @if(isset($chapters))
                                     @foreach($chapters as $chap)
@@ -1214,6 +1241,9 @@ document.addEventListener('keydown', function(e) {
                                     @endforeach
                                 @endif
                             </select>
+                            <small id="chapterShuffleHelp" class="text-success text-xs d-none mt-1 font-weight-bold">
+                                <i class="fas fa-magic mr-1"></i> নির্বাচিত অধ্যায় থেকে MCQ প্রশ্নসমূহ স্বয়ংক্রিয়ভাবে এলোমেলো (Auto Shuffle) হয়ে এই কুইজে যুক্ত হবে।
+                            </small>
                         </div>
 
                         <!-- Question Type Selector (As requested by user) -->
@@ -1232,6 +1262,17 @@ document.addEventListener('keydown', function(e) {
                                 <option value="matching">বাম-ডান মিলকরণ (Matching)</option>
                             </select>
                             <small class="text-muted">নির্দিষ্ট ধরনের প্রশ্ন বাছাই করতে চাইলে এটি নির্বাচন করুন।</small>
+                        </div>
+
+                        <!-- Auto Shuffle Option -->
+                        <div id="libShuffleBlock" class="form-group mb-3 p-2.5 rounded border border-success" style="background-color: #F0FDF4;">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="libAutoShuffle" name="auto_shuffle" value="1" checked>
+                                <label class="custom-control-label font-weight-bold text-sm text-dark cursor-pointer" for="libAutoShuffle">
+                                    <i class="fas fa-random text-success mr-1"></i> অধ্যায়ের MCQ প্রশ্নগুলো স্বয়ংক্রিয়ভাবে এলোমেলো / অটো শাফল করুন (Auto Shuffle)
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-0.5">টিক দেওয়া থাকলে কুইজে যুক্ত করার সময় প্রশ্নগুলো এলোমেলো (Random Shuffled) ক্রমে বাছাই হবে।</small>
                         </div>
 
                         <!-- Question Count -->
@@ -1575,22 +1616,59 @@ function toggleLibSourceMode() {
     var typeBlock = document.getElementById('libTypeBlock');
     var paperBlock = document.getElementById('libPaperBlock');
     var countBlock = document.getElementById('libCountBlock');
+    var shuffleBlock = document.getElementById('libShuffleBlock');
+    var shuffleNotice = document.getElementById('chapterShuffleNotice');
+    var shuffleHelp = document.getElementById('chapterShuffleHelp');
 
-    if (catBlock) {
-        catBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    if (catBlock) catBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    if (chapBlock) chapBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    if (paperBlock) paperBlock.style.display = (mode === 'paper') ? 'block' : 'none';
+    if (countBlock) countBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    if (typeBlock) typeBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+    if (shuffleBlock) shuffleBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+
+    if (mode === 'chapter') {
+        if (shuffleNotice) shuffleNotice.style.display = 'inline-block';
+        if (shuffleHelp) shuffleHelp.classList.remove('d-none');
+        var typeSelect = document.querySelector('select[name="question_type"]');
+        if (typeSelect && (!typeSelect.value || typeSelect.value === '')) {
+            typeSelect.value = 'mcq_single';
+        }
+    } else {
+        if (shuffleNotice) shuffleNotice.style.display = 'none';
+        if (shuffleHelp) shuffleHelp.classList.add('d-none');
     }
-    if (chapBlock) {
-        chapBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
+}
+
+function onChapterSelectChanged() {
+    var chapVal = document.getElementById('libChapterSelect').value;
+    var shuffleNotice = document.getElementById('chapterShuffleNotice');
+    var shuffleHelp = document.getElementById('chapterShuffleHelp');
+    if (chapVal) {
+        if (shuffleNotice) shuffleNotice.style.display = 'inline-block';
+        if (shuffleHelp) shuffleHelp.classList.remove('d-none');
+        var typeSelect = document.querySelector('select[name="question_type"]');
+        if (typeSelect && (!typeSelect.value || typeSelect.value === '')) {
+            typeSelect.value = 'mcq_single';
+        }
+    } else {
+        var mode = document.querySelector('input[name="source_mode"]:checked').value;
+        if (mode !== 'chapter') {
+            if (shuffleNotice) shuffleNotice.style.display = 'none';
+            if (shuffleHelp) shuffleHelp.classList.add('d-none');
+        }
     }
-    if (paperBlock) {
-        paperBlock.style.display = (mode === 'paper') ? 'block' : 'none';
+}
+
+function openTargetQuizBuilder() {
+    var select = document.getElementById('libTargetQuizSelect');
+    var quizId = select ? select.value : null;
+    if (!quizId) {
+        alert('অনুগ্রহ করে প্রথমে একটি টার্গেট কুইজ নির্বাচন করুন।');
+        if (select) select.focus();
+        return;
     }
-    if (countBlock) {
-        countBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
-    }
-    if (typeBlock) {
-        typeBlock.style.display = (mode !== 'paper') ? 'block' : 'none';
-    }
+    window.location.href = '/admin/quizzes/' + quizId + '/builder';
 }
 
 function openImportForQuiz(quizId, quizTitle) {

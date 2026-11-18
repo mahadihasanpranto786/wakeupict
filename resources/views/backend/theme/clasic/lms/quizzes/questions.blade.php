@@ -23,10 +23,13 @@
                 </div>
                 <div class="col-sm-5 text-sm-right mt-2 mt-sm-0">
                     <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary shadow-sm mr-1">
-                        <i class="fas fa-arrow-left mr-1"></i> কুইজ তালিকায় ফিরুন
+                        <i class="fas fa-arrow-left mr-1"></i> কুইজ তালিকা
                     </a>
-                    <a href="{{ route('admin.question-book.index') }}" class="btn btn-primary shadow-sm">
-                        <i class="fas fa-plus-circle mr-1"></i> লাইব্রেরি থেকে আরও প্রশ্ন আনুন
+                    <a href="{{ route('admin.quizzes.builder', $quiz->id) }}" class="btn btn-primary shadow-sm font-weight-bold mr-1" title="ড্র্যাগ অ্যান্ড ড্রপ স্টুডিওতে প্রশ্ন বাছাই ও সাজান">
+                        <i class="fas fa-hand-pointer mr-1"></i> ড্র্যাগ অ্যান্ড ড্রপ বিল্ডার
+                    </a>
+                    <a href="{{ route('admin.question-book.index') }}" class="btn btn-outline-primary shadow-sm">
+                        <i class="fas fa-plus-circle mr-1"></i> প্রশ্ন লাইব্রেরি
                     </a>
                 </div>
             </div>
@@ -70,6 +73,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
                     <tr>
+                        <th class="text-center" style="width: 36px;" title="ড্র্যাগ করে ওপরে বা নিচে সাজান"><i class="fas fa-grip-vertical text-muted"></i></th>
                         <th class="text-center" style="width: 48px;">
                             <input type="checkbox" id="selectAllCheckbox" class="adm-checkbox" title="সবগুলো প্রশ্ন একসাথে নির্বাচন করুন">
                         </th>
@@ -81,13 +85,16 @@
                         <th class="text-center" style="width: 100px;">অ্যাকশন</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="quizQuestionsTableBody">
                     @forelse($questions as $index => $q)
-                        <tr id="q-row-{{ $q->id }}">
+                        <tr id="q-row-{{ $q->id }}" class="sortable-question-row" draggable="true" data-question-id="{{ $q->id }}">
+                            <td class="text-center text-muted drag-handle cursor-grab" style="cursor: grab;" title="ড্র্যাগ করে ওপরে বা নিচে সাজান">
+                                <i class="fas fa-grip-vertical"></i>
+                            </td>
                             <td class="text-center">
                                 <input type="checkbox" name="question_ids[]" value="{{ $q->id }}" class="question-checkbox" title="প্রশ্ন #{{ $q->id }} নির্বাচন করুন">
                             </td>
-                            <td class="text-center text-muted font-weight-bold">
+                            <td class="text-center text-muted font-weight-bold row-index-number">
                                 {{ $loop->iteration + ($questions->currentPage() - 1) * $questions->perPage() }}
                             </td>
                             <td>
@@ -135,10 +142,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 text-secondary d-block"></i>
                                 <h5>এই কুইজে এখনও কোনো প্রশ্ন যোগ করা হয়নি!</h5>
-                                <p class="text-xs text-muted">প্রশ্ন লাইব্রেরি থেকে বা এক্সেল থেকে প্রশ্ন যুক্ত করতে পারেন।</p>
+                                <p class="text-xs text-muted">প্রশ্ন লাইব্রেরি থেকে বা ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডার থেকে সরাসরি প্রশ্ন যুক্ত করতে পারেন।</p>
+                                <a href="{{ route('admin.quizzes.builder', $quiz->id) }}" class="btn btn-sm btn-primary font-weight-bold mt-2 shadow-sm">
+                                    <i class="fas fa-hand-pointer mr-1"></i> ড্র্যাগ অ্যান্ড ড্রপ পেপার বিল্ডার খুলুন
+                                </a>
                             </td>
                         </tr>
                     @endforelse
@@ -239,5 +249,84 @@ function executeBulkDeleteQuestions() {
                 document.getElementById('bulkDeleteQuestionsForm').submit();
             }
         }
+
+        // ================= Drag-and-Drop Table Reordering ================= //
+        (function() {
+            var tbody = document.getElementById('quizQuestionsTableBody');
+            if (!tbody) return;
+
+            var draggedRow = null;
+
+            tbody.addEventListener('dragstart', function(e) {
+                var row = e.target.closest('.sortable-question-row');
+                if (!row) return;
+                draggedRow = row;
+                row.classList.add('table-primary', 'opacity-75');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', row.dataset.questionId);
+            });
+
+            tbody.addEventListener('dragend', function(e) {
+                if (draggedRow) {
+                    draggedRow.classList.remove('table-primary', 'opacity-75');
+                    draggedRow = null;
+                }
+                document.querySelectorAll('.sortable-question-row').forEach(function(r) {
+                    r.classList.remove('border-top', 'border-primary', 'border-2');
+                });
+            });
+
+            tbody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                var targetRow = e.target.closest('.sortable-question-row');
+                if (targetRow && targetRow !== draggedRow) {
+                    var rect = targetRow.getBoundingClientRect();
+                    var next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    tbody.insertBefore(draggedRow, next ? targetRow.nextSibling : targetRow);
+                }
+            });
+
+            tbody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (!draggedRow) return;
+
+                // Re-calculate visible index numbers
+                var rows = tbody.querySelectorAll('.sortable-question-row');
+                var orderIds = [];
+                var startIdx = {{ ($questions->currentPage() - 1) * $questions->perPage() }};
+                rows.forEach(function(row, idx) {
+                    orderIds.push(row.dataset.questionId);
+                    var numCell = row.querySelector('.row-index-number');
+                    if (numCell) numCell.innerText = (startIdx + idx + 1);
+                });
+
+                // Send AJAX reorder request
+                fetch("{{ route('admin.quizzes.questions.reorder', $quiz->id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ order: orderIds })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        // Show subtle toast or notification
+                        var toast = document.createElement('div');
+                        toast.className = 'alert alert-success shadow-sm position-fixed';
+                        toast.style.cssText = 'bottom: 20px; right: 20px; z-index: 9999; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px;';
+                        toast.innerHTML = '<i class="fas fa-check-circle mr-1"></i> প্রশ্নের ক্রম সফলভাবে ড্র্যাগ করে সাজানো হয়েছে!';
+                        document.body.appendChild(toast);
+                        setTimeout(function() { toast.remove(); }, 2500);
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Reorder error:', err);
+                });
+            });
+        })();
     </script>
 @endsection

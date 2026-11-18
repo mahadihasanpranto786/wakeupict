@@ -209,13 +209,21 @@
     <div class="card shadow-sm border-0 mb-3 bg-white">
         <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
             <div class="d-flex align-items-center">
+                @if($paper->linkedQuiz || $paper->linked_quiz_id)
+                    <a href="{{ route('admin.quizzes.questions', $paper->linked_quiz_id ?: $paper->linkedQuiz->id) }}" class="btn btn-sm btn-outline-primary mr-2 font-weight-bold" title="কুইজ প্রশ্ন তালিকায় ফিরুন">
+                        <i class="fas fa-arrow-left mr-1"></i> কুইজে ফিরুন
+                    </a>
+                @endif
                 <a href="{{ route('admin.question-papers.index') }}" class="btn btn-sm btn-outline-secondary mr-3">
-                    <i class="fas fa-arrow-left mr-1"></i> তালিকা
+                    <i class="fas fa-list mr-1"></i> প্রশ্নপত্র তালিকা
                 </a>
                 <div>
                     <h5 class="mb-0 font-weight-bold text-dark">
                         {{ $paper->title }}
                         <span class="badge badge-warning text-dark ml-2">{{ \App\model\LmsQuestionPaper::getBengaliSetCode($paper->paper_set) }}</span>
+                        @if($paper->linkedQuiz || $paper->linked_quiz_id)
+                            <span class="badge badge-info text-white ml-1 text-xs"><i class="fas fa-link mr-1"></i> কুইজ সংযুক্ত</span>
+                        @endif
                     </h5>
                     <div class="text-xs text-muted">
                         কোড: <strong>{{ $paper->paper_code }}</strong> | বিষয় কোড: <strong>{{ $paper->subject_code }}</strong> | শিক্ষাবর্ষ: <strong>{{ $paper->academic_year }}</strong>

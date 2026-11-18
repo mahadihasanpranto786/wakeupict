@@ -648,6 +648,8 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::put('/{id}', 'backend\theme\clasic\lms\AdminQuizController@update')->name('update');
     Route::post('/{id}/import-from-library', 'backend\theme\clasic\lms\AdminQuizController@importFromLibrary')->name('import-from-library');
     Route::get('/{id}/questions', 'backend\theme\clasic\lms\AdminQuizController@manageQuestions')->name('questions');
+    Route::get('/{id}/builder', 'backend\theme\clasic\lms\AdminQuizController@builder')->name('builder');
+    Route::post('/{id}/questions/reorder', 'backend\theme\clasic\lms\AdminQuizController@reorderQuestions')->name('questions.reorder');
     Route::delete('/{id}/questions/{questionId}', 'backend\theme\clasic\lms\AdminQuizController@deleteQuestion')->name('delete-question');
     Route::match(['GET', 'POST'], '/{id}/questions/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDeleteQuestions')->name('questions.bulk-delete');
     Route::post('/{id}/toggle', 'backend\theme\clasic\lms\AdminQuizController@togglePublish')->name('toggle');

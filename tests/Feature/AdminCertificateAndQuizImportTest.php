@@ -970,4 +970,140 @@ class AdminCertificateAndQuizImportTest extends TestCase
             $qB->delete();
         }
     }
+
+    /**
+     * Test Quiz Drag and Drop Paper Builder integration
+     */
+    public function test_admin_quiz_drag_and_drop_builder_flow()
+    {
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Quiz Builder Flow Test ' . rand(100, 999),
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 20,
+            'total_marks'      => 10,
+            'pass_marks'       => 4,
+            'is_published'     => true,
+        ]);
+
+        $q = LmsQuestion::create([
+            'quiz_id'       => $quiz->id,
+            'course_id'     => $this->course->id,
+            'question_text' => 'Quiz Builder Question Test ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'marks'         => 2.0,
+            'order_index'   => 1,
+            'is_active'     => true,
+        ]);
+
+        try {
+            // Calling builder route automatically creates/links paper and redirects to paper builder
+            $res = $this->actingAs($this->adminUser)->get(route('admin.quizzes.builder', $quiz->id));
+            $quiz->refresh();
+
+            $this->assertNotNull($quiz->paper_id);
+            $paper = \App\model\LmsQuestionPaper::find($quiz->paper_id);
+            $this->assertNotNull($paper);
+            $this->assertEquals($quiz->id, $paper->linked_quiz_id);
+            $this->assertGreaterThan(0, $paper->items()->count());
+
+            $res->assertRedirect(route('admin.question-papers.builder', $paper->id));
+
+            // Test Quiz Question Reorder AJAX
+            $q2 = LmsQuestion::create([
+                'quiz_id'       => $quiz->id,
+                'course_id'     => $this->course->id,
+                'question_text' => 'Quiz Builder Question 2 Test ' . rand(1000, 9999),
+                'question_type' => 'mcq_single',
+                'marks'         => 2.0,
+                'order_index'   => 2,
+                'is_active'     => true,
+            ]);
+
+            $reorderRes = $this->actingAs($this->adminUser)->postJson(route('admin.quizzes.questions.reorder', $quiz->id), [
+                'order' => [$q2->id, $q->id],
+            ]);
+            $reorderRes->assertStatus(200)->assertJson(['success' => true]);
+
+            $q->refresh();
+            $q2->refresh();
+            $this->assertEquals(2, $q->order_index);
+            $this->assertEquals(1, $q2->order_index);
+
+            // Clean up
+            $q2->delete();
+        } finally {
+            if ($quiz->paper) {
+                $quiz->paper->items()->delete();
+                $quiz->paper->sections()->delete();
+                $quiz->paper->delete();
+            }
+            $q->delete();
+            $quiz->delete();
+        }
+    }
+
+    /**
+     * Test Quiz Import from Library with Chapter Auto-Shuffling
+     */
+    public function test_admin_quiz_import_from_library_chapter_auto_shuffle()
+    {
+        $testChapter = 'Chapter_Shuffle_' . rand(1000, 9999);
+
+        $q1 = LmsQuestion::create([
+            'quiz_id'       => null,
+            'course_id'     => $this->course->id,
+            'chapter'       => $testChapter,
+            'question_text' => 'Chapter Shuffle Q1 ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+        $q1->options()->create(['option_text' => 'Option A', 'is_correct' => true, 'order_index' => 1]);
+
+        $q2 = LmsQuestion::create([
+            'quiz_id'       => null,
+            'course_id'     => $this->course->id,
+            'chapter'       => $testChapter,
+            'question_text' => 'Chapter Shuffle Q2 ' . rand(1000, 9999),
+            'question_type' => 'mcq_single',
+            'marks'         => 1.0,
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+        $q2->options()->create(['option_text' => 'Option B', 'is_correct' => true, 'order_index' => 1]);
+
+        $quiz = LmsQuiz::create([
+            'course_id'        => $this->course->id,
+            'title'            => 'Chapter Shuffle Quiz ' . rand(100, 999),
+            'quiz_type'        => 'exam',
+            'duration_minutes' => 15,
+            'total_marks'      => 0,
+            'pass_marks'       => 1,
+            'is_published'     => true,
+        ]);
+
+        try {
+            $res = $this->actingAs($this->adminUser)->post(route('admin.quizzes.import-from-library', $quiz->id), [
+                'source_mode'  => 'chapter',
+                'chapter'      => $testChapter,
+                'count'        => 2,
+                'auto_shuffle' => 1,
+            ]);
+
+            $res->assertSessionHas('success');
+            $this->assertEquals(2, $quiz->questions()->count());
+        } finally {
+            $quiz->questions()->each(function ($q) {
+                $q->options()->delete();
+                $q->delete();
+            });
+            $quiz->delete();
+            $q1->options()->delete();
+            $q1->delete();
+            $q2->options()->delete();
+            $q2->delete();
+        }
+    }
 }

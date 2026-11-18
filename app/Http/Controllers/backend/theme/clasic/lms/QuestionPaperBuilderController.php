@@ -258,6 +258,16 @@ class QuestionPaperBuilderController extends Controller
 
             $calculatedMarks = $paper->recalculateTotals();
 
+            if ($paper->linkedQuiz) {
+                $paper->linkedQuiz->update([
+                    'total_marks'      => $calculatedMarks,
+                    'title'            => $paper->title,
+                    'duration_minutes' => $paper->duration_minutes,
+                    'pass_marks'       => $paper->pass_marks,
+                    'negative_marks'   => $paper->negative_marks,
+                ]);
+            }
+
             DB::commit();
 
             return response()->json([
