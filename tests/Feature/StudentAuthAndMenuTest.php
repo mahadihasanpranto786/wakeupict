@@ -160,4 +160,22 @@ class StudentAuthAndMenuTest extends TestCase
 
         $student->delete();
     }
+
+    /**
+     * Test Language switching in Student Portal via /language/{locale} and /locale/{locale}
+     */
+    public function testStudentPortalLanguageSwitching()
+    {
+        // 1. Switch to English via /language/en
+        $response = $this->get('/language/en');
+        $response->assertRedirect();
+        $response->assertSessionHas('locale', 'en');
+        $response->assertCookie('locale', 'en');
+
+        // 2. Switch to Bangla via /locale/bn (alias route)
+        $response = $this->get('/locale/bn');
+        $response->assertRedirect();
+        $response->assertSessionHas('locale', 'bn');
+        $response->assertCookie('locale', 'bn');
+    }
 }

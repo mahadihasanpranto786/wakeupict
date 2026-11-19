@@ -105,6 +105,9 @@ class StudentAuthController extends Controller
         // Login via student guard
         Auth::guard('student')->login($student, $remember);
 
+        // Security: Regenerate session ID to prevent session fixation / shared browser session leakage
+        $request->session()->regenerate();
+
         // Update login audit timestamp and IP
         $student->update([
             'last_login_at' => Carbon::now(),
@@ -147,6 +150,13 @@ class StudentAuthController extends Controller
      */
     public function register(Request $request)
     {
+        // 1. Anti-Spam Honeypot: Trap automated spam bots
+        if ($request->filled('b_hp_security')) {
+            return redirect()->route('student.login')->with([
+                'info' => 'Your registration request has been submitted.',
+            ]);
+        }
+
         // Graceful defaults if course_id / batch_id not passed in simplified submission
         if (!$request->filled('course_id')) {
             $defaultCourse = Course::where('status', 1)->orderBy('sort_order', 'asc')->orderBy('id', 'asc')->first();
@@ -203,6 +213,36 @@ class StudentAuthController extends Controller
         $rawPhone = trim($request->phone ?: '');
         $cleanPhone = StudentEnrollmentService::normalizePhone($rawPhone);
         $rawEmail = $request->email ? strtolower(trim($request->email)) : null;
+
+        // Bangladeshi Phone Number Validation: Must be 11 digits starting with 013-019
+        if (!preg_match('/^01[3-9]\d{8}$/', $cleanPhone)) {
+            return back()->withInput()->withErrors([
+                'phone' => 'অনুগ্রহ করে সঠিক ১১ ডিজিটের বাংলাদেশী মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)।',
+            ]);
+        }
+
+        // Anti-Gibberish / Spam Bot Name Check (blocks names like "yjFUVyQHbRCfMkbQVBIwYng")
+        $rawName = trim((string)$request->name);
+        if (
+            (!strpos($rawName, ' ') && strlen($rawName) > 14 && preg_match('/^[a-zA-Z]+$/', $rawName)) ||
+            preg_match('/[a-z][A-Z][a-z][A-Z]/', $rawName) ||
+            preg_match('/[A-Z]{3,}[a-z]{3,}[A-Z]{2,}/', $rawName) ||
+            preg_match('/[^a-zA-Z\p{Bengali}\s\.\-\'\’]/u', $rawName)
+        ) {
+            return back()->withInput()->withErrors([
+                'name' => 'অনুগ্রহ করে সঠিক পূর্ণ নাম লিখুন (যেমন: MD. RAHIM MIAH)।',
+            ]);
+        }
+
+        // Anti-Spam Dot-Stuffing Email Check (blocks emails like "al.am.i.l.ab.i.p4.50@gmail.com")
+        if ($rawEmail) {
+            $localPart = explode('@', $rawEmail)[0] ?? '';
+            if (substr_count($localPart, '.') >= 4) {
+                return back()->withInput()->withErrors([
+                    'email' => 'অনুগ্রহ করে আপনার সঠিক ইমেইল এড্রেস লিখুন।',
+                ]);
+            }
+        }
 
         // Verify that the course and batch are ACTIVE
         $course = Course::where('id', $request->course_id)->where('status', 1)->first();
@@ -388,6 +428,11 @@ class StudentAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('student')->logout();
+
+        // Security: Invalidate current session and clear all sensitive user state
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return redirect()->route('student.login')->with([
             'info' => 'You have been safely logged out.',
         ]);

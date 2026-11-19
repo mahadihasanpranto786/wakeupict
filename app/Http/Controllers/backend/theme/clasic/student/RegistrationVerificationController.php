@@ -38,9 +38,10 @@ class RegistrationVerificationController extends Controller
         $verificationRequests = RegistrationVerification::count();
         $blockedVerificationRequests = RegistrationVerification::where('status', 'blocked')->count();
 
-        // 2. Query Builder for Student Registrations
+        // 2. Query Builder for Student Registrations (Latest registered student always shows first in DESC order)
         $query = StudentAccount::with(['student', 'admitedStudent', 'enrollments.course', 'enrollments.batch', 'verifiedBy'])
-            ->latest('id');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         // Filter: Status (Pending, Approved, Rejected)
         if ($request->filled('status')) {
@@ -277,6 +278,31 @@ class RegistrationVerificationController extends Controller
         return redirect()->back()->with([
             'success' => "Verification request for phone {$verification->phone} has been REJECTED.",
         ]);
+    }
+
+    /**
+     * Purge / Delete a spam or invalid student registration record
+     */
+    public function destroyStudent($id)
+    {
+        $account = StudentAccount::findOrFail($id);
+        $name = $account->name;
+
+        DB::beginTransaction();
+        try {
+            $account->enrollments()->delete();
+            $account->delete();
+            DB::commit();
+
+            return redirect()->back()->with([
+                'success' => "রেজিস্ট্রেশন রেকর্ড '{$name}' সফলভাবে মুছে ফেলা হয়েছে।",
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors([
+                'error' => 'ডিলিট সম্পন্ন করা যায়নি: ' . $e->getMessage(),
+            ]);
+        }
     }
 }
 

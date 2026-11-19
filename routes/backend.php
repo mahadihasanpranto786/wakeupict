@@ -280,6 +280,7 @@ Route::post('/student-accounts/{id}/toggle-status', 'backend\theme\clasic\studen
 Route::get('/registration-verifications', 'backend\theme\clasic\student\RegistrationVerificationController@index')->name('admin.registration.verifications');
 Route::post('/registrations/{id}/approve', 'backend\theme\clasic\student\RegistrationVerificationController@approveStudent')->name('admin.registrations.approve');
 Route::post('/registrations/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectStudent')->name('admin.registrations.reject');
+Route::delete('/registration-verifications/{id}', 'backend\theme\clasic\student\RegistrationVerificationController@destroyStudent')->name('admin.registrations.destroy');
 Route::post('/verification-requests/{id}/approve', 'backend\theme\clasic\student\RegistrationVerificationController@approveVerificationRequest')->name('admin.verification.request.approve');
 Route::post('/verification-requests/{id}/reject', 'backend\theme\clasic\student\RegistrationVerificationController@rejectVerificationRequest')->name('admin.verification.request.reject');
 Route::match(['get', 'post', 'delete'], '/student-accounts/{id}/delete', 'backend\theme\clasic\student\StudentAccountController@destroy')->name('admin.student-accounts.delete');

@@ -131,7 +131,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0177' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'pending',
             'status' => 1,
         ]);
@@ -160,7 +160,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0176' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'approved',
             'status' => 1,
         ]);
@@ -179,7 +179,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0175' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'rejected',
             'rejection_reason' => 'Invalid document submissions',
             'status' => 0,
@@ -370,7 +370,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
 
             $html = $response->getContent();
 
-            // Newest student registration appears first with the highest serial number (#total -> #total-1)
+            // Newest student registration appears first in DESC order with standard sequential serial numbers (#1, #2, ...)
             $newestPos = strpos($html, $newestAccount->name);
             $prevPos = strpos($html, $previousAccount->name);
             $this->assertNotFalse($newestPos);
@@ -378,29 +378,29 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             $this->assertLessThan($prevPos, $newestPos);
 
             $this->assertRegExp(
-                '/<tr>\s*<td>' . $totalRegistrations . '<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($newestAccount->name, '/') . '<\/div>/',
+                '/<tr>\s*<td>1<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($newestAccount->name, '/') . '<\/div>/',
                 $html
             );
             $this->assertRegExp(
-                '/<tr>\s*<td>' . ($totalRegistrations - 1) . '<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($previousAccount->name, '/') . '<\/div>/',
+                '/<tr>\s*<td>2<\/td>\s*<td>\s*<div[^>]*>' . preg_quote($previousAccount->name, '/') . '<\/div>/',
                 $html
             );
 
-            // Verification logs tab also displays newest log first with descending serial (#vTotal -> #vTotal-1)
+            // Verification logs tab also displays newest log first with standard serial numbers
             $this->assertRegExp(
-                '/<tr>\s*<td>' . $totalLogs . '<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($newestLog->phone, '/') . '<\/strong>/',
+                '/<tr>\s*<td>1<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($newestLog->phone, '/') . '<\/strong>/',
                 $html
             );
             $this->assertRegExp(
-                '/<tr>\s*<td>' . ($totalLogs - 1) . '<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($previousLog->phone, '/') . '<\/strong>/',
+                '/<tr>\s*<td>2<\/td>\s*<td>\s*<strong[^>]*>' . preg_quote($previousLog->phone, '/') . '<\/strong>/',
                 $html
             );
 
-            // Page 2 must continue descending serial from ($totalRegistrations - 15)
+            // Page 2 must continue standard serial sequence starting from 16
             $page2 = $this->actingAs($admin)->get(route('admin.registration.verifications', ['page' => 2]));
             $page2->assertStatus(200);
             $page2Html = $page2->getContent();
-            $this->assertStringContainsString('<td>' . ($totalRegistrations - 15) . '</td>', $page2Html);
+            $this->assertStringContainsString('<td>16</td>', $page2Html);
         } finally {
             foreach ($createdAccounts as $acc) {
                 $acc->delete();
@@ -409,5 +409,88 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
                 $log->delete();
             }
         }
+    }
+
+    /**
+     * Test 11: Spam Bot Protection Rejects Gibberish Names, Invalid Phones, and Dot-Stuffed Emails
+     */
+    public function testSpamRegistrationBlocking()
+    {
+        $course = Course::where('status', 1)->first();
+        $batch = Batch::where('status', 1)->where('active_batch', 1)->first();
+
+        // 1. Gibberish Bot Name (like user reported "yjFUVyQHbRCfMkbQVBIwYng")
+        $response = $this->post(route('student.register.submit'), [
+            'name' => 'yjFUVyQHbRCfMkbQVBIwYng',
+            'phone' => '01711' . rand(100000, 999999),
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+        $response->assertSessionHasErrors('name');
+
+        // 2. Non-BD Phone Number (like user reported "7463936929")
+        $response = $this->post(route('student.register.submit'), [
+            'name' => 'Valid Student Name',
+            'phone' => '7463936929',
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+        $response->assertSessionHasErrors('phone');
+
+        // 3. Dot-stuffed email (like user reported "al.am.i.l.ab.i.p4.50@gmail.com")
+        $response = $this->post(route('student.register.submit'), [
+            'name' => 'Valid Student Name',
+            'phone' => '01722' . rand(100000, 999999),
+            'email' => 'al.am.i.l.ab.i.p4.50@gmail.com',
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+        $response->assertSessionHasErrors('email');
+
+        // 4. Honeypot trap: Form submitted with hidden bot field filled
+        $response = $this->post(route('student.register.submit'), [
+            'b_hp_security' => 'i_am_a_bot',
+            'name' => 'Valid Student Name',
+            'phone' => '01733' . rand(100000, 999999),
+            'course_id' => $course->id,
+            'batch_id' => $batch->id,
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+        $response->assertRedirect(route('student.login'));
+    }
+
+    /**
+     * Test 12: Admin Can Delete Spam Student Registration Record
+     */
+    public function testAdminCanDeleteSpamRegistration()
+    {
+        $admin = User::first();
+        if (!$admin) {
+            $admin = factory(User::class)->create();
+        }
+
+        $spamAccount = StudentAccount::create([
+            'name' => 'Spam Bot Target',
+            'phone' => '01755' . rand(100000, 999999),
+            'email' => 'spambot_' . rand(1000, 9999) . '@spam.com',
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
+            'password' => Hash::make('secret'),
+            'registration_status' => 'pending',
+            'status' => 0,
+        ]);
+
+        $this->assertDatabaseHas('student_accounts', ['id' => $spamAccount->id]);
+
+        $response = $this->actingAs($admin)->delete(route('admin.registrations.destroy', $spamAccount->id));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('student_accounts', ['id' => $spamAccount->id]);
     }
 }

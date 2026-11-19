@@ -30,7 +30,11 @@ class QuestionBookController extends Controller
     public function index(Request $request)
     {
         $query = LmsQuestion::with(['options', 'course', 'quiz', 'parentQuestion', 'derivedQuestions'])
-            ->where('is_archived', $request->has('archived') ? true : false);
+            ->where('is_archived', $request->has('archived') ? true : false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
 
         // Search text
         if ($request->filled('search')) {
@@ -107,25 +111,35 @@ class QuestionBookController extends Controller
         $perPage = (int)$request->input('per_page', 15);
         $questions = $query->paginate($perPage)->appends($request->all());
 
-        // Aggregate statistics across categories & types
+        // Aggregate statistics across categories & types strictly for the master Question Library (exclude quiz-specific copies)
+        $libraryBase = LmsQuestion::where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
+
         $stats = [
-            'total'          => LmsQuestion::where('is_archived', false)->count(),
-            'mcq'            => LmsQuestion::where('is_archived', false)->whereIn('question_type', ['mcq_single', 'mcq_multi', 'mcq'])->count(),
-            'true_false'     => LmsQuestion::where('is_archived', false)->where('question_type', 'true_false')->count(),
-            'fill_blanks'    => LmsQuestion::where('is_archived', false)->where('question_type', 'fill_blanks')->count(),
-            'short_answer'   => LmsQuestion::where('is_archived', false)->where('question_type', 'short_answer')->count(),
-            'creative'       => LmsQuestion::where('is_archived', false)->where('question_type', 'creative')->count(),
-            'descriptive'    => LmsQuestion::where('is_archived', false)->whereIn('question_type', ['descriptive', 'translation'])->count(),
-            'matching'       => LmsQuestion::where('is_archived', false)->where('question_type', 'matching')->count(),
-            'original_count' => LmsQuestion::where('is_archived', false)->whereNull('parent_question_id')->count(),
-            'derived_count'  => LmsQuestion::where('is_archived', false)->whereNotNull('parent_question_id')->count(),
-            'archived'       => LmsQuestion::where('is_archived', true)->count(),
+            'total'          => (clone $libraryBase)->count(),
+            'mcq'            => (clone $libraryBase)->whereIn('question_type', ['mcq_single', 'mcq_multi', 'mcq'])->count(),
+            'true_false'     => (clone $libraryBase)->where('question_type', 'true_false')->count(),
+            'fill_blanks'    => (clone $libraryBase)->where('question_type', 'fill_blanks')->count(),
+            'short_answer'   => (clone $libraryBase)->where('question_type', 'short_answer')->count(),
+            'creative'       => (clone $libraryBase)->where('question_type', 'creative')->count(),
+            'descriptive'    => (clone $libraryBase)->whereIn('question_type', ['descriptive', 'translation'])->count(),
+            'matching'       => (clone $libraryBase)->where('question_type', 'matching')->count(),
+            'original_count' => (clone $libraryBase)->whereNull('parent_question_id')->count(),
+            'derived_count'  => (clone $libraryBase)->whereNotNull('parent_question_id')->count(),
+            'archived'       => LmsQuestion::where('is_archived', true)
+                                ->where(function ($q) {
+                                    $q->whereNull('quiz_id')
+                                      ->orWhere('quiz_id', 0);
+                                })->count(),
         ];
 
         // Dropdown data
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
-        $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
-        $chapterCounts = LmsQuestion::whereNotNull('chapter')
+        $categories = (clone $libraryBase)->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
+        $chapterCounts = (clone $libraryBase)->whereNotNull('chapter')
             ->where('chapter', '!=', '')
             ->select('chapter', DB::raw('count(*) as total'))
             ->groupBy('chapter')

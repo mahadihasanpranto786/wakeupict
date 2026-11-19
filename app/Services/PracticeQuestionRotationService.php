@@ -205,14 +205,18 @@ class PracticeQuestionRotationService
     }
 
     /**
-     * Scope query to only include MCQ format questions with options
-     * (Non-MCQ types like short_answer, fill_blanks, creative, descriptive are excluded)
+     * Scope query to only include master Question Library MCQ format questions with options
+     * (Excludes quiz-specific copies and non-MCQ types like short_answer, fill_blanks, creative, descriptive)
      */
     public static function applyMcqConstraint($query)
     {
         return $query->where('is_active', true)
             ->where('is_archived', false)
             ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            })
             ->has('options', '>=', 2);
     }
 
