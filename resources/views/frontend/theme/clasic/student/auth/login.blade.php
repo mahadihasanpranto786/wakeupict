@@ -285,8 +285,9 @@
                 <form action="{{ route('student.register.submit') }}" method="POST" class="space-y-3.5" autocomplete="off" id="studentRegisterForm">
                     @csrf
 
-                    <!-- Browser Autofill Trap -->
+                    <!-- Anti-Spam Honeypot & Browser Autofill Trap -->
                     <div style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; overflow: hidden; z-index: -9999;" aria-hidden="true">
+                        <input type="text" name="b_hp_security" tabindex="-1" value="" autocomplete="off">
                         <input type="text" name="prevent_autofill_reg_user" tabindex="-1" autocomplete="off">
                         <input type="password" name="prevent_autofill_reg_pwd" tabindex="-1" autocomplete="new-password">
                     </div>

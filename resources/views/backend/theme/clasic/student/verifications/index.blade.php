@@ -276,7 +276,7 @@
                                         $primaryBatch = $item->batch;
                                     @endphp
                                     <tr>
-                                        <td>{{ $registrations->total() - (($registrations->firstItem() ?? 1) - 1) - $index }}</td>
+                                        <td>{{ ($registrations->firstItem() ?? 1) + $index }}</td>
                                         <td>
                                             <div class="font-weight-bold text-dark">{{ $item->name }}</div>
                                             <div class="small text-muted">
@@ -359,6 +359,15 @@
                                                 <button type="button" class="btn btn-outline-info btn-sm font-weight-bold ml-1" data-toggle="modal" data-target="#infoModal{{ $item->id }}" title="View Credentials & Password">
                                                     <i class="fas fa-eye mr-1"></i> Details
                                                 </button>
+
+                                                <!-- Delete / Purge Spam Registration Button -->
+                                                <form method="POST" action="{{ route('admin.registrations.destroy', $item->id) }}" class="d-inline ml-1" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে {{ $item->name }} এর রেজিস্ট্রেশন রেকর্ডটি মুছে ফেলতে চান?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Spam Registration">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
                                             </div>
 
                                             <!-- Student Info & Credentials Modal -->
@@ -386,15 +395,15 @@
                                                                     <strong class="font-mono text-dark" style="font-size: 14px;">{{ $item->phone }}</strong>
                                                                 </div>
                                                                 <div class="mb-1">
-                                                                    <span class="small text-muted d-block font-weight-bold">Student Password (পাসওয়ার্ড):</span>
-                                                                    <div class="input-group input-group-sm mt-1">
-                                                                        <input type="password" id="verifyModalPass{{ $item->id }}" class="form-control font-mono font-weight-bold bg-white text-dark" value="{{ $item->display_password }}" readonly style="font-size: 14px; letter-spacing: 1px;">
+                                                                    <span class="small text-muted d-block font-weight-bold mb-1">Student Password (পাসওয়ার্ড):</span>
+                                                                    <div class="input-group shadow-sm rounded-lg overflow-hidden border border-warning" style="background: #ffffff;">
+                                                                        <input type="password" id="verifyModalPass{{ $item->id }}" class="form-control font-mono font-weight-bold bg-white text-dark border-0 px-3 py-2" value="{{ $item->display_password }}" readonly style="font-size: 16px; letter-spacing: 2px; height: 48px;">
                                                                         <div class="input-group-append">
-                                                                            <button type="button" class="btn btn-dark" onclick="togglePassView('verifyModalPass{{ $item->id }}', this)" title="Show / Hide Password">
-                                                                                <i class="fas fa-eye"></i>
+                                                                            <button type="button" class="btn btn-dark px-3 px-sm-3.5 d-flex align-items-center justify-content-center" onclick="togglePassView('verifyModalPass{{ $item->id }}', this)" title="Show / Hide Password" style="min-width: 48px; border-radius: 0;">
+                                                                                <i class="fas fa-eye" style="font-size: 16px;"></i>
                                                                             </button>
-                                                                            <button type="button" class="btn btn-warning font-weight-bold text-dark" onclick="copyPassVal('verifyModalPass{{ $item->id }}', this)" title="Copy Password">
-                                                                                <i class="fas fa-copy"></i>
+                                                                            <button type="button" class="btn btn-warning font-weight-bold text-dark px-3 px-sm-3.5 d-flex align-items-center justify-content-center" onclick="copyPassVal('verifyModalPass{{ $item->id }}', this)" title="Copy Password" style="min-width: 50px; background-color: #f59e0b; border-color: #d97706; border-radius: 0;">
+                                                                                <i class="fas fa-copy" style="font-size: 16px;"></i>
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -412,7 +421,14 @@
                                                                 <p class="mb-0 small"><strong>Registered On:</strong> {{ $item->created_at ? $item->created_at->format('d M, Y h:i A') : 'N/A' }}</p>
                                                             </div>
                                                         </div>
-                                                        <div class="modal-footer bg-light py-2">
+                                                        <div class="modal-footer bg-light py-2 d-flex justify-content-between align-items-center">
+                                                            <form method="POST" action="{{ route('admin.registrations.destroy', $item->id) }}" onsubmit="return confirm('আপনি কি নিশ্চিতভাবে এই রেজিস্ট্রেশন রেকর্ডটি মুছে ফেলতে চান?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-danger btn-sm font-weight-bold" title="Delete Spam / Invalid Record">
+                                                                    <i class="fas fa-trash-alt mr-1"></i> Delete Spam
+                                                                </button>
+                                                            </form>
                                                             <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>
@@ -513,7 +529,7 @@
                             <tbody>
                                 @forelse($verificationLogs as $vIdx => $vLog)
                                     <tr>
-                                        <td>{{ $verificationLogs->total() - (($verificationLogs->firstItem() ?? 1) - 1) - $vIdx }}</td>
+                                        <td>{{ ($verificationLogs->firstItem() ?? 1) + $vIdx }}</td>
                                         <td>
                                             <strong class="font-mono text-dark">{{ $vLog->phone }}</strong>
                                         </td>
