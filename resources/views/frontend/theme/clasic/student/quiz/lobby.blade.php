@@ -123,7 +123,7 @@
             </div>
             <div class="quiz-card-inner p-4 rounded-2xl border text-center font-mono">
                 <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-sans">Total Questions</span>
-                <span class="text-xl font-black text-blue-600 dark:text-blue-400">{{ $quiz->questions->count() }}</span>
+                <span class="text-xl font-black text-blue-600 dark:text-blue-400">{{ $quiz->getQuestionsCount() }}</span>
             </div>
             <div class="quiz-card-inner p-4 rounded-2xl border text-center font-mono">
                 <span class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-sans">Total Marks</span>
@@ -209,7 +209,7 @@
                     <span>Resume In-Progress Exam</span>
                 </a>
             @elseif($canAttempt)
-                @if($quiz->questions->count() > 0 || ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->count() > 0))
+                @if($quiz->getQuestionsCount() > 0)
                     <form id="start-exam-form-main" action="{{ route('student.quiz.start', $quiz->id) }}" method="POST">
                         @csrf
                         <button type="button" onclick="confirmStartExam('start-exam-form-main', '{{ addslashes($quiz->title) }}', '{{ $quiz->duration_minutes }}', '{{ $quiz->total_questions ? $toBng($quiz->total_questions) . 'টি' : 'নির্ধারিত' }}')"

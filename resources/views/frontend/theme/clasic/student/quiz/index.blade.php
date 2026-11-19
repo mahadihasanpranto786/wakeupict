@@ -330,7 +330,7 @@
                             <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center font-mono">
                                 <div class="p-2 rounded-xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/60 dark:border-slate-800/80">
                                     <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-sans">Questions</span>
-                                    <span class="text-xs font-bold text-slate-800 dark:text-white">{{ $quiz->questions->count() }} Qs</span>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-white">{{ $quiz->getQuestionsCount() }} Qs</span>
                                 </div>
                                 <div class="p-2 rounded-xl bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200/60 dark:border-slate-800/80">
                                     <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-sans">Time</span>

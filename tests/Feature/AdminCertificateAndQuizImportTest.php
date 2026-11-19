@@ -1032,6 +1032,17 @@ class AdminCertificateAndQuizImportTest extends TestCase
 
             // Clean up
             $q2->delete();
+
+            // Test publishOnline syncs questions
+            $pubRes = $this->actingAs($this->adminUser)->post(route('admin.question-papers.publish-online', $paper->id));
+            $pubRes->assertSessionHas('success');
+            $this->assertEquals($paper->items()->count(), $quiz->questions()->count());
+            $this->assertEquals($paper->items()->count(), $quiz->getQuestionsCount());
+
+            // Test Student upcoming exams renders question count accurately
+            $upcomingRes = $this->actingAs($this->student, 'student')->get(route('student.exams.upcoming'));
+            $upcomingRes->assertStatus(200);
+            $upcomingRes->assertSee($quiz->getQuestionsCount() . ' Questions');
         } finally {
             if ($quiz->paper) {
                 $quiz->paper->items()->delete();

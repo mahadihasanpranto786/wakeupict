@@ -85,9 +85,17 @@ class StudentQuizController extends Controller
         $student = Auth::guard('student')->user();
         $exams = LmsQuiz::where('is_published', true)
             ->where('quiz_type', 'exam')
-            ->with(['course', 'questions'])
+            ->with(['course', 'questions', 'paper.items'])
             ->orderBy('id', 'desc')
             ->get();
+
+        // Self-heal: ensure any exam linked to a paper has its questions synchronized
+        foreach ($exams as $exam) {
+            if ($exam->questions->count() === 0 && $exam->paper_id && $exam->paper && $exam->paper->items()->count() > 0) {
+                $exam->syncQuestionsFromPaper();
+                $exam->load('questions');
+            }
+        }
 
         return view('frontend.theme.clasic.student.quiz.upcoming', compact('student', 'exams'));
     }

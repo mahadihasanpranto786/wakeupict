@@ -553,8 +553,13 @@
                                     </div>
                                 @empty
                                     <div class="text-center py-4 text-muted empty-drop-placeholder">
-                                        <i class="fas fa-hand-point-down fa-2x mb-2 text-muted"></i>
-                                        <p class="mb-0 text-xs">বাম পাশের প্রশ্ন লাইব্রেরি থেকে প্রশ্ন টেনে এনে (Drag & Drop) এখানে ড্রপ করুন অথবা '+' বাটনে ক্লিক করুন।</p>
+                                        <i class="fas fa-hand-pointer fa-2x mb-2 text-primary"></i>
+                                        <p class="mb-2 text-xs font-weight-bold text-dark">বাম পাশের প্রশ্ন লাইব্রেরি থেকে প্রশ্ন টেনে এনে (Drag & Drop) এখানে ড্রপ করুন অথবা প্রশ্নের ডান পাশের '+' বাটনে ক্লিক করুন।</p>
+                                        <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-xs btn-outline-info font-weight-bold" onclick="prepareAutoPickModal(); $('#autoPickModal').modal('show');">
+                                                <i class="fas fa-magic mr-1"></i> এক-ক্লিকে অটো প্রশ্ন বাছাই করুন
+                                            </button>
+                                        </div>
                                     </div>
                                 @endforelse
                             </div>
@@ -680,9 +685,9 @@
                     <p class="text-xs text-white-50 mb-2">
                         এই প্রশ্নপত্রটি সরাসরি LMS অনলাইন কুইজ সিস্টেমে যুক্ত হবে যেখানে শিক্ষার্থীরা অনলাইন টাইমারসহ পরীক্ষা দিতে পারবে।
                     </p>
-                    <form action="{{ route('admin.question-papers.publish-online', $paper->id) }}" method="POST">
+                    <form action="{{ route('admin.question-papers.publish-online', $paper->id) }}" method="POST" onsubmit="return confirmPublishOnline(event)">
                         @csrf
-                        <button type="submit" class="btn btn-light btn-sm font-weight-bold text-success btn-block" onclick="return confirm('অনলাইন পরীক্ষা হিসেবে প্রকাশ করতে চান?')">
+                        <button type="submit" class="btn btn-light btn-sm font-weight-bold text-success btn-block" onclick="return confirmPublishOnline(event)">
                             <i class="fas fa-globe mr-1"></i> এক-ক্লিকে অনলাইন কুইজ পাবলিশ
                         </button>
                     </form>
@@ -1678,6 +1683,19 @@
             .catch(function(err) {
                 alert('অটো সিলেকশনে ত্রুটি: ' + err);
             });
+        }
+
+        function confirmPublishOnline(event) {
+            var items = document.querySelectorAll('#paperSectionsContainer .canvas-question-card');
+            if (items.length === 0) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                alert('⚠️ আপনার প্রশ্নপত্র ক্যানভাসে এখনও কোনো প্রশ্ন যুক্ত করা হয়নি!\n\nঅনলাইন পরীক্ষা হিসেবে প্রকাশ করতে প্রথমে বাম পাশের তালিকা থেকে প্রশ্ন টেনে এনে (Drag & Drop) ক্যানভাসে ড্রপ করুন অথবা উপরে "অটো প্রশ্ন বাছাই" বাটনে ক্লিক করে প্রশ্ন যোগ করুন।');
+                return false;
+            }
+            return confirm('অনলাইন পরীক্ষা হিসেবে ' + items.length + 'টি প্রশ্ন LMS কুইজে প্রকাশ করতে চান? শিক্ষার্থীরা অবিলম্বে আসন্ন পরীক্ষা পেজ থেকে এই পরীক্ষা দিতে পারবে।');
         }
 
         // Periodic Background Auto-Save (Every 30 seconds)

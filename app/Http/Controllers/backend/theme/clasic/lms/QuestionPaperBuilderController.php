@@ -266,6 +266,7 @@ class QuestionPaperBuilderController extends Controller
                     'pass_marks'       => $paper->pass_marks,
                     'negative_marks'   => $paper->negative_marks,
                 ]);
+                $paper->linkedQuiz->syncQuestionsFromPaper();
             }
 
             DB::commit();
@@ -408,6 +409,11 @@ class QuestionPaperBuilderController extends Controller
         $item->freezeSnapshot();
         $paper->recalculateTotals();
 
+        if ($paper->linkedQuiz) {
+            $paper->linkedQuiz->update(['total_marks' => $paper->total_marks]);
+            $paper->linkedQuiz->syncQuestionsFromPaper();
+        }
+
         return response()->json([
             'success'         => true,
             'message'         => 'প্রশ্নটি প্রশ্নপত্রে সফলভাবে যোগ করা হয়েছে!',
@@ -446,6 +452,11 @@ class QuestionPaperBuilderController extends Controller
         $item->delete();
 
         $paper->recalculateTotals();
+
+        if ($paper->linkedQuiz) {
+            $paper->linkedQuiz->update(['total_marks' => $paper->total_marks]);
+            $paper->linkedQuiz->syncQuestionsFromPaper();
+        }
 
         return response()->json([
             'success'         => true,
@@ -521,6 +532,11 @@ class QuestionPaperBuilderController extends Controller
         $section->delete();
 
         $paper->recalculateTotals();
+
+        if ($paper->linkedQuiz) {
+            $paper->linkedQuiz->update(['total_marks' => $paper->total_marks]);
+            $paper->linkedQuiz->syncQuestionsFromPaper();
+        }
 
         if (request()->ajax() || request()->wantsJson()) {
             return response()->json([
@@ -660,6 +676,11 @@ class QuestionPaperBuilderController extends Controller
 
             $paper->recalculateTotals();
 
+        if ($paper->linkedQuiz) {
+            $paper->linkedQuiz->update(['total_marks' => $paper->total_marks]);
+            $paper->linkedQuiz->syncQuestionsFromPaper();
+        }
+
             DB::commit();
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -778,7 +799,7 @@ class QuestionPaperBuilderController extends Controller
         $paper = LmsQuestionPaper::with(['items.masterQuestion.options'])->findOrFail($id);
 
         if ($paper->items->isEmpty()) {
-            return redirect()->back()->withErrors(['error' => 'প্রশ্নপত্রটি খালি। অন্তত একটি প্রশ্ন যুক্ত করুন।']);
+            return redirect()->back()->withErrors(['error' => 'প্রশ্নপত্রটি খালি। অনলাইন পরীক্ষায় প্রশ্ন সেট করতে প্রথমে ক্যানভাসে প্রশ্ন টেনে আনুন (Drag & Drop), "+" বাটনে চাপুন অথবা "অটো প্রশ্ন বাছাই" দিয়ে প্রশ্ন যোগ করুন।']);
         }
 
         DB::beginTransaction();
@@ -806,9 +827,12 @@ class QuestionPaperBuilderController extends Controller
                 'linked_quiz_id' => $quiz->id,
             ]);
 
+            // Synchronize all paper items into quiz questions so that student portal and upcoming exams show the exact questions!
+            $quiz->syncQuestionsFromPaper();
+
             DB::commit();
 
-            return redirect()->back()->with('success', "প্রশ্নপত্রটি সফলভাবে অনলাইন পরীক্ষা হিসেবে প্রকাশিত হয়েছে! কুইজ আইডি: #{$quiz->id}। শিক্ষার্থীরা এখন স্টুডেন্ট পোর্টাল থেকে এই পরীক্ষা দিতে পারবে।");
+            return redirect()->back()->with('success', "প্রশ্নপত্রটি সফলভাবে অনলাইন পরীক্ষা হিসেবে প্রকাশিত হয়েছে! কুইজ আইডি: #{$quiz->id}। শিক্ষার্থীরা এখন স্টুডেন্ট পোর্টাল থেকে এই পরীক্ষা দিতে পারবে (মোট প্রশ্ন: {$quiz->questions()->count()}টি)।");
         } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'অনলাইন প্রকাশনা ব্যর্থ হয়েছে: ' . $e->getMessage()]);
