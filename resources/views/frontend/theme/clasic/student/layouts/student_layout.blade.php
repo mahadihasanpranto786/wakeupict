@@ -914,7 +914,7 @@
                         <i class="fa fa-moon-o inline dark:hidden text-indigo-400"></i>
                     </button>
  
-                    <a href="{{ url('locale/' . (App::getLocale() == 'bn' ? 'en' : 'bn')) }}" class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-brand-primary transition-colors">
+                    <a href="{{ route('language.switch', App::getLocale() == 'bn' ? 'en' : 'bn') }}" class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-brand-primary transition-colors">
                         {{ App::getLocale() == 'bn' ? 'English' : 'বাংলা' }}
                     </a>
  

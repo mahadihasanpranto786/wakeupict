@@ -131,7 +131,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0177' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'pending',
             'status' => 1,
         ]);
@@ -160,7 +160,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0176' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'approved',
             'status' => 1,
         ]);
@@ -179,7 +179,7 @@ class StudentRegistrationAndVerificationWorkflowTest extends TestCase
             'phone' => '0175' . rand(1000000, 9999999),
             'password' => Hash::make('password123'),
             'student_id_code' => 'WUICT-2026-' . rand(1000, 9999),
-            'registration_number' => '20260501' . rand(1000, 9999),
+            'registration_number' => '2026' . rand(10, 99) . rand(100000, 999999),
             'registration_status' => 'rejected',
             'rejection_reason' => 'Invalid document submissions',
             'status' => 0,

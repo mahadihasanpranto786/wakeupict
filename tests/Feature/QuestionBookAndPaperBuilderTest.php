@@ -744,4 +744,71 @@ class QuestionBookAndPaperBuilderTest extends TestCase
         $this->assertDatabaseMissing('lms_question_papers', ['id' => $paper1->id]);
         $this->assertDatabaseMissing('lms_question_papers', ['id' => $paper2->id]);
     }
+
+    /**
+     * Test Question Book and Student Practice count strictly reflect net master questions
+     * and do NOT increase when an exam or quiz copies are created.
+     */
+    public function test_question_book_and_student_practice_count_remain_stable_when_exam_is_created()
+    {
+        // 1. Initial count in Question Book
+        $initialRes = $this->actingAs($this->adminUser)->get(route('admin.question-book.index'));
+        $initialStats = $initialRes->viewData('stats');
+        $initialTotal = $initialStats['total'];
+        $initialMcq = $initialStats['mcq'];
+
+        // Initial count in student practice rotation
+        $rotationService = app(\App\Services\PracticeQuestionRotationService::class);
+        $initialStudentProgress = $rotationService->getStudentProgress($this->student->id);
+        $initialStudentTotal = $initialStudentProgress['total_questions'];
+
+        // 2. Create an exam / quiz with attached quiz-specific questions
+        $quiz = LmsQuiz::create([
+            'title'        => 'Test Exam for Count Isolation',
+            'course_id'    => $this->course->id,
+            'is_published' => true,
+        ]);
+
+        $quizQuestion = LmsQuestion::create([
+            'quiz_id'       => $quiz->id,
+            'question_text' => 'Cloned exam specific question for test isolate',
+            'question_type' => 'mcq_single',
+            'category'      => 'Web Development',
+            'is_active'     => true,
+            'is_archived'   => false,
+        ]);
+
+        LmsQuestionOption::create([
+            'question_id' => $quizQuestion->id,
+            'option_text' => 'Option A',
+            'is_correct'  => true,
+            'order_index' => 1,
+        ]);
+        LmsQuestionOption::create([
+            'question_id' => $quizQuestion->id,
+            'option_text' => 'Option B',
+            'is_correct'  => false,
+            'order_index' => 2,
+        ]);
+
+        // 3. Question Book count must remain exactly the same
+        $afterRes = $this->actingAs($this->adminUser)->get(route('admin.question-book.index'));
+        $afterStats = $afterRes->viewData('stats');
+        $this->assertEquals($initialTotal, $afterStats['total'], 'Question Book total count must NOT increase when exam questions are created.');
+        $this->assertEquals($initialMcq, $afterStats['mcq'], 'Question Book MCQ count must NOT increase when exam questions are created.');
+
+        // Question Book questions list must not contain the exam copy
+        $questionsInView = $afterRes->viewData('questions');
+        $questionIds = $questionsInView->pluck('id')->toArray();
+        $this->assertNotContains($quizQuestion->id, $questionIds, 'Question Book list must exclude quiz/exam copies.');
+
+        // 4. Student Practice count must also remain strictly stable
+        $afterStudentProgress = $rotationService->getStudentProgress($this->student->id);
+        $this->assertEquals($initialStudentTotal, $afterStudentProgress['total_questions'], 'Student practice total MCQ count must NOT increase when exam questions are created.');
+
+        // Cleanup
+        $quizQuestion->options()->delete();
+        $quizQuestion->delete();
+        $quiz->delete();
+    }
 }

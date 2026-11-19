@@ -143,8 +143,12 @@ class QuestionPaperBuilderController extends Controller
             'items.masterQuestion.options'
         ])->findOrFail($id);
 
-        // Fetch question library for left panel
-        $qQuery = LmsQuestion::with('options')->where('is_archived', false);
+        // Fetch question library for left panel strictly from master library (exclude quiz copies)
+        $qQuery = LmsQuestion::with('options')->where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
 
         $selectedCourseId = $request->input('library_course', $request->input('course_id'));
         if ($selectedCourseId !== null && $selectedCourseId !== '') {
@@ -185,9 +189,15 @@ class QuestionPaperBuilderController extends Controller
 
         $libraryQuestions = $qQuery->latest('id')->paginate(30)->appends($request->all());
 
-        // Category & chapter lists for filters and auto-pick
-        $categories = LmsQuestion::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
-        $chapterCounts = LmsQuestion::whereNotNull('chapter')
+        // Category & chapter lists for filters and auto-pick (master library only)
+        $libraryBase = LmsQuestion::where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
+
+        $categories = (clone $libraryBase)->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
+        $chapterCounts = (clone $libraryBase)->whereNotNull('chapter')
             ->where('chapter', '!=', '')
             ->select('chapter', DB::raw('count(*) as total'))
             ->groupBy('chapter')
@@ -195,7 +205,7 @@ class QuestionPaperBuilderController extends Controller
             ->orderBy('chapter', 'asc')
             ->pluck('total', 'chapter');
         $chapters = $chapterCounts->keys()->values();
-        $courseCounts = LmsQuestion::where('is_archived', false)
+        $courseCounts = (clone $libraryBase)
             ->select('course_id', DB::raw('count(*) as q_count'))
             ->groupBy('course_id')
             ->pluck('q_count', 'course_id')
@@ -206,7 +216,7 @@ class QuestionPaperBuilderController extends Controller
             return $c;
         });
 
-        $totalQuestionsInLib = LmsQuestion::where('is_archived', false)->count();
+        $totalQuestionsInLib = (clone $libraryBase)->count();
 
         // Calculate summary
         $totalQuestionsCount = $paper->items->count();
@@ -291,7 +301,11 @@ class QuestionPaperBuilderController extends Controller
     {
         $paper = LmsQuestionPaper::findOrFail($id);
 
-        $qQuery = LmsQuestion::with('options')->where('is_archived', false);
+        $qQuery = LmsQuestion::with('options')->where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
 
         $selectedCourseId = $request->input('course_id', $request->input('library_course'));
         if ($selectedCourseId !== null && $selectedCourseId !== '') {
@@ -566,7 +580,11 @@ class QuestionPaperBuilderController extends Controller
 
         $section = LmsQuestionPaperSection::where('paper_id', $paper->id)->findOrFail($request->section_id);
 
-        $query = LmsQuestion::with('options')->where('is_archived', false);
+        $query = LmsQuestion::with('options')->where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('quiz_id')
+                  ->orWhere('quiz_id', 0);
+            });
 
         $selectedCourseId = $request->input('course_id');
         if ($selectedCourseId !== null && $selectedCourseId !== '') {

@@ -59,10 +59,10 @@
                     <span class="bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full text-[10px] font-black">Cycle #{{ $progress['current_cycle'] }}</span>
                 </div>
                 <h1 class="text-xl sm:text-3xl font-black tracking-tight text-white">
-                    স্মার্ট প্রশ্ন ব্যাংক প্র্যাকটিস ও রোটেশন
+                    {{ App::getLocale() === 'en' ? 'Smart Question Bank Practice & Rotation' : 'স্মার্ট প্রশ্ন ব্যাংক প্র্যাকটিস ও রোটেশন' }}
                 </h1>
                 <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                    ১,০০০+ প্রশ্ন ব্যাংকের প্রতিটি প্রশ্ন কোনো পুনরাবৃত্তি ছাড়াই ধারাবাহিকভাবে কভার করুন। সম্পূর্ণ প্রশ্ন শেষ হলে স্বয়ংক্রিয়ভাবে পরবর্তী সাইকেল শুরু হবে।
+                    {{ App::getLocale() === 'en' ? 'Sequentially master every single question in the master question bank with zero repetition. A new rotation cycle begins automatically once completed.' : '১,০০০+ প্রশ্ন ব্যাংকের প্রতিটি প্রশ্ন কোনো পুনরাবৃত্তি ছাড়াই ধারাবাহিকভাবে কভার করুন। সম্পূর্ণ প্রশ্ন শেষ হলে স্বয়ংক্রিয়ভাবে পরবর্তী সাইকেল শুরু হবে।' }}
                 </p>
             </div>
 
@@ -72,10 +72,10 @@
                     <i class="fa fa-refresh"></i>
                 </div>
                 <div>
-                    <div class="text-[10px] font-bold uppercase tracking-wider text-blue-200">বর্তমান রোটেশন সাইকেল</div>
-                    <div class="text-xl sm:text-2xl font-black text-white">সাইকেল #{{ $progress['current_cycle'] }}</div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-blue-200">{{ App::getLocale() === 'en' ? 'Current Rotation Cycle' : 'বর্তমান রোটেশন সাইকেল' }}</div>
+                    <div class="text-xl sm:text-2xl font-black text-white">{{ App::getLocale() === 'en' ? 'Cycle' : 'সাইকেল' }} #{{ $progress['current_cycle'] }}</div>
                     <div class="text-xs text-emerald-300 font-semibold">
-                        {{ $progress['coverage_pct'] }}% প্রশ্ন ব্যাংক সম্পন্ন
+                        {{ $progress['coverage_pct'] }}% {{ App::getLocale() === 'en' ? 'Question Bank Covered' : 'প্রশ্ন ব্যাংক সম্পন্ন' }}
                     </div>
                 </div>
             </div>
@@ -86,10 +86,10 @@
             <div class="flex items-center justify-between text-xs font-bold mb-1.5">
                 <span class="text-slate-300 flex items-center gap-1.5">
                     <i class="fa fa-database text-amber-400"></i>
-                    <span>প্রশ্ন ব্যাংক কভারেজ অগ্রগতি (Question Bank Coverage)</span>
+                    <span>{{ App::getLocale() === 'en' ? 'Question Bank Coverage Progress' : 'প্রশ্ন ব্যাংক কভারেজ অগ্রগতি (Question Bank Coverage)' }}</span>
                 </span>
                 <span class="text-amber-300 font-extrabold text-xs sm:text-sm">
-                    {{ $progress['attempted_questions'] }} / {{ $progress['total_questions'] }} টি ({{ $progress['coverage_pct'] }}%)
+                    {{ $progress['attempted_questions'] }} / {{ $progress['total_questions'] }} {{ App::getLocale() === 'en' ? 'Qs' : 'টি' }} ({{ $progress['coverage_pct'] }}%)
                 </span>
             </div>
             <div class="w-full h-2.5 bg-black/30 rounded-full overflow-hidden p-0.5 border border-white/10">
@@ -104,7 +104,7 @@
         <!-- Metric 1: Total Questions -->
         <div class="hud-card rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">মোট প্রশ্ন</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ App::getLocale() === 'en' ? 'Total Questions' : 'মোট প্রশ্ন' }}</span>
                 <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">
                     <i class="fa fa-database"></i>
                 </div>
@@ -113,14 +113,14 @@
                 {{ number_format($progress['total_questions']) }}
             </div>
             <div class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                Total in Question Bank
+                {{ App::getLocale() === 'en' ? 'Net MCQ in Question Bank' : 'নেট MCQ (Master Question Bank)' }}
             </div>
         </div>
 
         <!-- Metric 2: Attempted Questions -->
         <div class="hud-card rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">অনুশীলনকৃত</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ App::getLocale() === 'en' ? 'Attempted' : 'অনুশীলনকৃত' }}</span>
                 <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs">
                     <i class="fa fa-check-circle"></i>
                 </div>
@@ -136,7 +136,7 @@
         <!-- Metric 3: Remaining Questions -->
         <div class="hud-card rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">অবশিষ্ট প্রশ্ন</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ App::getLocale() === 'en' ? 'Remaining' : 'অবশিষ্ট প্রশ্ন' }}</span>
                 <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs">
                     <i class="fa fa-hourglass-half"></i>
                 </div>
@@ -152,7 +152,7 @@
         <!-- Metric 4: Total Exams Completed -->
         <div class="hud-card rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">পরীক্ষা সম্পন্ন</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ App::getLocale() === 'en' ? 'Exams Taken' : 'পরীক্ষা সম্পন্ন' }}</span>
                 <div class="w-7 h-7 rounded-lg bg-violet-50 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
                     <i class="fa fa-graduation-cap"></i>
                 </div>
@@ -168,7 +168,7 @@
         <!-- Metric 5: Coverage & Accuracy -->
         <div class="hud-card col-span-2 md:col-span-1 rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">সঠিকতার হার</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ App::getLocale() === 'en' ? 'Accuracy Rate' : 'সঠিকতার হার' }}</span>
                 <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">
                     <i class="fa fa-bullseye"></i>
                 </div>
@@ -188,10 +188,10 @@
             <div>
                 <span class="text-[11px] font-bold text-brand-primary uppercase tracking-wider">Interactive Test Generator</span>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5">
-                    নতুন অনুশীলন পরীক্ষা শুরু করুন (Start Rotated Exam)
+                    {{ App::getLocale() === 'en' ? 'Start Rotated Practice Exam' : 'নতুন অনুশীলন পরীক্ষা শুরু করুন (Start Rotated Exam)' }}
                 </h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    ক্যাটাগরি এবং প্রশ্নের অপশন নির্বাচন করে পরীক্ষা শুরু করুন। সিস্টেমে এখনও দেখা হয়নি এমন প্রশ্ন অগ্রাধিকার পাবে।
+                    {{ App::getLocale() === 'en' ? 'Select category and question parameters to begin. Fresh, unseen questions are prioritized.' : 'ক্যাটাগরি এবং প্রশ্নের অপশন নির্বাচন করে পরীক্ষা শুরু করুন। সিস্টেমে এখনও দেখা হয়নি এমন প্রশ্ন অগ্রাধিকার পাবে।' }}
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">

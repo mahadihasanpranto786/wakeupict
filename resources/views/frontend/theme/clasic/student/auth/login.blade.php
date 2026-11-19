@@ -100,6 +100,23 @@
         background-color: var(--brand-primary, #F26522) !important;
         color: #ffffff !important;
     }
+
+    /* Neutralize browser autofill yellow/cyan background and styling */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+        -webkit-text-fill-color: #0f172a !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+    html.dark input:-webkit-autofill,
+    html.dark input:-webkit-autofill:hover, 
+    html.dark input:-webkit-autofill:focus, 
+    html.dark input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
 </style>
 @endpush
 
@@ -109,7 +126,7 @@
     <div class="absolute inset-0 bg-grid-mesh opacity-20 pointer-events-none"></div>
     <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <div class="max-w-md w-full relative z-10">
+    <div class="w-full max-w-md md:max-w-xl lg:max-w-2xl relative z-10 transition-all duration-300">
         <div class="rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 backdrop-blur-2xl p-5 sm:p-7 shadow-2xl transition-all">
             
             <!-- Logo & Badge -->
@@ -178,8 +195,14 @@
                     </p>
                 </div>
 
-                <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-4">
+                <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-4" autocomplete="off" id="studentLoginForm">
                     @csrf
+
+                    <!-- Browser Autofill Trap (Prevents browser from pre-filling saved passwords on load) -->
+                    <div style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; overflow: hidden; z-index: -9999;" aria-hidden="true">
+                        <input type="text" name="prevent_autofill_user" tabindex="-1" autocomplete="off">
+                        <input type="password" name="prevent_autofill_pwd" tabindex="-1" autocomplete="new-password">
+                    </div>
 
                     <div>
                         <label for="login_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
@@ -188,7 +211,11 @@
                         <div class="relative">
                             <i class="fa fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" required
-                                   placeholder="যেমন: 202605010001 বা 017XXXXXXXX"
+                                   readonly
+                                   onfocus="this.removeAttribute('readonly');"
+                                   onpointerdown="this.removeAttribute('readonly');"
+                                   autocomplete="off"
+                                   placeholder="Enter your registration no / phone / email"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
                         </div>
                     </div>
@@ -202,7 +229,11 @@
                         <div class="relative">
                             <i class="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="password" id="password" name="password" required
-                                   placeholder="••••••••"
+                                   readonly
+                                   onfocus="this.removeAttribute('readonly');"
+                                   onpointerdown="this.removeAttribute('readonly');"
+                                   autocomplete="new-password"
+                                   placeholder="Enter your password"
                                    class="w-full pl-11 pr-11 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                             <button type="button" onclick="toggleAuthPasswordVisibility('password', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
                                 <i class="fa fa-eye text-sm"></i>
@@ -251,18 +282,14 @@
             <!-- TAB PANE 2: STUDENT REGISTRATION / ACCOUNT ACTIVATION -->
             <!-- ========================================================================= -->
             <div id="authPaneRegister" class="{{ $activeTab === 'register' ? 'block' : 'hidden' }}">
-                <div class="mb-3.5 p-2.5 px-3 rounded-2xl bg-cyan-50/80 dark:bg-cyan-950/20 border border-cyan-300 dark:border-cyan-800 text-xs text-slate-800 dark:text-slate-300 space-y-1">
-                    <div class="flex items-center gap-1.5 font-bold text-cyan-800 dark:text-cyan-400">
-                        <i class="fa fa-shield text-sm"></i>
-                        <span>অটো-কোর্স লিংকিং সুবিধা:</span>
-                    </div>
-                    <p class="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-                        ভর্তির সময় ব্যবহৃত মোবাইল নম্বরটি লিখলে আপনার কোর্স, ব্যাচ ও ম্যাটেরিয়ালস স্বয়ংক্রিয়ভাবে প্রোফাইলে যুক্ত হবে।
-                    </p>
-                </div>
-
-                <form action="{{ route('student.register.submit') }}" method="POST" class="space-y-3.5">
+                <form action="{{ route('student.register.submit') }}" method="POST" class="space-y-3.5" autocomplete="off" id="studentRegisterForm">
                     @csrf
+
+                    <!-- Browser Autofill Trap -->
+                    <div style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; overflow: hidden; z-index: -9999;" aria-hidden="true">
+                        <input type="text" name="prevent_autofill_reg_user" tabindex="-1" autocomplete="off">
+                        <input type="password" name="prevent_autofill_reg_pwd" tabindex="-1" autocomplete="new-password">
+                    </div>
 
                     <div>
                         <label for="reg_name" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
@@ -271,7 +298,8 @@
                         <div class="relative">
                             <i class="fa fa-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="text" id="reg_name" name="name" value="{{ old('name') }}" required
-                                   placeholder="যেমন: MD. RAHIM MIAH"
+                                   autocomplete="off"
+                                   placeholder="Enter your name"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                         </div>
                     </div>
@@ -283,7 +311,8 @@
                         <div class="relative">
                             <i class="fa fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="text" id="reg_phone" name="phone" value="{{ old('phone') }}" required
-                                   placeholder="017XXXXXXXX"
+                                   autocomplete="off"
+                                   placeholder="Enter your phone number"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
                         </div>
                     </div>
@@ -295,57 +324,61 @@
                         <div class="relative">
                             <i class="fa fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                             <input type="email" id="reg_email" name="email" value="{{ old('email') }}"
-                                   placeholder="student@example.com"
+                                   autocomplete="off"
+                                   placeholder="Enter your email address"
                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all font-mono">
                         </div>
                     </div>
 
-                    <!-- Dynamic Course Selection -->
-                    <div>
-                        <label for="reg_course_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                            Select Course <span class="text-rose-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <i class="fa fa-graduation-cap absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
-                            <select id="reg_course_id" name="course_id" required
-                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
-                                <option value="" disabled {{ old('course_id') ? '' : 'selected' }}>-- Select Course --</option>
-                                @if(isset($activeCourses))
-                                    @foreach($activeCourses as $c)
-                                        <option value="{{ $c->id }}" {{ old('course_id') == $c->id ? 'selected' : '' }}>
-                                            {{ $c->course_title }} (Code: {{ $c->course_code ?: str_pad($c->id, 2, '0', STR_PAD_LEFT) }})
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
+                    <!-- Dynamic Course & Batch Selection (Responsive Grid) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Dynamic Course Selection -->
+                        <div>
+                            <label for="reg_course_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                                Course <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fa fa-graduation-cap absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
+                                <select id="reg_course_id" name="course_id" required
+                                        class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                    <option value="" disabled {{ old('course_id') ? '' : 'selected' }}>-- Select Course --</option>
+                                    @if(isset($activeCourses))
+                                        @foreach($activeCourses as $c)
+                                            <option value="{{ $c->id }}" {{ old('course_id') == $c->id ? 'selected' : '' }}>
+                                                {{ $c->course_title }} (Code: {{ $c->course_code ?: str_pad($c->id, 2, '0', STR_PAD_LEFT) }})
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Active Batch Selection -->
+                        <div>
+                            <label for="reg_batch_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                                Batch <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
+                                <select id="reg_batch_id" name="batch_id" required
+                                        class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+                                    <option value="" disabled {{ old('batch_id') ? '' : 'selected' }}>-- Select Batch --</option>
+                                    @if(isset($activeBatches))
+                                        @foreach($activeBatches as $b)
+                                            @php
+                                                $cleanCode = preg_replace('/^(batch[-_\s]*code[-_\s]*|batch[-_\s]*)/i', '', $b->batch_code ?: $b->batch_number);
+                                            @endphp
+                                            <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
+                                                Batch-Code-{{ $cleanCode }} [{{ $b->academic_year ?: date('Y') }}]
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Dynamic Active Batch Selection -->
-                    <div>
-                        <label for="reg_batch_id" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                            Select Active Batch <span class="text-rose-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <i class="fa fa-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm z-10 pointer-events-none"></i>
-                            <select id="reg_batch_id" name="batch_id" required
-                                    class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
-                                <option value="" disabled {{ old('batch_id') ? '' : 'selected' }}>-- Select Batch --</option>
-                                @if(isset($activeBatches))
-                                    @foreach($activeBatches as $b)
-                                        @php
-                                            $cleanCode = preg_replace('/^(batch[-_\s]*code[-_\s]*|batch[-_\s]*)/i', '', $b->batch_code ?: $b->batch_number);
-                                        @endphp
-                                        <option value="{{ $b->id }}" data-course="{{ $b->course_id }}" {{ old('batch_id') == $b->id ? 'selected' : '' }}>
-                                            Batch-Code-{{ $cleanCode }} [{{ $b->academic_year ?: date('Y') }}]
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <div>
                             <label for="reg_password" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                                 Password <span class="text-rose-500">*</span>
@@ -353,7 +386,8 @@
                             <div class="relative">
                                 <i class="fa fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                                 <input type="password" id="reg_password" name="password" required minlength="6"
-                                       placeholder="কমপক্ষে ৬ ডিজিট"
+                                       autocomplete="new-password"
+                                       placeholder="Enter your password"
                                        class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                                 <button type="button" onclick="toggleAuthPasswordVisibility('reg_password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
                                     <i class="fa fa-eye text-xs"></i>
@@ -363,12 +397,13 @@
 
                         <div>
                             <label for="reg_password_confirmation" class="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                                Confirm <span class="text-rose-500">*</span>
+                                Confirm Password <span class="text-rose-500">*</span>
                             </label>
                             <div class="relative">
                                 <i class="fa fa-check-circle absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                                 <input type="password" id="reg_password_confirmation" name="password_confirmation" required minlength="6"
-                                       placeholder="পুনরায় পাসওয়ার্ড দিন"
+                                       autocomplete="new-password"
+                                       placeholder="Enter your confirm password"
                                        class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
                                 <button type="button" onclick="toggleAuthPasswordVisibility('reg_password_confirmation', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus:outline-none p-1 cursor-pointer transition-colors" title="পাসওয়ার্ড দেখুন / লুকান">
                                     <i class="fa fa-eye text-xs"></i>
@@ -378,9 +413,9 @@
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                            <i class="fa fa-check-circle"></i>
-                            <span>Activate &amp; Enter Dashboard</span>
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-sm tracking-wide bg-brand-primary hover:bg-brand-accent text-white transition-all shadow-glow-emerald hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa fa-user-plus"></i>
+                            <span>Create Account</span>
                         </button>
                     </div>
                 </form>
@@ -525,6 +560,24 @@
         if (window.location.hash === '#register' || window.location.search.indexOf('tab=register') !== -1 || '{{ $activeTab }}' === 'register') {
             switchAuthTab('register');
         }
+
+        // Anti-Autofill Protection: release readonly and prevent browser from forcibly pre-filling saved passwords
+        function clearForcedAutofill() {
+            var $loginId = $('#login_id');
+            var $pwd = $('#password');
+            $loginId.removeAttr('readonly');
+            $pwd.removeAttr('readonly');
+
+            @if(!old('login_id'))
+            if (document.activeElement !== $loginId[0] && document.activeElement !== $pwd[0]) {
+                $loginId.val('');
+                $pwd.val('');
+            }
+            @endif
+        }
+
+        setTimeout(clearForcedAutofill, 80);
+        setTimeout(clearForcedAutofill, 300);
     });
 </script>
 @endpush

@@ -6,8 +6,9 @@ Route::middleware(['web'])->group(function () {
     //**************************************** BACKEND ROUTES*************************************************** */
     Auth::routes();
 
-    // Global Language Switcher
+    // Global Language Switcher (supports both /language/{locale} and /locale/{locale})
     Route::get('/language/{locale}', 'LanguageController@switchLanguage')->name('language.switch');
+    Route::get('/locale/{locale}', 'LanguageController@switchLanguage')->name('locale.switch');
 
     // Appearance / CMS Routes
     Route::group(['prefix' => 'admin/appearance'], function () {
