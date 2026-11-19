@@ -582,61 +582,7 @@ class AdminQuizController extends Controller
      */
     protected function syncPaperItemsToQuiz(LmsQuiz $quiz)
     {
-        if (!$quiz->paper_id || !$quiz->paper) {
-            return;
-        }
-
-        $paperItems = $quiz->paper->items()->with(['masterQuestion.options', 'section'])->orderBy('order_index', 'asc')->get();
-        if ($paperItems->isEmpty()) {
-            return;
-        }
-
-        DB::transaction(function () use ($quiz, $paperItems) {
-            $order = 0;
-            $targetSet = $quiz->question_set ?: ($quiz->paper->paper_set ?: 'Set A');
-
-            foreach ($paperItems as $item) {
-                $sq = $item->masterQuestion;
-                if (!$sq) continue;
-                $order++;
-
-                $newQ = $sq->replicate();
-                $newQ->quiz_id = $quiz->id;
-                $newQ->course_id = $quiz->course_id;
-                $newQ->parent_question_id = $sq->id;
-                $newQ->set_code = $targetSet;
-                $newQ->order_index = $order;
-                $newQ->marks = $item->marks ?: ($sq->marks ?: 1.0);
-                $newQ->negative_marks = $item->negative_marks !== null ? $item->negative_marks : ($sq->negative_marks ?: 0.0);
-                $newQ->question_text = $item->getQuestionText();
-                $newQ->question_type = $item->getQuestionType();
-                $newQ->is_active = true;
-                $newQ->is_archived = false;
-                $newQ->save();
-
-                $options = $item->getQuestionOptions();
-                if (!empty($options)) {
-                    foreach ($options as $opt) {
-                        $optText = is_array($opt) ? $opt['option_text'] : (isset($opt->option_text) ? $opt->option_text : '');
-                        $isCorrect = is_array($opt) ? (!empty($opt['is_correct'])) : (!empty($opt->is_correct));
-                        $optOrder = is_array($opt) ? (isset($opt['order_index']) ? $opt['order_index'] : 0) : (isset($opt->order_index) ? $opt->order_index : 0);
-                        $newQ->options()->create([
-                            'option_text' => $optText,
-                            'is_correct'  => $isCorrect,
-                            'order_index' => $optOrder,
-                        ]);
-                    }
-                } elseif ($sq->options->count() > 0) {
-                    foreach ($sq->options as $opt) {
-                        $newOpt = $opt->replicate();
-                        $newOpt->question_id = $newQ->id;
-                        $newOpt->save();
-                    }
-                }
-            }
-
-            $quiz->update(['total_marks' => $quiz->paper->total_marks]);
-        });
+        $quiz->syncQuestionsFromPaper();
     }
 
     /**

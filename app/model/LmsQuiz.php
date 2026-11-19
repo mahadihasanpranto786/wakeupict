@@ -118,6 +118,95 @@ class LmsQuiz extends Model
         return $this->activeQuestions()->with('options')->get();
     }
 
+    /**
+     * Get accurate total count of questions attached to this quiz
+     */
+    public function getQuestionsCount()
+    {
+        $count = $this->questions()->count();
+        if ($count === 0 && $this->paper_id && $this->paper) {
+            return $this->paper->items()->count();
+        }
+        return $count;
+    }
+
+    /**
+     * Synchronize questions from linked Question Paper into Quiz Questions table
+     */
+    public function syncQuestionsFromPaper()
+    {
+        if (!$this->paper_id || !$this->paper) {
+            return false;
+        }
+
+        $paperItems = $this->paper->items()
+            ->with(['masterQuestion.options', 'section'])
+            ->orderBy('order_index', 'asc')
+            ->get();
+
+        if ($paperItems->isEmpty()) {
+            return false;
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($paperItems) {
+            // Remove existing quiz-specific questions to ensure a clean sync
+            foreach ($this->questions as $oldQ) {
+                $oldQ->options()->delete();
+                $oldQ->answers()->delete();
+                $oldQ->delete();
+            }
+
+            $order = 0;
+            $targetSet = $this->question_set ?: ($this->paper->paper_set ?: 'Set A');
+
+            foreach ($paperItems as $item) {
+                $sq = $item->masterQuestion;
+                if (!$sq) continue;
+                $order++;
+
+                $newQ = $sq->replicate();
+                $newQ->quiz_id = $this->id;
+                $newQ->course_id = $this->course_id;
+                $newQ->parent_question_id = $sq->id;
+                $newQ->set_code = $targetSet;
+                $newQ->order_index = $order;
+                $newQ->marks = $item->marks ?: ($sq->marks ?: 1.0);
+                $newQ->negative_marks = $item->negative_marks !== null ? $item->negative_marks : ($sq->negative_marks ?: 0.0);
+                $newQ->question_text = $item->getQuestionText() ?: $sq->question_text;
+                $newQ->question_type = $item->getQuestionType() ?: $sq->question_type;
+                $newQ->is_active = true;
+                $newQ->is_archived = false;
+                $newQ->save();
+
+                $options = $item->getQuestionOptions();
+                if (!empty($options)) {
+                    foreach ($options as $opt) {
+                        $optText = is_array($opt) ? $opt['option_text'] : (isset($opt->option_text) ? $opt->option_text : '');
+                        $isCorrect = is_array($opt) ? (!empty($opt['is_correct'])) : (!empty($opt->is_correct));
+                        $optOrder = is_array($opt) ? (isset($opt['order_index']) ? $opt['order_index'] : 0) : (isset($opt->order_index) ? $opt->order_index : 0);
+                        $newQ->options()->create([
+                            'option_text' => $optText,
+                            'is_correct'  => $isCorrect,
+                            'order_index' => $optOrder,
+                        ]);
+                    }
+                } elseif ($sq->options->count() > 0) {
+                    foreach ($sq->options as $opt) {
+                        $newOpt = $opt->replicate();
+                        $newOpt->question_id = $newQ->id;
+                        $newOpt->save();
+                    }
+                }
+            }
+
+            $this->update([
+                'total_marks' => $this->paper->total_marks ?: $this->questions()->sum('marks')
+            ]);
+        });
+
+        return true;
+    }
+
     public function attempts()
     {
         return $this->hasMany(LmsQuizAttempt::class, 'quiz_id')->orderBy('created_at', 'desc');

@@ -241,7 +241,7 @@
 
                             <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-500 dark:text-slate-400 pt-1">
                                 <span><i class="fa fa-clock-o text-blue-600 mr-1"></i> {{ $exam->duration_minutes }} Minutes</span>
-                                <span><i class="fa fa-question-circle text-indigo-500 mr-1"></i> {{ $exam->questions->count() }} Questions</span>
+                                <span><i class="fa fa-question-circle text-indigo-500 mr-1"></i> {{ $exam->getQuestionsCount() }} Questions</span>
                                 <span><i class="fa fa-trophy text-amber-500 mr-1"></i> {{ (int)$exam->total_marks }} Total Marks (Pass: {{ (int)$exam->pass_marks }})</span>
                                 @if($exam->max_attempts > 0)
                                     <span><i class="fa fa-repeat text-teal-600 mr-1"></i> সর্বোচ্চ {{ $exam->max_attempts }} বার পরীক্ষা</span>
@@ -276,7 +276,7 @@
                                     <i class="fa fa-history"></i>
                                     <span>ফলাফল ও হিস্ট্রি</span>
                                 </a>
-                            @elseif($exam->questions->count() > 0)
+                            @elseif($exam->getQuestionsCount() > 0)
                                 <a href="{{ route('student.quiz.lobby', $exam->id) }}" 
                                    class="quiz-action-btn px-7 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 hover:scale-105">
                                     <i class="fa fa-play text-[10px]"></i>
