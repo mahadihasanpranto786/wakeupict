@@ -290,6 +290,9 @@
                 <div class="mb-2">
                     <select id="libQuizFilter" class="form-control form-control-sm custom-select text-xs font-weight-bold text-dark" onchange="loadLibraryQuestionsAJAX()">
                         <option value="">-- সকল কুইজ ও প্রশ্নব্যাংক (All Quizzes & Bank) --</option>
+                        <option value="bank" {{ (isset($selectedQuizId) && $selectedQuizId === 'bank') ? 'selected' : '' }}>
+                            📚 শুধুমাত্র সেন্ট্রাল প্রশ্নব্যাংক (Central Question Bank Only)
+                        </option>
                         @if(isset($quizzes))
                             @foreach($quizzes as $qz)
                                 <option value="{{ $qz->id }}" {{ (isset($selectedQuizId) && (string)$selectedQuizId === (string)$qz->id) ? 'selected' : '' }}>
@@ -391,6 +394,13 @@
                         <p>কোনো প্রশ্ন পাওয়া যায়নি।</p>
                     </div>
                 @endforelse
+                @if(isset($libraryQuestions) && $libraryQuestions->hasMorePages())
+                    <div id="libLoadMoreContainer" class="text-center py-2">
+                        <button type="button" id="libLoadMoreBtn" class="btn btn-xs btn-outline-secondary btn-block font-weight-bold" onclick="loadLibraryQuestionsAJAX(true)">
+                            <i class="fas fa-chevron-circle-down mr-1"></i> আরও প্রশ্ন লোড করুন (পৃষ্ঠা 2)
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
 
