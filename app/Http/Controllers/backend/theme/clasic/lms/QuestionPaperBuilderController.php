@@ -203,34 +203,25 @@ class QuestionPaperBuilderController extends Controller
         }
 
         // Fetch question library for left panel:
-        // Include non-archived original questions (parent_question_id is null/0) OR master library questions
-        $qQuery = LmsQuestion::with('options')->where('is_archived', false)
-            ->where(function ($q) {
-                $q->whereNull('parent_question_id')
-                  ->orWhere('parent_question_id', 0);
-            });
+        // By default, load ALL active questions across all courses so admin sees the full question library first
+        $qQuery = LmsQuestion::with('options')->where('is_archived', false);
 
         // Filter: Specific Quiz if selected
         $selectedQuizId = $request->input('library_quiz', $request->input('quiz_id'));
         if (!empty($selectedQuizId)) {
-            $qQuery->where('quiz_id', $selectedQuizId);
+            if ($selectedQuizId === 'bank') {
+                $qQuery->where(function ($q) {
+                    $q->whereNull('quiz_id')->orWhere('quiz_id', 0);
+                });
+            } else {
+                $qQuery->where('quiz_id', $selectedQuizId);
+            }
         }
 
-        // Filter: Course
+        // Filter: Course (Show ALL courses by default; only filter when explicitly chosen in the dropdown)
         $selectedCourseId = $request->input('library_course', $request->input('course_id'));
-        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
+        if (!empty($selectedCourseId) && $selectedCourseId !== 'all') {
             $qQuery->where('course_id', $selectedCourseId);
-        } elseif (!$request->has('library_course') && !$request->has('course_id') && $paper->course_id) {
-            // Check if questions exist for this course before forcing it
-            $hasCourseQuestions = (clone $qQuery)->where('course_id', $paper->course_id)->exists();
-            if ($hasCourseQuestions) {
-                $qQuery->where(function ($q) use ($paper) {
-                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-                });
-                $selectedCourseId = $paper->course_id;
-            } else {
-                $selectedCourseId = '';
-            }
         } else {
             $selectedCourseId = '';
         }
@@ -263,11 +254,7 @@ class QuestionPaperBuilderController extends Controller
         $libraryQuestions = $qQuery->latest('id')->paginate(30)->appends($request->all());
 
         // Category & chapter lists for filters and auto-pick
-        $libraryBase = LmsQuestion::where('is_archived', false)
-            ->where(function ($q) {
-                $q->whereNull('parent_question_id')
-                  ->orWhere('parent_question_id', 0);
-            });
+        $libraryBase = LmsQuestion::where('is_archived', false);
 
         $categories = (clone $libraryBase)->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
         $chapterCounts = (clone $libraryBase)->whereNotNull('chapter')
@@ -377,29 +364,24 @@ class QuestionPaperBuilderController extends Controller
     {
         $paper = LmsQuestionPaper::findOrFail($id);
 
-        $qQuery = LmsQuestion::with('options')->where('is_archived', false)
-            ->where(function ($q) {
-                $q->whereNull('parent_question_id')
-                  ->orWhere('parent_question_id', 0);
-            });
+        $qQuery = LmsQuestion::with('options')->where('is_archived', false);
 
         // Filter: Specific Quiz if selected
         $quizId = $request->input('quiz_id', $request->input('library_quiz'));
         if (!empty($quizId)) {
-            $qQuery->where('quiz_id', $quizId);
+            if ($quizId === 'bank') {
+                $qQuery->where(function ($q) {
+                    $q->whereNull('quiz_id')->orWhere('quiz_id', 0);
+                });
+            } else {
+                $qQuery->where('quiz_id', $quizId);
+            }
         }
 
-        // Filter: Course
+        // Filter: Course (Show all courses by default unless explicitly chosen)
         $selectedCourseId = $request->input('course_id', $request->input('library_course'));
-        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
+        if (!empty($selectedCourseId) && $selectedCourseId !== 'all') {
             $qQuery->where('course_id', $selectedCourseId);
-        } elseif (!$request->has('course_id') && !$request->has('library_course') && $paper->course_id) {
-            $hasCourseQuestions = (clone $qQuery)->where('course_id', $paper->course_id)->exists();
-            if ($hasCourseQuestions) {
-                $qQuery->where(function ($q) use ($paper) {
-                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-                });
-            }
         }
 
         if ($request->filled('search')) {
@@ -434,7 +416,10 @@ class QuestionPaperBuilderController extends Controller
             $qQuery->where('difficulty', $request->difficulty);
         }
 
-        $questions = $qQuery->latest('id')->limit(50)->get();
+        $page = max(1, (int)$request->input('page', 1));
+        $perPage = 30;
+        $total = (clone $qQuery)->count();
+        $questions = $qQuery->latest('id')->skip(($page - 1) * $perPage)->take($perPage)->get();
 
         $mapped = $questions->map(function ($q) {
             return [
@@ -453,7 +438,9 @@ class QuestionPaperBuilderController extends Controller
 
         return response()->json([
             'success'   => true,
-            'total'     => $mapped->count(),
+            'total'     => $total,
+            'page'      => $page,
+            'has_more'  => ($page * $perPage) < $total,
             'questions' => $mapped,
         ]);
     }
@@ -666,26 +653,21 @@ class QuestionPaperBuilderController extends Controller
 
         $section = LmsQuestionPaperSection::where('paper_id', $paper->id)->findOrFail($request->section_id);
 
-        $query = LmsQuestion::with('options')->where('is_archived', false)
-            ->where(function ($q) {
-                $q->whereNull('parent_question_id')
-                  ->orWhere('parent_question_id', 0);
-            });
+        $query = LmsQuestion::with('options')->where('is_archived', false);
 
         if ($request->filled('quiz_id')) {
-            $query->where('quiz_id', $request->quiz_id);
+            if ($request->quiz_id === 'bank') {
+                $query->where(function ($q) {
+                    $q->whereNull('quiz_id')->orWhere('quiz_id', 0);
+                });
+            } else {
+                $query->where('quiz_id', $request->quiz_id);
+            }
         }
 
         $selectedCourseId = $request->input('course_id');
-        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
+        if (!empty($selectedCourseId) && $selectedCourseId !== 'all') {
             $query->where('course_id', $selectedCourseId);
-        } elseif (!$request->has('course_id') && $paper->course_id) {
-            $hasCourseQuestions = (clone $query)->where('course_id', $paper->course_id)->exists();
-            if ($hasCourseQuestions) {
-                $query->where(function ($q) use ($paper) {
-                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-                });
-            }
         }
 
         if ($request->filled('category')) {
