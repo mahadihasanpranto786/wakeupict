@@ -286,6 +286,19 @@
                         @endforeach
                     </select>
                 </div>
+                <!-- Quiz Filter Dropdown -->
+                <div class="mb-2">
+                    <select id="libQuizFilter" class="form-control form-control-sm custom-select text-xs font-weight-bold text-dark" onchange="loadLibraryQuestionsAJAX()">
+                        <option value="">-- সকল কুইজ ও প্রশ্নব্যাংক (All Quizzes & Bank) --</option>
+                        @if(isset($quizzes))
+                            @foreach($quizzes as $qz)
+                                <option value="{{ $qz->id }}" {{ (isset($selectedQuizId) && (string)$selectedQuizId === (string)$qz->id) ? 'selected' : '' }}>
+                                    কুইজ: {{ $qz->title }} ({{ $qz->questions_count }}টি প্রশ্ন)
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
                 <!-- Library Filter Dropdowns -->
                 <div class="row g-1 mb-2">
                     <div class="col-6">
@@ -758,6 +771,19 @@
                                         {{ $crs->course_title }}
                                     </option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="text-xs font-weight-bold">কুইজ সোর্স (Quiz Source - ঐচ্ছিক):</label>
+                            <select id="autoPickQuiz" class="form-control custom-select text-xs font-weight-bold text-dark">
+                                <option value="">-- যেকোনো কুইজ বা প্রশ্নব্যাংক (All Quizzes & Bank) --</option>
+                                @if(isset($quizzes))
+                                    @foreach($quizzes as $qz)
+                                        <option value="{{ $qz->id }}" {{ (isset($selectedQuizId) && (string)$selectedQuizId === (string)$qz->id) ? 'selected' : '' }}>
+                                            {{ $qz->title }} ({{ $qz->questions_count }}টি প্রশ্ন)
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="form-group mb-2">
@@ -1375,16 +1401,18 @@
         }
 
         function loadLibraryQuestionsAJAX() {
-            var search = document.getElementById('libSearchInput').value;
+            var search = document.getElementById('libSearchInput') ? document.getElementById('libSearchInput').value : '';
             var course = document.getElementById('libCourseFilter') ? document.getElementById('libCourseFilter').value : '';
-            var cat = document.getElementById('libCategoryFilter').value;
+            var quiz = document.getElementById('libQuizFilter') ? document.getElementById('libQuizFilter').value : '';
+            var cat = document.getElementById('libCategoryFilter') ? document.getElementById('libCategoryFilter').value : '';
             var chap = document.getElementById('libChapterFilter') ? document.getElementById('libChapterFilter').value : '';
-            var diff = document.getElementById('libDiffFilter').value;
+            var diff = document.getElementById('libDiffFilter') ? document.getElementById('libDiffFilter').value : '';
             var type = document.getElementById('libTypeFilter') ? document.getElementById('libTypeFilter').value : '';
 
             var params = new URLSearchParams();
             if (search) params.append('search', search);
-            if (course) params.append('course_id', course);
+            params.append('course_id', course);
+            if (quiz) params.append('quiz_id', quiz);
             if (cat) params.append('category', cat);
             if (chap) params.append('chapter', chap);
             if (diff) params.append('difficulty', diff);
@@ -1630,6 +1658,7 @@
         // 13. Auto-Pick / Random Questions via AJAX (Zero Full Page Reload)
         function submitAutoPickAJAX() {
             var courseId = document.getElementById('autoPickCourse') ? document.getElementById('autoPickCourse').value : '';
+            var quizId = document.getElementById('autoPickQuiz') ? document.getElementById('autoPickQuiz').value : '';
             var sectionId = document.getElementById('autoPickSectionSelect').value;
             var qType = document.getElementById('autoPickQuestionType').value;
             var category = document.getElementById('autoPickCategory').value;
@@ -1646,6 +1675,7 @@
                 },
                 body: JSON.stringify({
                     course_id: courseId,
+                    quiz_id: quizId,
                     section_id: sectionId,
                     question_type: qType,
                     category: category,

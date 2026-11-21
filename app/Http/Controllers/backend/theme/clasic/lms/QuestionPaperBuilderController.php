@@ -141,23 +141,96 @@ class QuestionPaperBuilderController extends Controller
             'course',
             'sections.items.masterQuestion.options',
             'items.masterQuestion.options'
-        ])->findOrFail($id);
+        ])->find($id);
 
-        // Fetch question library for left panel strictly from master library (exclude quiz copies)
+        if (!$paper) {
+            // Check if $id is actually a Quiz ID (e.g. user entered quiz ID into builder URL)
+            $quiz = LmsQuiz::find($id);
+            if ($quiz) {
+                return redirect()->route('admin.quizzes.builder', $quiz->id);
+            }
+            abort(404, 'প্রশ্নপত্র বা কুইজ পাওয়া যায়নি।');
+        }
+
+        // Auto-link quiz if linked_quiz_id is present or if a quiz has this paper_id
+        $linkedQuiz = $paper->linkedQuiz ?: LmsQuiz::where('paper_id', $paper->id)->first();
+        if ($linkedQuiz && !$paper->linked_quiz_id) {
+            $paper->update(['linked_quiz_id' => $linkedQuiz->id]);
+        }
+
+        // Ensure default section exists
+        if ($paper->sections->isEmpty()) {
+            $secTitle = $linkedQuiz ? 'কুইজের প্রশ্নাবলি (Quiz Questions)' : 'Section A: Multiple Choice Questions (বহুনির্বাচনি অভীক্ষা)';
+            LmsQuestionPaperSection::create([
+                'paper_id'           => $paper->id,
+                'title'              => $secTitle,
+                'instructions'       => 'সকল প্রশ্নের উত্তর দেওয়া আবশ্যক।',
+                'section_code'       => 'A',
+                'order_index'        => 1,
+                'marks_per_question' => 1.00,
+                'total_marks'        => 0.00,
+            ]);
+            $paper->load('sections');
+        }
+
+        // If paper canvas currently has 0 items, but linked quiz has questions: automatically import them!
+        if ($paper->items->isEmpty() && $linkedQuiz && $linkedQuiz->questions()->count() > 0) {
+            $section = $paper->sections->first();
+            $existingQuestions = $linkedQuiz->questions()->with('options')->orderBy('order_index', 'asc')->get();
+            $itemOrder = 0;
+            foreach ($existingQuestions as $eq) {
+                $itemOrder++;
+                $masterId = $eq->parent_question_id;
+                if (!$masterId || !LmsQuestion::where('id', $masterId)->exists()) {
+                    $masterId = $eq->id;
+                }
+
+                $item = LmsQuestionPaperItem::create([
+                    'paper_id'       => $paper->id,
+                    'section_id'     => $section ? $section->id : null,
+                    'question_id'    => $masterId,
+                    'order_index'    => $itemOrder,
+                    'marks'          => $eq->marks ?: 1.0,
+                    'negative_marks' => $eq->negative_marks ?: 0.0,
+                ]);
+                $item->freezeSnapshot();
+            }
+            $paper->recalculateTotals();
+            $paper->load([
+                'sections.items.masterQuestion.options',
+                'items.masterQuestion.options'
+            ]);
+        }
+
+        // Fetch question library for left panel:
+        // Include non-archived original questions (parent_question_id is null/0) OR master library questions
         $qQuery = LmsQuestion::with('options')->where('is_archived', false)
             ->where(function ($q) {
-                $q->whereNull('quiz_id')
-                  ->orWhere('quiz_id', 0);
+                $q->whereNull('parent_question_id')
+                  ->orWhere('parent_question_id', 0);
             });
 
+        // Filter: Specific Quiz if selected
+        $selectedQuizId = $request->input('library_quiz', $request->input('quiz_id'));
+        if (!empty($selectedQuizId)) {
+            $qQuery->where('quiz_id', $selectedQuizId);
+        }
+
+        // Filter: Course
         $selectedCourseId = $request->input('library_course', $request->input('course_id'));
-        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
             $qQuery->where('course_id', $selectedCourseId);
-        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
-            $qQuery->where(function ($q) use ($paper) {
-                $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-            });
-            $selectedCourseId = $paper->course_id;
+        } elseif (!$request->has('library_course') && !$request->has('course_id') && $paper->course_id) {
+            // Check if questions exist for this course before forcing it
+            $hasCourseQuestions = (clone $qQuery)->where('course_id', $paper->course_id)->exists();
+            if ($hasCourseQuestions) {
+                $qQuery->where(function ($q) use ($paper) {
+                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
+                });
+                $selectedCourseId = $paper->course_id;
+            } else {
+                $selectedCourseId = '';
+            }
         } else {
             $selectedCourseId = '';
         }
@@ -189,11 +262,11 @@ class QuestionPaperBuilderController extends Controller
 
         $libraryQuestions = $qQuery->latest('id')->paginate(30)->appends($request->all());
 
-        // Category & chapter lists for filters and auto-pick (master library only)
+        // Category & chapter lists for filters and auto-pick
         $libraryBase = LmsQuestion::where('is_archived', false)
             ->where(function ($q) {
-                $q->whereNull('quiz_id')
-                  ->orWhere('quiz_id', 0);
+                $q->whereNull('parent_question_id')
+                  ->orWhere('parent_question_id', 0);
             });
 
         $categories = (clone $libraryBase)->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->sort()->values();
@@ -216,6 +289,9 @@ class QuestionPaperBuilderController extends Controller
             return $c;
         });
 
+        // Fetch active quizzes list for Quiz Filter dropdown in left panel
+        $quizzes = LmsQuiz::withCount('questions')->orderBy('id', 'desc')->get();
+
         $totalQuestionsInLib = (clone $libraryBase)->count();
 
         // Calculate summary
@@ -223,7 +299,7 @@ class QuestionPaperBuilderController extends Controller
         $calculatedMarks = $paper->items->sum('marks');
 
         return view('backend.theme.clasic.lms.question_papers.builder', compact(
-            'paper', 'libraryQuestions', 'categories', 'chapters', 'chapterCounts', 'courses', 'selectedCourseId', 'totalQuestionsCount', 'calculatedMarks', 'totalQuestionsInLib'
+            'paper', 'libraryQuestions', 'categories', 'chapters', 'chapterCounts', 'courses', 'quizzes', 'selectedCourseId', 'selectedQuizId', 'totalQuestionsCount', 'calculatedMarks', 'totalQuestionsInLib'
         ));
     }
 
@@ -303,17 +379,27 @@ class QuestionPaperBuilderController extends Controller
 
         $qQuery = LmsQuestion::with('options')->where('is_archived', false)
             ->where(function ($q) {
-                $q->whereNull('quiz_id')
-                  ->orWhere('quiz_id', 0);
+                $q->whereNull('parent_question_id')
+                  ->orWhere('parent_question_id', 0);
             });
 
+        // Filter: Specific Quiz if selected
+        $quizId = $request->input('quiz_id', $request->input('library_quiz'));
+        if (!empty($quizId)) {
+            $qQuery->where('quiz_id', $quizId);
+        }
+
+        // Filter: Course
         $selectedCourseId = $request->input('course_id', $request->input('library_course'));
-        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
             $qQuery->where('course_id', $selectedCourseId);
-        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
-            $qQuery->where(function ($q) use ($paper) {
-                $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-            });
+        } elseif (!$request->has('course_id') && !$request->has('library_course') && $paper->course_id) {
+            $hasCourseQuestions = (clone $qQuery)->where('course_id', $paper->course_id)->exists();
+            if ($hasCourseQuestions) {
+                $qQuery->where(function ($q) use ($paper) {
+                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
+                });
+            }
         }
 
         if ($request->filled('search')) {
@@ -582,17 +668,24 @@ class QuestionPaperBuilderController extends Controller
 
         $query = LmsQuestion::with('options')->where('is_archived', false)
             ->where(function ($q) {
-                $q->whereNull('quiz_id')
-                  ->orWhere('quiz_id', 0);
+                $q->whereNull('parent_question_id')
+                  ->orWhere('parent_question_id', 0);
             });
 
+        if ($request->filled('quiz_id')) {
+            $query->where('quiz_id', $request->quiz_id);
+        }
+
         $selectedCourseId = $request->input('course_id');
-        if ($selectedCourseId !== null && $selectedCourseId !== '') {
+        if ($selectedCourseId !== null && $selectedCourseId !== '' && $selectedCourseId !== 'all') {
             $query->where('course_id', $selectedCourseId);
-        } elseif ($paper->course_id && LmsQuestion::where('course_id', $paper->course_id)->exists()) {
-            $query->where(function ($q) use ($paper) {
-                $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
-            });
+        } elseif (!$request->has('course_id') && $paper->course_id) {
+            $hasCourseQuestions = (clone $query)->where('course_id', $paper->course_id)->exists();
+            if ($hasCourseQuestions) {
+                $query->where(function ($q) use ($paper) {
+                    $q->where('course_id', $paper->course_id)->orWhereNull('course_id');
+                });
+            }
         }
 
         if ($request->filled('category')) {
