@@ -1403,14 +1403,27 @@
             });
         }
 
-        // 10. Instant AJAX Library Search & Filtering
+        // 10. Instant AJAX Library Search & Filtering with Infinite Scroll & Load More
         var libSearchTimer = null;
+        var libCurrentPage = 1;
+        var libHasMore = true;
+        var libIsLoading = false;
+
         function debounceLibrarySearch() {
             clearTimeout(libSearchTimer);
-            libSearchTimer = setTimeout(loadLibraryQuestionsAJAX, 350);
+            libSearchTimer = setTimeout(function() {
+                loadLibraryQuestionsAJAX(false);
+            }, 350);
         }
 
-        function loadLibraryQuestionsAJAX() {
+        function loadLibraryQuestionsAJAX(isAppend) {
+            if (libIsLoading) return;
+            if (isAppend) {
+                libCurrentPage++;
+            } else {
+                libCurrentPage = 1;
+            }
+
             var search = document.getElementById('libSearchInput') ? document.getElementById('libSearchInput').value : '';
             var course = document.getElementById('libCourseFilter') ? document.getElementById('libCourseFilter').value : '';
             var quiz = document.getElementById('libQuizFilter') ? document.getElementById('libQuizFilter').value : '';
@@ -1421,24 +1434,40 @@
 
             var params = new URLSearchParams();
             if (search) params.append('search', search);
-            params.append('course_id', course);
+            if (course) params.append('course_id', course);
             if (quiz) params.append('quiz_id', quiz);
             if (cat) params.append('category', cat);
             if (chap) params.append('chapter', chap);
             if (diff) params.append('difficulty', diff);
             if (type) params.append('type', type);
+            params.append('page', libCurrentPage);
 
             var container = document.getElementById('libraryScrollContainer');
-            container.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="text-xs mt-2">লোড হচ্ছে...</p></div>';
+            var loadMoreBtn = document.getElementById('libLoadMoreBtn');
+
+            libIsLoading = true;
+            if (!isAppend) {
+                container.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="text-xs mt-2">লোড হচ্ছে...</p></div>';
+            } else if (loadMoreBtn) {
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> আরও প্রশ্ন লোড হচ্ছে...';
+                loadMoreBtn.disabled = true;
+            }
 
             fetch('/admin/question-papers/' + paperId + '/library-questions?' + params.toString())
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
+                    libIsLoading = false;
                     if (res.success) {
                         var badge = document.getElementById('libTotalCountBadge');
                         if (badge) badge.innerText = res.total + 'টি প্রশ্ন';
 
-                        if (res.questions.length === 0) {
+                        libHasMore = !!res.has_more;
+
+                        // Remove existing load more btn if any
+                        var oldLoadMore = document.getElementById('libLoadMoreContainer');
+                        if (oldLoadMore) oldLoadMore.remove();
+
+                        if (res.questions.length === 0 && !isAppend) {
                             container.innerHTML = '<div class="text-center py-4 text-muted text-xs"><i class="fas fa-search fa-2x mb-2 text-muted"></i><p>কোনো প্রশ্ন পাওয়া যায়নি।</p></div>';
                             return;
                         }
@@ -1473,18 +1502,50 @@
                                     </div>
 
                                     <div class="text-xs text-muted">
-                                        ${lq.options_count}টি অপশন | <span class="text-info">${lq.category}</span>${lq.chapter ? ' | <span class="text-success font-weight-bold">' + escapeHtml(lq.chapter) + '</span>' : ''}
+                                        ${lq.options_count}টি অপশন | <span class="text-info">${escapeHtml(lq.category || 'General')}</span>${lq.chapter ? ' | <span class="text-success font-weight-bold">' + escapeHtml(lq.chapter) + '</span>' : ''}
                                     </div>
                                 </div>
                             `;
                         });
-                        container.innerHTML = html;
+
+                        if (isAppend) {
+                            container.insertAdjacentHTML('beforeend', html);
+                        } else {
+                            container.innerHTML = html;
+                        }
+
+                        if (libHasMore) {
+                            var loadMoreHtml = `
+                                <div id="libLoadMoreContainer" class="text-center py-2">
+                                    <button type="button" id="libLoadMoreBtn" class="btn btn-xs btn-outline-secondary btn-block font-weight-bold" onclick="loadLibraryQuestionsAJAX(true)">
+                                        <i class="fas fa-chevron-circle-down mr-1"></i> আরও প্রশ্ন লোড করুন (পৃষ্ঠা ${libCurrentPage + 1})
+                                    </button>
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', loadMoreHtml);
+                        }
                     }
                 })
                 .catch(function(err) {
-                    container.innerHTML = '<div class="alert alert-danger text-xs">লোড ব্যর্থ: ' + err + '</div>';
+                    libIsLoading = false;
+                    if (!isAppend) {
+                        container.innerHTML = '<div class="alert alert-danger text-xs">লোড ব্যর্থ: ' + err + '</div>';
+                    }
                 });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var libScroller = document.getElementById('libraryScrollContainer');
+            if (libScroller) {
+                libScroller.addEventListener('scroll', function() {
+                    if (libHasMore && !libIsLoading) {
+                        if (libScroller.scrollTop + libScroller.clientHeight >= libScroller.scrollHeight - 50) {
+                            loadLibraryQuestionsAJAX(true);
+                        }
+                    }
+                });
+            }
+        });
 
         // 11. Add Section via AJAX (Zero Full Page Reload)
         function submitAddSectionAJAX() {
