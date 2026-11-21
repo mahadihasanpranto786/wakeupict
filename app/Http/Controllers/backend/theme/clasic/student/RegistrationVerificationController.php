@@ -38,9 +38,8 @@ class RegistrationVerificationController extends Controller
         $verificationRequests = RegistrationVerification::count();
         $blockedVerificationRequests = RegistrationVerification::where('status', 'blocked')->count();
 
-        // 2. Query Builder for Student Registrations (Latest registered student always shows first in DESC order)
+        // 2. Query Builder for Student Registrations (Guaranteed strict DESC order by registration ID)
         $query = StudentAccount::with(['student', 'admitedStudent', 'enrollments.course', 'enrollments.batch', 'verifiedBy'])
-            ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc');
 
         // Filter: Status (Pending, Approved, Rejected)
