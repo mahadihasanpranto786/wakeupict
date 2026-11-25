@@ -202,4 +202,39 @@ class LmsQuizAttempt extends Model
         }
         return $this->quiz ? (int)$this->quiz->total_questions : 0;
     }
+
+    /**
+     * Compute answered, correct, wrong, and unanswered counts for this attempt.
+     */
+    public function getBreakdownStats(): array
+    {
+        $answers = $this->relationLoaded('answers') ? $this->answers : $this->answers()->get();
+
+        $totalQuestions = (int)$this->total_questions;
+        if ($totalQuestions <= 0) {
+            $totalQuestions = $answers->count();
+        }
+
+        $answeredAnswers = $answers->filter(function ($ans) {
+            $opts = $ans->selected_option_ids_array;
+            $hasText = $ans->text_answer !== null && trim((string)$ans->text_answer) !== '';
+            $hasCq = !empty($ans->cq_answers);
+            return !empty($opts) || $hasText || $hasCq;
+        });
+
+        $answeredCount = $answeredAnswers->count();
+        $correctCount = $answeredAnswers->where('is_correct', true)->count();
+        $wrongCount = $answeredAnswers->filter(function ($ans) {
+            return $ans->is_correct === false || $ans->is_correct === 0 || $ans->is_correct === '0';
+        })->count();
+        $unansweredCount = max(0, $totalQuestions - $answeredCount);
+
+        return [
+            'total'      => $totalQuestions,
+            'answered'   => $answeredCount,
+            'correct'    => $correctCount,
+            'wrong'      => $wrongCount,
+            'unanswered' => $unansweredCount,
+        ];
+    }
 }

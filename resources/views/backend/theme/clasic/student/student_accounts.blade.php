@@ -346,6 +346,9 @@
                                 </td>
                                 <td class="text-right">
                                     <div class="d-flex align-items-center justify-content-end" style="gap: 4px;">
+                                        <a href="{{ route('admin.quizzes.reports.student-tree', $acc->id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" title="শিক্ষার্থীর সম্পূর্ণ পরীক্ষার ফলাফল ট্রি দেখুন">
+                                            <i class="fas fa-sitemap"></i> ফলাফল ট্রি
+                                        </a>
                                         @if($parentStudent)
                                             <a href="{{ route('students-view', $parentStudent->id) }}" class="btn btn-outline-info btn-sm" title="স্লিপ / সম্পূর্ণ প্রোফাইল দেখুন" target="_blank">
                                                 <i class="fas fa-eye"></i>

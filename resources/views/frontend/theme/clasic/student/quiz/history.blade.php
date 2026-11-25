@@ -124,9 +124,28 @@
                 </div>
             </div>
 
+            <!-- Separate Tabs: All vs Upcoming/Live Exams vs Practice Menu -->
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('student.exams.history', array_merge(request()->except(['page', 'type']), ['type' => 'all'])) }}"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all border {{ ($activeType ?? 'all') === 'all' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-blue-400' }}">
+                    <i class="fa fa-list mr-1"></i> সকল ফলাফল
+                </a>
+                <a href="{{ route('student.exams.history', array_merge(request()->except(['page', 'type']), ['type' => 'exam'])) }}"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all border {{ ($activeType ?? 'all') === 'exam' ? 'bg-rose-600 border-rose-600 shadow-md' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-rose-400' }}">
+                    <i class="fa fa-clock-o mr-1"></i> আসন্ন পরীক্ষা (Live Exam)
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full bg-black/10 text-[10px]">{{ $examRootCount ?? 0 }}</span>
+                </a>
+                <a href="{{ route('student.exams.history', array_merge(request()->except(['page', 'type']), ['type' => 'practice'])) }}"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all border {{ ($activeType ?? 'all') === 'practice' ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-md' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-amber-400' }}">
+                    <i class="fa fa-flask mr-1"></i> অনুশীলন পরীক্ষা (Practice)
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full bg-black/10 text-[10px]">{{ $practiceRootCount ?? 0 }}</span>
+                </a>
+            </div>
+
             <!-- Search and Filter Bar -->
             <div class="quiz-glass-card quiz-card-surface rounded-2xl p-3 sm:p-4 border">
                 <form action="{{ route('student.results.index') }}" method="GET" class="flex flex-col md:flex-row items-center justify-between gap-3">
+                    <input type="hidden" name="type" value="{{ $activeType ?? 'all' }}">
                     <div class="relative flex-1 w-full">
                         <i class="fa fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         <input type="text" 
@@ -268,6 +287,7 @@
                                                                 <th class="py-2 px-3">চেষ্টা ক্রম (Attempt)</th>
                                                                 <th class="py-2 px-3">তারিখ ও সময় (BD Time)</th>
                                                                 <th class="py-2 px-3">প্রাপ্ত নম্বর (Score)</th>
+                                                                <th class="py-2 px-3">প্রশ্ন বিশ্লেষণ (সঠিক / ভুল / বাকি)</th>
                                                                 <th class="py-2 px-3">শতকরা (Pct)</th>
                                                                 <th class="py-2 px-3">ফলাফল (Status)</th>
                                                                 <th class="py-2 px-3 text-right">উত্তরপত্র</th>
@@ -277,6 +297,7 @@
                                                             @foreach($allAttempts as $chainIndex => $subAtt)
                                                                 @php
                                                                     $subPassed = $subAtt->isPassed();
+                                                                    $subStats = $subAtt->getBreakdownStats();
                                                                 @endphp
                                                                 <tr class="{{ $subPassed ? 'bg-emerald-50/40 dark:bg-emerald-950/20' : '' }}">
                                                                     <td class="py-2.5 px-3 font-bold">
@@ -295,6 +316,14 @@
                                                                     </td>
                                                                     <td class="py-2.5 px-3 font-bold {{ $subPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
                                                                         {{ $subAtt->score }} / {{ (int)$subAtt->total_marks }}
+                                                                    </td>
+                                                                    <td class="py-2.5 px-3">
+                                                                        <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
+                                                                            <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200" title="মোট উত্তরিত">উত্তর: {{ $subStats['answered'] }}/{{ $subStats['total'] }}</span>
+                                                                            <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-slate-900" title="সঠিক উত্তর">সঠিক: {{ $subStats['correct'] }}</span>
+                                                                            <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300" title="ভুল উত্তর">ভুল: {{ $subStats['wrong'] }}</span>
+                                                                            <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300" title="উত্তর দেওয়া হয়নি">বাকি: {{ $subStats['unanswered'] }}</span>
+                                                                        </div>
                                                                     </td>
                                                                     <td class="py-2.5 px-3">
                                                                         {{ $subAtt->percentage }}%

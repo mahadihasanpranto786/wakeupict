@@ -638,6 +638,7 @@ Route::group(['prefix' => 'admin/quizzes', 'as' => 'admin.quizzes.'], function (
     Route::get('/sample-template', 'backend\theme\clasic\lms\AdminQuizController@downloadSample')->name('sample');
     Route::match(['GET', 'POST'], '/bulk-delete', 'backend\theme\clasic\lms\AdminQuizController@bulkDestroyQuizzes')->name('bulk-delete');
     Route::get('/reports', 'backend\theme\clasic\lms\AdminQuizController@reports')->name('reports');
+    Route::get('/reports/student/{studentId}', 'backend\theme\clasic\lms\AdminQuizController@studentResultTree')->name('reports.student-tree');
     Route::get('/reports/attempt/{id}', 'backend\theme\clasic\lms\AdminQuizController@attemptDetail')->name('attempt-detail');
     Route::get('/reports/attempt/{id}/violations-data', 'backend\theme\clasic\lms\AdminQuizController@attemptViolationsJson')->name('attempt.violations-data');
     Route::post('/reports/attempt/{id}/reset-violations', 'backend\theme\clasic\lms\AdminQuizController@resetAttemptViolations')->name('attempt.reset-violations');
