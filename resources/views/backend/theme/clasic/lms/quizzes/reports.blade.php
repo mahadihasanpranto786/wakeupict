@@ -82,39 +82,55 @@
         </div>
     </div>
 
-    <!-- Reports Navigation Tabs: Attempts vs Parent Questions Tracking -->
-    <ul class="nav nav-pills mb-3" id="reportsTab" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') !== 'questions' ? 'active bg-primary text-white' : 'text-dark bg-white border' }} shadow-sm mr-2" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['q_page', 'q_search']), ['tab' => 'attempts'])) }}">
-                <i class="fas fa-user-graduate mr-1"></i> শিক্ষার্থী পরীক্ষা ফলাফল তালিকা (Attempts)
-                <span class="badge {{ ($activeTab ?? 'attempts') !== 'questions' ? 'badge-light text-primary' : 'badge-secondary' }} ml-1">{{ number_format($totalAttempts) }}</span>
+    <!-- Reports Navigation Tabs: All Attempts vs Live Exams vs Practice vs Parent Questions -->
+    <ul class="nav nav-pills mb-3 flex-wrap" id="reportsTab" role="tablist">
+        <li class="nav-item mb-1">
+            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') === 'attempts' ? 'active bg-primary text-white' : 'text-dark bg-white border' }} shadow-sm mr-2" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['q_page', 'q_search', 'page']), ['tab' => 'attempts'])) }}">
+                <i class="fas fa-user-graduate mr-1"></i> সকল ফলাফল (All)
+                <span class="badge {{ ($activeTab ?? 'attempts') === 'attempts' ? 'badge-light text-primary' : 'badge-secondary' }} ml-1">{{ number_format($totalAttempts) }}</span>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
+            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') === 'exams' ? 'active bg-danger text-white' : 'text-dark bg-white border' }} shadow-sm mr-2" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['q_page', 'q_search', 'page']), ['tab' => 'exams'])) }}">
+                <i class="fas fa-bolt mr-1"></i> আসন্ন / লাইভ পরীক্ষা (Live Exam)
+                <span class="badge {{ ($activeTab ?? 'attempts') === 'exams' ? 'badge-light text-danger' : 'badge-secondary' }} ml-1">{{ number_format($examAttemptsCount ?? 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') === 'practice' ? 'active bg-info text-white' : 'text-dark bg-white border' }} shadow-sm mr-2" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['q_page', 'q_search', 'page']), ['tab' => 'practice'])) }}">
+                <i class="fas fa-flask mr-1"></i> অনুশীলন পরীক্ষা (Practice)
+                <span class="badge {{ ($activeTab ?? 'attempts') === 'practice' ? 'badge-light text-info' : 'badge-secondary' }} ml-1">{{ number_format($practiceAttemptsCount ?? 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item mb-1">
             <a class="nav-link font-weight-bold {{ ($activeTab ?? 'attempts') === 'questions' ? 'active bg-primary text-white' : 'text-dark bg-white border' }} shadow-sm" href="{{ route('admin.quizzes.reports', array_merge(request()->except(['page', 'search']), ['tab' => 'questions'])) }}">
-                <i class="fas fa-project-diagram mr-1"></i> প্রশ্ন হিস্ট্রি ও প্যারেন্ট প্রশ্ন ট্র্যাকিং (Parent Question Analytics)
+                <i class="fas fa-project-diagram mr-1"></i> প্যারেন্ট প্রশ্ন ট্র্যাকিং
                 <span class="badge {{ ($activeTab ?? 'attempts') === 'questions' ? 'badge-light text-primary' : 'badge-secondary' }} ml-1">{{ number_format($pqStats->total() ?? 0) }}</span>
             </a>
         </li>
     </ul>
     @if(($activeTab ?? 'attempts') !== 'questions')
-    <!-- Filters Card -->
+    <!-- Top Filter & Live AJAX Search Bar -->
     <div class="card card-outline card-primary shadow-sm border-0 mb-3">
-        <div class="card-header bg-white py-3 border-bottom">
-            <form action="{{ route('admin.quizzes.reports') }}" method="GET" class="row align-items-center">
-                <!-- Search by Student Name / Phone / ID -->
+        <div class="card-header bg-white py-3 border-bottom-0">
+            <form id="reports-filter-form" action="{{ route('admin.quizzes.reports') }}" method="GET" class="row align-items-center">
+                <input type="hidden" name="tab" value="{{ $activeTab ?? 'attempts' }}">
+                <!-- Live Search by Student Name / Phone / ID -->
                 <div class="col-md-3 mb-2 mb-md-0">
                     <div class="input-group input-group-sm">
-                        <input type="text" name="search" class="form-control" placeholder="শিক্ষার্থীর নাম, মোবাইল বা রোল..." value="{{ request('search') }}">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light">
+                                <i id="reports-search-icon" class="fas fa-search text-muted"></i>
+                                <i id="reports-search-spinner" class="fas fa-spinner fa-spin text-primary d-none"></i>
+                            </span>
                         </div>
+                        <input type="text" id="reports-live-search" name="search" class="form-control" placeholder="শিক্ষার্থীর নাম, মোবাইল বা রোল..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                 </div>
 
                 <!-- Filter by Course -->
                 <div class="col-md-3 mb-2 mb-md-0">
-                    <select name="course_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                    <select name="course_id" class="form-control form-control-sm">
                         <option value="">-- সকল কোর্স / বিষয় --</option>
                         @foreach($courses as $c)
                             <option value="{{ $c->id }}" {{ request('course_id') == $c->id ? 'selected' : '' }}>
@@ -126,7 +142,7 @@
 
                 <!-- Filter by Quiz -->
                 <div class="col-md-3 mb-2 mb-md-0">
-                    <select name="quiz_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                    <select name="quiz_id" class="form-control form-control-sm">
                         <option value="">-- সকল কুইজ / পরীক্ষা --</option>
                         @foreach($quizzes as $q)
                             <option value="{{ $q->id }}" {{ request('quiz_id') == $q->id ? 'selected' : '' }}>
@@ -138,7 +154,7 @@
 
                 <!-- Filter by Status -->
                 <div class="col-md-2 mb-2 mb-md-0">
-                    <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+                    <select name="status" class="form-control form-control-sm">
                         <option value="">-- ফলাফল স্ট্যাটাস --</option>
                         <option value="graded" {{ request('status') == 'graded' ? 'selected' : '' }}>মূল্যায়িত (Graded)</option>
                         <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>জমা দেওয়া হয়েছে</option>
@@ -146,277 +162,22 @@
                     </select>
                 </div>
 
-                <!-- Reset Filter Button -->
-                <div class="col-md-1 text-md-right">
-                    @if(request()->hasAny(['search', 'course_id', 'quiz_id', 'status', 'set']))
-                        <a href="{{ route('admin.quizzes.reports') }}" class="btn btn-sm btn-outline-danger" title="ফিল্টার রিসেট করুন">
-                            <i class="fas fa-sync"></i>
-                        </a>
-                    @endif
+                <!-- Action Buttons -->
+                <div class="col-md-1 text-md-right d-flex justify-content-end">
+                    <button class="btn btn-sm btn-primary mr-1" type="submit" title="খুঁজুন"><i class="fas fa-search"></i></button>
+                    <a href="{{ route('admin.quizzes.reports', ['tab' => $activeTab ?? 'attempts']) }}" id="reports-reset-btn" class="btn btn-sm btn-outline-danger {{ request()->hasAny(['search', 'course_id', 'quiz_id', 'status', 'set']) ? '' : 'd-none' }}" title="ফিল্টার রিসেট করুন">
+                        <i class="fas fa-sync"></i>
+                    </a>
                 </div>
             </form>
         </div>
-
-        <!-- Bulk Action Bar for Selected Results -->
-        <div id="bulkActionBar" class="card-header bg-light border-bottom py-2" style="display: none;">
-            <div class="d-flex align-items-center justify-content-between flex-wrap">
-                <div class="d-flex align-items-center my-1">
-                    <span class="badge badge-primary px-2.5 py-1 text-sm font-weight-bold mr-2">
-                        <i class="fas fa-check-square mr-1"></i> <span id="selectedCountText">০</span> টি ফলাফল নির্বাচিত
-                    </span>
-                    <span class="text-xs text-muted">একসাথে একাধিক ফলাফল ডিলিট করতে পাশের বাটন ব্যবহার করুন।</span>
-                </div>
-                <div class="my-1">
-                    <button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="executeBulkDelete()">
-                        <i class="fas fa-trash-alt mr-1"></i> নির্বাচিত ফলাফল মুছুন (Bulk Delete)
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="clearAllSelections()">
-                        বাতিল
-                    </button>
-                </div>
-            </div>
-        </div>
-
-                <form id="bulkResetViolationsForm" action="{{ route('admin.quizzes.reports.bulk-reset-violations') }}" method="POST" style="display: none;">
-            @csrf
-            <div id="bulkResetInputsContainer"></div>
-        </form>
-        <form id="bulkDeleteForm" action="{{ route('admin.quizzes.reports.bulk-delete') }}" method="POST">
-            @csrf
-            <div class="card-body p-0 table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0">
-                    <thead class="bg-light text-uppercase text-xs font-weight-bold text-muted">
-                        <tr>
-                            <th class="text-center" style="width: 48px;">
-                                <input type="checkbox" id="selectAllCheckbox" class="adm-checkbox" title="সবগুলো একসাথে নির্বাচন করুন">
-                            </th>
-                            <th class="text-center" style="width: 50px;">#</th>
-                        <th>শিক্ষার্থীর তথ্য</th>
-                        <th>কুইজ ও কোর্স</th>
-                        <th class="text-center">সেট</th>
-                        <th class="text-center">প্রাপ্ত নম্বর</th>
-                        <th class="text-center">নেগেটিভ কর্তন</th>
-                        <th class="text-center">শতকরা</th>
-                        <th class="text-center">সময়</th>
-                        <th class="text-center">ফলাফল</th>
-                        <th class="text-center" style="width: 120px;">নিরাপত্তা অডিট</th>
-                        <th class="text-center">জমার তারিখ</th>
-                        <th class="text-center" style="width: 120px;">অ্যাকশন</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($attempts as $attempt)
-                        @php
-                            $isPassed = $attempt->isPassed();
-                        @endphp
-                        <tr>
-                            <td class="text-center">
-                                <input type="checkbox" name="attempt_ids[]" value="{{ $attempt->id }}" class="attempt-checkbox adm-checkbox" title="অ্যাটেম্পট #{{ $attempt->id }} নির্বাচন করুন">
-                            </td>
-                            <td class="text-center text-muted text-sm">{{ $loop->iteration + ($attempts->currentPage() - 1) * $attempts->perPage() }}</td>
-                            <td>
-                                <div class="font-weight-bold text-dark font-size-14">
-                                    <i class="fas fa-user-circle text-muted mr-1"></i>
-                                    {{ $attempt->student ? $attempt->student->name : 'N/A' }}
-                                </div>
-                                <div class="text-xs text-muted mt-0.5">
-                                    <span class="mr-2"><i class="fas fa-phone mr-1"></i> {{ $attempt->student ? $attempt->student->phone : 'N/A' }}</span>
-                                    @if($attempt->student && $attempt->student->student_id_code)
-                                        <span class="badge badge-light border text-xs">{{ $attempt->student->student_id_code }}</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div class="font-weight-bold text-dark text-sm">{{ $attempt->quiz ? $attempt->quiz->title : 'N/A' }}</div>
-                                <div class="text-xs text-primary font-weight-semibold">
-                                    <i class="fas fa-graduation-cap mr-1"></i>
-                                    {{ $attempt->quiz && $attempt->quiz->course ? $attempt->quiz->course->course_title : 'General' }}
-                                </div>
-                                @php
-                                    $retakes = $attempt->retakes ?: collect();
-                                    $retakeCount = $retakes->count();
-                                    $allChain = collect([$attempt])->concat($retakes);
-                                    $passedInChain = $allChain->first(function($a) { return $a->isPassed(); });
-                                @endphp
-                                @if($retakeCount > 0)
-                                    <div class="mt-1">
-                                        <button type="button" class="btn btn-xs btn-outline-info font-weight-bold py-0 px-2" onclick="toggleAdminRetakes({{ $attempt->id }})" id="admin-retake-btn-{{ $attempt->id }}">
-                                            <i class="fas fa-sitemap mr-1"></i> {{ $retakeCount }}টি রিটেক <i class="fas fa-chevron-down ml-0.5"></i>
-                                        </button>
-                                        @if($passedInChain)
-                                            <span class="badge badge-success px-1.5 py-0.5 ml-1 text-xs"><i class="fas fa-check-circle mr-0.5"></i> {{ $passedInChain->attempt_number }}ম বারে উত্তীর্ণ</span>
-                                        @else
-                                            <span class="badge badge-warning text-dark px-1.5 py-0.5 ml-1 text-xs">পুনঃচেষ্টা চলমান</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <span class="badge badge-light border font-weight-bold px-2 py-1">
-                                    {{ $attempt->question_set ?: 'Set A' }}
-                                    ({{ \App\model\LmsQuiz::getBengaliSetCode($attempt->question_set) }})
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span class="font-weight-bold {{ $isPassed ? 'text-success' : 'text-danger' }}" style="font-size: 1.1rem;">
-                                    {{ (float)$attempt->score }}
-                                </span>
-                                <span class="text-xs text-muted">/ {{ (float)$attempt->total_marks }}</span>
-                            </td>
-                            <td class="text-center text-sm text-danger font-weight-semibold">
-                                {{ (float)$attempt->negative_marks_deducted > 0 ? '-' . (float)$attempt->negative_marks_deducted : '০.০০' }}
-                            </td>
-                            <td class="text-center font-weight-bold">
-                                <span class="badge {{ $attempt->percentage >= 100 ? 'badge-success' : ($attempt->percentage >= 50 ? 'badge-info' : 'badge-danger') }} px-2 py-1 text-xs">
-                                    {{ (float)$attempt->percentage }}%
-                                </span>
-                            </td>
-                            <td class="text-center text-xs font-mono text-muted">
-                                <i class="far fa-clock mr-1"></i> {{ $attempt->formatted_time_spent }}
-                            </td>
-                            <td class="text-center">
-                                @if($attempt->status === 'graded')
-                                    @if($isPassed)
-                                        <span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (Passed)</span>
-                                    @else
-                                        <span class="badge badge-danger px-2 py-1"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
-                                    @endif
-                                @elseif($attempt->status === 'submitted')
-                                    <span class="badge badge-warning px-2 py-1"><i class="fas fa-hourglass-half mr-1"></i> মূল্যায়নাধীন</span>
-                                @elseif($attempt->status === 'timed_out' || ($attempt->started_at && $attempt->quiz && \Carbon\Carbon::now()->greaterThan($attempt->started_at->copy()->addMinutes($attempt->quiz->duration_minutes + 2))))
-                                    <span class="badge badge-secondary px-2 py-1 font-weight-bold" style="background-color: #64748b; color: #ffffff;" title="নির্ধারিত পরীক্ষার সময় পার হয়েছে">
-                                        <i class="far fa-clock mr-1"></i> সময় সমাপ্ত (Timed Out)
-                                    </span>
-                                @else
-                                    <span class="badge badge-info px-2 py-1 font-weight-bold" style="background-color: #0284c7; color: #ffffff;">
-                                        <i class="fas fa-edit mr-1"></i> চলমান (In Progress)
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @if(($attempt->security_violations_count ?: 0) == 0)
-                                    <span class="badge badge-success px-2 py-1"><i class="fas fa-shield-alt mr-1"></i> ক্লিন (Clean)</span>
-                                @else
-                                    <button type="button" 
-                                            class="btn btn-xs {{ $attempt->security_violations_count >= 3 ? 'btn-danger' : 'btn-warning' }} font-weight-bold" 
-                                            onclick="openViolationAuditModal({{ $attempt->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'N/A') }}', {{ (int)$attempt->security_violations_count }}, {{ json_encode($attempt->security_violations_log ?: []) }})"
-                                            title="নিরাপত্তা লঙ্ঘন অডিট লগ দেখুন">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i> {{ $attempt->security_violations_count }}টি লঙ্ঘন
-                                    </button>
-                                @endif
-                            </td>
-                            <td class="text-center text-xs text-muted">
-                                {{ $attempt->submitted_at ? $attempt->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $attempt->updated_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('admin.quizzes.attempt-detail', $attempt->id) }}" class="btn btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র ও মূল্যায়ন দেখুন">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger" title="এই শিক্ষার্থীর ফলাফল মুছে ফেলুন" onclick="confirmSingleDelete({{ $attempt->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'শিক্ষার্থী') }}')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        @if($retakeCount > 0)
-                            <tr id="admin-retakes-{{ $attempt->id }}" class="d-none" style="background-color: #f8fafc;">
-                                <td colspan="12" class="p-3">
-                                    <div class="border rounded bg-white p-3 shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                            <span class="font-weight-bold text-xs text-primary">
-                                                <i class="fas fa-sitemap mr-1"></i> পুনঃপরীক্ষা ও প্রচেষ্টার ধারাবাহিক ট্র্যাকিং হিস্টোরি (Parent-Child Chain)
-                                            </span>
-                                            <span class="text-xs text-muted">
-                                                মোট অংশগ্রহণ: {{ $retakeCount + 1 }} বার | {{ $passedInChain ? '১০০% সফল উত্তীর্ণ' : '১০০% অর্জনের চেষ্টা চলছে' }}
-                                            </span>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered text-center text-xs mb-0">
-                                                <thead class="bg-light">
-                                                    <tr>
-                                                        <th>চেষ্টা ক্রম</th>
-                                                        <th>তারিখ ও সময় (BD Time)</th>
-                                                        <th>প্রাপ্ত নম্বর (Score)</th>
-                                                        <th>শতকরা (Pct)</th>
-                                                        <th>নেগেটিভ কর্তন</th>
-                                                        <th>ফলাফল</th>
-                                                        <th>অ্যাকশন</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($allChain as $idx => $sub)
-                                                        @php $subPassed = $sub->isPassed(); @endphp
-                                                        <tr class="{{ $subPassed ? 'table-success' : '' }}">
-                                                            <td class="font-weight-bold">
-                                                                @if($idx === 0)
-                                                                    <span class="badge badge-secondary">মূল পরীক্ষা (#1)</span>
-                                                                @else
-                                                                    <span class="badge badge-info">পুনঃপরীক্ষা #{{ $idx }} (Attempt #{{ $sub->attempt_number }})</span>
-                                                                @endif
-                                                            </td>
-                                                            <td>
-                                                                {{ $sub->submitted_at ? $sub->submitted_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') : $sub->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
-                                                            </td>
-                                                            <td class="font-weight-bold {{ $subPassed ? 'text-success' : 'text-danger' }}">
-                                                                {{ (float)$sub->score }} / {{ (float)$sub->total_marks }}
-                                                            </td>
-                                                            <td class="font-weight-bold">
-                                                                {{ (float)$sub->percentage }}%
-                                                            </td>
-                                                            <td class="text-danger font-weight-semibold">
-                                                                {{ (float)$sub->negative_marks_deducted > 0 ? '-' . (float)$sub->negative_marks_deducted : '০.০০' }}
-                                                            </td>
-                                                            <td>
-                                                                @if($subPassed)
-                                                                    <span class="badge badge-success px-2 py-0.5"><i class="fas fa-check-circle mr-1"></i> উত্তীর্ণ (Passed)</span>
-                                                                @else
-                                                                    <span class="badge badge-danger px-2 py-0.5"><i class="fas fa-times-circle mr-1"></i> অনুত্তীর্ণ (Fail)</span>
-                                                                @endif
-                                                            </td>
-                                                            <td>
-                                                                <div class="btn-group btn-group-xs">
-                                                                    <a href="{{ route('admin.quizzes.attempt-detail', $sub->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold" title="বিস্তারিত উত্তরপত্র দেখুন">
-                                                                        <i class="fas fa-eye mr-1"></i> Review
-                                                                    </a>
-                                                                    <button type="button" class="btn btn-xs btn-outline-danger" title="শুধু এই প্রচেষ্টার ফলাফল মুছুন" onclick="confirmSingleDelete({{ $sub->id }}, '{{ addslashes($attempt->student ? $attempt->student->name : 'শিক্ষার্থী') }}')">
-                                                                        <i class="fas fa-trash-alt"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endif
-                    @empty
-                        <tr>
-                            <td colspan="12" class="text-center py-5 text-muted">
-                                <i class="fas fa-clipboard-list fa-3x mb-3 text-secondary d-block"></i>
-                                <h5>কোনো শিক্ষার্থীর পরীক্ষার ফলাফল পাওয়া যায়নি!</h5>
-                                <p class="text-xs text-muted">শিক্ষার্থীরা অনলাইন বা ওএমআর কুইজে অংশগ্রহণ করলে তাদের রেজাল্ট স্বয়ংক্রিয়ভাবে এখানে তালিকাভুক্ত হবে।</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        </form>
-
-        @if($attempts->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <span class="text-xs text-muted">দেখাচ্ছে {{ $attempts->firstItem() }} থেকে {{ $attempts->lastItem() }} (মোট {{ $attempts->total() }}টি ফলাফল)</span>
-                    {{ $attempts->links() }}
-                </div>
-            </div>
-        @endif
     </div>
+
+    <!-- Dynamic AJAX Results Container -->
+    <div id="reports-results-container">
+        @include('backend.theme.clasic.lms.quizzes.partials.reports_results')
+    </div>
+
     <!-- Hidden Single Delete Form -->
     <form id="singleDeleteForm" action="" method="POST" style="display: none;">
         @csrf
@@ -660,6 +421,127 @@
                 }
             }
         }
+
+        // Live AJAX Search & Filter on Exam Results & Reports
+        (function() {
+            var form = document.getElementById('reports-filter-form');
+            var searchInput = document.getElementById('reports-live-search');
+            var container = document.getElementById('reports-results-container');
+            var resetBtn = document.getElementById('reports-reset-btn');
+            var searchIcon = document.getElementById('reports-search-icon');
+            var searchSpinner = document.getElementById('reports-search-spinner');
+
+            if (!form || !container) return;
+
+            var debounceTimer = null;
+            var activeController = null;
+            var baseUrl = form.getAttribute('action');
+
+            function toggleReset() {
+                if (!resetBtn) return;
+                var hasFilter = false;
+                form.querySelectorAll('input[name="search"], select[name]').forEach(function(el) {
+                    if (el.value && el.value.trim() !== '') hasFilter = true;
+                });
+                resetBtn.classList.toggle('d-none', !hasFilter);
+            }
+
+            function setLoading(isLoading) {
+                if (searchIcon && searchSpinner) {
+                    searchIcon.classList.toggle('d-none', isLoading);
+                    searchSpinner.classList.toggle('d-none', !isLoading);
+                }
+                container.style.opacity = isLoading ? '0.6' : '1';
+            }
+
+            function buildUrl(pageUrl) {
+                var urlObj = new URL(pageUrl || baseUrl, window.location.origin);
+                if (!pageUrl) {
+                    var fd = new FormData(form);
+                    fd.forEach(function(val, key) {
+                        if (val && val.toString().trim() !== '') {
+                            urlObj.searchParams.set(key, val.toString().trim());
+                        }
+                    });
+                }
+                return urlObj;
+            }
+
+            function fetchReports(pageUrl) {
+                if (activeController) activeController.abort();
+                activeController = new AbortController();
+
+                var cleanUrl = buildUrl(pageUrl);
+                var ajaxUrl = new URL(cleanUrl.toString());
+                ajaxUrl.searchParams.set('ajax', '1');
+
+                setLoading(true);
+                toggleReset();
+
+                fetch(ajaxUrl.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    signal: activeController.signal
+                })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Network error');
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (data && typeof data.html === 'string') {
+                        container.innerHTML = data.html;
+                        window.history.replaceState({}, '', cleanUrl.toString());
+                    }
+                })
+                .catch(function(err) {
+                    if (err.name !== 'AbortError') console.error('Reports live search error:', err);
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        fetchReports(null);
+                    }, 250);
+                });
+            }
+
+            form.querySelectorAll('select').forEach(function(sel) {
+                sel.addEventListener('change', function() {
+                    fetchReports(null);
+                });
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                fetchReports(null);
+            });
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (searchInput) searchInput.value = '';
+                    form.querySelectorAll('select').forEach(function(sel) { sel.value = ''; });
+                    fetchReports(null);
+                });
+            }
+
+            container.addEventListener('click', function(e) {
+                var link = e.target.closest('.pagination a');
+                if (link && link.getAttribute('href')) {
+                    e.preventDefault();
+                    fetchReports(link.getAttribute('href'));
+                }
+            });
+        })();
     </script>
 
     <!-- Violation Logs Modal -->
@@ -767,6 +649,127 @@
                 }
             }
         }
+
+        // Live AJAX Search & Filter on Exam Results & Reports
+        (function() {
+            var form = document.getElementById('reports-filter-form');
+            var searchInput = document.getElementById('reports-live-search');
+            var container = document.getElementById('reports-results-container');
+            var resetBtn = document.getElementById('reports-reset-btn');
+            var searchIcon = document.getElementById('reports-search-icon');
+            var searchSpinner = document.getElementById('reports-search-spinner');
+
+            if (!form || !container) return;
+
+            var debounceTimer = null;
+            var activeController = null;
+            var baseUrl = form.getAttribute('action');
+
+            function toggleReset() {
+                if (!resetBtn) return;
+                var hasFilter = false;
+                form.querySelectorAll('input[name="search"], select[name]').forEach(function(el) {
+                    if (el.value && el.value.trim() !== '') hasFilter = true;
+                });
+                resetBtn.classList.toggle('d-none', !hasFilter);
+            }
+
+            function setLoading(isLoading) {
+                if (searchIcon && searchSpinner) {
+                    searchIcon.classList.toggle('d-none', isLoading);
+                    searchSpinner.classList.toggle('d-none', !isLoading);
+                }
+                container.style.opacity = isLoading ? '0.6' : '1';
+            }
+
+            function buildUrl(pageUrl) {
+                var urlObj = new URL(pageUrl || baseUrl, window.location.origin);
+                if (!pageUrl) {
+                    var fd = new FormData(form);
+                    fd.forEach(function(val, key) {
+                        if (val && val.toString().trim() !== '') {
+                            urlObj.searchParams.set(key, val.toString().trim());
+                        }
+                    });
+                }
+                return urlObj;
+            }
+
+            function fetchReports(pageUrl) {
+                if (activeController) activeController.abort();
+                activeController = new AbortController();
+
+                var cleanUrl = buildUrl(pageUrl);
+                var ajaxUrl = new URL(cleanUrl.toString());
+                ajaxUrl.searchParams.set('ajax', '1');
+
+                setLoading(true);
+                toggleReset();
+
+                fetch(ajaxUrl.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    signal: activeController.signal
+                })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Network error');
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (data && typeof data.html === 'string') {
+                        container.innerHTML = data.html;
+                        window.history.replaceState({}, '', cleanUrl.toString());
+                    }
+                })
+                .catch(function(err) {
+                    if (err.name !== 'AbortError') console.error('Reports live search error:', err);
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        fetchReports(null);
+                    }, 250);
+                });
+            }
+
+            form.querySelectorAll('select').forEach(function(sel) {
+                sel.addEventListener('change', function() {
+                    fetchReports(null);
+                });
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                fetchReports(null);
+            });
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (searchInput) searchInput.value = '';
+                    form.querySelectorAll('select').forEach(function(sel) { sel.value = ''; });
+                    fetchReports(null);
+                });
+            }
+
+            container.addEventListener('click', function(e) {
+                var link = e.target.closest('.pagination a');
+                if (link && link.getAttribute('href')) {
+                    e.preventDefault();
+                    fetchReports(link.getAttribute('href'));
+                }
+            });
+        })();
     </script>
 
     <!-- Parent Question History Modal -->
@@ -960,5 +963,126 @@
                 }
             }
         }
+
+        // Live AJAX Search & Filter on Exam Results & Reports
+        (function() {
+            var form = document.getElementById('reports-filter-form');
+            var searchInput = document.getElementById('reports-live-search');
+            var container = document.getElementById('reports-results-container');
+            var resetBtn = document.getElementById('reports-reset-btn');
+            var searchIcon = document.getElementById('reports-search-icon');
+            var searchSpinner = document.getElementById('reports-search-spinner');
+
+            if (!form || !container) return;
+
+            var debounceTimer = null;
+            var activeController = null;
+            var baseUrl = form.getAttribute('action');
+
+            function toggleReset() {
+                if (!resetBtn) return;
+                var hasFilter = false;
+                form.querySelectorAll('input[name="search"], select[name]').forEach(function(el) {
+                    if (el.value && el.value.trim() !== '') hasFilter = true;
+                });
+                resetBtn.classList.toggle('d-none', !hasFilter);
+            }
+
+            function setLoading(isLoading) {
+                if (searchIcon && searchSpinner) {
+                    searchIcon.classList.toggle('d-none', isLoading);
+                    searchSpinner.classList.toggle('d-none', !isLoading);
+                }
+                container.style.opacity = isLoading ? '0.6' : '1';
+            }
+
+            function buildUrl(pageUrl) {
+                var urlObj = new URL(pageUrl || baseUrl, window.location.origin);
+                if (!pageUrl) {
+                    var fd = new FormData(form);
+                    fd.forEach(function(val, key) {
+                        if (val && val.toString().trim() !== '') {
+                            urlObj.searchParams.set(key, val.toString().trim());
+                        }
+                    });
+                }
+                return urlObj;
+            }
+
+            function fetchReports(pageUrl) {
+                if (activeController) activeController.abort();
+                activeController = new AbortController();
+
+                var cleanUrl = buildUrl(pageUrl);
+                var ajaxUrl = new URL(cleanUrl.toString());
+                ajaxUrl.searchParams.set('ajax', '1');
+
+                setLoading(true);
+                toggleReset();
+
+                fetch(ajaxUrl.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    signal: activeController.signal
+                })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Network error');
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (data && typeof data.html === 'string') {
+                        container.innerHTML = data.html;
+                        window.history.replaceState({}, '', cleanUrl.toString());
+                    }
+                })
+                .catch(function(err) {
+                    if (err.name !== 'AbortError') console.error('Reports live search error:', err);
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        fetchReports(null);
+                    }, 250);
+                });
+            }
+
+            form.querySelectorAll('select').forEach(function(sel) {
+                sel.addEventListener('change', function() {
+                    fetchReports(null);
+                });
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                fetchReports(null);
+            });
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (searchInput) searchInput.value = '';
+                    form.querySelectorAll('select').forEach(function(sel) { sel.value = ''; });
+                    fetchReports(null);
+                });
+            }
+
+            container.addEventListener('click', function(e) {
+                var link = e.target.closest('.pagination a');
+                if (link && link.getAttribute('href')) {
+                    e.preventDefault();
+                    fetchReports(link.getAttribute('href'));
+                }
+            });
+        })();
     </script>
 @endsection

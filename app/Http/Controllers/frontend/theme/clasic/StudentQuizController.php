@@ -435,6 +435,15 @@ class StudentQuizController extends Controller
                 ]);
             }
 
+            // Self-heal: if an existing in-progress attempt has an empty/corrupted snapshot, rebuild it
+            if (empty($activeAttempt->questions_snapshot) || !is_array($activeAttempt->questions_snapshot)) {
+                $rebuiltSnapshot = $this->buildExamSnapshot($quiz, $activeAttempt->question_set ?: $quiz->question_set);
+                if (!empty($rebuiltSnapshot)) {
+                    $activeAttempt->questions_snapshot = $rebuiltSnapshot;
+                    $activeAttempt->save();
+                }
+            }
+
             return redirect()->route('student.quiz.take', $activeAttempt->id);
         }
 
@@ -471,153 +480,8 @@ class StudentQuizController extends Controller
         // Determine question set
         $assignedSet = $request->input('question_set', $quiz->question_set ?: 'Set A');
 
-        // Fetch questions for this attempt and freeze a snapshot
-        $snapshot = [];
-
-        // Check if quiz is linked to a structured Question Paper with sections
-        if ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->exists()) {
-            $paperItems = $quiz->paper->items()
-                ->with(['masterQuestion.options', 'section'])
-                ->orderBy('order_index', 'asc')
-                ->get();
-
-            if ($quiz->shuffle_questions) {
-                $paperItems = $paperItems->shuffle()->values();
-            }
-
-            $seenAttemptHashes = [];
-            foreach ($paperItems as $it) {
-                $q = $it->masterQuestion;
-                if (!$q) continue;
-
-                $qText = $it->getQuestionText() ?: $q->question_text;
-                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($qText);
-                if ($h && isset($seenAttemptHashes[$h])) {
-                    continue; // Skip duplicate question within the same exam
-                }
-                if ($h) {
-                    $seenAttemptHashes[$h] = true;
-                }
-
-                $type = $it->getQuestionType() ?: $q->question_type;
-                $isMcqFormat = in_array($type, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']);
-                // Strict MCQ constraint: non-MCQ formats are not allowed for student panel examinations
-                if (!$isMcqFormat || !$q->options || $q->options->count() < 2) {
-                    continue;
-                }
-
-                $opts = $q->options;
-                if ($quiz->shuffle_options) {
-                    $opts = $opts->shuffle()->values();
-                }
-
-                $optsArray = [];
-                $optIdx = 0;
-                foreach ($opts as $o) {
-                    $optsArray[] = [
-                        'id' => $o->id,
-                        'text' => $o->option_text,
-                        'order' => $optIdx++,
-                    ];
-                }
-
-                $snapshot[] = [
-                    'id'                   => $q->id,
-                    'paper_item_id'        => $it->id,
-                    'section_id'           => $it->section_id,
-                    'section_title'        => $it->section ? $it->section->title : null,
-                    'section_instructions' => $it->section ? $it->section->instructions : null,
-                    'section_code'         => $it->section ? $it->section->section_code : null,
-                    'question_text'        => $it->getQuestionText(),
-                    'question_type'        => $it->getQuestionType(),
-                    'marks'                => (float)$it->marks,
-                    'negative_marks'       => $it->negative_marks !== null ? (float)$it->negative_marks : null,
-                    'set_code'             => $q->set_code,
-                    'category'             => $q->category,
-                    'chapter'              => $q->chapter,
-                    'topic'                => $q->topic,
-                    'stimulus'             => $it->getStimulus(),
-                    'hints'                => $it->getHints(),
-                    'cq_subquestions'      => $it->getCqSubquestions(),
-                    'matching_pairs'       => $it->getMatchingPairs(),
-                    'options'              => $optsArray,
-                ];
-            }
-        } else {
-            // Standard Quiz question retrieval (strictly MCQ format with options)
-            $questionsQuery = $quiz->activeQuestions()
-                ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
-                ->has('options', '>=', 2)
-                ->with('options');
-            $availableSets = $quiz->getAvailableSets();
-            if (count($availableSets) > 1 && $assignedSet) {
-                $equivalents = \App\model\LmsQuiz::getEquivalentSetCodes($assignedSet);
-                $questionsQuery->where(function($q) use ($equivalents) {
-                    $q->whereIn('set_code', $equivalents)
-                      ->orWhereNull('set_code')
-                      ->orWhere('set_code', '');
-                });
-            }
-            $rawQuestions = $questionsQuery->get();
-            if ($rawQuestions->isEmpty()) {
-                $rawQuestions = $quiz->activeQuestions()
-                    ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
-                    ->has('options', '>=', 2)
-                    ->with('options')
-                    ->get();
-            }
-
-            if ($quiz->shuffle_questions) {
-                $rawQuestions = $rawQuestions->shuffle()->values();
-            }
-
-            $seenRawHashes = [];
-            foreach ($rawQuestions as $q) {
-                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
-                if ($h && isset($seenRawHashes[$h])) {
-                    continue; // Skip duplicate question within the same exam
-                }
-                if ($h) {
-                    $seenRawHashes[$h] = true;
-                }
-                $opts = $q->options;
-                if (!$opts || $opts->count() < 2) {
-                    continue;
-                }
-                if ($quiz->shuffle_options) {
-                    $opts = $opts->shuffle()->values();
-                }
-
-                $optsArray = [];
-                $optIdx = 0;
-                foreach ($opts as $o) {
-                    $optsArray[] = [
-                        'id' => $o->id,
-                        'text' => $o->option_text,
-                        'order' => $optIdx++,
-                    ];
-                }
-
-                $snapshot[] = [
-                    'id'              => $q->id,
-                    'section_id'      => null,
-                    'section_title'   => null,
-                    'question_text'   => $q->question_text,
-                    'question_type'   => $q->question_type,
-                    'marks'           => (float)$q->marks,
-                    'negative_marks'  => $q->negative_marks !== null ? (float)$q->negative_marks : null,
-                    'set_code'        => $q->set_code,
-                    'category'        => $q->category,
-                    'chapter'         => $q->chapter,
-                    'topic'           => $q->topic,
-                    'stimulus'        => $q->stimulus,
-                    'hints'           => $q->hints,
-                    'cq_subquestions' => $q->cq_subquestions_decoded,
-                    'matching_pairs'  => $q->matching_pairs_decoded,
-                    'options'         => $optsArray,
-                ];
-            }
-        }
+        // Fetch questions for this attempt and freeze a UTF-8 safe snapshot
+        $snapshot = $this->buildExamSnapshot($quiz, $assignedSet);
 
         if ($attemptNumber > 1 && ($quiz->shuffle_questions || $quiz->shuffle_options)) {
             $lastAttempt = LmsQuizAttempt::where('quiz_id', $quiz->id)
@@ -636,6 +500,9 @@ class StudentQuizController extends Controller
         }
 
         $viewMode = $request->input('view_mode', $quiz->view_mode ?: 'all_questions');
+        if (!in_array($viewMode, ['all_questions', 'one_by_one'])) {
+            $viewMode = 'all_questions';
+        }
 
         $newAttempt = LmsQuizAttempt::create([
             'quiz_id' => $quiz->id,
@@ -679,21 +546,30 @@ class StudentQuizController extends Controller
             ]);
         }
 
-        // Load questions: prefer frozen attempt snapshot, fallback to active questions
+        // Load questions: prefer frozen attempt snapshot, self-heal if empty
+        if ((empty($attempt->questions_snapshot) || !is_array($attempt->questions_snapshot)) && $quiz->quiz_type !== 'practice') {
+            $rebuiltSnapshot = $this->buildExamSnapshot($quiz, $attempt->question_set ?: $quiz->question_set);
+            if (!empty($rebuiltSnapshot)) {
+                $attempt->questions_snapshot = $rebuiltSnapshot;
+                $attempt->save();
+            }
+        }
+
         if (!empty($attempt->questions_snapshot) && is_array($attempt->questions_snapshot)) {
             $questions = collect($attempt->questions_snapshot)->map(function($qItem) {
                 $obj = (object)$qItem;
-                $obj->options = collect($qItem['options'])->map(function($opt) {
+                $rawOptions = isset($qItem['options']) && is_array($qItem['options']) ? $qItem['options'] : [];
+                $obj->options = collect($rawOptions)->map(function($opt, $idx) {
                     return (object)[
-                        'id' => $opt['id'],
-                        'option_text' => $opt['text'],
-                        'order_index' => $opt['order'],
+                        'id' => $opt['id'] ?? 0,
+                        'option_text' => $opt['text'] ?? '',
+                        'order_index' => $opt['order'] ?? $idx,
                     ];
                 });
                 return $obj;
             });
         } else {
-            $questions = $quiz->activeQuestions()->with('options')->get();
+            $questions = $quiz->getExamQuestions();
             if ($quiz->shuffle_questions) {
                 $questions = $questions->shuffle();
             }
@@ -1461,18 +1337,224 @@ class StudentQuizController extends Controller
         return $indices;
     }
 
+    /**
+     * Build a deduplicated, UTF-8 safe question snapshot for an exam or quiz attempt.
+     */
+    protected function buildExamSnapshot(LmsQuiz $quiz, ?string $assignedSet = null): array
+    {
+        $snapshot = [];
+
+        if ($quiz->paper_id && $quiz->paper && $quiz->paper->items()->exists()) {
+            $paperItems = $quiz->paper->items()
+                ->with(['masterQuestion.options', 'section'])
+                ->orderBy('order_index', 'asc')
+                ->get();
+
+            if ($quiz->shuffle_questions) {
+                $paperItems = $paperItems->shuffle()->values();
+            }
+
+            $seenAttemptHashes = [];
+            foreach ($paperItems as $it) {
+                $q = $it->masterQuestion;
+                if (!$q) continue;
+
+                $qText = $it->getQuestionText() ?: $q->question_text;
+                $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($qText);
+                if ($h && isset($seenAttemptHashes[$h])) {
+                    continue;
+                }
+                if ($h) {
+                    $seenAttemptHashes[$h] = true;
+                }
+
+                $type = $it->getQuestionType() ?: $q->question_type;
+                $isMcqFormat = in_array($type, ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice']);
+                if (!$isMcqFormat || !$q->options || $q->options->count() < 2) {
+                    continue;
+                }
+
+                $opts = $q->options;
+                if ($quiz->shuffle_options) {
+                    $opts = $opts->shuffle()->values();
+                }
+
+                $optsArray = [];
+                $optIdx = 0;
+                foreach ($opts as $o) {
+                    $optsArray[] = [
+                        'id'    => $o->id,
+                        'text'  => $o->option_text,
+                        'order' => $optIdx++,
+                    ];
+                }
+
+                $snapshot[] = [
+                    'id'                   => $q->id,
+                    'paper_item_id'        => $it->id,
+                    'section_id'           => $it->section_id,
+                    'section_title'        => $it->section ? $it->section->title : null,
+                    'section_instructions' => $it->section ? $it->section->instructions : null,
+                    'section_code'         => $it->section ? $it->section->section_code : null,
+                    'question_text'        => $qText,
+                    'question_type'        => $type,
+                    'marks'                => (float)$it->marks,
+                    'negative_marks'       => $it->negative_marks !== null ? (float)$it->negative_marks : null,
+                    'set_code'             => $q->set_code,
+                    'category'             => $q->category,
+                    'chapter'              => $q->chapter,
+                    'topic'                => $q->topic,
+                    'stimulus'             => $it->getStimulus(),
+                    'hints'                => $it->getHints(),
+                    'cq_subquestions'      => $it->getCqSubquestions(),
+                    'matching_pairs'       => $it->getMatchingPairs(),
+                    'options'              => $optsArray,
+                ];
+            }
+
+            return $this->sanitizeUtf8Snapshot($snapshot);
+        }
+
+        // Standard Quiz question retrieval (strictly MCQ format with options)
+        $questionsQuery = $quiz->activeQuestions()
+            ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+            ->has('options', '>=', 2)
+            ->with('options');
+
+        $availableSets = $quiz->getAvailableSets();
+        if (count($availableSets) > 1 && $assignedSet) {
+            $equivalents = \App\model\LmsQuiz::getEquivalentSetCodes($assignedSet);
+            $questionsQuery->where(function ($q) use ($equivalents) {
+                $q->whereIn('set_code', $equivalents)
+                  ->orWhereNull('set_code')
+                  ->orWhere('set_code', '');
+            });
+        }
+
+        $rawQuestions = $questionsQuery->get();
+        if ($rawQuestions->isEmpty()) {
+            $rawQuestions = $quiz->activeQuestions()
+                ->whereIn('question_type', ['mcq', 'mcq_single', 'mcq_multi', 'multiple_choice'])
+                ->has('options', '>=', 2)
+                ->with('options')
+                ->get();
+        }
+        // Final fallback if questions exist on the quiz with options but inactive/legacy type
+        if ($rawQuestions->isEmpty()) {
+            $rawQuestions = $quiz->questions()
+                ->has('options', '>=', 2)
+                ->with('options')
+                ->get();
+        }
+
+        if ($quiz->shuffle_questions) {
+            $rawQuestions = $rawQuestions->shuffle()->values();
+        }
+
+        $seenRawHashes = [];
+        foreach ($rawQuestions as $q) {
+            $h = $q->question_hash ?: \App\model\LmsQuestion::hashText($q->question_text);
+            if ($h && isset($seenRawHashes[$h])) {
+                continue;
+            }
+            if ($h) {
+                $seenRawHashes[$h] = true;
+            }
+
+            $opts = $q->options;
+            if (!$opts || $opts->count() < 2) {
+                continue;
+            }
+            if ($quiz->shuffle_options) {
+                $opts = $opts->shuffle()->values();
+            }
+
+            $optsArray = [];
+            $optIdx = 0;
+            foreach ($opts as $o) {
+                $optsArray[] = [
+                    'id'    => $o->id,
+                    'text'  => $o->option_text,
+                    'order' => $optIdx++,
+                ];
+            }
+
+            $snapshot[] = [
+                'id'              => $q->id,
+                'section_id'      => null,
+                'section_title'   => null,
+                'question_text'   => $q->question_text,
+                'question_type'   => $q->question_type,
+                'marks'           => (float)$q->marks,
+                'negative_marks'  => $q->negative_marks !== null ? (float)$q->negative_marks : null,
+                'set_code'        => $q->set_code,
+                'category'        => $q->category,
+                'chapter'         => $q->chapter,
+                'topic'           => $q->topic,
+                'stimulus'        => $q->stimulus,
+                'hints'           => $q->hints,
+                'cq_subquestions' => $q->cq_subquestions_decoded,
+                'matching_pairs'  => $q->matching_pairs_decoded,
+                'options'         => $optsArray,
+            ];
+        }
+
+        return $this->sanitizeUtf8Snapshot($snapshot);
+    }
+
+    /**
+     * Recursively sanitize snapshot strings to valid UTF-8 so JSON casting never fails.
+     */
+    protected function sanitizeUtf8Snapshot($value)
+    {
+        if (is_string($value)) {
+            $clean = @mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+            return $clean !== false ? $clean : '';
+        }
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                $value[$k] = $this->sanitizeUtf8Snapshot($v);
+            }
+        }
+        return $value;
+    }
+
     public function allResults(Request $request)
     {
         $student = Auth::guard('student')->user();
         
+        $activeType = $request->input('type', 'all');
+        if (!in_array($activeType, ['all', 'exam', 'practice'])) {
+            $activeType = 'all';
+        }
+
         // Load root attempts (attempts without a parent) with all nested retakes
-        $query = LmsQuizAttempt::where('student_account_id', $student->id)
+        $baseRootQuery = LmsQuizAttempt::where('student_account_id', $student->id)
             ->whereNull('parent_attempt_id')
-            ->whereIn('status', ['submitted', 'graded', 'timed_out'])
-            ->with(['quiz.course', 'retakes' => function($q) {
-                $q->whereIn('status', ['submitted', 'graded', 'timed_out'])->orderBy('id', 'asc');
+            ->whereIn('status', ['submitted', 'graded', 'timed_out']);
+
+        $examRootCount = (clone $baseRootQuery)->whereHas('quiz', function ($q) {
+            $q->where('quiz_type', 'exam');
+        })->count();
+        $practiceRootCount = (clone $baseRootQuery)->whereHas('quiz', function ($q) {
+            $q->where('quiz_type', 'practice');
+        })->count();
+
+        $query = (clone $baseRootQuery)
+            ->with(['quiz.course', 'answers', 'retakes' => function($q) {
+                $q->whereIn('status', ['submitted', 'graded', 'timed_out'])->with('answers')->orderBy('id', 'asc');
             }])
             ->orderBy('id', 'desc');
+
+        if ($activeType === 'exam') {
+            $query->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'exam');
+            });
+        } elseif ($activeType === 'practice') {
+            $query->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            });
+        }
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -1511,7 +1593,10 @@ class StudentQuizController extends Controller
         $avgPctVal = (int) round($allAttempts->avg('percentage') ?: 0);
         $maxScoreVal = $allAttempts->max('score') ?: 0;
 
-        return view('frontend.theme.clasic.student.quiz.history', compact('student', 'attempts', 'totalAttemptsCount', 'passedAttemptsCount', 'avgPctVal', 'maxScoreVal'));
+        return view('frontend.theme.clasic.student.quiz.history', compact(
+            'student', 'attempts', 'totalAttemptsCount', 'passedAttemptsCount', 'avgPctVal', 'maxScoreVal',
+            'activeType', 'examRootCount', 'practiceRootCount'
+        ));
     }
 
     /**

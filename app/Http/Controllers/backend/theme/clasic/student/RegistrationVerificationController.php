@@ -100,7 +100,15 @@ class RegistrationVerificationController extends Controller
             });
         }
 
-        $registrations = $query->paginate(15)->appends($request->query());
+        $registrations = $query->paginate(15)->appends($request->except('ajax'));
+
+        if ($request->ajax() || (bool)$request->input('ajax')) {
+            return response()->json([
+                'status' => 'success',
+                'total' => $registrations->total(),
+                'html' => view('backend.theme.clasic.student.verifications.partials.registrations_table', compact('registrations'))->render(),
+            ]);
+        }
 
         // 3. Query for Verification Logs / Blocked Requests (Forgot Number tab)
         $verificationLogs = RegistrationVerification::with(['studentAccount', 'admin'])

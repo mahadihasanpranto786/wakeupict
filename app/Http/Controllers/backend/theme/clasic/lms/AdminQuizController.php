@@ -875,10 +875,27 @@ class AdminQuizController extends Controller
                 $q->whereNull('parent_attempt_id')
                   ->orWhereDoesntHave('parentAttempt');
             })
-            ->with(['quiz.course', 'student', 'retakes' => function ($rq) {
-                $rq->with(['quiz.course', 'student'])->orderBy('id', 'asc');
+            ->with(['quiz.course', 'student', 'answers', 'retakes' => function ($rq) {
+                $rq->with(['quiz.course', 'student', 'answers'])->orderBy('id', 'asc');
             }])
             ->orderBy('id', 'desc');
+
+        $activeTab = $request->input('tab', 'attempts');
+
+        if ($activeTab === 'exams') {
+            $query->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'exam');
+            });
+        } elseif ($activeTab === 'practice') {
+            $query->whereHas('quiz', function ($q) {
+                $q->where('quiz_type', 'practice');
+            });
+        } elseif ($request->filled('quiz_type')) {
+            $quizType = $request->input('quiz_type');
+            $query->whereHas('quiz', function ($q) use ($quizType) {
+                $q->where('quiz_type', $quizType);
+            });
+        }
 
         if ($request->filled('quiz_id')) {
             $query->where('quiz_id', $request->quiz_id);
@@ -908,11 +925,23 @@ class AdminQuizController extends Controller
         }
 
         $attempts = $query->paginate(25)->appends($request->all());
-        $quizzes = LmsQuiz::with('course')->orderBy('title', 'asc')->get();
+        $quizzesQuery = LmsQuiz::with('course')->orderBy('title', 'asc');
+        if ($activeTab === 'exams') {
+            $quizzesQuery->where('quiz_type', 'exam');
+        } elseif ($activeTab === 'practice') {
+            $quizzesQuery->where('quiz_type', 'practice');
+        }
+        $quizzes = $quizzesQuery->get();
         $courses = Course::where('status', 1)->orderBy('course_title', 'asc')->get();
 
         // High-level KPI Stats using each attempt's configured pass_marks
         $totalAttempts = \App\model\LmsQuizAttempt::count();
+        $examAttemptsCount = \App\model\LmsQuizAttempt::whereHas('quiz', function ($q) {
+            $q->where('quiz_type', 'exam');
+        })->count();
+        $practiceAttemptsCount = \App\model\LmsQuizAttempt::whereHas('quiz', function ($q) {
+            $q->where('quiz_type', 'practice');
+        })->count();
         $gradedAttempts = \App\model\LmsQuizAttempt::with('quiz')->where('status', 'graded')->get();
         $passedAttempts = $gradedAttempts->filter(function ($a) {
             return $a->isPassed();
@@ -923,7 +952,6 @@ class AdminQuizController extends Controller
         // -------------------------------------------------------------
         // Parent Question Tracking & Cross-Attempt Analytics
         // -------------------------------------------------------------
-        $activeTab = $request->input('tab', 'attempts');
 
         $pqRaw = DB::table('lms_quiz_answers')
             ->join('lms_questions', 'lms_quiz_answers.question_id', '=', 'lms_questions.id')
@@ -955,9 +983,268 @@ class AdminQuizController extends Controller
                 : 0;
         }
 
+        // -------------------------------------------------------------
+        // Live Exam Cards & Parent-Child Retake Diagram Analytics
+        // -------------------------------------------------------------
+        $liveExamQuery = LmsQuiz::where('quiz_type', 'exam')
+            ->with(['course'])
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('quiz_id')) {
+            $liveExamQuery->where('id', $request->quiz_id);
+        }
+        if ($request->filled('course_id')) {
+            $liveExamQuery->where('course_id', $request->course_id);
+        }
+
+        $liveExams = $liveExamQuery->get();
+        $liveExamIds = $liveExams->pluck('id')->toArray();
+
+        $liveAttemptsByQuiz = collect();
+        if (!empty($liveExamIds)) {
+            $liveAttemptsQuery = \App\model\LmsQuizAttempt::whereIn('quiz_id', $liveExamIds)
+                ->with(['quiz.course', 'student', 'answers'])
+                ->orderBy('id', 'asc');
+
+            if ($request->filled('search')) {
+                $search = trim($request->search);
+                $liveAttemptsQuery->whereHas('student', function ($sq) use ($search) {
+                    $sq->where('name', 'like', "%{$search}%")
+                       ->orWhere('phone', 'like', "%{$search}%")
+                       ->orWhere('student_id_code', 'like', "%{$search}%");
+                });
+            }
+
+            $liveAttemptsByQuiz = $liveAttemptsQuery->get()->groupBy('quiz_id');
+        }
+
+        $liveExamDiagrams = $liveExams->map(function ($exam) use ($liveAttemptsByQuiz) {
+            $quizAttempts = $liveAttemptsByQuiz->get($exam->id, collect());
+            if ($quizAttempts->isEmpty()) {
+                return null;
+            }
+
+            // Group all attempts by unique student so each student appears ONCE per exam
+            $byStudent = $quizAttempts->groupBy('student_account_id');
+
+            $passedCount = 0;
+            $failedCount = 0;
+            $initialPassedCount = 0;
+            $retakeRecoveredCount = 0;
+            $retakeStudentsCount = 0;
+            $totalRetakesCount = 0;
+            $pctSum = 0;
+            $highestScore = 0;
+
+            $studentGroups = $byStudent->map(function ($studentAtts) use (
+                &$passedCount,
+                &$failedCount,
+                &$initialPassedCount,
+                &$retakeRecoveredCount,
+                &$retakeStudentsCount,
+                &$totalRetakesCount,
+                &$pctSum,
+                &$highestScore
+            ) {
+                $ordered = $studentAtts->sortBy('id')->values();
+                $initialAttempt = $ordered->first();
+                $retakes = $ordered->slice(1)->values();
+                $latestAttempt = $ordered->last();
+                $bestAttempt = $ordered->sortByDesc(function ($a) {
+                    return (float)$a->score;
+                })->first();
+
+                $initialPassed = $initialAttempt->isPassed();
+                $finalPassed = $ordered->contains(function ($a) {
+                    return $a->isPassed();
+                });
+                $retakePassed = $retakes->contains(function ($a) {
+                    return $a->isPassed();
+                });
+
+                if ($finalPassed) {
+                    $passedCount++;
+                } else {
+                    $failedCount++;
+                }
+
+                if ($initialPassed) {
+                    $initialPassedCount++;
+                } elseif ($retakePassed) {
+                    $retakeRecoveredCount++;
+                }
+
+                if ($retakes->count() > 0) {
+                    $retakeStudentsCount++;
+                    $totalRetakesCount += $retakes->count();
+                }
+
+                $bestPct = (float)($bestAttempt->percentage ?: 0);
+                $bestScore = (float)($bestAttempt->score ?: 0);
+                $pctSum += $bestPct;
+                if ($bestScore > $highestScore) {
+                    $highestScore = $bestScore;
+                }
+
+                return (object)[
+                    'student'         => $initialAttempt->student,
+                    'attempts'        => $ordered,
+                    'initial_attempt' => $initialAttempt,
+                    'retakes'         => $retakes,
+                    'latest_attempt'  => $latestAttempt,
+                    'best_attempt'    => $bestAttempt,
+                    'initial_passed'  => $initialPassed,
+                    'final_passed'    => $finalPassed,
+                    'retake_passed'   => $retakePassed,
+                    'total_attempts'  => $ordered->count(),
+                    'retake_count'    => $retakes->count(),
+                ];
+            })->sortByDesc(function ($g) {
+                return (float)$g->best_attempt->score;
+            })->values();
+
+            $totalStudents = $studentGroups->count();
+            $passRate = $totalStudents > 0 ? round(($passedCount / $totalStudents) * 100, 1) : 0;
+            $initialPassRate = $totalStudents > 0 ? round(($initialPassedCount / $totalStudents) * 100, 1) : 0;
+            $retakePassRate = $totalStudents > 0 ? round(($retakeRecoveredCount / $totalStudents) * 100, 1) : 0;
+            $avgBestPct = $totalStudents > 0 ? round($pctSum / $totalStudents, 1) : 0;
+
+            return (object)[
+                'exam'                   => $exam,
+                'students'               => $studentGroups,
+                'total_students'         => $totalStudents,
+                'total_attempts_all'     => $quizAttempts->count(),
+                'passed_students'        => $passedCount,
+                'failed_students'        => $failedCount,
+                'initial_passed_count'   => $initialPassedCount,
+                'retake_recovered_count' => $retakeRecoveredCount,
+                'retake_students_count'  => $retakeStudentsCount,
+                'total_retakes_count'    => $totalRetakesCount,
+                'pass_rate'              => $passRate,
+                'initial_pass_rate'      => $initialPassRate,
+                'retake_pass_rate'       => $retakePassRate,
+                'avg_best_pct'           => $avgBestPct,
+                'highest_score'          => $highestScore,
+            ];
+        })->filter()->values();
+
+        // -------------------------------------------------------------
+        // User-Based Practice Exam Parent-Child Tree Analytics
+        // -------------------------------------------------------------
+        $practiceAttemptsQuery = \App\model\LmsQuizAttempt::whereHas('quiz', function ($q) use ($request) {
+                $q->where('quiz_type', 'practice');
+                if ($request->filled('course_id')) {
+                    $q->where('course_id', $request->course_id);
+                }
+            })
+            ->with(['quiz.course', 'student', 'answers'])
+            ->orderBy('id', 'asc');
+
+        if ($request->filled('quiz_id')) {
+            $practiceAttemptsQuery->where('quiz_id', $request->quiz_id);
+        }
+        if ($request->filled('status')) {
+            $practiceAttemptsQuery->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $practiceAttemptsQuery->whereHas('student', function ($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('phone', 'like', "%{$search}%")
+                   ->orWhere('student_id_code', 'like', "%{$search}%");
+            });
+        }
+
+        $practiceUserTrees = $practiceAttemptsQuery->get()
+            ->groupBy('student_account_id')
+            ->map(function ($studentAtts) {
+                $ordered = $studentAtts->sortBy('id')->values();
+                $firstAtt = $ordered->first();
+                $bestAtt = $ordered->sortByDesc(function ($a) {
+                    return (float)$a->score;
+                })->first();
+                $passedCount = $ordered->filter(function ($a) {
+                    return $a->isPassed();
+                })->count();
+
+                return (object)[
+                    'student'         => $firstAtt->student,
+                    'attempts'        => $ordered,
+                    'initial_attempt' => $firstAtt,
+                    'child_attempts'  => $ordered->slice(1)->values(),
+                    'best_attempt'    => $bestAtt,
+                    'latest_attempt'  => $ordered->last(),
+                    'total_attempts'  => $ordered->count(),
+                    'passed_count'    => $passedCount,
+                    'failed_count'    => $ordered->count() - $passedCount,
+                    'avg_pct'         => round($ordered->avg('percentage') ?: 0, 1),
+                ];
+            })
+            ->sortByDesc('total_attempts')
+            ->values();
+
+        if ($request->ajax() || (bool)$request->input('ajax')) {
+            return response()->json([
+                'status' => 'success',
+                'html'   => view('backend.theme.clasic.lms.quizzes.partials.reports_results', compact(
+                    'attempts', 'quizzes', 'courses', 'totalAttempts', 'examAttemptsCount', 'practiceAttemptsCount',
+                    'passedAttempts', 'failedAttempts', 'avgScore', 'pqStats', 'activeTab', 'liveExamDiagrams',
+                    'practiceUserTrees'
+                ))->render(),
+            ]);
+        }
+
         return view('backend.theme.clasic.lms.quizzes.reports', compact(
-            'attempts', 'quizzes', 'courses', 'totalAttempts', 'passedAttempts', 'failedAttempts', 'avgScore',
-            'pqStats', 'activeTab'
+            'attempts', 'quizzes', 'courses', 'totalAttempts', 'examAttemptsCount', 'practiceAttemptsCount',
+            'passedAttempts', 'failedAttempts', 'avgScore', 'pqStats', 'activeTab', 'liveExamDiagrams',
+            'practiceUserTrees'
+        ));
+    }
+
+    /**
+     * Full Result History Tree View for a single StudentAccount
+     */
+    public function studentResultTree($studentId)
+    {
+        $student = \App\model\StudentAccount::with(['student', 'admitedStudent', 'enrollments.course', 'enrollments.batch'])->findOrFail($studentId);
+
+        $allAttempts = \App\model\LmsQuizAttempt::where('student_account_id', $student->id)
+            ->with(['quiz.course', 'answers'])
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $totalAttempts = $allAttempts->count();
+        $passedCount = $allAttempts->filter(function ($a) {
+            return $a->isPassed();
+        })->count();
+        $failedCount = $totalAttempts - $passedCount;
+        $avgPct = $totalAttempts > 0 ? round($allAttempts->avg('percentage') ?: 0, 1) : 0;
+
+        $examTrees = $allAttempts->groupBy('quiz_id')->map(function ($quizAtts) {
+            $ordered = $quizAtts->sortBy('id')->values();
+            $first = $ordered->first();
+            $quiz = $first->quiz;
+            $best = $ordered->sortByDesc(function ($a) {
+                return (float)$a->score;
+            })->first();
+            $hasPassed = $ordered->contains(function ($a) {
+                return $a->isPassed();
+            });
+
+            return (object)[
+                'quiz'           => $quiz,
+                'quiz_type'      => $quiz ? $quiz->quiz_type : 'quiz',
+                'attempts'       => $ordered,
+                'best_attempt'   => $best,
+                'total_attempts' => $ordered->count(),
+                'has_passed'     => $hasPassed,
+            ];
+        })->sortByDesc(function ($tree) {
+            return $tree->attempts->last()->id;
+        })->values();
+
+        return view('backend.theme.clasic.lms.quizzes.student_tree', compact(
+            'student', 'allAttempts', 'totalAttempts', 'passedCount', 'failedCount', 'avgPct', 'examTrees'
         ));
     }
 

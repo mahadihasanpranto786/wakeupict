@@ -12,7 +12,8 @@
         return strtr((string)$num, $bngDigits);
     };
 
-    $currentViewMode = $attempt->view_mode ?: ($quiz->view_mode ?: 'all_questions');
+    $rawViewMode = $attempt->view_mode ?: ($quiz->view_mode ?: 'all_questions');
+    $currentViewMode = in_array($rawViewMode, ['all_questions', 'one_by_one']) ? $rawViewMode : 'all_questions';
     $assignedSet = $attempt->question_set ?: ($quiz->question_set ?: 'Set A');
     $bngSet = \App\model\LmsQuiz::getBengaliSetCode($assignedSet);
     $subjectCode = $quiz->subject_code ?: '101';
@@ -241,6 +242,12 @@
 
                     <!-- Continuous Questions Stream -->
                     <div class="space-y-6 pt-2">
+                        @if($questions->isEmpty())
+                            <div class="p-8 text-center rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-sm font-semibold">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>
+                                এই পরীক্ষার প্রশ্নপত্র লোড করা যায়নি। অনুগ্রহ করে পেজটি রিলোড করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
+                            </div>
+                        @endif
                         @php
                             $activeSectionTitle = null;
                         @endphp
