@@ -1206,7 +1206,7 @@ class AdminQuizController extends Controller
      */
     public function studentResultTree($studentId)
     {
-        $student = \App\model\StudentAccount::with(['course', 'batch'])->findOrFail($studentId);
+        $student = \App\model\StudentAccount::with(['student', 'admitedStudent', 'enrollments.course', 'enrollments.batch'])->findOrFail($studentId);
 
         $allAttempts = \App\model\LmsQuizAttempt::where('student_account_id', $student->id)
             ->with(['quiz.course', 'answers'])
