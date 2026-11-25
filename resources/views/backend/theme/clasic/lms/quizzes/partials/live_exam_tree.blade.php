@@ -33,6 +33,11 @@
                             পূর্ণমান: <strong>{{ (float)$examObj->total_marks }}</strong>
                             <span class="mx-2">&bull;</span>
                             পাস মার্কস: <strong>{{ (float)$examObj->pass_marks }}</strong>
+                            @php $examDate = $examObj->start_time ?: $examObj->created_at; @endphp
+                            @if($examDate)
+                                <span class="mx-2">&bull;</span>
+                                <span class="font-mono"><i class="far fa-calendar-alt mr-1"></i>{{ \Carbon\Carbon::parse($examDate)->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
+                            @endif
                         </div>
                     </div>
 
@@ -132,9 +137,17 @@
                                         বাকি: <strong>{{ $initStats['unanswered'] }}</strong>
                                     </span>
                                 </div>
-                                <a href="{{ route('admin.quizzes.attempt-detail', $initAtt->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold">
-                                    <i class="fas fa-eye mr-1"></i> উত্তরপত্র
-                                </a>
+                                <div class="d-flex align-items-center" style="gap: 8px;">
+                                    @php $initTime = $initAtt->started_at ?: ($initAtt->submitted_at ?: $initAtt->created_at); @endphp
+                                    @if($initTime)
+                                        <span class="text-xs text-muted font-mono">
+                                            <i class="far fa-clock mr-1"></i>{{ $initTime->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
+                                        </span>
+                                    @endif
+                                    <a href="{{ route('admin.quizzes.attempt-detail', $initAtt->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold">
+                                        <i class="fas fa-eye mr-1"></i> উত্তরপত্র
+                                    </a>
+                                </div>
                             </div>
 
                             @if($childRetakes->count() > 0)
@@ -167,9 +180,17 @@
                                                 বাকি: <strong>{{ $childStats['unanswered'] }}</strong>
                                             </span>
                                         </div>
-                                        <a href="{{ route('admin.quizzes.attempt-detail', $childAtt->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold">
-                                            <i class="fas fa-eye mr-1"></i> উত্তরপত্র
-                                        </a>
+                                        <div class="d-flex align-items-center" style="gap: 8px;">
+                                            @php $childTime = $childAtt->started_at ?: ($childAtt->submitted_at ?: $childAtt->created_at); @endphp
+                                            @if($childTime)
+                                                <span class="text-xs text-muted font-mono">
+                                                    <i class="far fa-clock mr-1"></i>{{ $childTime->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}
+                                                </span>
+                                            @endif
+                                            <a href="{{ route('admin.quizzes.attempt-detail', $childAtt->id) }}" class="btn btn-xs btn-outline-primary font-weight-bold">
+                                                <i class="fas fa-eye mr-1"></i> উত্তরপত্র
+                                            </a>
+                                        </div>
                                     </div>
                                 @endforeach
                             @endif
