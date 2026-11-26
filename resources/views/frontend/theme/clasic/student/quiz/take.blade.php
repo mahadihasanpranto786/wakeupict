@@ -341,7 +341,7 @@
                                                     {{ $isSelected ? 'checked' : '' }}
                                                     {{ $isFinalized ? 'disabled' : '' }}
                                                     onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'all_questions')"
-                                                    style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;">
+                                                    class="w-4 h-4 accent-emerald-600 shrink-0 mt-1 cursor-pointer">
 
                                                 <!-- Bengali Option Letter Bubble -->
                                                 <span id="bubble-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? 'border-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500' }}">
@@ -566,7 +566,7 @@
                                             {{ $isSelected ? 'checked' : '' }}
                                             {{ $isFinalized ? 'disabled' : '' }}
                                             onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'one_by_one')"
-                                            style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;">
+                                            class="w-4 h-4 accent-blue-600 shrink-0 mt-1.5 cursor-pointer">
 
                                         <!-- Bengali Option Letter Bubble -->
                                         <span id="single-bubble-{{ $q->id }}-{{ $opt->id }}" class="w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold transition-all {{ $isSelected ? ($isFinalized ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500 text-emerald-900 dark:text-emerald-200' : 'bg-blue-100 dark:bg-blue-900/50 border-blue-500 text-blue-900 dark:text-blue-200') : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-blue-500' }}">
