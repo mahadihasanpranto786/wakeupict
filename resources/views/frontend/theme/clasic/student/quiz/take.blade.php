@@ -82,6 +82,13 @@
     [id^="q-item-"], .board-q-row {
         scroll-margin-top: 180px !important;
     }
+
+    /* Instant 0ms tap/click response on MCQ option labels */
+    label[id^="opt-label-"],
+    label[id^="single-opt-label-"] {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
 </style>
 
 <div class="max-w-6xl mx-auto space-y-5 exam-secure-zone" id="exam-container">
@@ -334,7 +341,7 @@
                                                     {{ $isSelected ? 'checked' : '' }}
                                                     {{ $isFinalized ? 'disabled' : '' }}
                                                     onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'all_questions')"
-                                                    class="sr-only">
+                                                    class="hidden">
 
                                                 <!-- High-Contrast Checkbox / Selection Box Indicator -->
                                                 <span id="check-icon-{{ $q->id }}-{{ $opt->id }}" class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 {{ $isSelected ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30' : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-emerald-500' }}">
@@ -564,7 +571,7 @@
                                             {{ $isSelected ? 'checked' : '' }}
                                             {{ $isFinalized ? 'disabled' : '' }}
                                             onchange="handleSelectAnswer({{ $q->id }}, {{ $opt->id }}, 'one_by_one')"
-                                            class="sr-only">
+                                            class="hidden">
 
                                         <!-- High-Contrast Checkbox / Selection Box Indicator -->
                                         <span id="single-check-icon-{{ $q->id }}-{{ $opt->id }}" class="w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 {{ $isSelected ? ($isFinalized ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30' : 'bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-500/30') : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-blue-500' }}">
@@ -969,14 +976,23 @@
     // 2. Select Option Handler
     // In ALL QUESTIONS VIEW: immediately finalizes and locks the question!
     // In ONE-BY-ONE VIEW: sets draft state; button finalizes and locks.
+    var lockedQuestionIds = {};
+    var saveQueue = Promise.resolve();
+
     function handleSelectAnswer(questionId, optionId, viewMode) {
+        if (lockedQuestionIds[questionId]) {
+            return;
+        }
         draftSelections[questionId] = optionId;
 
         if (viewMode === 'all_questions') {
-            // Immediate lock and finalize!
-            lockAndSaveAnswer(questionId, optionId, true, 'all_questions');
+            // Optimistic 0ms instant lock & visual feedback; persist in background queue
+            lockedQuestionIds[questionId] = true;
+            applyLockToQuestion(questionId, optionId);
+            updateCounters();
+            enqueueAnswerSave(questionId, optionId, true, 'all_questions');
         } else {
-            // One-by-One mode: mark as draft
+            // One-by-One mode: mark as draft immediately
             var palBtn = document.getElementById('pal-btn-' + questionId);
             if (palBtn && !palBtn.classList.contains('bg-emerald-600')) {
                 palBtn.className = "h-9 rounded-xl flex items-center justify-center font-bold transition-all bg-blue-600 text-white shadow-sm relative";
@@ -986,11 +1002,16 @@
                 singleBadge.innerHTML = '<i class="fa fa-pencil mr-1"></i> ড্রাফট (অনিশ্চিত)';
                 singleBadge.className = "px-2.5 py-1 rounded-full font-bold text-[11px] bg-blue-100 dark:bg-blue-950/40 text-blue-600 border border-blue-300";
             }
-            // Update labels styling in single view
             updateSingleViewStyles(questionId, optionId, false);
-            // Autosave as draft
-            lockAndSaveAnswer(questionId, optionId, false, 'one_by_one');
+            updateCounters();
+            enqueueAnswerSave(questionId, optionId, false, 'one_by_one');
         }
+    }
+
+    function enqueueAnswerSave(questionId, optionId, shouldFinalize, mode) {
+        saveQueue = saveQueue.then(function() {
+            return lockAndSaveAnswer(questionId, optionId, shouldFinalize, mode);
+        }).catch(function() {});
     }
 
     function finalizeSingleAnswer(questionId) {
@@ -1014,7 +1035,10 @@
             btn.disabled = true;
         }
 
-        lockAndSaveAnswer(questionId, optId, true, 'one_by_one');
+        lockedQuestionIds[questionId] = true;
+        applyLockToQuestion(questionId, optId);
+        updateCounters();
+        enqueueAnswerSave(questionId, optId, true, 'one_by_one');
     }
 
     var cqAnswersState = {}; // question_id -> { subKey: textVal }
@@ -1113,13 +1137,14 @@
             autoStatus.innerHTML = '<i class="fa fa-spinner fa-spin text-[10px]"></i> সংরক্ষণ হচ্ছে...';
         }
 
-        fetch(saveUrl, {
+        return fetch(saveUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': token,
                 'Accept': 'application/json'
             },
+            keepalive: true,
             body: JSON.stringify({
                 question_id: questionId,
                 selected_option_ids: [parseInt(optionId)],
@@ -1129,7 +1154,12 @@
                 time_spent_seconds: secondsElapsed
             })
         })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (!res.ok && res.status !== 422 && res.status !== 403) {
+                throw new Error('HTTP ' + res.status);
+            }
+            return res.json();
+        })
         .then(function(data) {
             if (data.status === 'success') {
                 if (autoStatus) {
@@ -1137,26 +1167,75 @@
                 }
 
                 if (data.is_finalized) {
-                    // Lock options in both views
+                    lockedQuestionIds[questionId] = true;
                     applyLockToQuestion(questionId, optionId);
                 }
                 updateCounters();
             } else if (data.code === 'LOCKED') {
+                lockedQuestionIds[questionId] = true;
                 showAlertToast(data.message || 'এই প্রশ্নের উত্তর ইতিমধ্যে লক করা হয়েছে।', "amber");
                 applyLockToQuestion(questionId, optionId);
             } else if (data.code === 'EXPIRED') {
                 alert('সময় শেষ! পরীক্ষা সমাপ্ত করা হচ্ছে।');
                 executeFinalSubmit();
+            } else {
+                if (shouldFinalize) {
+                    unlockQuestionInputs(questionId);
+                }
+                showAlertToast(data.message || 'উত্তর সংরক্ষণ করা যায়নি, আবার চেষ্টা করুন।', "rose");
             }
         })
         .catch(function(err) {
             console.error('Save answer error:', err);
+            if (shouldFinalize) {
+                unlockQuestionInputs(questionId);
+            }
             var conn = document.getElementById('connection-status');
             if (conn) {
                 conn.innerHTML = '<i class="fa fa-exclamation-triangle text-[8px]"></i> পুনঃসংযোগ হচ্ছে...';
                 conn.className = "text-amber-500 font-semibold flex items-center gap-1";
             }
+            showAlertToast('নেটওয়ার্ক সমস্যার কারণে উত্তর সেভ হয়নি। অনুগ্রহ করে আবার ক্লিক করুন।', "amber");
         });
+    }
+
+    function unlockQuestionInputs(questionId) {
+        delete lockedQuestionIds[questionId];
+        delete draftSelections[questionId];
+
+        document.querySelectorAll('input[name="q_ans_' + questionId + '"]').forEach(function(inp) {
+            inp.disabled = false;
+            inp.checked = false;
+            var lbl = document.getElementById('opt-label-' + questionId + '-' + inp.value);
+            var chk = document.getElementById('check-icon-' + questionId + '-' + inp.value);
+            var bubble = document.getElementById('bubble-' + questionId + '-' + inp.value);
+            if (lbl) lbl.className = "flex items-start gap-2.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer select-none group bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800/80 hover:border-emerald-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200";
+            if (chk) chk.className = "w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-emerald-500";
+            if (bubble) bubble.className = "w-6 h-6 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-emerald-500";
+        });
+
+        var lockedNotice = document.getElementById('locked-notice-' + questionId);
+        if (lockedNotice) {
+            lockedNotice.classList.add('hidden');
+            lockedNotice.classList.remove('flex');
+        }
+
+        document.querySelectorAll('input[name="single_ans_' + questionId + '"]').forEach(function(inp) {
+            inp.disabled = false;
+            inp.checked = false;
+            var lbl = document.getElementById('single-opt-label-' + questionId + '-' + inp.value);
+            var chk = document.getElementById('single-check-icon-' + questionId + '-' + inp.value);
+            var b = document.getElementById('single-bubble-' + questionId + '-' + inp.value);
+            if (lbl) lbl.className = "flex items-start gap-3.5 p-4 rounded-2xl border-2 transition-all cursor-pointer select-none group bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-slate-700 text-slate-800 dark:text-slate-200";
+            if (chk) chk.className = "w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 text-xs transition-all mt-0.5 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-transparent group-hover:border-blue-500";
+            if (b) b.className = "w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-serif text-xs font-bold border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:border-blue-500";
+        });
+
+        var palBtn = document.getElementById('pal-btn-' + questionId);
+        if (palBtn) {
+            palBtn.className = "h-9 rounded-xl flex items-center justify-center font-bold transition-all relative bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-500";
+        }
+        updateCounters();
     }
 
     function applyLockToQuestion(questionId, selectedOptionId) {
